@@ -122,7 +122,6 @@ Fill in `.env.local` (see `.env.example`):
 | --- | --- | --- |
 | `VITE_SUPABASE_URL` | browser | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | browser | anon key (safe, protected by RLS) |
-| `VITE_CONTACT_EMAIL` | browser | shown in Terms / Privacy |
 | `SUPABASE_URL` | server | same project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | server | **secret**, bypasses RLS, never expose |
 | `LIVEKIT_URL` | server | `wss://...` |
