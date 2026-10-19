@@ -14,7 +14,7 @@ import { useToast } from '../state/Toast';
 import { UploadBar, failureKey, type UploadState } from './UploadBar';
 
 interface Props {
-  roomType: 'battle' | 'group';
+  roomType: 'battle' | 'group' | 'live';
   roomId: string;
   canWrite?: boolean;
   /** Group chats can share files (stored privately; only members can open them). */

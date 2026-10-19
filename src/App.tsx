@@ -5,6 +5,7 @@ import { RouterProvider, useRouter } from './state/Router';
 import { LegalProvider } from './state/Legal';
 import { ToastProvider } from './state/Toast';
 import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScreens';
+import { AccountFooter } from './components/AccountFooter';
 import { Navbar } from './components/Navbar';
 import { Loading } from './components/ui';
 import { pendingInvite } from './lib/invite';
@@ -17,6 +18,8 @@ const CreateView = page(() => import('./views/CreateView').then((m) => ({ defaul
 const GroupRoom = page(() => import('./views/GroupsView').then((m) => ({ default: m.GroupRoom })));
 const GroupsView = page(() => import('./views/GroupsView').then((m) => ({ default: m.GroupsView })));
 const JoinGroupView = page(() => import('./views/GroupsView').then((m) => ({ default: m.JoinGroupView })));
+const LiveView = page(() => import('./views/LiveView').then((m) => ({ default: m.LiveView })));
+const LiveStreamRoom = page(() => import('./views/LiveView').then((m) => ({ default: m.LiveStreamRoom })));
 const HomeView = page(() => import('./views/HomeView').then((m) => ({ default: m.HomeView })));
 const LegalView = page(() => import('./views/LegalView').then((m) => ({ default: m.LegalView })));
 const MediaView = page(() => import('./views/MediaView').then((m) => ({ default: m.MediaView })));
@@ -29,6 +32,7 @@ function View() {
   switch (route.tab) {
     case 'home': return <HomeView />;
     case 'battles': return route.id ? <BattleRoom key={route.id} id={route.id} /> : <BattlesView />;
+    case 'live': return route.id ? <LiveStreamRoom key={route.id} id={route.id} /> : <LiveView />;
     case 'create': return <Gate><CreateView initial={route.id} /></Gate>;
     case 'media': return <MediaView />;
     case 'groups': return route.id ? <GroupRoom key={route.id} id={route.id} /> : <GroupsView />;
@@ -72,7 +76,7 @@ function Shell() {
   if (user && !profile && route.tab !== 'legal') return <Onboarding />;
 
   return (
-    <div className="flex min-h-screen flex-col pb-16 md:pb-0">
+    <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
       <Navbar />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
         <Suspense fallback={<Loading />}>
@@ -83,6 +87,7 @@ function Shell() {
         <button type="button" className="underline" onClick={() => go('legal', 'terms')}>{lang === 'fr' ? 'Conditions' : 'Terms'}</button>
         {' · '}
         <button type="button" className="underline" onClick={() => go('legal', 'privacy')}>{lang === 'fr' ? 'Confidentialité' : 'Privacy'}</button>
+        <AccountFooter />
       </footer>
       <AuthDialog />
     </div>

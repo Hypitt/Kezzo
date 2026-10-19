@@ -1,9 +1,11 @@
+import { useEffect, useRef } from 'react';
 import { Radio, VolumeX } from 'lucide-react';
 import { useLiveRoom } from '../../lib/useLiveRoom';
 import { COMPETITOR_COLORS } from '../../lib/battle';
 import type { Battle, Standing } from '../../lib/types';
 import { useI18n } from '../../state/I18n';
-import { LiveControls, MediaTile, RemoteAudio } from '../LiveParts';
+import { BattleRecorder } from '../../lib/recorder';
+import { LiveControls, MICROPHONE, MediaTile, RemoteAudio } from '../LiveParts';
 import { Spinner } from '../ui';
 import { RoundTimer } from './RoundTimer';
 
@@ -12,6 +14,9 @@ interface Props {
   userId: string | null;
   standings: Map<string, Standing>;
   offsetMs: number;
+  /** Host only: record the stage on this device while it is live. */
+  record?: boolean;
+  onRecordError?: () => void;
 }
 
 /** Tile arrangement for 1 to 5 competitors inside one frame. */
@@ -29,12 +34,37 @@ function layout(n: number): { grid: string; tile: (i: number) => string } {
  * All competitors in one shared frame. The layout adapts to how many people are on stage (1 to 5).
  * Each tile has the competitor's number, colour, name and live score, so votes are never ambiguous.
  */
-export function BattleStage({ battle, userId, standings, offsetMs }: Props) {
+export function BattleStage({ battle, userId, standings, offsetMs, record = false, onRecordError }: Props) {
   const { t } = useI18n();
   const video = battle.mode === 'video';
   const isHost = battle.host_id === userId;
   const isContender = battle.contenders.some((c) => c.user_id === userId);
   const live = useLiveRoom({ roomName: `battle:${battle.id}`, video, autoPublish: isHost || isContender });
+  const frame = useRef<HTMLDivElement>(null);
+  const liveRef = useRef(live);
+  liveRef.current = live;
+  const recording = record && isHost && live.phase === 'connected' && battle.status === 'live';
+
+  // Optional recording of the whole frame, only on the host's device. It reads what is already on screen, so viewers are not affected.
+  useEffect(() => {
+    const container = frame.current;
+    if (!recording || !container) return;
+    const recorder = new BattleRecorder({
+      battleId: battle.id,
+      title: battle.title,
+      container,
+      video,
+      audioTracks: () => liveRef.current.participants.flatMap((p) => {
+        const track = p.getTrackPublication(MICROPHONE)?.track?.mediaStreamTrack;
+        return track ? [track] : [];
+      }),
+    });
+    recorder.start().catch(() => onRecordError?.());
+    return () => {
+      void recorder.stop();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recording, battle.id]);
 
   if (live.phase !== 'connected') {
     return (
@@ -65,7 +95,7 @@ export function BattleStage({ battle, userId, standings, offsetMs }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-black p-1.5 sm:aspect-video">
+      <div ref={frame} className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-black p-1.5 sm:aspect-video">
         {stage.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-zinc-400">{t('stage_empty')}</div>
         ) : (

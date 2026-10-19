@@ -160,7 +160,11 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
         .on(RoomEvent.LocalTrackPublished, bump)
         .on(RoomEvent.LocalTrackUnpublished, bump)
         .on(RoomEvent.ActiveSpeakersChanged, bump)
-        .on(RoomEvent.ParticipantPermissionsChanged, bump)
+        .on(RoomEvent.ParticipantPermissionsChanged, (_previous: unknown, who: Participant) => {
+          // The host can let a guest on stage (or take them off) while the room is running.
+          if (who === room.localParticipant) setCanPublish(Boolean(who.permissions?.canPublish));
+          bump();
+        })
         .on(RoomEvent.Reconnecting, () => setReconnecting(true))
         .on(RoomEvent.Reconnected, () => setReconnecting(false))
         .on(RoomEvent.AudioPlaybackStatusChanged, () => setAudioBlocked(!room.canPlaybackAudio))

@@ -72,7 +72,7 @@ export async function loadPosts(me: string | null, o: PostQuery = {}): Promise<P
 
 // -------------------------------------------------------------- battles
 export const BATTLE_SELECT =
-  `id,host_id,title,category,custom_theme,mode,topic,total_rounds,current_round,max_contenders,entry_fee,prize_pool,status,winner_id,host_competes,public_weight,round_seconds,timer_ends_at,created_at,` +
+  `id,host_id,title,category,custom_theme,mode,topic,total_rounds,current_round,max_contenders,entry_fee,prize_pool,status,winner_id,host_competes,public_weight,round_seconds,timer_ends_at,highlight_post_id,created_at,` +
   `host:profiles!host_id(${PUBLIC_PROFILE}),` +
   `contenders:battle_contenders(user_id,score,muted,joined_at,profile:profiles!user_id(${PUBLIC_PROFILE}))`;
 

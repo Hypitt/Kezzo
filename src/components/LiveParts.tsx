@@ -8,7 +8,7 @@ import { useI18n } from '../state/I18n';
 
 // Plain values of Track.Source, so this file does not pull the whole video library into the page bundle.
 const CAMERA = 'camera' as unknown as Track.Source;
-const MICROPHONE = 'microphone' as unknown as Track.Source;
+export const MICROPHONE = 'microphone' as unknown as Track.Source;
 
 /** Plays the sound of one remote person. Rendered once per remote participant, even when they have no tile. */
 export function RemoteAudio({ p }: { p: Participant }) {
@@ -61,7 +61,7 @@ export function MediaTile({ participant, name, sub, local, video, marker, classN
   }, [camTrack, camVisible]);
 
   return (
-    <div className={`${className.includes('absolute') ? '' : 'relative'} flex min-h-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-900 ${participant?.isSpeaking ? 'ring-2 ring-accent' : ''} ${className}`}>
+    <div data-rec-name={name} className={`${className.includes('absolute') ? '' : 'relative'} flex min-h-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-900 ${participant?.isSpeaking ? 'ring-2 ring-accent' : ''} ${className}`}>
       {video && (
         <video
           ref={videoEl}

@@ -56,6 +56,7 @@ api/                 Vercel serverless functions (+ _lib/server.ts shared helper
 scripts/dev-server.ts  Local dev server (Express + Vite) and self-hosted production server
 supabase/schema.sql  Whole database: tables, RLS, functions, storage buckets, realtime
 supabase/update-2.sql  Upgrade for an existing database: groups, judges, weights, likes, status pictures
+supabase/update-3.sql  Go Live streams (solo and group), livestream chat, battle highlight clip
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers
@@ -87,7 +88,7 @@ cp .env.example .env.local
 ### 2. Supabase
 
 1. Create a project. Copy **Project URL**, **anon key** and **service_role key** from *Project Settings → API*.
-2. Open *SQL Editor → New query*, paste the whole of `supabase/schema.sql` and run it. Then run `supabase/update-2.sql` the same way. Both are safe to run again.
+2. Open *SQL Editor → New query*, paste the whole of `supabase/schema.sql` and run it. Then run `supabase/update-2.sql` and `supabase/update-3.sql` the same way. All three are safe to run again. Run `update-3.sql` before deploying the matching code: battle pages ask for its new `highlight_post_id` column.
 3. *Authentication → Providers → Google*: enable it and paste your Google client ID and secret (step 3 below).
 4. *Authentication → URL Configuration*:
    - **Site URL**: your production URL (e.g. `https://kezzo.vercel.app`)
@@ -195,3 +196,9 @@ MIT. See `LICENSE`.
 - `vercel.json` caches hashed files in `/assets` for a year and icons for a week; `index.html` is always revalidated.
 - Feed videos and audio use `preload="none"`, images are lazy and decoded off the main thread, photos are shrunk in the browser before upload, and the Google Fonts stylesheet no longer blocks the first paint.
 - The Search page requests the first page of results once (it used to request it twice for signed-in users) and loads the "people you follow" list only on the Following tab.
+
+## Go Live, recording and highlights
+
+- **Go Live** (`#/live`): anyone signed in can start a solo or group livestream without a battle. In a group stream viewers request a spot and the host approves them; approval takes effect inside the running LiveKit room (`api/livekit-live.ts`), nobody has to reconnect. The host can remove a guest at any time and end the stream for everyone.
+- **Recording** is optional and runs only in the host's browser (`src/lib/recorder.ts`). It draws the stage into a 960 px canvas at 20 fps, mixes everyone's audio, and saves 5-second pieces to IndexedDB, so it adds no load for viewers and survives a reload. When the battle ends the file downloads automatically, and stays available on the battle page until deleted. For server-side recording of every battle, LiveKit Egress is the alternative; it needs a storage bucket and paid minutes.
+- **Highlight clip**: after the battle the host uploads a video of up to 90 seconds, or picks a recording. A longer video can be trimmed in the browser (the clip is re-recorded at normal speed, so 90 seconds takes about 90 seconds). "Suggest the best moment" picks the 90 seconds with the most coin votes, judge scores and chat. The clip appears on the ended battle and in the feed.

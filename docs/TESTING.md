@@ -40,10 +40,18 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 27. New accounts start with 100 voting coins. The monthly claim button is hidden until a new UTC month.
 28. Edit profile and avatar; set a 24-hour status **with a picture**. It shows on Home (tap to enlarge) and on the profile.
 29. Report a post and a profile. Rows appear in the `reports` table (Supabase dashboard).
-30. In Settings, Sign out and Delete account are at the bottom. Delete shows a confirmation pop-up that needs the handle typed. Expected: signed out; the profile, posts and files are gone.
+30. Sign out and Delete account are in the page footer, not in Settings or the main content. Delete shows a confirmation pop-up that needs the handle typed. Expected: signed out; the profile, posts and files are gone.
 31. On the sign-in and sign-up screens and on profile setup, the Terms and Privacy links open a pop-up and keep the form.
 
 ## Security spot checks (browser dev tools or the Supabase API)
 32. As A, try `update wallets set voting_coins = 9999` and `insert into battle_votes ...` via the client. Expected: both fail (no permission).
 33. Without signing in, request `/api/livekit-token`. Expected: 401.
 34. As B, request the storage URL of A's **paid** file without unlocking. Expected: denied.
+
+## Go Live, feed video, recording, highlights
+35. On **Go Live**, start a **Solo** video stream as A. B opens it from the list, enters the room and sees A. Both can chat. A ends the stream: B sees "ended".
+36. A starts a **Group** stream (2 guests). B requests a spot; A approves. Expected: B can turn on the camera without reloading. A removes B: B's camera stops and B is a viewer again. With 2 guests approved, a third approval is refused ("stage is full").
+37. Home: with no live battle there is no "Live now" heading or box at all. Start a battle: the section appears.
+38. Scroll a feed that has videos. Expected: a video plays (muted) when most of it is on screen and pauses when it leaves. Press Pause: it stays paused while scrolling. Play/Pause and the sound button are always visible.
+39. As host, tick **Record this battle on my device**, start the battle, run it for a minute, then end it. Expected: a file downloads by itself, and a **Battle recording** card lets you download it again. Reload the page: it is still there.
+40. On the ended battle, upload a 30-second video as the highlight and post it. Expected: it plays under "Highlight" for everyone. Then upload a 3-minute video: it asks you to trim; "Suggest the best moment" moves the slider; "Create 90-second clip" shows progress and a preview; post it.

@@ -3,10 +3,11 @@ import { authenticate, HttpError, readBody, route, UUID_RE } from './_lib/server
 import { livekitEnv, publishing } from './_lib/livekit';
 
 /**
- * POST /api/livekit-token  { room: "battle:<id>" | "group:<id>" | "dm:<idA>:<idB>" }
+ * POST /api/livekit-token  { room: "battle:<id>" | "live:<id>" | "group:<id>" | "dm:<idA>:<idB>" }
  * Returns a short-lived LiveKit token. The server decides who may join and who may publish:
  *   battle: anyone signed in can watch; only contenders and the host can publish audio/video
  *           (a contender the host muted gets no microphone permission)
+ *   live:   anyone signed in can watch; the host and guests the host approved can publish
  *   group:  members only
  *   dm:     the two participants only (and not blocked)
  */
@@ -28,6 +29,21 @@ export default route(async (req, res) => {
     if (contender || isHost) {
       // The host always keeps their own microphone; contenders lose it while muted.
       const allowed = publishing(battle.mode === 'audio' ? 'audio' : 'video', Boolean(contender?.muted) && !isHost);
+      canPublish = allowed.canPublish;
+      canPublishSources = allowed.canPublishSources;
+    }
+  } else if (parts[0] === 'live' && parts.length === 2 && UUID_RE.test(parts[1])) {
+    const { data: stream } = await db.from('live_streams').select('id,host_id,status,mode,kind').eq('id', parts[1]).maybeSingle();
+    if (!stream) throw new HttpError(404, 'Live stream not found');
+    if (stream.status === 'ended') throw new HttpError(403, 'This live stream has ended');
+    let onStage = stream.host_id === user.id;
+    if (!onStage && stream.kind === 'group') {
+      const { data: guest } = await db
+        .from('live_guests').select('status').eq('stream_id', parts[1]).eq('user_id', user.id).eq('status', 'approved').maybeSingle();
+      onStage = Boolean(guest);
+    }
+    if (onStage) {
+      const allowed = publishing(stream.mode === 'audio' ? 'audio' : 'video', false);
       canPublish = allowed.canPublish;
       canPublishSources = allowed.canPublishSources;
     }

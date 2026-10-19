@@ -75,6 +75,7 @@ export interface Battle {
   winner_id: string | null;
   host_competes: boolean;
   public_weight: number;
+  highlight_post_id: string | null;
   round_seconds: number;
   timer_ends_at: string | null;
   created_at: string;
@@ -158,4 +159,22 @@ export interface LedgerEntry {
   balance_type: 'voting' | 'reward';
   reason: string;
   created_at: string;
+}
+
+export interface LiveStream {
+  id: string;
+  host_id: string;
+  title: string;
+  kind: 'solo' | 'group';
+  mode: 'video' | 'audio';
+  max_guests: number;
+  status: 'live' | 'ended';
+  created_at: string;
+  host: PublicProfile;
+}
+
+export interface LiveGuest {
+  user_id: string;
+  status: 'requested' | 'approved';
+  profile: PublicProfile;
 }

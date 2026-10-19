@@ -15,6 +15,8 @@ import { useToast } from '../state/Toast';
 import { ChatPanel } from '../components/ChatPanel';
 import { BattleStage } from '../components/battle/BattleStage';
 import { RoundTimer } from '../components/battle/RoundTimer';
+import { HighlightCard, RecordingPanel } from '../components/battle/BattleExtras';
+import { activeRecorder, onRecordingsChanged, recordingSupported } from '../lib/recorder';
 import { ReportButton } from '../components/ReportButton';
 import { Avatar, Empty, Loading, Spinner } from '../components/ui';
 
@@ -36,6 +38,8 @@ export function BattleRoom({ id }: { id: string }) {
   const [scores, setScores] = useState<JudgeScore[]>([]);
   const [liked, setLiked] = useState<Set<string>>(new Set()); // "<contenderId>:<round>"
   const [busy, setBusy] = useState<string | null>(null);
+  const [wantRecord, setWantRecord] = useState(false);
+  const sawLive = useRef(false);
   const timer = useRef<number>(0);
 
   const reload = useCallback(async () => {
@@ -149,6 +153,7 @@ export function BattleRoom({ id }: { id: string }) {
   const topFinal = Math.max(0, ...standings.map((s) => s.final_pct));
   const hasJudges = judges.length > 0;
   const scoringRound = ended ? battle.total_rounds : battle.current_round;
+  if (live) sawLive.current = true;
 
   return (
     <div className="space-y-5">
@@ -176,7 +181,7 @@ export function BattleRoom({ id }: { id: string }) {
         <p className="text-xs text-zinc-500">{t('hosted_by')} <button type="button" className="underline" onClick={() => go('profile', battle.host.id)}>{battle.host.display_name}</button></p>
       </header>
 
-      {isHost && !ended && <HostBar battle={battle} busy={busy} rpc={rpc} />}
+      {isHost && !ended && <HostBar battle={battle} busy={busy} rpc={rpc} record={wantRecord} onRecord={setWantRecord} />}
 
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
@@ -187,7 +192,11 @@ export function BattleRoom({ id }: { id: string }) {
               <p className="mt-1 text-sm text-zinc-500">{t('battle_over')}</p>
             </div>
           ) : (
-            <BattleStage key={battle.id} battle={battle} userId={user?.id ?? null} standings={standingMap} offsetMs={offsetMs} />
+            <BattleStage
+              key={battle.id} battle={battle} userId={user?.id ?? null} standings={standingMap} offsetMs={offsetMs}
+              record={isHost && wantRecord}
+              onRecordError={() => { setWantRecord(false); toast(t('rec_failed'), 'error'); }}
+            />
           )}
 
           <section className="card space-y-3" aria-label={t('contenders')}>
@@ -247,6 +256,9 @@ export function BattleRoom({ id }: { id: string }) {
           {isHost && !ended && (
             <HostControls battle={battle} busy={busy} rpc={rpc} onRecap={recap} offsetMs={offsetMs} hasJudges={hasJudges} />
           )}
+
+          {ended && <HighlightCard battle={battle} canRemove={isHost} onRemoved={reload} />}
+          {ended && isHost && <RecordingPanel battle={battle} autoDownload={sawLive.current && wantRecord} onChanged={reload} />}
 
           {verdicts.length > 0 && (
             <section className="card space-y-3" aria-label={t('ai_recap')}>
@@ -575,8 +587,18 @@ function HostControls({ battle, busy, rpc, onRecap, hasJudges }: HostProps) {
 }
 
 /** Always-visible host actions at the top of the room: start, next round, end and pay out, or cancel. */
-function HostBar({ battle, busy, rpc }: { battle: Battle; busy: string | null; rpc: HostProps['rpc'] }) {
+function HostBar({ battle, busy, rpc, record, onRecord }: { battle: Battle; busy: string | null; rpc: HostProps['rpc']; record: boolean; onRecord: (on: boolean) => void }) {
   const { t } = useI18n();
+  const canRecord = recordingSupported();
+  const [elapsed, setElapsed] = useState(0);
+  const [running, setRunning] = useState(false);
+  useEffect(() => {
+    const refresh = () => setRunning(activeRecorder()?.battleId === battle.id);
+    refresh();
+    const off = onRecordingsChanged(refresh);
+    const id = window.setInterval(() => setElapsed(activeRecorder()?.battleId === battle.id ? activeRecorder()!.elapsedMs() : 0), 1000);
+    return () => { off(); window.clearInterval(id); };
+  }, [battle.id]);
   const open = battle.status === 'open';
   const live = battle.status === 'live';
   const end = () => {
@@ -598,6 +620,20 @@ function HostBar({ battle, busy, rpc }: { battle: Battle; busy: string | null; r
         {busy === 'end_battle' && <Spinner />}{t(open ? 'cancel_battle' : 'end_battle')}
       </button>
       {open && battle.contenders.length < 2 && <p className="basis-full text-xs text-zinc-500">{t('need_two')}</p>}
+      <div className="basis-full space-y-1 border-t border-zinc-100 pt-3">
+        {canRecord ? (
+          <>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={record} onChange={(e) => onRecord(e.target.checked)} />
+              {t('rec_opt_in')}
+              {record && running && <span className="ml-1 inline-flex items-center gap-1 text-xs font-semibold text-accent"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" aria-hidden="true" />{t('rec_recording', { time: formatClock(elapsed / 1000) })}</span>}
+            </label>
+            <p className="text-xs text-zinc-500">{t(record && !live ? 'rec_waiting' : 'rec_note')}</p>
+          </>
+        ) : (
+          <p className="text-xs text-zinc-500">{t('rec_unsupported')}</p>
+        )}
+      </div>
     </section>
   );
 }

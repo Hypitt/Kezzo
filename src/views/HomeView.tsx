@@ -65,19 +65,15 @@ export function HomeView() {
         </div>
       </section>
 
-      <section aria-label={t('live_now')}>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{t('live_now')}</h2>
-          <button type="button" className="text-sm text-zinc-500 underline" onClick={() => go('battles')}>{t('see_all')}</button>
-        </div>
-        {battles.length === 0 ? (
-          <Empty text={t('no_live_battles')}>
-            <button type="button" className="btn btn-primary" onClick={() => go('create', 'battle')}>{t('create_battle')}</button>
-          </Empty>
-        ) : (
+      {battles.length > 0 && (
+        <section aria-label={t('live_now')}>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-lg font-semibold">{t('live_now')}</h2>
+            <button type="button" className="text-sm text-zinc-500 underline" onClick={() => go('battles')}>{t('see_all')}</button>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">{battles.map((b) => <BattleCard key={b.id} battle={b} />)}</div>
-        )}
-      </section>
+        </section>
+      )}
 
       <section aria-label={t('latest_posts')}>
         <div className="mb-3 flex items-center justify-between">

@@ -179,6 +179,33 @@ export const en = {
   err_host_cannot_judge: 'The host cannot be a judge.', err_invalid_score: 'Scores go from 0 to 10.', err_not_judge: 'Only judges can score.',
   err_weights_locked: 'Voting weights can only change before the battle starts.', err_invalid_weight: 'Choose a percentage from 0 to 100.',
   err_invalid_timer: 'Choose a timer between 10 seconds and 1 hour.', err_host_only: 'You are hosting only, so you cannot join the stage.',
+  // go live
+  nav_live: 'Go Live', go_live: 'Go Live', live_sub: 'Stream on your own or bring guests on stage. No battle needed.',
+  live_title_label: 'Title', live_title_ph: 'What are you streaming?', live_kind_label: 'Type', live_kind_solo: 'Solo', live_kind_group: 'Group',
+  live_kind_solo_hint: 'Just you on camera. Everyone else watches and chats.', live_kind_group_hint: 'You and the guests you approve share the stage.',
+  live_mode_label: 'Format', live_max_guests: 'Guests on stage (besides you)', live_start: 'Start streaming',
+  live_none: 'Nobody is live right now.', live_not_found: 'Livestream not found.', live_ended: 'This livestream has ended.', live_ended_toast: 'Livestream ended.',
+  live_end: 'End livestream', live_end_confirm: 'End this livestream for everyone?', live_open_stage: 'Open the stage',
+  live_request: 'Request to join the stage', live_request_hint: 'Want to be on camera? Ask the host.', live_requested: 'Request sent. Waiting for the host.',
+  live_cancel_request: 'Cancel request', live_on_stage: 'You are on stage. Use the buttons below to turn on your microphone and camera.', live_leave_stage: 'Leave stage',
+  live_requests: 'Join requests', live_no_requests: 'No requests right now.', live_approve: 'Approve', live_decline: 'Decline', live_remove: 'Remove from stage',
+  live_on_stage_list: 'On stage', live_spots: '{n} of {max} guest spots used', live_stage_full: 'The stage is full.', live_sign_in: 'Sign in to join the stage or chat.',
+  err_stage_full: 'The stage is full.', err_invalid_live: 'Check the title and options.', err_not_group_live: 'Only group livestreams take guests.', err_is_host: 'You are the host.',
+  err_no_profile: 'Finish setting up your profile first.', err_invalid_highlight: 'That video cannot be used as the highlight.', err_highlight_too_long: 'Highlights are 90 seconds at most.',
+  // feed video
+  play: 'Play', pause: 'Pause', seek: 'Seek', sound_on: 'Turn sound on', sound_off: 'Turn sound off',
+  // recording
+  rec_opt_in: 'Record this battle on my device', rec_note: 'Saved on this device while you host (about 20 MB per minute) and downloaded when the battle ends. Keep this tab open and visible.',
+  rec_waiting: 'Recording starts as soon as the battle goes live.', rec_recording: 'Recording {time}', rec_unsupported: 'Recording is not supported in this browser. Try Chrome, Edge or Firefox on a computer.',
+  rec_failed: 'Recording could not start on this device.', rec_title: 'Battle recording', rec_saved_note: 'The full recording is kept in this browser until you delete it. Download it now to keep it safely.',
+  rec_part: 'Recording {n}', rec_recovered: 'recovered after the page closed', rec_download: 'Download full recording', rec_delete: 'Delete recording', rec_delete_confirm: 'Delete this recording from this device?',
+  // highlight
+  hl_title: 'Highlight clip', hl_sub: 'Post a highlight of up to {n} seconds on this battle. Upload a video or use your recording.', hl_upload: 'Upload a highlight video',
+  hl_use_recording: 'Use recording {n}', hl_not_video: 'Please choose a video file.', hl_unreadable: 'That video could not be read.',
+  hl_too_long: 'This video is {n} seconds long. A highlight can be {max} seconds at most, so choose the part to keep.', hl_trim_unsupported: 'Trimming is not available in this browser. Trim the video on your phone or computer and upload the shorter file.',
+  hl_start: 'Clip from {from} to {to}', hl_suggest: 'Suggest the best moment', hl_suggested: 'Moved to the busiest moment of the battle.', hl_make_clip: 'Create {n}-second clip',
+  hl_making: 'Creating the clip… {pct}%', hl_clip_failed: 'The clip could not be created. Try again, or trim the video elsewhere.', hl_post: 'Post highlight', hl_posted_toast: 'Highlight posted on this battle.',
+  hl_edit_clip: 'Change the clip', hl_choose_other: 'Choose another video', hl_card_title: 'Highlight', hl_remove: 'Remove highlight',
 };
 
 export type Key = keyof typeof en;
@@ -348,4 +375,31 @@ export const fr: Record<Key, string> = {
   err_host_cannot_judge: 'L’hôte ne peut pas être juge.', err_invalid_score: 'Les notes vont de 0 à 10.', err_not_judge: 'Seuls les juges peuvent noter.',
   err_weights_locked: 'La pondération ne peut changer qu’avant le début du battle.', err_invalid_weight: 'Choisissez un pourcentage de 0 à 100.',
   err_invalid_timer: 'Choisissez un chrono entre 10 secondes et 1 heure.', err_host_only: 'Vous animez seulement, vous ne pouvez donc pas monter sur scène.',
+  // go live
+  nav_live: 'En direct', go_live: 'Passer en direct', live_sub: 'Diffusez seul ou invitez des personnes sur scène. Aucun battle nécessaire.',
+  live_title_label: 'Titre', live_title_ph: 'Que diffusez-vous?', live_kind_label: 'Type', live_kind_solo: 'Solo', live_kind_group: 'Groupe',
+  live_kind_solo_hint: 'Vous seul à l’écran. Les autres regardent et discutent.', live_kind_group_hint: 'Vous et les invités que vous approuvez partagez la scène.',
+  live_mode_label: 'Format', live_max_guests: 'Invités sur scène (en plus de vous)', live_start: 'Démarrer la diffusion',
+  live_none: 'Personne n’est en direct pour le moment.', live_not_found: 'Diffusion introuvable.', live_ended: 'Cette diffusion est terminée.', live_ended_toast: 'Diffusion terminée.',
+  live_end: 'Terminer la diffusion', live_end_confirm: 'Terminer cette diffusion pour tout le monde?', live_open_stage: 'Ouvrir la scène',
+  live_request: 'Demander à monter sur scène', live_request_hint: 'Envie d’être à l’écran? Demandez à l’hôte.', live_requested: 'Demande envoyée. En attente de l’hôte.',
+  live_cancel_request: 'Annuler la demande', live_on_stage: 'Vous êtes sur scène. Utilisez les boutons ci-dessous pour activer votre micro et votre caméra.', live_leave_stage: 'Quitter la scène',
+  live_requests: 'Demandes', live_no_requests: 'Aucune demande pour le moment.', live_approve: 'Approuver', live_decline: 'Refuser', live_remove: 'Retirer de la scène',
+  live_on_stage_list: 'Sur scène', live_spots: '{n} places d’invité sur {max} utilisées', live_stage_full: 'La scène est pleine.', live_sign_in: 'Connectez-vous pour monter sur scène ou discuter.',
+  err_stage_full: 'La scène est pleine.', err_invalid_live: 'Vérifiez le titre et les options.', err_not_group_live: 'Seules les diffusions de groupe acceptent des invités.', err_is_host: 'Vous êtes l’hôte.',
+  err_no_profile: 'Terminez d’abord votre profil.', err_invalid_highlight: 'Cette vidéo ne peut pas servir de faits saillants.', err_highlight_too_long: 'Les faits saillants durent 90 secondes au maximum.',
+  // feed video
+  play: 'Lecture', pause: 'Pause', seek: 'Position', sound_on: 'Activer le son', sound_off: 'Couper le son',
+  // recording
+  rec_opt_in: 'Enregistrer ce battle sur mon appareil', rec_note: 'Enregistré sur cet appareil pendant que vous animez (environ 20 Mo par minute) et téléchargé à la fin du battle. Gardez cet onglet ouvert et visible.',
+  rec_waiting: 'L’enregistrement démarre dès que le battle passe en direct.', rec_recording: 'Enregistrement {time}', rec_unsupported: 'L’enregistrement n’est pas pris en charge par ce navigateur. Essayez Chrome, Edge ou Firefox sur ordinateur.',
+  rec_failed: 'L’enregistrement n’a pas pu démarrer sur cet appareil.', rec_title: 'Enregistrement du battle', rec_saved_note: 'L’enregistrement complet reste dans ce navigateur jusqu’à sa suppression. Téléchargez-le maintenant pour le conserver.',
+  rec_part: 'Enregistrement {n}', rec_recovered: 'récupéré après la fermeture de la page', rec_download: 'Télécharger l’enregistrement complet', rec_delete: 'Supprimer l’enregistrement', rec_delete_confirm: 'Supprimer cet enregistrement de cet appareil?',
+  // highlight
+  hl_title: 'Faits saillants', hl_sub: 'Publiez un extrait de {n} secondes au maximum sur ce battle. Téléversez une vidéo ou utilisez votre enregistrement.', hl_upload: 'Téléverser une vidéo',
+  hl_use_recording: 'Utiliser l’enregistrement {n}', hl_not_video: 'Choisissez un fichier vidéo.', hl_unreadable: 'Cette vidéo n’a pas pu être lue.',
+  hl_too_long: 'Cette vidéo dure {n} secondes. Un extrait dure {max} secondes au maximum : choisissez la partie à garder.', hl_trim_unsupported: 'Le découpage n’est pas disponible dans ce navigateur. Raccourcissez la vidéo sur votre téléphone ou ordinateur, puis téléversez-la.',
+  hl_start: 'Extrait de {from} à {to}', hl_suggest: 'Suggérer le meilleur moment', hl_suggested: 'Placé sur le moment le plus animé du battle.', hl_make_clip: 'Créer l’extrait de {n} secondes',
+  hl_making: 'Création de l’extrait… {pct} %', hl_clip_failed: 'L’extrait n’a pas pu être créé. Réessayez ou raccourcissez la vidéo ailleurs.', hl_post: 'Publier l’extrait', hl_posted_toast: 'Extrait publié sur ce battle.',
+  hl_edit_clip: 'Modifier l’extrait', hl_choose_other: 'Choisir une autre vidéo', hl_card_title: 'Faits saillants', hl_remove: 'Retirer l’extrait',
 };
