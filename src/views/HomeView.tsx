@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { StatusViewer } from '../components/StatusViewer';
 import { loadActiveStatuses, loadBattles, loadPosts, type PersonRow } from '../lib/data';
 import type { Battle, Post } from '../lib/types';
 import { useAuth } from '../state/Auth';
@@ -16,6 +17,7 @@ export function HomeView() {
   const [battles, setBattles] = useState<Battle[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewing, setViewing] = useState<PersonRow | null>(null);
 
   useEffect(() => {
     let off = false;
@@ -50,8 +52,12 @@ export function HomeView() {
             </button>
           )}
           {statuses.map((p) => (
-            <button key={p.id} type="button" className="flex w-16 shrink-0 flex-col items-center gap-1 text-xs" onClick={() => go('profile', p.id)} title={p.status_text ?? ''}>
-              <span className="rounded-full border-2 border-accent p-0.5"><Avatar p={p} size={52} /></span>
+            <button key={p.id} type="button" className="flex w-16 shrink-0 flex-col items-center gap-1 text-xs" onClick={() => setViewing(p)} title={p.status_text ?? ''}>
+              <span className="rounded-full border-2 border-accent p-0.5">
+                {p.status_image_url
+                  ? <img src={p.status_image_url} alt="" className="h-[52px] w-[52px] rounded-full bg-zinc-100 object-cover" loading="lazy" />
+                  : <Avatar p={p} size={52} />}
+              </span>
               <span className="w-full truncate text-center">{p.display_name}</span>
             </button>
           ))}
@@ -93,6 +99,7 @@ export function HomeView() {
           </div>
         )}
       </section>
+      {viewing && <StatusViewer person={viewing} onClose={() => setViewing(null)} />}
     </div>
   );
 }

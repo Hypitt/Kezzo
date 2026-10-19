@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './state/Auth';
 import { I18nProvider, useI18n } from './state/I18n';
 import { RouterProvider, useRouter } from './state/Router';
+import { LegalProvider } from './state/Legal';
 import { ToastProvider } from './state/Toast';
 import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScreens';
 import { Navbar } from './components/Navbar';
@@ -9,7 +10,7 @@ import { Loading } from './components/ui';
 import { BattleRoom } from './views/BattleRoom';
 import { BattlesView } from './views/BattlesView';
 import { CreateView } from './views/CreateView';
-import { GroupRoom, GroupsView } from './views/GroupsView';
+import { GroupRoom, GroupsView, JoinGroupView, pendingInvite } from './views/GroupsView';
 import { HomeView } from './views/HomeView';
 import { LegalView } from './views/LegalView';
 import { MediaView } from './views/MediaView';
@@ -28,6 +29,7 @@ function View() {
     case 'messages': return <Gate><MessagesView otherId={route.id} /></Gate>;
     case 'profile': return <ProfileView id={route.id} />;
     case 'legal': return <LegalView id={route.id} />;
+    case 'join': return <JoinGroupView code={route.id} />;
     case 'search':
     default: return <SearchView />;
   }
@@ -36,11 +38,19 @@ function View() {
 function Shell() {
   const { user, profile, loading, configured } = useAuth();
   const { lang, setLang } = useI18n();
-  const { go } = useRouter();
+  const { go, route } = useRouter();
 
   // Adopt the saved language of the signed-in profile once it loads.
   useEffect(() => {
     if (profile && profile.language !== lang) setLang(profile.language);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id]);
+
+  // Finish joining a group if an invite link was opened before signing in.
+  useEffect(() => {
+    if (!profile) return;
+    const code = pendingInvite();
+    if (code) go('join', code);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id]);
 
@@ -52,7 +62,8 @@ function Shell() {
 
   if (!configured) return <SetupNotice />;
   if (loading) return <Loading />;
-  if (user && !profile) return <Onboarding />;
+  // The Terms and Privacy pages stay reachable while a new person is still choosing their profile.
+  if (user && !profile && route.tab !== 'legal') return <Onboarding />;
 
   return (
     <div className="flex min-h-screen flex-col pb-16 md:pb-0">
@@ -84,7 +95,9 @@ export default function App() {
     <I18nProvider>
       <ToastProvider>
         <RouterProvider>
-          <Providers />
+          <LegalProvider>
+            <Providers />
+          </LegalProvider>
         </RouterProvider>
       </ToastProvider>
     </I18nProvider>

@@ -7,6 +7,7 @@ import { useToast } from '../state/Toast';
 import { HANDLE_RE } from '../lib/format';
 import { Spinner } from './ui';
 import type { Profile } from '../lib/types';
+import { LegalNotice } from '../state/Legal';
 
 function GoogleLogo() {
   return (
@@ -188,6 +189,7 @@ export function AuthPanel({ onDone, initialMode = 'signin' }: { onDone: () => vo
         <span className="h-px flex-1 bg-zinc-200" />
       </div>
       <EmailForm mode={mode} setMode={setMode} onDone={onDone} />
+      <p className="mt-4 text-center text-xs text-zinc-500"><LegalNotice /></p>
     </div>
   );
 }
@@ -320,9 +322,7 @@ export function Onboarding() {
         <label className="flex items-start gap-2 text-sm text-zinc-700">
           <input type="checkbox" className="mt-1" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
           <span>
-            {t('agree_prefix')}{' '}
-            <a className="underline" href="#/legal/terms" target="_blank" rel="noreferrer">{t('terms')}</a> {t('and')}{' '}
-            <a className="underline" href="#/legal/privacy" target="_blank" rel="noreferrer">{t('privacy')}</a>. {t('age_confirm')}
+            <LegalNotice prefixKey="agree_prefix" /> {t('age_confirm')}
           </span>
         </label>
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}

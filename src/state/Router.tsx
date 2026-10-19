@@ -1,16 +1,16 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 export const TABS = ['home', 'battles', 'search', 'create', 'media', 'groups', 'messages', 'profile'] as const;
-export type Tab = (typeof TABS)[number] | 'legal';
+export type Tab = (typeof TABS)[number] | 'legal' | 'join';
 export interface Route { tab: Tab; id?: string }
 
 interface RouterValue { route: Route; go: (tab: Tab, id?: string) => void }
 const RouterContext = createContext<RouterValue | null>(null);
 
-/** Hash routes: #/search, #/battles/<id>, #/profile/<userId>, #/messages/<userId>, #/groups/<id>, #/legal/privacy */
+/** Hash routes: #/search, #/battles/<id>, #/profile/<userId>, #/messages/<userId>, #/groups/<id>, #/join/<inviteCode>, #/legal/privacy */
 function parse(): Route {
   const [tab, id] = window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
-  if (tab === 'legal' || (TABS as readonly string[]).includes(tab)) return { tab: tab as Tab, id };
+  if (tab === 'legal' || tab === 'join' || (TABS as readonly string[]).includes(tab)) return { tab: tab as Tab, id };
   return { tab: 'search' }; // default landing page: Search & Feeds
 }
 

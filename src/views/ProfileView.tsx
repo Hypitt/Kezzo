@@ -14,6 +14,9 @@ import { useToast } from '../state/Toast';
 import { PostCard } from '../components/PostCard';
 import { ReportButton } from '../components/ReportButton';
 import { SignInCard } from '../components/AuthScreens';
+import { ConfirmDialog } from '../components/ConfirmDialog';
+import { StatusViewer } from '../components/StatusViewer';
+import { useLegal } from '../state/Legal';
 import { Avatar, Empty, Loading, LoadMore, Spinner } from '../components/ui';
 
 const PAGE = 8;
@@ -40,6 +43,7 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
   const [followers, setFollowers] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [viewStatus, setViewStatus] = useState(false);
 
   useEffect(() => {
     if (own) return setProfile(mine);
@@ -120,7 +124,16 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold">{profile.display_name}</h1>
           <p className="text-sm text-zinc-500">@{profile.handle}{profile.generation ? ` · ${profile.generation}` : ''}</p>
-          {isActiveStatus(profile) && <p className="mt-1 text-sm text-accent">{profile.status_text}</p>}
+          {isActiveStatus(profile) && (
+            <div className="mt-2 flex items-center gap-3">
+              {profile.status_image_url && (
+                <button type="button" onClick={() => setViewStatus(true)} aria-label={t('view_status')}>
+                  <img src={profile.status_image_url} alt="" className="h-16 w-16 rounded-xl object-cover" loading="lazy" />
+                </button>
+              )}
+              {profile.status_text && <p className="text-sm text-accent">{profile.status_text}</p>}
+            </div>
+          )}
           {profile.bio && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-zinc-700">{profile.bio}</p>}
           <p className="mt-2 text-xs text-zinc-500">{t('followers_n', { n: followers })} · {t('following_n', { n: followingCount })}</p>
         </div>
@@ -154,6 +167,7 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
         )}
         <LoadMore show={hasMore} busy={moreBusy} onClick={more} label={t('load_more')} />
       </section>
+      {viewStatus && <StatusViewer person={profile} onClose={() => setViewStatus(false)} />}
     </div>
   );
 }
@@ -162,7 +176,7 @@ function OwnSettings({ profile }: { profile: Profile }) {
   const { user, wallet, updateProfile, refreshWallet, signOut, deleteAccount } = useAuth();
   const { t } = useI18n();
   const { toast } = useToast();
-  const { go } = useRouter();
+  const { openLegal } = useLegal();
   const [editing, setEditing] = useState(false);
   const [displayName, setDisplayName] = useState(profile.display_name);
   const [bio, setBio] = useState(profile.bio);
@@ -170,6 +184,8 @@ function OwnSettings({ profile }: { profile: Profile }) {
   const [dmPolicy, setDmPolicy] = useState(profile.dm_policy);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const thisMonth = new Date().toISOString().slice(0, 7);
   const canClaim = Boolean(wallet && wallet.last_claim_month.slice(0, 7) < thisMonth);
@@ -220,13 +236,14 @@ function OwnSettings({ profile }: { profile: Profile }) {
   };
 
   const removeAccount = async () => {
-    const typed = window.prompt(t('confirm_delete_account', { handle: profile.handle }));
-    if (typed?.trim().toLowerCase() !== profile.handle) return;
+    setDeleting(true);
     try {
       await deleteAccount();
       toast(t('account_deleted'));
     } catch {
       toast(t('error_generic'), 'error');
+      setDeleting(false);
+      setConfirming(false);
     }
   };
 
@@ -297,14 +314,40 @@ function OwnSettings({ profile }: { profile: Profile }) {
             </div>
           </form>
         )}
-        <div className="flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-4">
-          <button type="button" className="btn btn-ghost btn-sm" onClick={signOut}>{t('sign_out')}</button>
-          <button type="button" className="btn btn-danger btn-sm" onClick={removeAccount}>{t('delete_account')}</button>
-          <span className="flex-1" />
-          <button type="button" className="text-xs text-zinc-500 underline" onClick={() => go('legal', 'terms')}>{t('terms')}</button>
-          <button type="button" className="text-xs text-zinc-500 underline" onClick={() => go('legal', 'privacy')}>{t('privacy')}</button>
+        <div className="flex flex-wrap items-center gap-4 border-t border-zinc-100 pt-4 text-xs">
+          <button type="button" className="text-zinc-500 underline" onClick={() => openLegal('terms')}>{t('terms')}</button>
+          <button type="button" className="text-zinc-500 underline" onClick={() => openLegal('privacy')}>{t('privacy')}</button>
+        </div>
+
+        {/* Account actions live at the very bottom of Settings. */}
+        <div className="space-y-3 border-t border-zinc-200 pt-4">
+          <h3 className="text-sm font-semibold text-zinc-700">{t('account')}</h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" className="btn btn-ghost btn-sm" onClick={signOut}>{t('sign_out')}</button>
+            <button type="button" className="btn btn-danger btn-sm" onClick={() => setConfirming(true)}>{t('delete_account')}</button>
+          </div>
         </div>
       </section>
+
+      {confirming && (
+        <ConfirmDialog
+          title={t('delete_account_title')}
+          confirmLabel={t('delete_account_confirm')}
+          requireText={profile.handle}
+          requireLabel={t('type_handle_to_confirm', { handle: profile.handle })}
+          busy={deleting}
+          onConfirm={removeAccount}
+          onCancel={() => setConfirming(false)}
+        >
+          <p>{t('delete_account_warning')}</p>
+          <ul className="list-disc pl-5">
+            <li>{t('delete_item_posts')}</li>
+            <li>{t('delete_item_messages')}</li>
+            <li>{t('delete_item_wallet')}</li>
+          </ul>
+          <p className="font-medium text-zinc-800">{t('cannot_undo')}</p>
+        </ConfirmDialog>
+      )}
     </>
   );
 }

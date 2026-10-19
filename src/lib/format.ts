@@ -30,6 +30,6 @@ export function fileExt(name: string): string {
   return ext.slice(0, 5) || 'bin';
 }
 
-export function isActiveStatus(p: { status_text: string | null; status_expires_at: string | null }): boolean {
-  return Boolean(p.status_text && p.status_expires_at && new Date(p.status_expires_at).getTime() > Date.now());
+export function isActiveStatus(p: { status_text: string | null; status_image_url?: string | null; status_expires_at: string | null }): boolean {
+  return Boolean((p.status_text || p.status_image_url) && p.status_expires_at && new Date(p.status_expires_at).getTime() > Date.now());
 }

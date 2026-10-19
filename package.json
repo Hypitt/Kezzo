@@ -2,7 +2,7 @@
   "name": "kezzo",
   "private": true,
   "version": "1.0.0",
-  "description": "Kezzo: live creator battles, media feeds, squads and chats.",
+  "description": "Kezzo: live creator battles, media feeds, groups and chats.",
   "license": "MIT",
   "engines": { "node": ">=20.19" },
   "scripts": {
@@ -22,6 +22,7 @@
     "lucide-react": "^0.546.0",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "tus-js-client": "^4.3.1",
     "tsx": "^4.21.0"
   },
   "devDependencies": {

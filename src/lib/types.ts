@@ -12,6 +12,7 @@ export interface Profile extends PublicProfile {
   generation: 'Gen Z' | 'Millennial' | 'Other' | null;
   status_text: string | null;
   status_expires_at: string | null;
+  status_image_url: string | null;
   language: Lang;
   dm_policy: 'everyone' | 'followers' | 'nobody';
   created_at: string;
@@ -52,6 +53,7 @@ export type BattleStatus = 'open' | 'live' | 'ended';
 export interface Contender {
   user_id: string;
   score: number;
+  muted: boolean;
   joined_at: string;
   profile: PublicProfile;
 }
@@ -71,6 +73,10 @@ export interface Battle {
   prize_pool: number;
   status: BattleStatus;
   winner_id: string | null;
+  host_competes: boolean;
+  public_weight: number;
+  round_seconds: number;
+  timer_ends_at: string | null;
   created_at: string;
   host: PublicProfile;
   contenders: Contender[];
@@ -83,6 +89,10 @@ export interface ChatMessage {
   author_id: string;
   body: string;
   created_at: string;
+  file_path: string | null;
+  file_name: string | null;
+  file_type: string | null;
+  file_size: number | null;
   author?: PublicProfile;
 }
 
@@ -102,7 +112,35 @@ export interface Group {
   tagline: string;
   category: string;
   member_count: number;
+  join_policy: 'open' | 'invite';
   created_at: string;
+}
+
+export type GroupRole = 'owner' | 'admin' | 'member';
+
+export interface GroupMember {
+  user_id: string;
+  role: GroupRole;
+  profile: PublicProfile;
+}
+
+/** One row of the battle scoreboard (calculated by the database). */
+export interface Standing {
+  user_id: string;
+  public_points: number;
+  public_pct: number;
+  judge_avg: number;
+  judge_pct: number;
+  final_pct: number;
+}
+
+export interface JudgeScore {
+  judge_id: string;
+  contender_id: string;
+  round: number;
+  score: number;
+  comment: string;
+  updated_at: string;
 }
 
 export interface AiVerdict {

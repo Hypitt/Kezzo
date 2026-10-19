@@ -1,15 +1,13 @@
 import { RoomServiceClient } from 'livekit-server-sdk';
 import { authenticate, HttpError, readBody, route, UUID_RE } from './_lib/server';
+import { livekitEnv, livekitHttpUrl } from './_lib/livekit';
 
 /**
  * POST /api/livekit-kick  { battleId, userId }
  * Host-only: removes a contender from the battle and disconnects them from the live room.
  */
 export default route(async (req, res) => {
-  const { LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET } = process.env;
-  if (!LIVEKIT_URL || !LIVEKIT_API_KEY || !LIVEKIT_API_SECRET) {
-    throw new HttpError(503, 'LiveKit is not configured on the server');
-  }
+  const lk = livekitEnv();
   const { user, db } = await authenticate(req);
   const body = readBody(req);
   const battleId = String(body.battleId ?? '');
@@ -25,9 +23,8 @@ export default route(async (req, res) => {
   const { error } = await db.from('battle_contenders').delete().eq('battle_id', battleId).eq('user_id', targetId);
   if (error) throw new HttpError(500, 'Could not remove contender');
 
-  const host = LIVEKIT_URL.replace(/^wss:/, 'https:').replace(/^ws:/, 'http:');
   try {
-    await new RoomServiceClient(host, LIVEKIT_API_KEY, LIVEKIT_API_SECRET).removeParticipant(`battle:${battleId}`, targetId);
+    await new RoomServiceClient(livekitHttpUrl(lk.url), lk.key, lk.secret).removeParticipant(`battle:${battleId}`, targetId);
   } catch {
     // The participant may not be connected right now; the database change is what matters.
   }

@@ -72,15 +72,16 @@ export async function loadPosts(me: string | null, o: PostQuery = {}): Promise<P
 
 // -------------------------------------------------------------- battles
 export const BATTLE_SELECT =
-  `id,host_id,title,category,custom_theme,mode,topic,total_rounds,current_round,max_contenders,entry_fee,prize_pool,status,winner_id,created_at,` +
+  `id,host_id,title,category,custom_theme,mode,topic,total_rounds,current_round,max_contenders,entry_fee,prize_pool,status,winner_id,host_competes,public_weight,round_seconds,timer_ends_at,created_at,` +
   `host:profiles!host_id(${PUBLIC_PROFILE}),` +
-  `contenders:battle_contenders(user_id,score,joined_at,profile:profiles!user_id(${PUBLIC_PROFILE}))`;
+  `contenders:battle_contenders(user_id,score,muted,joined_at,profile:profiles!user_id(${PUBLIC_PROFILE}))`;
 
 export function normalizeBattle(row: unknown): Battle {
   const r = row as Record<string, unknown>;
   const contenders = ((r.contenders as Array<Record<string, unknown>>) ?? []).map((c) => ({
     user_id: c.user_id as string,
     score: c.score as number,
+    muted: Boolean(c.muted),
     joined_at: c.joined_at as string,
     profile: one(c.profile as PublicProfile | PublicProfile[]),
   }));
@@ -114,8 +115,9 @@ export interface PersonRow extends PublicProfile {
   bio: string;
   status_text: string | null;
   status_expires_at: string | null;
+  status_image_url: string | null;
 }
-const PERSON_SELECT = `${PUBLIC_PROFILE},bio,status_text,status_expires_at`;
+const PERSON_SELECT = `${PUBLIC_PROFILE},bio,status_text,status_expires_at,status_image_url`;
 
 export async function loadPeople(term?: string, from = 0, limit = 12): Promise<PersonRow[]> {
   let q = supabase.from('profiles').select(PERSON_SELECT).order('created_at', { ascending: false }).range(from, from + limit - 1);
@@ -133,5 +135,5 @@ export async function loadActiveStatuses(limit = 24): Promise<PersonRow[]> {
     .gt('status_expires_at', new Date().toISOString())
     .order('status_expires_at', { ascending: false }).limit(limit);
   if (error) throw error;
-  return ((data ?? []) as PersonRow[]).filter((p) => p.status_text);
+  return ((data ?? []) as PersonRow[]).filter((p) => p.status_text || p.status_image_url);
 }

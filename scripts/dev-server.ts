@@ -13,6 +13,7 @@ dotenv.config({ path: ['.env.local', '.env'] });
 import health from '../api/health';
 import livekitToken from '../api/livekit-token';
 import livekitKick from '../api/livekit-kick';
+import livekitMute from '../api/livekit-mute';
 import aiJudge from '../api/ai-judge';
 
 type ApiHandler = (req: never, res: never) => unknown;
@@ -20,6 +21,7 @@ const routes: Record<string, ApiHandler> = {
   '/api/health': health,
   '/api/livekit-token': livekitToken,
   '/api/livekit-kick': livekitKick,
+  '/api/livekit-mute': livekitMute,
   '/api/ai-judge': aiJudge,
 };
 

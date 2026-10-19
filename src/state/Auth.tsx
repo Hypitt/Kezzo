@@ -11,7 +11,7 @@ export interface NewProfile {
   generation: Profile['generation'];
 }
 type ProfilePatch = Partial<
-  Pick<Profile, 'handle' | 'display_name' | 'avatar_url' | 'bio' | 'generation' | 'status_text' | 'status_expires_at' | 'language' | 'dm_policy'>
+  Pick<Profile, 'handle' | 'display_name' | 'avatar_url' | 'bio' | 'generation' | 'status_text' | 'status_expires_at' | 'status_image_url' | 'language' | 'dm_policy'>
 >;
 
 interface AuthValue {
@@ -192,6 +192,10 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
 
   const deleteAccount = useCallback(async () => {
     if (!user) return;
+    // Files this person shared in group chats live in a private bucket.
+    const { data: shared } = await supabase.from('chat_messages').select('file_path').eq('author_id', user.id).not('file_path', 'is', null).limit(1000);
+    const sharedPaths = (shared ?? []).map((r) => r.file_path as string).filter(Boolean);
+    if (sharedPaths.length) await supabase.storage.from('chat-files').remove(sharedPaths);
     for (const bucket of ['avatars', 'media-public', 'media-paid']) {
       const { data } = await supabase.storage.from(bucket).list(user.id, { limit: 1000 });
       if (data?.length) await supabase.storage.from(bucket).remove(data.map((f) => `${user.id}/${f.name}`));
