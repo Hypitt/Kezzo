@@ -33,6 +33,12 @@ export function SearchView() {
   const [moreBusy, setMoreBusy] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const request = useRef(0);
+  const userId = user?.id ?? null;
+  // The people-you-follow list only matters on the "Following" tab. Keeping it out of the "All" tab's
+  // dependencies stops the first page from being requested twice when that list finishes loading.
+  const followingRef = useRef<string[] | null>(null);
+  followingRef.current = following;
+  const followKey = scope === 'following' ? following : null;
 
   useEffect(() => {
     const id = window.setTimeout(() => setTerm(input), 300);
@@ -40,19 +46,20 @@ export function SearchView() {
   }, [input]);
 
   useEffect(() => {
-    if (!user) return setFollowing([]);
-    supabase.from('follows').select('followee_id').eq('follower_id', user.id).then(({ data }) => {
+    if (scope !== 'following') return; // only the "Following" tab needs this list
+    if (!userId) return setFollowing([]);
+    supabase.from('follows').select('followee_id').eq('follower_id', userId).then(({ data }) => {
       setFollowing((data ?? []).map((r) => r.followee_id as string));
     });
-  }, [user]);
+  }, [userId, scope]);
 
   const fetchPage = useCallback(
     async (offset: number): Promise<number> => {
       if (tab === 'feed') {
-        if (scope === 'following' && following === null) return 0;
-        const rows = await loadPosts(user?.id ?? null, {
+        if (scope === 'following' && followingRef.current === null) return 0;
+        const rows = await loadPosts(userId, {
           q: term, from: offset, limit: PAGE, excludeAuthors: blocked,
-          authorIds: scope === 'following' ? (following ?? []) : undefined,
+          authorIds: scope === 'following' ? (followingRef.current ?? []) : undefined,
         });
         setPosts((p) => (offset ? [...p, ...rows] : rows));
         return rows.length;
@@ -66,7 +73,7 @@ export function SearchView() {
       setPeople((l) => (offset ? [...l, ...rows] : rows));
       return rows.length;
     },
-    [tab, scope, following, term, user, blocked],
+    [tab, scope, followKey, term, userId, blocked],
   );
 
   useEffect(() => {

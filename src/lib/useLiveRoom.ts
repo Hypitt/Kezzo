@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { DisconnectReason, Room, RoomEvent, VideoPresets, type Participant } from 'livekit-client';
+import type { DisconnectReason, Participant, Room } from 'livekit-client';
 import { api } from './api';
 import type { Key } from './i18n';
 import { useAuth } from '../state/Auth';
@@ -75,7 +75,8 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
 
   const refreshDevices = useCallback(async () => {
     try {
-      const [mics, cams] = await Promise.all([Room.getLocalDevices('audioinput', false), video ? Room.getLocalDevices('videoinput', false) : Promise.resolve([])]);
+      const { Room: LkRoom } = await import('livekit-client'); // loaded on demand: the video library is large
+      const [mics, cams] = await Promise.all([LkRoom.getLocalDevices('audioinput', false), video ? LkRoom.getLocalDevices('videoinput', false) : Promise.resolve([])]);
       const room = roomRef.current;
       setDevices({
         mics: mics.filter((d) => d.deviceId),
@@ -118,6 +119,7 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
           } catch (err) {
             // Some cameras refuse HD; retry with a smaller picture before giving up.
             if (on && (err as { name?: string }).name === 'OverconstrainedError') {
+              const { VideoPresets } = await import('livekit-client');
               await room.localParticipant.setCameraEnabled(true, { resolution: VideoPresets.h360.resolution });
             } else throw err;
           }
@@ -139,7 +141,8 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
     setError(null);
     try {
       const { token, url, canPublish: allowed } = await api<{ token: string; url: string; canPublish: boolean }>('livekit-token', { room: roomName });
-      const room = new Room({
+      const { Room: LkRoom, RoomEvent, VideoPresets, DisconnectReason: Reason } = await import('livekit-client');
+      const room = new LkRoom({
         adaptiveStream: true,
         dynacast: true,
         stopLocalTrackOnUnpublish: true,
@@ -167,8 +170,8 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
           setPhase('idle');
           setReconnecting(false);
           if (leftByUser.current) return;
-          if (reason === DisconnectReason.PARTICIPANT_REMOVED) setError(t('removed_from_room'));
-          else if (reason === DisconnectReason.DUPLICATE_IDENTITY) setError(t('duplicate_session'));
+          if (reason === Reason.PARTICIPANT_REMOVED) setError(t('removed_from_room'));
+          else if (reason === Reason.DUPLICATE_IDENTITY) setError(t('duplicate_session'));
           else setError(t('conn_lost'));
         });
       await room.connect(url, token, { autoSubscribe: true });

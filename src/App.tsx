@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Suspense, lazy, useEffect, type ComponentType } from 'react';
 import { AuthProvider, useAuth } from './state/Auth';
 import { I18nProvider, useI18n } from './state/I18n';
 import { RouterProvider, useRouter } from './state/Router';
@@ -7,16 +7,22 @@ import { ToastProvider } from './state/Toast';
 import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScreens';
 import { Navbar } from './components/Navbar';
 import { Loading } from './components/ui';
-import { BattleRoom } from './views/BattleRoom';
-import { BattlesView } from './views/BattlesView';
-import { CreateView } from './views/CreateView';
-import { GroupRoom, GroupsView, JoinGroupView, pendingInvite } from './views/GroupsView';
-import { HomeView } from './views/HomeView';
-import { LegalView } from './views/LegalView';
-import { MediaView } from './views/MediaView';
-import { MessagesView } from './views/MessagesView';
-import { ProfileView } from './views/ProfileView';
-import { SearchView } from './views/SearchView';
+import { pendingInvite } from './lib/invite';
+
+// Every page is its own downloadable chunk, so the first screen only loads the code it needs.
+const page = <P extends object>(load: () => Promise<{ default: ComponentType<P> }>) => lazy(load);
+const BattleRoom = page(() => import('./views/BattleRoom').then((m) => ({ default: m.BattleRoom })));
+const BattlesView = page(() => import('./views/BattlesView').then((m) => ({ default: m.BattlesView })));
+const CreateView = page(() => import('./views/CreateView').then((m) => ({ default: m.CreateView })));
+const GroupRoom = page(() => import('./views/GroupsView').then((m) => ({ default: m.GroupRoom })));
+const GroupsView = page(() => import('./views/GroupsView').then((m) => ({ default: m.GroupsView })));
+const JoinGroupView = page(() => import('./views/GroupsView').then((m) => ({ default: m.JoinGroupView })));
+const HomeView = page(() => import('./views/HomeView').then((m) => ({ default: m.HomeView })));
+const LegalView = page(() => import('./views/LegalView').then((m) => ({ default: m.LegalView })));
+const MediaView = page(() => import('./views/MediaView').then((m) => ({ default: m.MediaView })));
+const MessagesView = page(() => import('./views/MessagesView').then((m) => ({ default: m.MessagesView })));
+const ProfileView = page(() => import('./views/ProfileView').then((m) => ({ default: m.ProfileView })));
+const SearchView = page(() => import('./views/SearchView').then((m) => ({ default: m.SearchView })));
 
 function View() {
   const { route } = useRouter();
@@ -69,7 +75,9 @@ function Shell() {
     <div className="flex min-h-screen flex-col pb-16 md:pb-0">
       <Navbar />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-        <View />
+        <Suspense fallback={<Loading />}>
+          <View />
+        </Suspense>
       </main>
       <footer className="border-t border-zinc-100 py-6 text-center text-xs text-zinc-500">
         <button type="button" className="underline" onClick={() => go('legal', 'terms')}>{lang === 'fr' ? 'Conditions' : 'Terms'}</button>

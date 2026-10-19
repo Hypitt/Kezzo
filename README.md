@@ -188,3 +188,10 @@ Before pushing, run `git status` and confirm **no `.env` or `.env.local` file is
 ## License
 
 MIT. See `LICENSE`.
+
+## Performance notes
+
+- Every page is a separate chunk (`React.lazy`); the video-call library (`livekit-client`) and the resumable-upload library (`tus-js-client`) load only when someone joins a room or uploads a big file.
+- `vercel.json` caches hashed files in `/assets` for a year and icons for a week; `index.html` is always revalidated.
+- Feed videos and audio use `preload="none"`, images are lazy and decoded off the main thread, photos are shrunk in the browser before upload, and the Google Fonts stylesheet no longer blocks the first paint.
+- The Search page requests the first page of results once (it used to request it twice for signed-in users) and loads the "people you follow" list only on the Following tab.

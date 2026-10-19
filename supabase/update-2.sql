@@ -12,18 +12,7 @@
 -- How to run: Supabase Dashboard > SQL Editor > New query > paste > Run.
 -- =====================================================================
 
--- Small helper: drop an unnamed CHECK constraint whose definition matches a pattern.
-create or replace function pg_temp.drop_check(tbl regclass, pattern text) returns void
-language plpgsql as $$
-declare c record;
-begin
-  for c in
-    select conname from pg_constraint
-     where conrelid = tbl and contype = 'c' and pg_get_constraintdef(oid) like pattern
-  loop
-    execute format('alter table %s drop constraint %I', tbl, c.conname);
-  end loop;
-end $$;
+-- (Unnamed CHECK constraints are dropped with small inline blocks, so no helper function is needed.)
 
 -- ---------------------------------------------------------------------
 -- Profiles: status picture
@@ -35,7 +24,10 @@ grant update (status_image_url) on public.profiles to authenticated;
 -- ---------------------------------------------------------------------
 -- Posts: longer videos (up to 30 minutes)
 -- ---------------------------------------------------------------------
-select pg_temp.drop_check('public.posts', '%duration_seconds <= 90%');
+do $$ declare c record; begin
+  for c in select conname from pg_constraint where conrelid = 'public.posts'::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%duration_seconds <= 90%'
+  loop execute format('alter table public.posts drop constraint %I', c.conname); end loop;
+end $$;
 alter table public.posts drop constraint if exists posts_video_duration_ck;
 alter table public.posts add constraint posts_video_duration_ck
   check (kind <> 'video' or (duration_seconds is not null and duration_seconds <= 1800));
@@ -44,13 +36,19 @@ alter table public.posts add constraint posts_video_duration_ck
 -- Groups: roles, join policy, invite links
 -- ---------------------------------------------------------------------
 alter table public.group_members add column if not exists role text not null default 'member';
-select pg_temp.drop_check('public.group_members', '%role%');
+do $$ declare c record; begin
+  for c in select conname from pg_constraint where conrelid = 'public.group_members'::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%role%'
+  loop execute format('alter table public.group_members drop constraint %I', c.conname); end loop;
+end $$;
 alter table public.group_members add constraint group_members_role_ck check (role in ('owner', 'admin', 'member'));
 update public.group_members gm set role = 'owner'
   from public.groups g where g.id = gm.group_id and g.owner_id = gm.user_id and gm.role <> 'owner';
 
 alter table public.groups add column if not exists join_policy text not null default 'open';
-select pg_temp.drop_check('public.groups', '%join_policy%');
+do $$ declare c record; begin
+  for c in select conname from pg_constraint where conrelid = 'public.groups'::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%join_policy%'
+  loop execute format('alter table public.groups drop constraint %I', c.conname); end loop;
+end $$;
 alter table public.groups add constraint groups_join_policy_ck check (join_policy in ('open', 'invite'));
 grant update (join_policy) on public.groups to authenticated;
 
@@ -154,8 +152,14 @@ alter table public.chat_messages add column if not exists file_path text;
 alter table public.chat_messages add column if not exists file_name text;
 alter table public.chat_messages add column if not exists file_type text;
 alter table public.chat_messages add column if not exists file_size bigint;
-select pg_temp.drop_check('public.chat_messages', '%char_length(body)%');
-select pg_temp.drop_check('public.chat_messages', '%file_path%');
+do $$ declare c record; begin
+  for c in select conname from pg_constraint where conrelid = 'public.chat_messages'::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%char_length(body)%'
+  loop execute format('alter table public.chat_messages drop constraint %I', c.conname); end loop;
+end $$;
+do $$ declare c record; begin
+  for c in select conname from pg_constraint where conrelid = 'public.chat_messages'::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%file_path%'
+  loop execute format('alter table public.chat_messages drop constraint %I', c.conname); end loop;
+end $$;
 alter table public.chat_messages drop constraint if exists chat_body_ck;
 alter table public.chat_messages add constraint chat_body_ck
   check (char_length(body) <= 500 and (char_length(body) >= 1 or file_path is not null));
@@ -175,15 +179,24 @@ alter table public.battles add column if not exists host_competes boolean not nu
 alter table public.battles add column if not exists public_weight int not null default 100;
 alter table public.battles add column if not exists round_seconds int not null default 0;
 alter table public.battles add column if not exists timer_ends_at timestamptz;
-select pg_temp.drop_check('public.battles', '%public_weight%');
-select pg_temp.drop_check('public.battles', '%round_seconds%');
+do $$ declare c record; begin
+  for c in select conname from pg_constraint where conrelid = 'public.battles'::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%public_weight%'
+  loop execute format('alter table public.battles drop constraint %I', c.conname); end loop;
+end $$;
+do $$ declare c record; begin
+  for c in select conname from pg_constraint where conrelid = 'public.battles'::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%round_seconds%'
+  loop execute format('alter table public.battles drop constraint %I', c.conname); end loop;
+end $$;
 alter table public.battles add constraint battles_public_weight_ck check (public_weight between 0 and 100);
 alter table public.battles add constraint battles_round_seconds_ck check (round_seconds between 0 and 3600);
 
 alter table public.battle_contenders add column if not exists muted boolean not null default false;
 
 -- Coin votes are now 2 or 5 coins (older rows keep their original amounts).
-select pg_temp.drop_check('public.battle_votes', '%amount%');
+do $$ declare c record; begin
+  for c in select conname from pg_constraint where conrelid = 'public.battle_votes'::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%amount%'
+  loop execute format('alter table public.battle_votes drop constraint %I', c.conname); end loop;
+end $$;
 alter table public.battle_votes add constraint battle_votes_amount_ck check (amount in (1, 2, 5, 10));
 
 create table if not exists public.battle_likes (
@@ -488,7 +501,18 @@ begin
   select * into b from public.battles where id = p_battle for update;
   if not found then raise exception 'not_found'; end if;
   if b.host_id is distinct from uid then raise exception 'not_host'; end if;
-  if b.status <> 'live' then raise exception 'bad_status'; end if;
+  if b.status = 'ended' then raise exception 'bad_status'; end if;
+
+  -- Cancelled before it started: give every entry fee back, nobody wins.
+  if b.status = 'open' then
+    if b.entry_fee > 0 then
+      for c in select bc.user_id from public.battle_contenders bc where bc.battle_id = p_battle loop
+        perform public.credit_reward(c.user_id, b.entry_fee, 'battle_refund', p_battle);
+      end loop;
+    end if;
+    update public.battles set status = 'ended', ended_at = now(), winner_id = null, timer_ends_at = null, prize_pool = 0 where id = p_battle;
+    return;
+  end if;
 
   host_cut := floor(b.prize_pool * 0.2);
   remaining := b.prize_pool - host_cut;
@@ -633,3 +657,4 @@ begin
     end if;
   end loop;
 end $$;
+

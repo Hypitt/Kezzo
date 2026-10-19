@@ -4,5 +4,11 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  build: { chunkSizeWarningLimit: 900 },
+  build: {
+    target: 'es2022', // modern browsers only: smaller output, no old-browser helpers
+    cssCodeSplit: true,
+    sourcemap: false,
+    reportCompressedSize: false,
+    chunkSizeWarningLimit: 500,
+  },
 });

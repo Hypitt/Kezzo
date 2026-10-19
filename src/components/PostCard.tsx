@@ -134,9 +134,9 @@ export function PostCard({ post, onChange, onDelete }: Props) {
             </div>
           ) : mediaUrl ? (
             <>
-              {post.kind === 'photo' && <img src={mediaUrl} alt={post.title} className="max-h-[32rem] w-full rounded-xl bg-zinc-100 object-contain" loading="lazy" />}
-              {post.kind === 'video' && <video src={mediaUrl} controls playsInline preload="metadata" className="max-h-[32rem] w-full rounded-xl bg-black" />}
-              {post.kind === 'audio' && <audio src={mediaUrl} controls preload="metadata" className="w-full" />}
+              {post.kind === 'photo' && <img src={mediaUrl} alt={post.title} className="max-h-[32rem] w-full rounded-xl bg-zinc-100 object-contain" loading="lazy" decoding="async" />}
+              {post.kind === 'video' && <video src={mediaUrl} controls playsInline preload="none" className="max-h-[32rem] w-full rounded-xl bg-black" />}
+              {post.kind === 'audio' && <audio src={mediaUrl} controls preload="none" className="w-full" />}
               <a className="mt-2 inline-flex items-center gap-1 text-xs text-zinc-500 underline" href={mediaUrl} target="_blank" rel="noreferrer">
                 <Download className="h-3.5 w-3.5" aria-hidden="true" />
                 {t('open_file')}

@@ -228,10 +228,10 @@ function ChatFile({ message }: { message: ChatMessage }) {
   return (
     <div className="mt-1.5 space-y-1.5">
       {type.startsWith('image/') && url && (
-        <a href={url} target="_blank" rel="noreferrer"><img src={url} alt={message.file_name ?? ''} className="max-h-48 rounded-lg border border-zinc-200 object-cover" loading="lazy" /></a>
+        <a href={url} target="_blank" rel="noreferrer"><img src={url} alt={message.file_name ?? ''} className="max-h-48 rounded-lg border border-zinc-200 object-cover" loading="lazy" decoding="async" /></a>
       )}
-      {type.startsWith('video/') && url && <video src={url} controls preload="metadata" className="max-h-56 rounded-lg" />}
-      {type.startsWith('audio/') && url && <audio src={url} controls preload="metadata" className="w-full max-w-xs" />}
+      {type.startsWith('video/') && url && <video src={url} controls preload="none" className="max-h-56 rounded-lg" />}
+      {type.startsWith('audio/') && url && <audio src={url} controls preload="none" className="w-full max-w-xs" />}
       <button type="button" onClick={download} className="flex w-full max-w-xs items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-left text-xs hover:bg-zinc-100">
         <FileText className="h-4 w-4 shrink-0 text-zinc-500" aria-hidden="true" />
         <span className="min-w-0 flex-1">

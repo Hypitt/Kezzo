@@ -1,4 +1,3 @@
-import * as tus from 'tus-js-client';
 import { supabase } from './supabase';
 
 /**
@@ -50,7 +49,7 @@ function reasonFromStatus(status: number | undefined): UploadFailure {
  */
 export function startUpload({ bucket, path, file, onProgress }: UploadOptions): UploadHandle {
   let cancelled = false;
-  let upload: tus.Upload | null = null;
+  let upload: import('tus-js-client').Upload | null = null;
 
   const done = (async () => {
     if (file.size <= SIMPLE_LIMIT) {
@@ -71,6 +70,7 @@ export function startUpload({ bucket, path, file, onProgress }: UploadOptions): 
     const anon = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
     const freshToken = async (): Promise<string> => (await supabase.auth.getSession()).data.session?.access_token ?? anon;
 
+    const tus = await import('tus-js-client'); // only needed for big files
     await new Promise<void>((resolve, reject) => {
       upload = new tus.Upload(file, {
         endpoint: `${base}/storage/v1/upload/resumable`,

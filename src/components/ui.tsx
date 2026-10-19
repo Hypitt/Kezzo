@@ -12,6 +12,7 @@ export function Avatar({ p, size = 36 }: { p: { display_name: string; avatar_url
       className="shrink-0 rounded-full bg-zinc-100 object-cover"
       referrerPolicy="no-referrer"
       loading="lazy"
+      decoding="async"
     />
   ) : (
     <span

@@ -176,6 +176,8 @@ export function BattleRoom({ id }: { id: string }) {
         <p className="text-xs text-zinc-500">{t('hosted_by')} <button type="button" className="underline" onClick={() => go('profile', battle.host.id)}>{battle.host.display_name}</button></p>
       </header>
 
+      {isHost && !ended && <HostBar battle={battle} busy={busy} rpc={rpc} />}
+
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
           {ended ? (
@@ -213,7 +215,8 @@ export function BattleRoom({ id }: { id: string }) {
                   leader={!ended && topFinal > 0 && (standingMap.get(c.user_id)?.final_pct ?? 0) === topFinal}
                   hasJudges={hasJudges}
                   viewerIsHost={isHost}
-                  canVote={live && Boolean(user) && c.user_id !== user?.id && !isJudge}
+                  canVote={!ended && Boolean(user) && c.user_id !== user?.id && !isJudge}
+                  votesOpen={live}
                   alreadyLiked={liked.has(`${c.user_id}:${battle.current_round}`)}
                   busy={busy}
                   onLike={() => rpc('like_contender', { p_battle: id, p_contender: c.user_id }, t('liked_toast', { name: c.profile.display_name }))}
@@ -224,7 +227,7 @@ export function BattleRoom({ id }: { id: string }) {
                 />
               ))}
             </ul>
-            {live && !user && <p className="text-xs text-zinc-500">{t('sign_in_to_vote')}</p>}
+            {!ended && !user && <p className="text-xs text-zinc-500">{t('sign_in_to_vote')}</p>}
             {live && isJudge && <p className="text-xs text-zinc-500">{t('judge_no_public_vote')}</p>}
             {live && <p className="text-xs text-zinc-500">{t('vote_rules')}</p>}
           </section>
@@ -276,6 +279,7 @@ interface CardProps {
   hasJudges: boolean;
   viewerIsHost: boolean;
   canVote: boolean;
+  votesOpen: boolean;
   alreadyLiked: boolean;
   busy: string | null;
   onLike: () => void;
@@ -286,7 +290,7 @@ interface CardProps {
 }
 
 /** One competitor: number + colour, live scores, and the buttons that vote for exactly this person. */
-function CompetitorCard({ c, index, battle, standing, leader, hasJudges, viewerIsHost, canVote, alreadyLiked, busy, onLike, onVote, onMute, onKick, onProfile }: CardProps) {
+function CompetitorCard({ c, index, battle, standing, leader, hasJudges, viewerIsHost, canVote, votesOpen, alreadyLiked, busy, onLike, onVote, onMute, onKick, onProfile }: CardProps) {
   const { t } = useI18n();
   const color = COMPETITOR_COLORS[index % COMPETITOR_COLORS.length];
   const ended = battle.status === 'ended';
@@ -324,16 +328,17 @@ function CompetitorCard({ c, index, battle, standing, leader, hasJudges, viewerI
       <div className="flex flex-wrap items-center gap-2">
         {canVote && (
           <>
-            <button type="button" className="btn btn-ghost btn-sm bg-white" disabled={alreadyLiked || voting} onClick={onLike} aria-label={t('like_aria', { name })}>
+            <button type="button" className="btn btn-ghost btn-sm bg-white" disabled={!votesOpen || alreadyLiked || voting} onClick={onLike} aria-label={t('like_aria', { name })}>
               <Heart className={`h-3.5 w-3.5 ${alreadyLiked ? 'fill-red-500 text-red-500' : ''}`} aria-hidden="true" />
               {alreadyLiked ? t('liked') : t('like_free')}
             </button>
-            <button type="button" className={`btn btn-sm text-white ${color.bg}`} disabled={voting} onClick={() => onVote(2)} aria-label={t('vote_aria', { n: 2, name })}>
+            <button type="button" className={`btn btn-sm text-white ${color.bg}`} disabled={!votesOpen || voting} onClick={() => onVote(2)} aria-label={t('vote_aria', { n: 2, name })}>
               <Coins className="h-3.5 w-3.5" aria-hidden="true" />{t('vote_coins', { n: 2 })}
             </button>
-            <button type="button" className={`btn btn-sm text-white ${color.bg}`} disabled={voting} onClick={() => onVote(5)} aria-label={t('vote_aria', { n: 5, name })}>
+            <button type="button" className={`btn btn-sm text-white ${color.bg}`} disabled={!votesOpen || voting} onClick={() => onVote(5)} aria-label={t('vote_aria', { n: 5, name })}>
               <Coins className="h-3.5 w-3.5" aria-hidden="true" />{t('vote_coins', { n: 5 })}
             </button>
+            {!votesOpen && <span className="text-xs text-zinc-500">{t('vote_after_start')}</span>}
           </>
         )}
         {viewerIsHost && !ended && c.user_id !== battle.host_id && (
@@ -528,28 +533,14 @@ function HostControls({ battle, busy, rpc, onRecap, hasJudges }: HostProps) {
   return (
     <section className="card space-y-4" aria-label={t('host_controls')}>
       <h2 className="font-semibold">{t('host_controls')}</h2>
-      <div className="flex flex-wrap gap-2">
-        {battle.status === 'open' && (
-          <button type="button" className="btn btn-accent" disabled={battle.contenders.length < 2 || busy === 'start_battle'} onClick={() => rpc('start_battle', { p_battle: battle.id }, t('started_toast'))}>
-            {t('start_battle')}
+      {live && (
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className="btn btn-ghost" disabled={busy === 'recap'} onClick={onRecap}>
+            {busy === 'recap' ? <Spinner /> : <Sparkles className="h-4 w-4" aria-hidden="true" />}
+            {t('ai_recap')}
           </button>
-        )}
-        {live && battle.current_round < battle.total_rounds && (
-          <button type="button" className="btn btn-ghost" onClick={() => rpc('next_round', { p_battle: battle.id })}>{t('next_round')}</button>
-        )}
-        {live && (
-          <>
-            <button type="button" className="btn btn-ghost" disabled={busy === 'recap'} onClick={onRecap}>
-              {busy === 'recap' ? <Spinner /> : <Sparkles className="h-4 w-4" aria-hidden="true" />}
-              {t('ai_recap')}
-            </button>
-            <button type="button" className="btn btn-primary" disabled={busy === 'end_battle'} onClick={() => window.confirm(t('confirm_end')) && rpc('end_battle', { p_battle: battle.id }, t('ended_toast'))}>
-              {t('end_battle')}
-            </button>
-          </>
-        )}
-      </div>
-      {battle.status === 'open' && battle.contenders.length < 2 && <p className="text-xs text-zinc-500">{t('need_two')}</p>}
+        </div>
+      )}
 
       {battle.status === 'open' && (
         <div className="space-y-2 border-t border-zinc-100 pt-3">
@@ -579,6 +570,34 @@ function HostControls({ battle, busy, rpc, onRecap, hasJudges }: HostProps) {
         </div>
       )}
       <p className="text-xs text-zinc-500">{t('payout_rules')}</p>
+    </section>
+  );
+}
+
+/** Always-visible host actions at the top of the room: start, next round, end and pay out, or cancel. */
+function HostBar({ battle, busy, rpc }: { battle: Battle; busy: string | null; rpc: HostProps['rpc'] }) {
+  const { t } = useI18n();
+  const open = battle.status === 'open';
+  const live = battle.status === 'live';
+  const end = () => {
+    if (!window.confirm(t(open ? 'confirm_cancel' : 'confirm_end'))) return;
+    rpc('end_battle', { p_battle: battle.id }, t(open ? 'cancelled_toast' : 'ended_toast'));
+  };
+  return (
+    <section className="card flex flex-wrap items-center gap-2 border-zinc-900" aria-label={t('host_controls')}>
+      <span className="mr-auto text-sm font-semibold">{t('host_controls')}</span>
+      {open && (
+        <button type="button" className="btn btn-accent" disabled={battle.contenders.length < 2 || busy === 'start_battle'} onClick={() => rpc('start_battle', { p_battle: battle.id }, t('started_toast'))}>
+          {busy === 'start_battle' && <Spinner />}{t('start_battle')}
+        </button>
+      )}
+      {live && battle.current_round < battle.total_rounds && (
+        <button type="button" className="btn btn-ghost" disabled={busy === 'next_round'} onClick={() => rpc('next_round', { p_battle: battle.id })}>{t('next_round')}</button>
+      )}
+      <button type="button" className="btn btn-primary" disabled={busy === 'end_battle'} onClick={end}>
+        {busy === 'end_battle' && <Spinner />}{t(open ? 'cancel_battle' : 'end_battle')}
+      </button>
+      {open && battle.contenders.length < 2 && <p className="basis-full text-xs text-zinc-500">{t('need_two')}</p>}
     </section>
   );
 }

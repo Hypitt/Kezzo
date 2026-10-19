@@ -1,3 +1,4 @@
+import { PENDING_JOIN } from '../lib/invite';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { ArrowLeft, Copy, Crown, Link2, Lock, Mic, RefreshCw, Shield, UserMinus, UserPlus, Users, Video } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -16,7 +17,6 @@ import { ReportButton } from '../components/ReportButton';
 import { Avatar, Chip, Empty, Loading, PageHeader, Spinner } from '../components/ui';
 
 const CATEGORIES = ['dance', 'roasting', 'singing', 'debate', 'comedy', 'other'] as const;
-const PENDING_JOIN = 'kezzo.pendingJoin';
 
 export function GroupsView() {
   const { user, ensureAuth } = useAuth();
@@ -174,11 +174,6 @@ export function JoinGroupView({ code }: { code?: string }) {
       <p>{user && profile ? t('joining_group') : t('sign_in_to_join_group')}</p>
     </div>
   );
-}
-
-/** If someone opened an invite link while signed out, finish joining after they sign in. */
-export function pendingInvite(): string | null {
-  try { return localStorage.getItem(PENDING_JOIN); } catch { return null; }
 }
 
 type CallMode = null | 'audio' | 'video';

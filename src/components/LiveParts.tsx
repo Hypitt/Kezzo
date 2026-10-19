@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Mic, MicOff, PhoneOff, Settings2, Video, VideoOff, Volume2, WifiOff } from 'lucide-react';
-import { Track, type Participant } from 'livekit-client';
+import type { Participant, Track } from 'livekit-client';
+
 import { initials } from '../lib/format';
 import type { LiveRoomApi } from '../lib/useLiveRoom';
 import { useI18n } from '../state/I18n';
 
+// Plain values of Track.Source, so this file does not pull the whole video library into the page bundle.
+const CAMERA = 'camera' as unknown as Track.Source;
+const MICROPHONE = 'microphone' as unknown as Track.Source;
+
 /** Plays the sound of one remote person. Rendered once per remote participant, even when they have no tile. */
 export function RemoteAudio({ p }: { p: Participant }) {
   const el = useRef<HTMLAudioElement>(null);
-  const track = p.getTrackPublication(Track.Source.Microphone)?.track;
+  const track = p.getTrackPublication(MICROPHONE)?.track;
   useEffect(() => {
     const node = el.current;
     if (!node || !track) return;
@@ -40,8 +45,8 @@ interface TileProps {
 export function MediaTile({ participant, name, sub, local, video, marker, className = '', children, mutedByHost }: TileProps) {
   const { t } = useI18n();
   const videoEl = useRef<HTMLVideoElement>(null);
-  const camPub = participant?.getTrackPublication(Track.Source.Camera);
-  const micPub = participant?.getTrackPublication(Track.Source.Microphone);
+  const camPub = participant?.getTrackPublication(CAMERA);
+  const micPub = participant?.getTrackPublication(MICROPHONE);
   const camTrack = camPub?.track;
   const camVisible = Boolean(camTrack) && !camPub?.isMuted;
   const micOn = Boolean(micPub?.track) && !micPub?.isMuted;
