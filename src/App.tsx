@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './state/Auth';
 import { I18nProvider, useI18n } from './state/I18n';
 import { RouterProvider, useRouter } from './state/Router';
 import { ToastProvider } from './state/Toast';
-import { Gate, Onboarding, SetupNotice } from './components/AuthScreens';
+import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScreens';
 import { Navbar } from './components/Navbar';
 import { Loading } from './components/ui';
 import { BattleRoom } from './views/BattleRoom';
@@ -65,6 +65,7 @@ function Shell() {
         {' · '}
         <button type="button" className="underline" onClick={() => go('legal', 'privacy')}>{lang === 'fr' ? 'Confidentialité' : 'Privacy'}</button>
       </footer>
+      <AuthDialog />
     </div>
   );
 }

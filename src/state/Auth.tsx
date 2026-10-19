@@ -23,6 +23,16 @@ interface AuthValue {
   wallet: Wallet | null;
   blocked: string[];
   signInWithGoogle: () => Promise<void>;
+  /** Email + password. Resolves with `needsConfirmation` when Supabase sent a confirmation email. */
+  signUpWithEmail: (email: string, password: string) => Promise<{ needsConfirmation: boolean }>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
+  /** True while the user arrived from a password-reset email and must choose a new password. */
+  recovering: boolean;
+  authOpen: boolean;
+  openAuth: () => void;
+  closeAuth: () => void;
   signOut: () => Promise<void>;
   createProfile: (values: NewProfile) => Promise<void>;
   updateProfile: (patch: ProfilePatch) => Promise<void>;
@@ -43,6 +53,8 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [blocked, setBlocked] = useState<string[]>([]);
   const [loading, setLoading] = useState(configured);
+  const [recovering, setRecovering] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
   const lastUser = useRef<string | null>(null);
   const signedInCb = useRef(onSignedIn);
   signedInCb.current = onSignedIn;
@@ -62,6 +74,10 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
   useEffect(() => {
     if (!configured) return;
     const { data } = supabase.auth.onAuthStateChange((event, next) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setRecovering(true);
+        setAuthOpen(true);
+      }
       setSession(next);
       const uid = next?.user.id ?? null;
       const isNewUser = uid !== lastUser.current;
@@ -90,6 +106,42 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
     });
     if (error) toast(error.message, 'error');
   }, [toast]);
+
+  const signUpWithEmail = useCallback(async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${window.location.origin}/` },
+    });
+    if (error) throw error;
+    // With "Confirm email" on, an already-registered address comes back with no identities and no error.
+    if (data.user && (data.user.identities?.length ?? 1) === 0) {
+      throw Object.assign(new Error('User already registered'), { code: 'user_already_exists' });
+    }
+    return { needsConfirmation: !data.session };
+  }, []);
+
+  const signInWithEmail = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  }, []);
+
+  const sendPasswordReset = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/` });
+    if (error) throw error;
+  }, []);
+
+  const updatePassword = useCallback(async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+    setRecovering(false);
+  }, []);
+
+  const openAuth = useCallback(() => setAuthOpen(true), []);
+  const closeAuth = useCallback(() => {
+    setAuthOpen(false);
+    setRecovering(false);
+  }, []);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
@@ -152,15 +204,19 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
   const ensureAuth = useCallback(() => {
     if (user && profile) return true;
     toast(t('sign_in_required'));
+    if (!user) setAuthOpen(true);
     return false;
   }, [user, profile, toast, t]);
 
   const value = useMemo<AuthValue>(
     () => ({
       configured, loading, session, user, profile, wallet, blocked,
-      signInWithGoogle, signOut, createProfile, updateProfile, refreshWallet, refreshBlocked, deleteAccount, ensureAuth,
+      signInWithGoogle, signUpWithEmail, signInWithEmail, sendPasswordReset, updatePassword, recovering,
+      authOpen, openAuth, closeAuth,
+      signOut, createProfile, updateProfile, refreshWallet, refreshBlocked, deleteAccount, ensureAuth,
     }),
-    [loading, session, user, profile, wallet, blocked, signInWithGoogle, signOut, createProfile, updateProfile, refreshWallet, refreshBlocked, deleteAccount, ensureAuth],
+    [loading, session, user, profile, wallet, blocked, signInWithGoogle, signUpWithEmail, signInWithEmail, sendPasswordReset,
+      updatePassword, recovering, authOpen, openAuth, closeAuth, signOut, createProfile, updateProfile, refreshWallet, refreshBlocked, deleteAccount, ensureAuth],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

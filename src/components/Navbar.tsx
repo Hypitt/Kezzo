@@ -20,7 +20,7 @@ const NAV: { tab: Exclude<Tab, 'legal'>; icon: LucideIcon; label: Key }[] = [
 ];
 
 export function Navbar() {
-  const { user, profile, wallet, signInWithGoogle, updateProfile, refreshWallet } = useAuth();
+  const { user, profile, wallet, openAuth, updateProfile, refreshWallet } = useAuth();
   const { t, lang, setLang } = useI18n();
   const { route, go } = useRouter();
   const { toast } = useToast();
@@ -83,7 +83,7 @@ export function Navbar() {
                 <Avatar p={profile} size={30} />
               </button>
             ) : (
-              <button type="button" className="btn btn-primary btn-sm" onClick={signInWithGoogle}>
+              <button type="button" className="btn btn-primary btn-sm" onClick={openAuth}>
                 <LogIn className="h-3.5 w-3.5" aria-hidden="true" />
                 {t('sign_in')}
               </button>
