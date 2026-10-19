@@ -5,7 +5,6 @@ import { RouterProvider, useRouter } from './state/Router';
 import { LegalProvider } from './state/Legal';
 import { ToastProvider } from './state/Toast';
 import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScreens';
-import { AccountFooter } from './components/AccountFooter';
 import { Navbar } from './components/Navbar';
 import { Loading } from './components/ui';
 import { pendingInvite } from './lib/invite';
@@ -87,7 +86,6 @@ function Shell() {
         <button type="button" className="underline" onClick={() => go('legal', 'terms')}>{lang === 'fr' ? 'Conditions' : 'Terms'}</button>
         {' · '}
         <button type="button" className="underline" onClick={() => go('legal', 'privacy')}>{lang === 'fr' ? 'Confidentialité' : 'Privacy'}</button>
-        <AccountFooter />
       </footer>
       <AuthDialog />
     </div>

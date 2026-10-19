@@ -40,7 +40,7 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 27. New accounts start with 100 voting coins. The monthly claim button is hidden until a new UTC month.
 28. Edit profile and avatar; set a 24-hour status **with a picture**. It shows on Home (tap to enlarge) and on the profile.
 29. Report a post and a profile. Rows appear in the `reports` table (Supabase dashboard).
-30. Sign out and Delete account are in the page footer, not in Settings or the main content. Delete shows a confirmation pop-up that needs the handle typed. Expected: signed out; the profile, posts and files are gone.
+30. Sign out and Delete account appear only at the very bottom of your own profile page, below everything else (not on other pages). Delete shows a confirmation pop-up that needs the handle typed. Expected: signed out; the profile, posts and files are gone.
 31. On the sign-in and sign-up screens and on profile setup, the Terms and Privacy links open a pop-up and keep the form.
 
 ## Security spot checks (browser dev tools or the Supabase API)

@@ -16,6 +16,7 @@ import { ReportButton } from '../components/ReportButton';
 import { SignInCard } from '../components/AuthScreens';
 import { StatusViewer } from '../components/StatusViewer';
 import { useLegal } from '../state/Legal';
+import { AccountFooter } from '../components/AccountFooter';
 import { Avatar, Empty, Loading, LoadMore, Spinner } from '../components/ui';
 
 const PAGE = 8;
@@ -167,6 +168,7 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
         <LoadMore show={hasMore} busy={moreBusy} onClick={more} label={t('load_more')} />
       </section>
       {viewStatus && <StatusViewer person={profile} onClose={() => setViewStatus(false)} />}
+      {own && <div className="border-t border-zinc-200 pt-2"><AccountFooter /></div>}
     </div>
   );
 }

@@ -46,6 +46,32 @@ export function sourceAllowed(p: Participant | undefined, source: keyof typeof S
   return list.length === 0 || list.includes(SOURCE[source]);
 }
 
+/**
+ * Asks for camera and microphone permission right at the click, before any waiting (network, token, connecting).
+ * Some browsers (Safari and iPhones especially) only show the permission prompt while the tap is still "fresh".
+ * The tracks are stopped straight away; LiveKit opens them again, with permission already given.
+ */
+async function primeMedia(video: boolean): Promise<Key | null> {
+  const md = typeof navigator !== 'undefined' ? navigator.mediaDevices : undefined;
+  if (!md?.getUserMedia) return null;
+  const stop = (s: MediaStream) => s.getTracks().forEach((t) => t.stop());
+  try {
+    stop(await md.getUserMedia({ audio: true, video }));
+    return null;
+  } catch (err) {
+    if (video && !/NotAllowed|Security|PermissionDenied/i.test((err as { name?: string }).name ?? '')) {
+      // No camera found, or it is busy: carry on with the microphone alone.
+      try {
+        stop(await md.getUserMedia({ audio: true }));
+      } catch (inner) {
+        return mediaErrorKey(inner);
+      }
+      return mediaErrorKey(err);
+    }
+    return mediaErrorKey(err);
+  }
+}
+
 function mediaErrorKey(err: unknown): Key {
   const e = err as { name?: string; message?: string };
   const name = e?.name ?? '';
@@ -65,6 +91,7 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
   const { ensureAuth } = useAuth();
   const roomRef = useRef<Room | null>(null);
   const leftByUser = useRef(false);
+  const autoDone = useRef(false);
   const [phase, setPhase] = useState<Phase>('idle');
   const [error, setError] = useState<string | null>(null);
   const [canPublish, setCanPublish] = useState(false);
@@ -91,6 +118,7 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
 
   const leave = useCallback(() => {
     leftByUser.current = true;
+    autoDone.current = false;
     const room = roomRef.current;
     roomRef.current = null;
     room?.disconnect(true); // also stops the camera and microphone
@@ -137,8 +165,10 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
   const join = useCallback(async () => {
     if (!ensureAuth() || roomRef.current) return;
     leftByUser.current = false;
+    autoDone.current = false;
     setPhase('connecting');
     setError(null);
+    const primed = autoPublish ? primeMedia(video) : Promise.resolve<Key | null>(null);
     try {
       const { token, url, canPublish: allowed } = await api<{ token: string; url: string; canPublish: boolean }>('livekit-token', { room: roomName });
       const { Room: LkRoom, RoomEvent, VideoPresets, DisconnectReason: Reason } = await import('livekit-client');
@@ -186,10 +216,13 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
       roomRef.current = room;
       await room.startAudio().catch(() => undefined);
       setAudioBlocked(!room.canPlaybackAudio);
+      if (allowed && autoPublish) autoDone.current = true;
       setCanPublish(allowed);
       setPhase('connected');
       await refreshDevices();
-      if (allowed && autoPublish) {
+      const blocked = await primed;
+      if (blocked) setError(t(blocked));
+      if (allowed && autoPublish && blocked !== 'media_denied') {
         if (sourceAllowed(room.localParticipant, 'microphone')) await publish('mic', true);
         if (video && sourceAllowed(room.localParticipant, 'camera')) await publish('cam', true);
       }
@@ -199,6 +232,17 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
       setError(/not configured/i.test(message) ? t('live_not_configured') : message || t('error_generic'));
     }
   }, [ensureAuth, roomName, t, refreshDevices, autoPublish, video, publish]);
+
+  // A guest the host lets on stage while connected: turn their devices on without making them reconnect.
+  useEffect(() => {
+    if (phase !== 'connected' || !canPublish || !autoPublish || autoDone.current) return;
+    autoDone.current = true;
+    const local = roomRef.current?.localParticipant;
+    void (async () => {
+      if (sourceAllowed(local, 'microphone')) await publish('mic', true);
+      if (video && sourceAllowed(local, 'camera')) await publish('cam', true);
+    })();
+  }, [phase, canPublish, autoPublish, video, publish]);
 
   const room = roomRef.current;
   const local = room?.localParticipant;

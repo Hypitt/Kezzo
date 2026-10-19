@@ -80,7 +80,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
           'Kezzo is provided “as is” and “as available”. To the extent the law allows, WeDIL Inc. is not liable for indirect or consequential losses, lost data, or content posted by other users, and because Kezzo is free, our total liability to you is limited to CAD $100. Nothing in these Terms removes rights you have under Québec’s Consumer Protection Act or other law that cannot be waived.',
         ] },
         { h: '14. Suspension and account deletion', body: [
-          'You can stop using Kezzo and delete your account at any time with the Delete account button at the bottom of any page while signed in, or by emailing kezzo.app@gmail.com. Deleting your account removes your profile, content, messages and coins and cannot be undone. We may suspend or end your access for breaking these Terms or for other legitimate reasons, subject to the law. Some information may be kept after deletion where the law requires it or for security, fraud prevention or disputes.',
+          'You can stop using Kezzo and delete your account at any time with the Delete account button at the bottom of your profile page, or by emailing kezzo.app@gmail.com. Deleting your account removes your profile, content, messages and coins and cannot be undone. We may suspend or end your access for breaking these Terms or for other legitimate reasons, subject to the law. Some information may be kept after deletion where the law requires it or for security, fraud prevention or disputes.',
         ] },
         { h: '15. Governing law', body: [
           'These Terms are governed by the laws of Québec and the federal laws of Canada that apply there. Disputes go to the courts of the district of Montréal, unless your local consumer law lets you sue where you live.',
@@ -139,7 +139,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
           'We use encrypted connections (HTTPS), row-level security on every database table, server-only secret keys, and private storage for paid media. No system is perfectly secure. If a breach creates a risk of serious harm, we will notify you and the Commission d’accès à l’information as the law requires.',
         ] },
         { h: '11. Your rights', body: [
-          'You can view and edit your profile, delete your content, control who can message you, block people, and delete your account with the Delete account button at the bottom of any page. You can also ask us at kezzo.app@gmail.com to:',
+          'You can view and edit your profile, delete your content, control who can message you, block people, and delete your account with the Delete account button at the bottom of your profile page. You can also ask us at kezzo.app@gmail.com to:',
           [
             'access the information we hold about you and learn how it is used and shared',
             'get a copy in a structured, commonly used format',
@@ -150,7 +150,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
           'We may need to verify your identity, and we answer within 30 days.',
         ] },
         { h: '12. Account deletion', body: [
-          'Delete your account with the Delete account button at the bottom of any page (a typed confirmation is required) or by emailing kezzo.app@gmail.com. Your profile, content, messages and coins are removed, and backup copies are erased within the period in section 9. Some records may be kept where the law requires it or for security, fraud prevention or disputes. Content other users already downloaded or shared cannot be removed from their devices.',
+          'Delete your account with the Delete account button at the bottom of your profile page (a typed confirmation is required) or by emailing kezzo.app@gmail.com. Your profile, content, messages and coins are removed, and backup copies are erased within the period in section 9. Some records may be kept where the law requires it or for security, fraud prevention or disputes. Content other users already downloaded or shared cannot be removed from their devices.',
         ] },
         { h: '13. Age', body: [
           'Kezzo is for people 16 and over, and sign-up asks you to confirm your age. We do not knowingly collect information from anyone younger. If you think a child under 16 has an account, email kezzo.app@gmail.com and we will delete it.',
@@ -236,7 +236,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
           'Kezzo est fournie « telle quelle » et « selon la disponibilité ». Dans la mesure permise par la loi, WeDIL Inc. n’est pas responsable des pertes indirectes ou consécutives, des pertes de données ni du contenu publié par d’autres utilisateurs et, comme Kezzo est gratuite, notre responsabilité totale envers vous est limitée à 100 $ CA. Rien dans ces Conditions ne supprime les droits que vous confère la Loi sur la protection du consommateur du Québec ou toute autre loi à laquelle on ne peut renoncer.',
         ] },
         { h: '14. Suspension et suppression du compte', body: [
-          'Vous pouvez cesser d’utiliser Kezzo et supprimer votre compte en tout temps avec le bouton Supprimer le compte au bas de n’importe quelle page lorsque vous êtes connecté, ou en écrivant à kezzo.app@gmail.com. La suppression de votre compte retire votre profil, votre contenu, vos messages et vos pièces, et est irréversible. Nous pouvons suspendre ou mettre fin à votre accès si vous enfreignez ces Conditions ou pour d’autres motifs légitimes, sous réserve de la loi. Certains renseignements peuvent être conservés après la suppression lorsque la loi l’exige ou pour la sécurité, la prévention de la fraude ou le règlement de différends.',
+          'Vous pouvez cesser d’utiliser Kezzo et supprimer votre compte en tout temps avec le bouton Supprimer le compte au bas de votre page de profil, ou en écrivant à kezzo.app@gmail.com. La suppression de votre compte retire votre profil, votre contenu, vos messages et vos pièces, et est irréversible. Nous pouvons suspendre ou mettre fin à votre accès si vous enfreignez ces Conditions ou pour d’autres motifs légitimes, sous réserve de la loi. Certains renseignements peuvent être conservés après la suppression lorsque la loi l’exige ou pour la sécurité, la prévention de la fraude ou le règlement de différends.',
         ] },
         { h: '15. Droit applicable', body: [
           'Ces Conditions sont régies par les lois du Québec et les lois fédérales du Canada qui s’y appliquent. Les différends relèvent des tribunaux du district de Montréal, sauf si votre loi locale sur la protection du consommateur vous permet de poursuivre là où vous habitez.',
@@ -295,7 +295,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
           'Nous utilisons des connexions chiffrées (HTTPS), la sécurité au niveau des lignes sur chaque table de la base de données, des clés secrètes réservées au serveur et un stockage privé pour les médias payants. Aucun système n’est parfaitement sécurisé. Si une atteinte présente un risque de préjudice sérieux, nous vous en aviserons ainsi que la Commission d’accès à l’information, comme la loi l’exige.',
         ] },
         { h: '11. Vos droits', body: [
-          'Vous pouvez consulter et modifier votre profil, supprimer votre contenu, choisir qui peut vous écrire, bloquer des personnes et supprimer votre compte avec le bouton Supprimer le compte au bas de n’importe quelle page. Vous pouvez aussi nous demander, à kezzo.app@gmail.com, de :',
+          'Vous pouvez consulter et modifier votre profil, supprimer votre contenu, choisir qui peut vous écrire, bloquer des personnes et supprimer votre compte avec le bouton Supprimer le compte au bas de votre page de profil. Vous pouvez aussi nous demander, à kezzo.app@gmail.com, de :',
           [
             'vous donner accès aux renseignements que nous détenons sur vous et vous expliquer comment ils sont utilisés et communiqués',
             'vous remettre une copie dans un format structuré et couramment utilisé',
@@ -306,7 +306,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
           'Nous pouvons devoir vérifier votre identité, et nous répondons dans un délai de 30 jours.',
         ] },
         { h: '12. Suppression du compte', body: [
-          'Supprimez votre compte avec le bouton Supprimer le compte au bas de n’importe quelle page (une confirmation saisie au clavier est exigée) ou en écrivant à kezzo.app@gmail.com. Votre profil, votre contenu, vos messages et vos pièces sont retirés, et les copies de sauvegarde sont effacées dans le délai prévu à l’article 9. Certains registres peuvent être conservés lorsque la loi l’exige ou pour la sécurité, la prévention de la fraude ou le règlement de différends. Le contenu que d’autres utilisateurs ont déjà téléchargé ou partagé ne peut pas être retiré de leurs appareils.',
+          'Supprimez votre compte avec le bouton Supprimer le compte au bas de votre page de profil (une confirmation saisie au clavier est exigée) ou en écrivant à kezzo.app@gmail.com. Votre profil, votre contenu, vos messages et vos pièces sont retirés, et les copies de sauvegarde sont effacées dans le délai prévu à l’article 9. Certains registres peuvent être conservés lorsque la loi l’exige ou pour la sécurité, la prévention de la fraude ou le règlement de différends. Le contenu que d’autres utilisateurs ont déjà téléchargé ou partagé ne peut pas être retiré de leurs appareils.',
         ] },
         { h: '13. Âge', body: [
           'Kezzo s’adresse aux personnes de 16 ans et plus, et l’inscription vous demande de confirmer votre âge. Nous ne recueillons pas sciemment de renseignements auprès de personnes plus jeunes. Si vous croyez qu’un enfant de moins de 16 ans a un compte, écrivez à kezzo.app@gmail.com et nous le supprimerons.',
