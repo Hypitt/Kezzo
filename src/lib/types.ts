@@ -35,6 +35,8 @@ export interface Post {
   body: string;
   media_bucket: 'media-public' | 'media-paid' | null;
   media_path: string | null;
+  /** Extra photos after the first one (photo posts only, up to 9). */
+  media_extra?: string[] | null;
   duration_seconds: number | null;
   download_price: number;
   created_at: string;

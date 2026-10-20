@@ -136,14 +136,62 @@ export function PublicFrame({ children }: { children: ReactNode }) {
 }
 
 /** A calm, stylised battle frame made of plain boxes: shows the idea without loading any picture. */
+const SKIN = ['#f1c9a5', '#c68a5e', '#8d5a3b', '#e8b98f', '#6f4426', '#f5d6bd'];
+const HAIR = ['#2b1d14', '#111111', '#7a4a21', '#d9a441', '#3b2a4a', '#8a2b1f'];
+const SHIRT = ['#e5432b', '#2a78d6', '#27272a', '#eb6834', '#0f766e', '#7c3aed'];
+
+/** A friendly illustrated face. If a real photo is added at `photo` (public/landing), it covers the drawing. */
+function Person({ i, photo }: { i: number; photo: string }) {
+  const [ok, setOk] = useState(true);
+  return (
+    <span className="relative inline-block h-11 w-11 overflow-hidden rounded-full border-2 border-white bg-stone-200">
+      <svg viewBox="0 0 48 48" className="h-full w-full" aria-hidden="true">
+        <rect width="48" height="48" fill="#e7e5e4" />
+        <path d="M6 48c1-11 9-16 18-16s17 5 18 16z" fill={SHIRT[i % 6]} />
+        <ellipse cx="24" cy="22" rx="9" ry="10" fill={SKIN[i % 6]} />
+        <path d="M14.5 21c0-8 4-12 9.5-12s9.5 4 9.5 12c-2-4-5-6-9.5-6s-7.5 2-9.5 6z" fill={HAIR[i % 6]} />
+        <circle cx="20.5" cy="23" r="1.1" fill="#27272a" /><circle cx="27.5" cy="23" r="1.1" fill="#27272a" />
+        <path d="M20.5 27.5q3.5 3 7 0" stroke="#27272a" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+      </svg>
+      {ok && <img src={photo} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" onError={() => setOk(false)} />}
+    </span>
+  );
+}
+
+/** Community video behind the hero. Optional: without /landing/hero.mp4 the card stays solid dark. Skipped for reduced motion or slow data. */
+function HeroVideo() {
+  const [play, setPlay] = useState(false);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const nav = navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } };
+    const slow = nav.connection?.saveData || /(^|-)2g$/.test(nav.connection?.effectiveType ?? '');
+    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    setPlay(!slow && !still);
+  }, []);
+  return (
+    <div className="absolute inset-0" aria-hidden="true">
+      {play && (
+        <video
+          className={`h-full w-full object-cover transition-opacity duration-700 ${ready ? 'opacity-100' : 'opacity-0'}`}
+          autoPlay muted loop playsInline preload="metadata" poster="/landing/hero-poster.jpg"
+          onCanPlay={() => setReady(true)} onError={() => setReady(false)}
+        >
+          <source src="/landing/hero.mp4" type="video/mp4" />
+        </video>
+      )}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/35" />
+    </div>
+  );
+}
+
 function BattleMock() {
   const { lang } = useI18n();
   const c = COPY[lang];
-  const tile = (name: string, pct: number, bar: string) => (
+  const tile = (name: string, pct: number, bar: string, n: number) => (
     <div className="relative flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-xl bg-stone-100 p-3">
       <span className="self-end rounded-md bg-white px-1.5 py-0.5 text-xs font-semibold tabular-nums text-zinc-900 shadow-sm">{pct}%</span>
       <div>
-        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-stone-300 font-display text-sm font-bold text-zinc-700">{name[0]}</div>
+        <div className="mb-2"><Person i={n} photo={`/landing/battle-${n === 0 ? 1 : 2}.jpg`} /></div>
         <p className="text-sm font-semibold text-zinc-900">{name}</p>
         <div className="mt-2 h-1.5 w-full rounded-full bg-stone-300"><div className={`h-full rounded-full ${bar}`} style={{ width: `${pct}%` }} /></div>
       </div>
@@ -157,8 +205,8 @@ function BattleMock() {
         <span className="inline-flex items-center gap-1"><Video className="h-3.5 w-3.5" />1.2k</span>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        {tile('Maya', 54, 'bg-accent')}
-        {tile('Jo', 46, 'bg-zinc-800')}
+        {tile('Maya', 54, 'bg-accent', 0)}
+        {tile('Jo', 46, 'bg-zinc-800', 1)}
       </div>
       <div className="mt-3 flex items-center justify-between rounded-xl bg-stone-50 px-3 py-2 text-xs text-zinc-600">
         <span className="inline-flex items-center gap-1.5"><Heart className="h-3.5 w-3.5 text-accent" />+5 {c.mockVotes}</span>
@@ -218,25 +266,30 @@ export function Landing({ invite }: { invite?: string }) {
 
   return (
     <PublicFrame>
-      {/* Hero */}
-      <section className="bg-white px-4 pb-14 pt-12 text-zinc-900 sm:pb-20 sm:pt-16">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-1 text-xs font-medium text-zinc-700">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-              {liveBattles > 0 ? c.live(liveBattles) : c.eyebrow}
-            </span>
-            <h1 className="mt-5 text-4xl font-bold leading-[1.08] sm:text-6xl">
-              {c.h1a}<br /><span className="text-accent">{c.h1b}</span>
-            </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-zinc-600 sm:text-lg">{c.lead}</p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <button type="button" className="btn btn-accent px-6 py-3 text-base" onClick={() => openAuth('signup')}>{c.cta}</button>
-              <button type="button" className={`${outline} px-6 py-3 text-base`} onClick={() => openAuth('signin')}>{c.login}</button>
+      {/* Hero: a card with a short community video behind it */}
+      <section className="bg-white px-3 pb-10 pt-4 sm:px-4 sm:pb-16 sm:pt-6">
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl bg-zinc-900 text-white">
+          <HeroVideo />
+          <div className="relative grid items-center gap-12 px-5 py-12 sm:px-10 sm:py-16 lg:grid-cols-2">
+            <div>
+              {liveBattles > 0 && (
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+                  {c.live(liveBattles)}
+                </span>
+              )}
+              <h1 className="mt-5 text-4xl font-bold leading-[1.08] text-white sm:text-6xl">
+                {c.h1a}<br />{c.h1b}
+              </h1>
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">{c.lead}</p>
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <button type="button" className="btn btn-accent px-6 py-3 text-base" onClick={() => openAuth('signup')}>{c.cta}</button>
+                <button type="button" className="btn border border-white/60 bg-transparent px-6 py-3 text-base text-white hover:bg-white/10" onClick={() => openAuth('signin')}>{c.login}</button>
+              </div>
+              <p className="mt-3 text-xs text-white/70">{c.ctaNote}</p>
             </div>
-            <p className="mt-3 text-xs text-zinc-500">{c.ctaNote}</p>
+            <BattleMock />
           </div>
-          <BattleMock />
         </div>
       </section>
 
@@ -259,10 +312,13 @@ export function Landing({ invite }: { invite?: string }) {
           </div>
           <div className="rounded-3xl border border-stone-200 bg-stone-50 p-6" aria-hidden="true">
             <div className="space-y-3">
-              {[['Dance', 'Maya vs Jo', 'bg-accent'], ['Comedy', 'Sam vs Lee vs Noor', 'bg-zinc-800'], ['Singing', 'Ana vs Eli', 'bg-accent']].map(([tag, who, dot]) => (
-                <div key={who} className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3">
+              {[['Dance', 'Maya vs Jo', 0, 1], ['Comedy', 'Sam vs Lee vs Noor', 2, 3], ['Singing', 'Ana vs Eli', 4, 5]].map(([tag, who, a, b], row) => (
+                <div key={who as string} className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <span className={`h-2 w-2 rounded-full ${dot}`} />
+                    <span className="flex -space-x-3">
+                      <Person i={a as number} photo={`/landing/battle-${row * 2 + 1}.jpg`} />
+                      <Person i={b as number} photo={`/landing/battle-${row * 2 + 2}.jpg`} />
+                    </span>
                     <div><p className="text-sm font-semibold text-zinc-900">{who}</p><p className="text-xs text-zinc-500">{tag}</p></div>
                   </div>
                   <Swords className="h-4 w-4 text-zinc-400" />

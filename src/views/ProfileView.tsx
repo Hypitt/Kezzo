@@ -11,7 +11,7 @@ import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
-import { PostCard } from '../components/PostCard';
+import { PostGrid } from '../components/PostGrid';
 import { ReportButton } from '../components/ReportButton';
 import { SignInCard } from '../components/AuthScreens';
 import { StatusViewer } from '../components/StatusViewer';
@@ -156,14 +156,11 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
             {own && <button type="button" className="btn btn-primary" onClick={() => go('create', 'post')}>{t('create_post')}</button>}
           </Empty>
         ) : (
-          posts.map((p) => (
-            <PostCard
-              key={p.id}
-              post={p}
-              onChange={(next) => setPosts((l) => l.map((x) => (x.id === next.id ? next : x)))}
-              onDelete={(pid) => setPosts((l) => l.filter((x) => x.id !== pid))}
-            />
-          ))
+          <PostGrid
+            posts={posts}
+            onChange={(next) => setPosts((l) => l.map((x) => (x.id === next.id ? next : x)))}
+            onDelete={(pid) => setPosts((l) => l.filter((x) => x.id !== pid))}
+          />
         )}
         <LoadMore show={hasMore} busy={moreBusy} onClick={more} label={t('load_more')} />
       </section>

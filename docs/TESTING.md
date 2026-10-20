@@ -84,5 +84,11 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 ## Landing page: groups and live counter
 58. Run `update-8.sql`. As the owner of an open group, open the group's admin tools and tick **Show this group on Kezzo's public home page**. In a private window the landing page now shows a **Groups you can join** section with that group (name, category, member count). Untick it: the section disappears (when it was the only one).
 59. Click **Sign up to join** on the group card, create an account: after onboarding you land on that group's page. Switch the group to *Invite only*: the checkbox becomes disabled and the group disappears from the landing page.
-60. A member who is not an admin of the group does not see the checkbox. While a battle is live, the landing page eyebrow says "1 battle live right now"; with no live battle it shows the normal line.
+60. A member who is not an admin of the group does not see the checkbox. While a battle is live, a small "1 battle live right now" pill appears above the headline; with no live battle there is no pill.
 
+## Photos, profile grid, landing visuals
+61. Run `update-9.sql`. In Create → Post → Photo, pick several photos (also add more in a second pick): thumbnails show with numbers and an X to remove each; the counter says "n of 10 photos". An 11th photo is refused with a message.
+62. Publish. In the feed the post shows the first photo with a "1/4" badge and dots; swipe left/right on a phone (arrows on desktop, ←/→ keys) to see the others. A single-photo post looks as before.
+63. Publish a paid multi-photo post: another account sees the lock; after unlocking, all photos swipe. Deleting the post removes every photo from storage.
+64. Open a profile: posts appear three per row. A multi-photo tile has a small gallery icon, a video tile a play icon, a locked paid post a padlock. Click a tile: the full post opens in a window (Esc or the X closes it); like, comment, edit and delete work there.
+65. Landing page: the line "Live battles · Live streams · Groups" is gone. The top card has a dark background; with `public/landing/hero.mp4` present the video plays muted behind white text; without it the card stays dark. With "reduce motion" on, the video does not load. The "Live battles that anyone can join" box shows faces (drawn ones, or photos if `battle-1.jpg`… exist).

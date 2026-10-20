@@ -12,7 +12,7 @@ const one = <T,>(v: T | T[] | null | undefined): T => (Array.isArray(v) ? v[0] :
 
 // ---------------------------------------------------------------- posts
 const POST_SELECT =
-  `id,author_id,kind,title,body,media_bucket,media_path,duration_seconds,download_price,created_at,` +
+  `id,author_id,kind,title,body,media_bucket,media_path,media_extra,duration_seconds,download_price,created_at,` +
   `author:profiles!author_id(${PUBLIC_PROFILE}),likes:post_likes(count),comments:post_comments(count)`;
 
 export interface PostQuery {

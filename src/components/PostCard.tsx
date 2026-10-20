@@ -12,6 +12,7 @@ import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { Avatar, Spinner } from './ui';
 import { FeedVideo } from './FeedVideo';
+import { PhotoCarousel } from './PhotoCarousel';
 import { ReportButton } from './ReportButton';
 
 interface Props {
@@ -28,6 +29,8 @@ export function PostCard({ post, onChange, onDelete }: Props) {
   const { toast } = useToast();
   const { go } = useRouter();
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [extraUrls, setExtraUrls] = useState<string[]>([]);
+  const extraKey = (post.media_extra ?? []).join('|');
   const [showComments, setShowComments] = useState(false);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(post.title);
@@ -38,18 +41,25 @@ export function PostCard({ post, onChange, onDelete }: Props) {
   useEffect(() => {
     let cancelled = false;
     setMediaUrl(null);
+    setExtraUrls([]);
     if (!post.media_path || !post.media_bucket || locked) return;
+    const extra = extraKey ? extraKey.split('|') : [];
     if (post.media_bucket === 'media-public') {
-      setMediaUrl(supabase.storage.from('media-public').getPublicUrl(post.media_path).data.publicUrl);
+      const store = supabase.storage.from('media-public');
+      setMediaUrl(store.getPublicUrl(post.media_path).data.publicUrl);
+      setExtraUrls(extra.map((p) => store.getPublicUrl(p).data.publicUrl));
     } else {
-      supabase.storage.from('media-paid').createSignedUrl(post.media_path, 3600).then(({ data }) => {
-        if (!cancelled && data) setMediaUrl(data.signedUrl);
+      supabase.storage.from('media-paid').createSignedUrls([post.media_path, ...extra], 3600).then(({ data }) => {
+        if (cancelled || !data) return;
+        const urls = data.map((d) => d.signedUrl ?? '');
+        if (urls[0]) setMediaUrl(urls[0]);
+        setExtraUrls(urls.slice(1).filter(Boolean));
       });
     }
     return () => {
       cancelled = true;
     };
-  }, [post.media_path, post.media_bucket, locked]);
+  }, [post.media_path, post.media_bucket, extraKey, locked]);
 
   const toggleLike = async () => {
     if (!ensureAuth() || !user) return;
@@ -86,7 +96,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
     if (!window.confirm(t('confirm_delete'))) return;
     const { error } = await supabase.from('posts').delete().eq('id', post.id);
     if (error) return toast(t('error_generic'), 'error');
-    if (post.media_bucket && post.media_path) await supabase.storage.from(post.media_bucket).remove([post.media_path]);
+    if (post.media_bucket && post.media_path) await supabase.storage.from(post.media_bucket).remove([post.media_path, ...(post.media_extra ?? [])]);
     onDelete(post.id);
   };
 
@@ -135,7 +145,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
             </div>
           ) : mediaUrl ? (
             <>
-              {post.kind === 'photo' && <img src={mediaUrl} alt={post.title} className="max-h-[32rem] w-full rounded-xl bg-zinc-100 object-contain" loading="lazy" decoding="async" />}
+              {post.kind === 'photo' && <PhotoCarousel urls={[mediaUrl, ...extraUrls]} alt={post.title} />}
               {post.kind === 'video' && <FeedVideo src={mediaUrl} />}
               {post.kind === 'audio' && <audio src={mediaUrl} controls preload="none" className="w-full" />}
               <a className="mt-2 inline-flex items-center gap-1 text-xs text-zinc-500 underline" href={mediaUrl} target="_blank" rel="noreferrer">

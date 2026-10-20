@@ -180,6 +180,8 @@ export const en = {
   err_weights_locked: 'Voting weights can only change before the battle starts.', err_invalid_weight: 'Choose a percentage from 0 to 100.',
   err_invalid_timer: 'Choose a timer between 10 seconds and 1 hour.', err_host_only: 'You are hosting only, so you cannot join the stage.',
   // notifications
+  photos: 'Photos', file_hint_photos: 'Up to {max} photos, {n} MB each. Viewers swipe through them.', photos_count: '{n} of {max} photos', err_max_photos: 'You can add up to {n} photos to one post.',
+  photo_n: 'Photo {i} of {n}', prev_photo: 'Previous photo', next_photo: 'Next photo', open_post: 'Open post',
   feature_group: 'Show this group on Kezzo’s public home page', feature_group_hint: 'Visitors see the name, description and member count. They must sign up or log in to join.', feature_group_invite: 'Only open groups can be shown on the public home page.',
   email_messages: 'Email me about new direct and group messages',
   notif_title: 'Notifications', notif_empty: 'Nothing new yet. Messages, likes, new followers and live sessions show up here.', notif_mark_all: 'Mark all as read',
@@ -382,6 +384,8 @@ export const fr: Record<Key, string> = {
   err_weights_locked: 'La pondération ne peut changer qu’avant le début du battle.', err_invalid_weight: 'Choisissez un pourcentage de 0 à 100.',
   err_invalid_timer: 'Choisissez un chrono entre 10 secondes et 1 heure.', err_host_only: 'Vous animez seulement, vous ne pouvez donc pas monter sur scène.',
   // notifications
+  photos: 'Photos', file_hint_photos: 'Jusqu’à {max} photos de {n} Mo chacune. Les gens les font défiler en glissant.', photos_count: '{n} photos sur {max}', err_max_photos: 'Vous pouvez ajouter jusqu’à {n} photos à une publication.',
+  photo_n: 'Photo {i} sur {n}', prev_photo: 'Photo précédente', next_photo: 'Photo suivante', open_post: 'Ouvrir la publication',
   feature_group: 'Afficher ce groupe sur la page d’accueil publique de Kezzo', feature_group_hint: 'Les visiteurs voient le nom, la description et le nombre de membres. Ils doivent s’inscrire ou se connecter pour rejoindre.', feature_group_invite: 'Seuls les groupes ouverts peuvent apparaître sur la page d’accueil publique.',
   email_messages: 'Me envoyer un courriel pour les nouveaux messages privés et de groupe',
   notif_title: 'Notifications', notif_empty: 'Rien de nouveau pour l’instant. Les messages, J’aime, nouveaux abonnés et directs apparaissent ici.', notif_mark_all: 'Tout marquer comme lu',

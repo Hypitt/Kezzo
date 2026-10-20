@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { explain } from '../lib/errors';
 import { fileExt } from '../lib/format';
@@ -46,6 +47,8 @@ interface PostJob {
   uploaded: boolean;
 }
 
+const MAX_PHOTOS = 10;
+
 function PostForm() {
   const { user, ensureAuth } = useAuth();
   const { t } = useI18n();
@@ -55,56 +58,73 @@ function PostForm() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [price, setPrice] = useState(0);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [upload, setUpload] = useState<UploadState | null>(null);
-  const job = useRef<PostJob | null>(null);
+  const jobs = useRef<PostJob[]>([]);
   const handle = useRef<UploadHandle | null>(null);
+  const previews = useMemo(() => (kind === 'photo' ? files.map((f) => URL.createObjectURL(f)) : []), [kind, files]);
+  useEffect(() => () => previews.forEach((u) => URL.revokeObjectURL(u)), [previews]);
 
   // Stop an unfinished upload when the person leaves this form.
   useEffect(() => () => handle.current?.cancel(), []);
 
-  /** Uploads (or resumes) the file, then saves the post. Safe to call again after a failure. */
+  /** Uploads (or resumes) the files one after the other, then saves the post. Safe to call again after a failure. */
   const run = async () => {
     if (!user) return;
-    const j = job.current;
+    const list = jobs.current;
     setBusy(true);
     setError(null);
+    const total = list.reduce((n, j) => n + j.file.size, 0);
     try {
-      if (j && !j.uploaded) {
-        setUpload({ sent: 0, total: j.file.size, failed: false });
+      for (const j of list) {
+        if (j.uploaded) continue;
+        const before = list.filter((x) => x.uploaded).reduce((n, x) => n + x.file.size, 0);
+        setUpload({ sent: before, total, failed: false });
         const h = startUpload({
           bucket: j.bucket, path: j.path, file: j.file,
-          onProgress: (sent, total) => setUpload((u) => (u ? { ...u, sent, total, failed: false } : u)),
+          onProgress: (sent) => setUpload((u) => (u ? { ...u, sent: before + sent, total, failed: false } : u)),
         });
         handle.current = h;
         await h.done;
         j.uploaded = true;
       }
+      const first = list[0];
       const { error: insErr } = await supabase.from('posts').insert({
         author_id: user.id, kind, title: title.trim(), body: body.trim(),
-        media_bucket: j?.bucket ?? null, media_path: j?.path ?? null, duration_seconds: j?.duration ?? null,
+        media_bucket: first?.bucket ?? null, media_path: first?.path ?? null, media_extra: list.slice(1).map((j) => j.path),
+        duration_seconds: first?.duration ?? null,
         download_price: kind === 'text' ? 0 : price,
       });
       if (insErr) throw new Error(t('error_generic'));
-      job.current = null;
+      jobs.current = [];
       setUpload(null);
       toast(t('post_published'));
       go('search');
     } catch (err) {
       const reason = (err as { reason?: UploadFailure }).reason;
       if (reason === 'cancelled') return;
-      if (reason) setUpload({ sent: 0, total: j?.file.size ?? 0, failed: true, message: t(failureKey(reason)) });
+      if (reason) setUpload({ sent: 0, total, failed: true, message: t(failureKey(reason)) });
       else setError((err as Error).message);
     } finally {
       setBusy(false);
     }
   };
 
+  /** Deletes photos already uploaded for a post that will not be published. */
+  const discardUploaded = () => {
+    const done = jobs.current.filter((j) => j.uploaded);
+    for (const bucket of ['media-public', 'media-paid'] as const) {
+      const paths = done.filter((j) => j.bucket === bucket).map((j) => j.path);
+      if (paths.length) void supabase.storage.from(bucket).remove(paths);
+    }
+  };
+
   const cancelUpload = () => {
     handle.current?.cancel();
-    if (job.current?.uploaded === false) job.current = null;
+    discardUploaded();
+    jobs.current = [];
     setUpload(null);
     setBusy(false);
   };
@@ -117,16 +137,17 @@ function PostForm() {
     if (!isSafe(title) || !isSafe(body)) return setError(t('blocked_content'));
 
     if (kind === 'text') {
-      job.current = null;
+      jobs.current = [];
       return run();
     }
-    if (!file) return setError(t('err_file_required'));
-    if (file.size > MAX_UPLOAD_BYTES) return setError(t('err_file_too_big', { n: MAX_UPLOAD_MB }));
+    const chosen = kind === 'photo' ? files.slice(0, MAX_PHOTOS) : files.slice(0, 1);
+    if (chosen.length === 0) return setError(t('err_file_required'));
+    if (chosen.some((f) => f.size > MAX_UPLOAD_BYTES)) return setError(t('err_file_too_big', { n: MAX_UPLOAD_MB }));
     setBusy(true);
     let duration: number | null = null;
     if (kind !== 'photo') {
       try {
-        duration = Math.round(await mediaDuration(file, kind));
+        duration = Math.round(await mediaDuration(chosen[0], kind));
       } catch {
         setBusy(false);
         return setError(t('err_file_unreadable'));
@@ -136,16 +157,36 @@ function PostForm() {
         return setError(t('err_video_too_long', { min: MAX_VIDEO_SECONDS / 60 }));
       }
     }
-    const ready = kind === 'photo' ? await compressImage(file) : file; // smaller photos upload much faster
-    // The storage path is created once, so Retry continues the same upload instead of starting over.
-    if (!job.current || job.current.file !== ready) {
-      job.current = {
+    const ready = kind === 'photo' ? await Promise.all(chosen.map((f) => compressImage(f))) : chosen; // smaller photos upload much faster
+    // The storage paths are created once, so Retry continues the same upload instead of starting over.
+    const same = jobs.current.length === ready.length && jobs.current.every((j, i) => j.file === ready[i]);
+    if (!same) {
+      discardUploaded();
+      jobs.current = ready.map((file) => ({
         bucket: price > 0 ? 'media-paid' : 'media-public',
-        path: `${user.id}/${crypto.randomUUID()}.${fileExt(ready.name)}`,
-        file: ready, duration, uploaded: false,
-      };
+        path: `${user.id}/${crypto.randomUUID()}.${fileExt(file.name)}`,
+        file, duration, uploaded: false,
+      }));
     }
     return run();
+  };
+
+  const pick = (list: FileList | null) => {
+    const incoming = Array.from(list ?? []);
+    jobs.current = [];
+    setUpload(null);
+    if (kind === 'photo') {
+      setFiles((old) => [...old, ...incoming].slice(0, MAX_PHOTOS));
+      if (files.length + incoming.length > MAX_PHOTOS) toast(t('err_max_photos', { n: MAX_PHOTOS }), 'error');
+    } else {
+      setFiles(incoming.slice(0, 1));
+    }
+  };
+
+  const removePhoto = (i: number) => {
+    jobs.current = [];
+    setUpload(null);
+    setFiles((old) => old.filter((_, idx) => idx !== i));
   };
 
   return (
@@ -154,7 +195,7 @@ function PostForm() {
         <span className="label">{t('post_type')}</span>
         <div className="flex flex-wrap gap-2">
           {(['text', 'photo', 'audio', 'video'] as PostKind[]).map((k) => (
-            <Chip key={k} active={kind === k} onClick={() => { if (busy) return; setKind(k); setFile(null); job.current = null; if (k === 'text') setPrice(0); }}>
+            <Chip key={k} active={kind === k} onClick={() => { if (busy) return; setKind(k); setFiles([]); jobs.current = []; if (k === 'text') setPrice(0); }}>
               {t(`kind_${k}` as Key)}
             </Chip>
           ))}
@@ -171,9 +212,31 @@ function PostForm() {
       {kind !== 'text' && (
         <>
           <div>
-            <label className="label" htmlFor="pf-file">{t('file')}</label>
-            <input id="pf-file" type="file" accept={ACCEPT[kind]} disabled={busy} onChange={(e) => { setFile(e.target.files?.[0] ?? null); job.current = null; setUpload(null); }} className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm" />
-            <p className="mt-1 text-xs text-zinc-500">{kind === 'video' ? t('file_hint_video', { n: MAX_UPLOAD_MB, min: MAX_VIDEO_SECONDS / 60 }) : t('file_hint', { n: MAX_UPLOAD_MB })}</p>
+            <label className="label" htmlFor="pf-file">{kind === 'photo' ? t('photos') : t('file')}</label>
+            <input
+              id="pf-file" type="file" accept={ACCEPT[kind]} multiple={kind === 'photo'} disabled={busy || (kind === 'photo' && files.length >= MAX_PHOTOS)}
+              onChange={(e) => { pick(e.target.files); e.target.value = ''; }}
+              className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm"
+            />
+            <p className="mt-1 text-xs text-zinc-500">
+              {kind === 'video' ? t('file_hint_video', { n: MAX_UPLOAD_MB, min: MAX_VIDEO_SECONDS / 60 }) : kind === 'photo' ? t('file_hint_photos', { n: MAX_UPLOAD_MB, max: MAX_PHOTOS }) : t('file_hint', { n: MAX_UPLOAD_MB })}
+            </p>
+            {kind === 'photo' && files.length > 0 && (
+              <ul className="mt-3 grid grid-cols-5 gap-2" aria-label={t('photos')}>
+                {files.map((f, i) => (
+                  <li key={`${f.name}-${i}`} className="relative aspect-square overflow-hidden rounded-lg bg-zinc-100">
+                    <img src={previews[i]} alt="" className="h-full w-full object-cover" />
+                    <span className="absolute left-1 top-1 rounded bg-black/60 px-1 text-[10px] font-semibold text-white">{i + 1}</span>
+                    {!busy && (
+                      <button type="button" className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-white" onClick={() => removePhoto(i)} aria-label={t('delete')}>
+                        <X className="h-3 w-3" aria-hidden="true" />
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {kind === 'photo' && files.length > 0 && <p className="mt-1 text-xs text-zinc-500">{t('photos_count', { n: files.length, max: MAX_PHOTOS })}</p>}
           </div>
           <div>
             <label className="label" htmlFor="pf-price">{t('price_label')}</label>
