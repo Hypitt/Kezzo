@@ -93,7 +93,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
     },
     privacy: {
       title: 'Privacy Policy',
-      updated: 'Effective October 19, 2026 · Last updated October 19, 2026',
+      updated: 'Effective October 19, 2026 · Last updated October 20, 2026',
       sections: [
         { h: '1. Introduction and who is responsible', body: [
           'Kezzo respects your privacy. This Policy explains how we collect, use, share, keep and protect personal information when you use Kezzo, including sign-up, feeds, posts, live battles, solo and group livestreams, recordings, highlights, groups, chat and calls. Kezzo is operated by WeDIL Inc., Montréal, Québec, which is responsible for your personal information. Under Québec law, the person with the highest authority at WeDIL Inc. is in charge of protecting personal information; reach them at kezzo.app@gmail.com. We follow Québec’s Act respecting the protection of personal information in the private sector (Law 25) and Canada’s PIPEDA.',
@@ -108,6 +108,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
             ['Social activity', 'Follows, blocks, groups and roles, battles joined, votes, judge scores, reports you file', 'Your use of Kezzo'],
             ['Coins', 'Balance, monthly grants, votes cast, unlocks, battle payouts', 'Your use of Kezzo'],
             ['Technical', 'IP address, browser and device type, diagnostic and error logs, login times, security events', 'Your browser, via our third-party providers'],
+            ['Usage statistics', 'A random visitor ID, pages viewed (without the ids in the address), visit time, referring site, country, device, browser and language, page load time, sign-in events and a few error messages. If you are signed in, your account ID is attached so we can count active members. Your IP address and full browser string are not saved.', 'Your browser, only if “Do Not Track” and “Global Privacy Control” are off'],
           ] },
         ] },
         { h: '3. Camera, microphone, livestreams and recordings', body: [
@@ -130,7 +131,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
           'Our providers store and process data outside Québec, including in the United States. Before using them we assessed that your information stays adequately protected. Data held abroad may be accessible to authorities there under local law.',
         ] },
         { h: '8. Cookies and browser storage', body: [
-          'Kezzo uses only essential browser storage (local storage and similar) to keep you signed in, protect your account, remember your language and settings, and hold recordings a host has not posted yet. We do not use advertising or cross-site tracking cookies. If we ever add analytics or advertising, we will update this Policy and ask for your consent where required.',
+          'Kezzo uses only essential browser storage (local storage and similar) to keep you signed in, protect your account, remember your language and settings, and hold recordings a host has not posted yet. We do not use advertising or cross-site tracking cookies. For our own anonymous usage statistics (how many people visit, which pages are used, how fast Kezzo loads), we keep a random visitor ID in your browser’s local storage and a visit ID in session storage. They contain no personal information, are used only by Kezzo, and are never shared with advertisers. If your browser sends “Do Not Track” or “Global Privacy Control”, Kezzo sends no usage statistics at all, and you can also clear your browser storage at any time. Usage statistics are kept for up to 13 months and are visible only to Kezzo administrators. If we ever add advertising, we will update this Policy and ask for your consent where required.',
         ] },
         { h: '9. How long we keep it', body: [
           'We keep your information while your account is open. When you delete a post, message or your account, it is removed from Kezzo right away and erased from backups within 30 days. We keep reports and records of rule violations for up to 1 year to prevent repeat abuse, and server logs for up to 90 days, unless the law requires longer.',
@@ -249,7 +250,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
     },
     privacy: {
       title: 'Politique de confidentialité',
-      updated: 'En vigueur le 19 octobre 2026 · Dernière mise à jour le 19 octobre 2026',
+      updated: 'En vigueur le 19 octobre 2026 · Dernière mise à jour le 20 octobre 2026',
       sections: [
         { h: '1. Introduction et responsable', body: [
           'Kezzo respecte votre vie privée. La présente Politique explique comment nous recueillons, utilisons, communiquons, conservons et protégeons les renseignements personnels lorsque vous utilisez Kezzo, y compris l’inscription, les fils, les publications, les battles en direct, les diffusions en solo et en groupe, les enregistrements, les faits saillants, les groupes, le clavardage et les appels. Kezzo est exploitée par WeDIL Inc., Montréal (Québec), qui est responsable de vos renseignements personnels. En vertu du droit québécois, la personne ayant la plus haute autorité chez WeDIL Inc. veille à la protection des renseignements personnels; vous pouvez la joindre à kezzo.app@gmail.com. Nous respectons la Loi sur la protection des renseignements personnels dans le secteur privé du Québec (Loi 25) et la LPRPDE du Canada.',
@@ -264,6 +265,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
             ['Activité sociale', 'Abonnements, blocages, groupes et rôles, battles auxquels vous participez, votes, notes des juges, signalements que vous faites', 'Votre utilisation de Kezzo'],
             ['Pièces', 'Solde, attributions mensuelles, votes donnés, déblocages, gains de battles', 'Votre utilisation de Kezzo'],
             ['Technique', 'Adresse IP, type de navigateur et d’appareil, journaux de diagnostic et d’erreurs, heures de connexion, événements de sécurité', 'Votre navigateur, par l’intermédiaire de nos fournisseurs tiers'],
+            ['Statistiques d’utilisation', 'Un identifiant de visiteur aléatoire, les pages consultées (sans les identifiants dans l’adresse), l’heure de la visite, le site de provenance, le pays, l’appareil, le navigateur et la langue, le temps de chargement, les événements de connexion et quelques messages d’erreur. Si vous êtes connecté, l’identifiant de votre compte y est associé pour compter les membres actifs. Votre adresse IP et la chaîne complète du navigateur ne sont pas enregistrées.', 'Votre navigateur, seulement si « Ne pas suivre » et « Global Privacy Control » sont désactivés'],
           ] },
         ] },
         { h: '3. Caméra, micro, diffusions et enregistrements', body: [
@@ -286,7 +288,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
           'Nos fournisseurs stockent et traitent des données à l’extérieur du Québec, notamment aux États-Unis. Avant de les utiliser, nous avons évalué que vos renseignements demeurent adéquatement protégés. Les données conservées à l’étranger peuvent être accessibles aux autorités de ces pays en vertu de leur droit local.',
         ] },
         { h: '8. Témoins et stockage du navigateur', body: [
-          'Kezzo n’utilise que le stockage essentiel du navigateur (stockage local et équivalents) pour vous garder connecté, protéger votre compte, mémoriser votre langue et vos paramètres, et conserver les enregistrements qu’un hôte n’a pas encore publiés. Nous n’utilisons pas de témoins publicitaires ni de suivi intersites. Si nous ajoutons un jour des outils d’analyse ou de publicité, nous mettrons à jour la présente Politique et demanderons votre consentement lorsque requis.',
+          'Kezzo n’utilise que le stockage essentiel du navigateur (stockage local et équivalents) pour vous garder connecté, protéger votre compte, mémoriser votre langue et vos paramètres, et conserver les enregistrements qu’un hôte n’a pas encore publiés. Nous n’utilisons pas de témoins publicitaires ni de suivi intersites. Pour nos statistiques d’utilisation anonymes (nombre de visiteurs, pages utilisées, rapidité de Kezzo), nous conservons un identifiant de visiteur aléatoire dans le stockage local de votre navigateur et un identifiant de visite dans le stockage de session. Ils ne contiennent aucun renseignement personnel, ne servent qu’à Kezzo et ne sont jamais communiqués à des annonceurs. Si votre navigateur envoie « Ne pas suivre » ou « Global Privacy Control », Kezzo n’envoie aucune statistique d’utilisation, et vous pouvez aussi vider le stockage de votre navigateur en tout temps. Les statistiques d’utilisation sont conservées au plus 13 mois et ne sont visibles que des administrateurs de Kezzo. Si nous ajoutons un jour de la publicité, nous mettrons à jour la présente Politique et demanderons votre consentement lorsque requis.',
         ] },
         { h: '9. Durée de conservation', body: [
           'Nous conservons vos renseignements tant que votre compte est ouvert. Lorsque vous supprimez une publication, un message ou votre compte, l’élément est retiré de Kezzo immédiatement et effacé des sauvegardes dans un délai de 30 jours. Nous conservons les signalements et les registres d’infractions aux règles jusqu’à 1 an pour prévenir les abus répétés, et les journaux de serveur jusqu’à 90 jours, sauf si la loi exige une durée plus longue.',

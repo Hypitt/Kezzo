@@ -11,8 +11,7 @@ const reducedMotion = (): boolean => window.matchMedia?.('(prefers-reduced-motio
 /**
  * A feed video that plays by itself (muted, as browsers require) when most of it is on screen and pauses when it scrolls away.
  * Play/Pause and sound buttons stay visible. If the person pauses it, it stays paused until they press Play again.
- * The file is only requested when the video is close to the screen, and it is released again once the video is far
- * off screen, so a long feed never holds dozens of videos in the phone's memory.
+ * The file is only requested when the video is close to the screen.
  */
 export function FeedVideo({ src }: { src: string }) {
   const { t } = useI18n();
@@ -23,23 +22,12 @@ export function FeedVideo({ src }: { src: string }) {
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
   const [progress, setProgress] = useState(0);
-  const resumeAt = useRef(0);
 
-  // Load shortly before the video scrolls into view; free its memory once it is well off screen.
+  // Start loading shortly before the video scrolls into view.
   useEffect(() => {
     const el = box.current;
     if (!el) return;
-    const io = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) return setNear(true);
-      const v = video.current;
-      if (v && v.getAttribute('src')) {
-        resumeAt.current = v.currentTime || 0; // continue from here if they scroll back
-        v.pause();
-        v.removeAttribute('src');
-        v.load(); // actually drops the downloaded video data
-      }
-      setNear(false);
-    }, { rootMargin: '800px 0px' });
+    const io = new IntersectionObserver(([entry]) => entry.isIntersecting && setNear(true), { rootMargin: '400px 0px' });
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -103,9 +91,6 @@ export function FeedVideo({ src }: { src: string }) {
         loop
         preload={near ? 'metadata' : 'none'}
         className="max-h-[32rem] min-h-40 w-full bg-black"
-        onLoadedMetadata={(e) => {
-          if (resumeAt.current > 0) e.currentTarget.currentTime = resumeAt.current;
-        }}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onTimeUpdate={(e) => {

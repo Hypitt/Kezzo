@@ -8,11 +8,10 @@ import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScre
 import { Navbar } from './components/Navbar';
 import { Loading } from './components/ui';
 import { pendingInvite } from './lib/invite';
-import { InstallApp } from './components/InstallApp';
-import { ErrorBoundary, loadPage } from './components/ErrorBoundary';
+import { startMonitoring, trackPage } from './lib/analytics';
 
 // Every page is its own downloadable chunk, so the first screen only loads the code it needs.
-const page = <P extends object>(load: () => Promise<{ default: ComponentType<P> }>) => lazy(() => loadPage(load));
+const page = <P extends object>(load: () => Promise<{ default: ComponentType<P> }>) => lazy(load);
 const BattleRoom = page(() => import('./views/BattleRoom').then((m) => ({ default: m.BattleRoom })));
 const BattlesView = page(() => import('./views/BattlesView').then((m) => ({ default: m.BattlesView })));
 const CreateView = page(() => import('./views/CreateView').then((m) => ({ default: m.CreateView })));
@@ -26,6 +25,7 @@ const LegalView = page(() => import('./views/LegalView').then((m) => ({ default:
 const MediaView = page(() => import('./views/MediaView').then((m) => ({ default: m.MediaView })));
 const MessagesView = page(() => import('./views/MessagesView').then((m) => ({ default: m.MessagesView })));
 const ProfileView = page(() => import('./views/ProfileView').then((m) => ({ default: m.ProfileView })));
+const AdminView = page(() => import('./views/AdminView').then((m) => ({ default: m.AdminView })));
 const SearchView = page(() => import('./views/SearchView').then((m) => ({ default: m.SearchView })));
 
 function View() {
@@ -39,6 +39,7 @@ function View() {
     case 'groups': return route.id ? <GroupRoom key={route.id} id={route.id} /> : <GroupsView />;
     case 'messages': return <Gate><MessagesView otherId={route.id} /></Gate>;
     case 'profile': return <ProfileView id={route.id} />;
+    case 'admin': return <AdminView />;
     case 'legal': return <LegalView id={route.id} />;
     case 'join': return <JoinGroupView code={route.id} />;
     case 'search':
@@ -56,6 +57,14 @@ function Shell() {
     if (profile && profile.language !== lang) setLang(profile.language);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id]);
+
+  // Anonymous usage statistics: one page view per screen, load time and errors (nothing is sent with Do Not Track).
+  useEffect(() => {
+    startMonitoring();
+  }, []);
+  useEffect(() => {
+    trackPage(window.location.hash);
+  }, [route.tab, route.id]);
 
   // Finish joining a group if an invite link was opened before signing in.
   useEffect(() => {
@@ -80,17 +89,14 @@ function Shell() {
     <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
       <Navbar />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-        <ErrorBoundary resetKey={`${route.tab}/${route.id ?? ''}`}>
-          <Suspense fallback={<Loading />}>
-            <View />
-          </Suspense>
-        </ErrorBoundary>
+        <Suspense fallback={<Loading />}>
+          <View />
+        </Suspense>
       </main>
       <footer className="border-t border-zinc-100 py-6 text-center text-xs text-zinc-500">
         <button type="button" className="underline" onClick={() => go('legal', 'terms')}>{lang === 'fr' ? 'Conditions' : 'Terms'}</button>
         {' · '}
         <button type="button" className="underline" onClick={() => go('legal', 'privacy')}>{lang === 'fr' ? 'Confidentialité' : 'Privacy'}</button>
-        <InstallApp className="ml-3" />
       </footer>
       <AuthDialog />
     </div>

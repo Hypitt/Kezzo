@@ -28,39 +28,28 @@ export function mediaDuration(file: File, kind: 'audio' | 'video'): Promise<numb
   });
 }
 
-/** Longest video allowed (seconds): 60 minutes, like Instagram feed videos. Matches the database rule. */
-export const MAX_VIDEO_SECONDS = 3600;
+/** Longest video allowed (seconds). Matches the database rule. */
+export const MAX_VIDEO_SECONDS = 1800;
 
 /**
- * Shrinks big photos in the browser before upload (max 1440 px by default, JPEG). This makes uploads much faster.
+ * Shrinks big photos in the browser before upload (max 2048 px, JPEG/WebP). This makes uploads much faster.
  * GIFs and small files are left alone. If anything goes wrong the original file is returned.
  */
-export async function compressImage(file: File, maxSide = 1440, quality = 0.86): Promise<File> {
-  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return file;
+export async function compressImage(file: File, maxSide = 2048, quality = 0.86): Promise<File> {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 400 * 1024) return file;
   try {
     const bitmap = await createImageBitmap(file);
     const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
-    // Small files that are already small enough on screen are kept as they are.
-    if (scale === 1 && file.size < 400 * 1024) {
-      bitmap.close();
-      return file;
-    }
     const canvas = document.createElement('canvas');
     canvas.width = Math.round(bitmap.width * scale);
     canvas.height = Math.round(bitmap.height * scale);
     const ctx = canvas.getContext('2d');
     if (!ctx) return file;
-    const type = file.type === 'image/png' && file.size < 1.5 * 1024 * 1024 ? 'image/png' : 'image/jpeg';
-    if (type === 'image/jpeg') {
-      // JPEG has no transparency: paint white first, or see-through parts of a PNG turn black.
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     bitmap.close();
+    const type = file.type === 'image/png' && file.size < 1.5 * 1024 * 1024 ? 'image/png' : 'image/jpeg';
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality));
-    // Keep the original only if it already had the right size and re-saving would not make it smaller.
-    if (!blob || (scale === 1 && blob.size >= file.size)) return file;
+    if (!blob || blob.size >= file.size) return file;
     const ext = type === 'image/png' ? 'png' : 'jpg';
     return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.' + ext, { type, lastModified: file.lastModified });
   } catch {

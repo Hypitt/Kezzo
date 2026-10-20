@@ -55,3 +55,10 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 38. Scroll a feed that has videos. Expected: a video plays (muted) when most of it is on screen and pauses when it leaves. Press Pause: it stays paused while scrolling. Play/Pause and the sound button are always visible.
 39. As host, tick **Record this battle on my device**, start the battle, run it for a minute, then end it. Expected: a file downloads by itself, and a **Battle recording** card lets you download it again. Reload the page: it is still there.
 40. On the ended battle, upload a 30-second video as the highlight and post it. Expected: it plays under "Highlight" for everyone. Then upload a 3-minute video: it asks you to trim; "Suggest the best moment" moves the slider; "Create 90-second clip" shows progress and a preview; post it.
+
+## Admin statistics
+41. Run `update-4.sql`, then add yourself to `admins` (see README). Sign in: an **Admin** button appears on your own profile page, next to Sign out. A second, normal account does not see it, and opening `#/admin` as that account shows "administrators only".
+42. In a private window open the site and click through Search, Battles and a battle. Back in `#/admin`, press Refresh: visitors, page views and "Active in last 30 min" increase, and Top pages lists `/battles/:id` (never a real id).
+43. Sign out and sign in again: Sign-ins goes up by one and the method (Google or email) is shown.
+44. Turn on Do Not Track (or Global Privacy Control) in the browser, browse around: the counts do not change.
+45. Switch 7 / 30 / 90 days and the Table view; hover the charts to see the tooltip. Check the page on a phone width.

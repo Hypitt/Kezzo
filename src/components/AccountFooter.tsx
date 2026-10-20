@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
+import { useRouter } from '../state/Router';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
@@ -11,6 +13,15 @@ export function AccountFooter() {
   const { toast } = useToast();
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [admin, setAdmin] = useState(false);
+  const { go } = useRouter();
+  const uid = user?.id;
+
+  // Only administrators see the link to the statistics page (the database decides who is one).
+  useEffect(() => {
+    if (!uid) return;
+    void supabase.rpc('is_admin').then(({ data }) => setAdmin(data === true));
+  }, [uid]);
   if (!user || !profile) return null;
 
   const removeAccount = async () => {
@@ -28,6 +39,7 @@ export function AccountFooter() {
   return (
     <>
       <div className="mt-3 flex items-center justify-center gap-3">
+        {admin && <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('admin')}>Admin</button>}
         <button type="button" className="btn btn-ghost btn-sm" onClick={signOut}>{t('sign_out')}</button>
         <button type="button" className="btn btn-danger btn-sm" onClick={() => setConfirming(true)}>{t('delete_account')}</button>
       </div>

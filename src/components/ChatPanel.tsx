@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { Download, FileText, Paperclip, Send, Trash2, UserX } from 'lucide-react';
+import { Download, FileText, Paperclip, Send, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { PUBLIC_PROFILE } from '../lib/data';
 import { fileExt } from '../lib/format';
 import { compressImage, formatBytes } from '../lib/media';
 import { isSafe } from '../lib/moderation';
-import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL, startUpload, type UploadFailure, type UploadHandle } from '../lib/upload';
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB, startUpload, type UploadFailure, type UploadHandle } from '../lib/upload';
 import type { ChatMessage, PublicProfile } from '../lib/types';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
+import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { UploadBar, failureKey, type UploadState } from './UploadBar';
-import { ProfileLink, RichText } from './ProfileLink';
 
 interface Props {
   roomType: 'battle' | 'group' | 'live';
@@ -19,19 +19,18 @@ interface Props {
   canWrite?: boolean;
   /** Group chats can share files (stored privately; only members can open them). */
   allowFiles?: boolean;
-  /** Group owners and admins, or the host of a battle or live stream, can delete anyone's message. */
+  /** Group owners and admins can delete anyone's message. */
   canModerate?: boolean;
-  /** Battle and live hosts: remove a person from the room and ban them from it. */
-  onRemoveUser?: (userId: string) => void;
 }
 
 const COLUMNS = 'id,room_type,room_id,author_id,body,created_at,file_path,file_name,file_type,file_size';
 
 /** Realtime chat for battle rooms (public) and group rooms (members only; enforced by RLS). */
-export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = false, canModerate = false, onRemoveUser }: Props) {
+export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = false, canModerate = false }: Props) {
   const { user, ensureAuth, blocked } = useAuth();
   const { t } = useI18n();
   const { toast } = useToast();
+  const { go } = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState('');
   const [upload, setUpload] = useState<UploadState | null>(null);
@@ -65,11 +64,6 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${roomId}` }, async (payload) => {
         const [row] = await hydrate([payload.new as ChatMessage]);
         if (!off) setMessages((m) => (m.some((x) => x.id === row.id) ? m : [...m, row].slice(-200)));
-      })
-      // A message deleted by its author or a moderator disappears for everyone (only its id is sent).
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'chat_messages' }, (payload) => {
-        const gone = (payload.old as { id?: string }).id;
-        if (!off && gone) setMessages((m) => m.filter((x) => x.id !== gone));
       })
       .subscribe();
     return () => {
@@ -134,8 +128,8 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
   const pick = async (file: File | undefined) => {
     if (picker.current) picker.current.value = '';
     if (!file || !ensureAuth() || !user) return;
-    const ready = await compressImage(file); // big photos are shrunk first, so they fit
-    if (ready.size > MAX_UPLOAD_BYTES) return toast(t('err_file_too_big', { n: MAX_UPLOAD_LABEL }), 'error');
+    if (file.size > MAX_UPLOAD_BYTES) return toast(t('err_file_too_big', { n: MAX_UPLOAD_MB }), 'error');
+    const ready = await compressImage(file);
     pending.current = { file: ready, path: `group/${roomId}/${user.id}/${crypto.randomUUID()}.${fileExt(ready.name)}` };
     void runUpload();
   };
@@ -164,19 +158,13 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
         {visible.map((m) => (
           <div key={m.id} className="group/msg break-words">
             <p>
-              {/* In a live battle or stream, profiles open in a new tab so the person keeps watching. */}
-              <ProfileLink to={m.author_id} newTab={roomType !== 'group'} className="font-semibold" title={m.author ? `@${m.author.handle}` : undefined}>
+              <button type="button" className="font-semibold hover:underline" onClick={() => m.author && go('profile', m.author.id)}>
                 {m.author?.display_name ?? '…'}
-              </ProfileLink>{' '}
-              {m.body && <span className="text-zinc-700"><RichText text={m.body} newTab={roomType !== 'group'} /></span>}
-              {(m.author_id === user?.id || canModerate) && (
-                <button type="button" className="ml-2 inline-flex align-middle text-zinc-400 hover:text-red-600" onClick={() => remove(m)} aria-label={t('delete')} title={t('delete')}>
+              </button>{' '}
+              {m.body && <span className="text-zinc-700">{m.body}</span>}
+              {(m.author_id === user?.id || canModerate) && roomType === 'group' && (
+                <button type="button" className="ml-2 inline-flex align-middle text-zinc-400 hover:text-red-600" onClick={() => remove(m)} aria-label={t('delete')}>
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                </button>
-              )}
-              {onRemoveUser && m.author_id !== user?.id && (
-                <button type="button" className="ml-2 inline-flex align-middle text-zinc-400 hover:text-red-600" onClick={() => onRemoveUser(m.author_id)} aria-label={t('remove_from_room')} title={t('remove_from_room')}>
-                  <UserX className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
               )}
             </p>

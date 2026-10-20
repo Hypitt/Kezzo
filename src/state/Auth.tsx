@@ -1,3 +1,4 @@
+import { track } from '../lib/analytics';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { configured, supabase } from '../lib/supabase';
@@ -93,7 +94,11 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
       setTimeout(async () => {
         if (isNewUser) await loadAll(uid);
         setLoading(false);
-        if (isNewUser && event === 'SIGNED_IN') signedInCb.current?.();
+        if (isNewUser && event === 'SIGNED_IN') {
+          const provider = (next?.user.app_metadata as { provider?: string } | undefined)?.provider;
+          track({ kind: 'signin', detail: provider === 'google' ? 'google' : 'email' });
+          signedInCb.current?.();
+        }
       }, 0);
     });
     return () => data.subscription.unsubscribe();
@@ -144,6 +149,7 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
   }, []);
 
   const signOut = useCallback(async () => {
+    track({ kind: 'signout' });
     await supabase.auth.signOut();
   }, []);
 
@@ -162,6 +168,7 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
         terms_accepted_at: new Date().toISOString(),
       });
       if (error) throw error;
+      track({ kind: 'signup', detail: (user.app_metadata as { provider?: string } | undefined)?.provider === 'google' ? 'google' : 'email' });
       await loadAll(user.id);
     },
     [user, loadAll],
@@ -170,10 +177,8 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
   const updateProfile = useCallback(
     async (patch: ProfilePatch) => {
       if (!user) return;
-      // Ask for the saved row back: if the database refused the change silently, nothing comes back.
-      const { data, error } = await supabase.from('profiles').update(patch).eq('id', user.id).select('id');
+      const { error } = await supabase.from('profiles').update(patch).eq('id', user.id);
       if (error) throw error;
-      if (!data?.length) throw Object.assign(new Error('not_saved'), { code: 'not_saved' });
       setProfile((prev) => (prev ? { ...prev, ...patch } : prev));
     },
     [user],
@@ -195,31 +200,12 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
   const deleteAccount = useCallback(async () => {
     if (!user) return;
     // Files this person shared in group chats live in a private bucket.
-    // Work in pages of 500 so nobody's files are left behind, however many they uploaded.
-    // If any removal fails we stop before deleting the account, so the person can simply try again.
-    const PAGE = 500;
-    for (let round = 0; round < 200; round++) {
-      const { data: shared, error } = await supabase
-        .from('chat_messages').select('id,file_path').eq('author_id', user.id).not('file_path', 'is', null)
-        .order('id').range(round * PAGE, round * PAGE + PAGE - 1);
-      if (error) throw error;
-      const paths = (shared ?? []).map((r) => r.file_path as string).filter(Boolean);
-      if (paths.length) {
-        const { error: removeError } = await supabase.storage.from('chat-files').remove(paths);
-        if (removeError) throw removeError;
-      }
-      if ((shared ?? []).length < PAGE) break;
-    }
+    const { data: shared } = await supabase.from('chat_messages').select('file_path').eq('author_id', user.id).not('file_path', 'is', null).limit(1000);
+    const sharedPaths = (shared ?? []).map((r) => r.file_path as string).filter(Boolean);
+    if (sharedPaths.length) await supabase.storage.from('chat-files').remove(sharedPaths);
     for (const bucket of ['avatars', 'media-public', 'media-paid']) {
-      // Removing files shifts the list, so read the first page again until the folder is empty.
-      for (let round = 0; round < 200; round++) {
-        const { data, error } = await supabase.storage.from(bucket).list(user.id, { limit: PAGE });
-        if (error) throw error;
-        if (!data?.length) break;
-        const { error: removeError } = await supabase.storage.from(bucket).remove(data.map((f) => `${user.id}/${f.name}`));
-        if (removeError) throw removeError;
-        if (data.length < PAGE) break;
-      }
+      const { data } = await supabase.storage.from(bucket).list(user.id, { limit: 1000 });
+      if (data?.length) await supabase.storage.from(bucket).remove(data.map((f) => `${user.id}/${f.name}`));
     }
     const { error } = await supabase.rpc('delete_my_account');
     if (error) throw error;

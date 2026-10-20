@@ -11,7 +11,6 @@ import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { LiveRoom } from '../components/LiveRoom';
 import { Avatar, Empty, Loading } from '../components/ui';
-import { RichText } from '../components/ProfileLink';
 
 interface Conversation { otherId: string; last: DirectMessage; unread: number }
 const COLUMNS = 'id,sender_id,recipient_id,body,read_at,created_at';
@@ -51,11 +50,6 @@ export function MessagesView({ otherId }: { otherId?: string }) {
     const channel = supabase
       .channel(`dm:${me}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'direct_messages', filter: `recipient_id=eq.${me}` }, () => {
-        loadConversations();
-        setRefresh((n) => n + 1);
-      })
-      // Messages you send from your phone or another tab show up here too.
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'direct_messages', filter: `sender_id=eq.${me}` }, () => {
         loadConversations();
         setRefresh((n) => n + 1);
       })
@@ -147,7 +141,7 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
     const { data, error } = await supabase.from('direct_messages').insert({ sender_id: me, recipient_id: otherId, body }).select(COLUMNS).single();
     if (error || !data) return toast(t('dm_not_allowed'), 'error');
     setText('');
-    setMessages((m) => (m.some((x) => x.id === (data as DirectMessage).id) ? m : [...m, data as DirectMessage]));
+    setMessages((m) => [...m, data as DirectMessage]);
     onSent();
   };
 
@@ -167,7 +161,7 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
         {messages.length === 0 && <p className="text-sm text-zinc-500">{t('say_hello')}</p>}
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.sender_id === me ? 'justify-end' : ''}`}>
-            <p className={`max-w-[80%] break-words rounded-2xl px-3 py-1.5 text-sm ${m.sender_id === me ? 'bg-zinc-900 text-white' : 'bg-zinc-100'}`}><RichText text={m.body} linkClassName="font-medium underline" /></p>
+            <p className={`max-w-[80%] break-words rounded-2xl px-3 py-1.5 text-sm ${m.sender_id === me ? 'bg-zinc-900 text-white' : 'bg-zinc-100'}`}>{m.body}</p>
           </div>
         ))}
       </div>

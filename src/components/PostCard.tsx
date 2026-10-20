@@ -11,7 +11,6 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { Avatar, Spinner } from './ui';
-import { ProfileLink, RichText } from './ProfileLink';
 import { FeedVideo } from './FeedVideo';
 import { ReportButton } from './ReportButton';
 
@@ -33,7 +32,6 @@ export function PostCard({ post, onChange, onDelete }: Props) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(post.title);
   const [body, setBody] = useState(post.body);
-  const [saving, setSaving] = useState(false);
   const mine = user?.id === post.author_id;
   const locked = post.download_price > 0 && !post.unlocked && !mine;
 
@@ -75,26 +73,12 @@ export function PostCard({ post, onChange, onDelete }: Props) {
     toast(t('unlocked_toast'));
   };
 
-  // Always start editing from what the post says now (it may have changed since the card first appeared).
-  const startEdit = () => {
-    setTitle(post.title);
-    setBody(post.body);
-    setEditing(true);
-  };
-
   const saveEdit = async (e: FormEvent) => {
     e.preventDefault();
-    const nextTitle = title.trim();
-    const nextBody = body.trim();
-    if (!nextTitle) return toast(t('err_title_required'), 'error');
-    if (!isSafe(nextTitle) || !isSafe(nextBody)) return toast(t('blocked_content'), 'error');
-    setSaving(true);
-    // Ask for the saved row back: if the database refused the change silently, nothing comes back.
-    const { data, error } = await supabase.from('posts').update({ title: nextTitle, body: nextBody }).eq('id', post.id).select('id');
-    setSaving(false);
-    if (error) return toast(explain(error, t), 'error');
-    if (!data?.length) return toast(t('err_not_saved'), 'error');
-    onChange({ ...post, title: nextTitle, body: nextBody });
+    if (!isSafe(title) || !isSafe(body)) return toast(t('blocked_content'), 'error');
+    const { error } = await supabase.from('posts').update({ title: title.trim(), body: body.trim() }).eq('id', post.id);
+    if (error) return toast(t('error_generic'), 'error');
+    onChange({ ...post, title: title.trim(), body: body.trim() });
     setEditing(false);
   };
 
@@ -128,20 +112,19 @@ export function PostCard({ post, onChange, onDelete }: Props) {
           <input className="input" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} required aria-label={t('title')} />
           <textarea className="input" rows={3} value={body} maxLength={2000} onChange={(e) => setBody(e.target.value)} aria-label={t('body')} />
           <div className="flex gap-2">
-            <button className="btn btn-primary btn-sm" disabled={saving}>{saving && <Spinner />}{t('save')}</button>
+            <button className="btn btn-primary btn-sm">{t('save')}</button>
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(false)}>{t('cancel')}</button>
           </div>
         </form>
       ) : (
         <div>
           <h3 className="text-base font-semibold">{post.title}</h3>
-          {post.body && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-zinc-700"><RichText text={post.body} /></p>}
+          {post.body && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-zinc-700">{post.body}</p>}
         </div>
       )}
 
       {post.kind !== 'text' && (
-        // Off-screen photos and players are skipped by the browser until they come back into view, which saves memory on long feeds.
-        <div className="[content-visibility:auto] [contain-intrinsic-size:auto_320px]">
+        <div>
           {locked ? (
             <div className="flex flex-col items-center gap-3 rounded-xl bg-zinc-100 px-4 py-8 text-center">
               <Lock className="h-6 w-6 text-zinc-500" aria-hidden="true" />
@@ -178,7 +161,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
         <span className="flex-1" />
         {mine ? (
           <>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={startEdit} disabled={editing}><Pencil className="h-3.5 w-3.5" aria-hidden="true" />{t('edit')}</button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}><Pencil className="h-3.5 w-3.5" aria-hidden="true" />{t('edit')}</button>
             <button type="button" className="btn btn-danger btn-sm" onClick={remove}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" />{t('delete')}</button>
           </>
         ) : (
@@ -239,9 +222,9 @@ function Comments({ post, onCount }: { post: Post; onCount: (n: number) => void 
         <ul className="space-y-2">
           {rows.map((c) => (
             <li key={c.id} className="flex items-start gap-2 text-sm">
-              {c.author && <ProfileLink to={c.author_id} className="shrink-0"><Avatar p={c.author} size={24} /></ProfileLink>}
+              {c.author && <Avatar p={c.author} size={24} />}
               <p className="min-w-0 flex-1 break-words">
-                <ProfileLink to={c.author_id} className="font-semibold" title={c.author ? `@${c.author.handle}` : undefined}>{c.author?.display_name ?? '…'}</ProfileLink> <RichText text={c.body} />
+                <span className="font-semibold">{c.author?.display_name ?? '…'}</span> {c.body}
               </p>
               {(c.author_id === user?.id || post.author_id === user?.id) && (
                 <button type="button" className="text-zinc-400 hover:text-red-600" onClick={() => remove(c.id)} aria-label={t('delete')}>

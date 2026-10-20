@@ -8,7 +8,7 @@ import {
   HIGHLIGHT_SECONDS, clipSupported, deleteRecording, downloadBlob, fileExtension, listRecordings, makeClip, onRecordingsChanged,
   openForClip, recordingBlob, suggestStart, type RecordingInfo,
 } from '../../lib/recorder';
-import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL, startUpload, type UploadFailure, type UploadHandle } from '../../lib/upload';
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB, startUpload, type UploadFailure, type UploadHandle } from '../../lib/upload';
 import type { Battle } from '../../lib/types';
 import { useAuth } from '../../state/Auth';
 import { useI18n } from '../../state/I18n';
@@ -219,7 +219,7 @@ function HighlightSection({ battle, recordings, onPosted }: { battle: Battle; re
 
   const post = async (blob: Blob, seconds: number) => {
     if (!user) return;
-    if (blob.size > MAX_UPLOAD_BYTES) return setError(t('err_file_too_big', { n: MAX_UPLOAD_LABEL }));
+    if (blob.size > MAX_UPLOAD_BYTES) return setError(t('err_file_too_big', { n: MAX_UPLOAD_MB }));
     const ext = fileExtension(blob.type || 'video/webm');
     const file = new File([blob], `highlight.${ext}`, { type: ext === 'mp4' ? 'video/mp4' : 'video/webm' });
     const path = `${user.id}/${crypto.randomUUID()}.${ext}`;

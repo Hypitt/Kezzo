@@ -5,8 +5,6 @@ import { explain } from '../lib/errors';
 import { loadPosts } from '../lib/data';
 import { fileExt, isActiveStatus } from '../lib/format';
 import { isSafe } from '../lib/moderation';
-import { compressImage } from '../lib/media';
-import { contentTypeOf } from '../lib/upload';
 import type { LedgerEntry, Post, Profile } from '../lib/types';
 import type { Key } from '../lib/i18n';
 import { useAuth } from '../state/Auth';
@@ -19,31 +17,13 @@ import { SignInCard } from '../components/AuthScreens';
 import { StatusViewer } from '../components/StatusViewer';
 import { useLegal } from '../state/Legal';
 import { AccountFooter } from '../components/AccountFooter';
-import { RichText } from '../components/ProfileLink';
-import { InstallApp } from '../components/InstallApp';
 import { Avatar, Empty, Loading, LoadMore, Spinner } from '../components/ui';
 
 const PAGE = 8;
 
 export function ProfileView({ id }: { id?: string }) {
   const { user, profile: mine } = useAuth();
-  const { t } = useI18n();
-  // "#/profile/@handle" (from an @mention) is looked up by handle.
-  const byHandle = id?.startsWith('@') ? id.slice(1).toLowerCase() : null;
-  const [found, setFound] = useState<{ handle: string; id: string | null } | null>(null);
-  useEffect(() => {
-    if (!byHandle) return;
-    let off = false;
-    supabase.from('profiles').select('id').eq('handle', byHandle).maybeSingle().then(({ data }) => {
-      if (!off) setFound({ handle: byHandle, id: (data?.id as string | undefined) ?? null });
-    });
-    return () => { off = true; };
-  }, [byHandle]);
-  if (byHandle) {
-    if (!found || found.handle !== byHandle) return <Loading />;
-    if (!found.id) return <Empty text={t('profile_not_found')} />;
-  }
-  const targetId = byHandle ? (found?.id ?? undefined) : id ?? user?.id;
+  const targetId = id ?? user?.id;
   if (!targetId) return <SignInCard />;
   const own = Boolean(user && targetId === user.id);
   return <ProfileBody key={targetId} targetId={targetId} own={own} mine={mine} />;
@@ -154,7 +134,7 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
               {profile.status_text && <p className="text-sm text-accent">{profile.status_text}</p>}
             </div>
           )}
-          {profile.bio && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-zinc-700"><RichText text={profile.bio} /></p>}
+          {profile.bio && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-zinc-700">{profile.bio}</p>}
           <p className="mt-2 text-xs text-zinc-500">{t('followers_n', { n: followers })} · {t('following_n', { n: followingCount })}</p>
         </div>
         {!own && (
@@ -216,50 +196,31 @@ function OwnSettings({ profile }: { profile: Profile }) {
 
   const save = async (e: FormEvent) => {
     e.preventDefault();
-    if (!displayName.trim()) return toast(t('err_name_required'), 'error');
     if (!isSafe(displayName) || !isSafe(bio)) return toast(t('blocked_content'), 'error');
     setSaving(true);
     try {
       await updateProfile({ display_name: displayName.trim(), bio: bio.trim(), generation, dm_policy: dmPolicy });
       toast(t('profile_saved'));
       setEditing(false);
-    } catch (err) {
-      toast((err as { code?: string }).code === 'not_saved' ? t('err_not_saved') : explain(err, t), 'error');
+    } catch {
+      toast(t('error_generic'), 'error');
     } finally {
       setSaving(false);
     }
   };
 
-  // Always start editing from the saved profile.
-  const startEdit = () => {
-    setDisplayName(profile.display_name);
-    setBio(profile.bio);
-    setGeneration(profile.generation);
-    setDmPolicy(profile.dm_policy);
-    setEditing(true);
-  };
-
   const uploadAvatar = async (file: File | undefined) => {
     if (!file || !user) return;
+    if (file.size > 2 * 1024 * 1024) return toast(t('err_avatar_big'), 'error');
     setUploading(true);
-    // Any phone photo works: it is shrunk to 512 px before upload (Instagram shows profile photos at 320 px).
-    // Profile photos appear many times on every page, so keeping them small saves a lot of memory on phones.
-    const ready = await compressImage(file, 512, 0.88);
-    if (ready.size > 10 * 1024 * 1024) {
-      setUploading(false);
-      return toast(t('err_avatar_big'), 'error');
-    }
-    const previous = profile.avatar_url?.split('/object/public/avatars/')[1];
-    const path = `${user.id}/avatar-${Date.now()}.${fileExt(ready.name)}`;
-    const { error } = await supabase.storage.from('avatars').upload(path, ready, { contentType: contentTypeOf(ready), upsert: false });
+    const path = `${user.id}/avatar-${Date.now()}.${fileExt(file.name)}`;
+    const { error } = await supabase.storage.from('avatars').upload(path, file, { contentType: file.type, upsert: false });
     if (error) {
       setUploading(false);
       return toast(t('err_upload'), 'error');
     }
     try {
       await updateProfile({ avatar_url: supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl });
-      // Remove the old picture so it does not stay online (only files in your own folder can be removed).
-      if (previous) await supabase.storage.from('avatars').remove([decodeURIComponent(previous.split('?')[0])]);
     } catch {
       toast(t('error_generic'), 'error');
     }
@@ -298,12 +259,12 @@ function OwnSettings({ profile }: { profile: Profile }) {
       <section className="card space-y-4" aria-label={t('settings')}>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">{t('settings')}</h2>
-          {!editing && <button type="button" className="btn btn-ghost btn-sm" onClick={startEdit}><Pencil className="h-3.5 w-3.5" aria-hidden="true" />{t('edit_profile')}</button>}
+          {!editing && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}><Pencil className="h-3.5 w-3.5" aria-hidden="true" />{t('edit_profile')}</button>}
         </div>
         <label className="btn btn-ghost btn-sm w-fit cursor-pointer">
           {uploading && <Spinner />}
           {t('change_avatar')}
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" disabled={uploading} onChange={(e) => { void uploadAvatar(e.target.files?.[0]); e.target.value = ''; }} />
+          <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => uploadAvatar(e.target.files?.[0])} />
         </label>
         {editing && (
           <form onSubmit={save} className="space-y-3">
@@ -343,7 +304,6 @@ function OwnSettings({ profile }: { profile: Profile }) {
         <div className="flex flex-wrap items-center gap-4 border-t border-zinc-100 pt-4 text-xs">
           <button type="button" className="text-zinc-500 underline" onClick={() => openLegal('terms')}>{t('terms')}</button>
           <button type="button" className="text-zinc-500 underline" onClick={() => openLegal('privacy')}>{t('privacy')}</button>
-          <InstallApp className="text-zinc-500" />
         </div>
 
       </section>

@@ -1,33 +1,13 @@
 import { supabase } from './supabase';
 
 /**
- * Biggest file the app accepts, in MB. Default 4096 (4 GB), like Instagram videos.
- * The real ceiling is your Supabase plan: Free = 50 MB per file (cannot be raised); Pro = set
- * Storage > Settings > "Global file size limit" to 4 GB. Staying on Free? Set VITE_MAX_UPLOAD_MB=50 in Vercel
- * so people are told the real limit before they upload.
+ * Biggest file the app accepts, in MB. The real ceiling is your Supabase plan:
+ *   Free plan = 50 MB per file. Pro plan = raise "Upload file size limit" in Supabase (Storage > Settings),
+ *   then set VITE_MAX_UPLOAD_MB (for example 2000) in Vercel and redeploy.
  */
 const configured = Number(import.meta.env.VITE_MAX_UPLOAD_MB);
-export const MAX_UPLOAD_MB = Number.isFinite(configured) && configured > 0 ? Math.min(configured, 5000) : 4096;
+export const MAX_UPLOAD_MB = Number.isFinite(configured) && configured > 0 ? Math.min(configured, 5000) : 50;
 export const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
-/** "4 GB" or "50 MB", for messages. */
-export const MAX_UPLOAD_LABEL = MAX_UPLOAD_MB >= 1024 && MAX_UPLOAD_MB % 1024 === 0 ? `${MAX_UPLOAD_MB / 1024} GB` : `${MAX_UPLOAD_MB} MB`;
-
-const TYPES_BY_EXT: Record<string, string> = {
-  jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif',
-  mp4: 'video/mp4', m4v: 'video/x-m4v', mov: 'video/quicktime', webm: 'video/webm', '3gp': 'video/3gpp',
-  mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', wav: 'audio/wav', ogg: 'audio/ogg', oga: 'audio/ogg',
-  pdf: 'application/pdf', zip: 'application/zip', txt: 'text/plain', csv: 'text/csv',
-};
-
-/**
- * Some phones and browsers hand over files with no type at all. Storage would then refuse them,
- * so guess the type from the file name.
- */
-export function contentTypeOf(file: File): string {
-  if (file.type) return file.type;
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-  return TYPES_BY_EXT[ext] ?? 'application/octet-stream';
-}
 
 /** Files at or below this size use a single quick request; bigger ones are sent in resumable chunks. */
 const SIMPLE_LIMIT = 6 * 1024 * 1024;
@@ -74,7 +54,7 @@ export function startUpload({ bucket, path, file, onProgress }: UploadOptions): 
   const done = (async () => {
     if (file.size <= SIMPLE_LIMIT) {
       onProgress?.(0, file.size);
-      const { error } = await supabase.storage.from(bucket).upload(path, file, { contentType: contentTypeOf(file), upsert: false });
+      const { error } = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type || undefined, upsert: false });
       if (cancelled) throw new UploadError('cancelled');
       if (error) {
         const raw = (error as { statusCode?: string | number }).statusCode;
@@ -101,7 +81,7 @@ export function startUpload({ bucket, path, file, onProgress }: UploadOptions): 
         chunkSize: CHUNK,
         // Tie "resume" to this exact storage path, so a retry can never continue into a different file name.
         fingerprint: async (f: File) => ['kezzo', bucket, path, f.name, f.size, f.lastModified].join('|'),
-        metadata: { bucketName: bucket, objectName: path, contentType: contentTypeOf(file), cacheControl: '3600' },
+        metadata: { bucketName: bucket, objectName: path, contentType: file.type || 'application/octet-stream', cacheControl: '3600' },
         // The sign-in token is refreshed before every request, so a long upload never fails with "expired".
         onBeforeRequest: async (req) => {
           req.setHeader('Authorization', `Bearer ${await freshToken()}`);

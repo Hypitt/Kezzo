@@ -16,6 +16,7 @@ import livekitKick from '../api/livekit-kick';
 import livekitMute from '../api/livekit-mute';
 import livekitLive from '../api/livekit-live';
 import aiJudge from '../api/ai-judge';
+import track from '../api/track';
 
 type ApiHandler = (req: never, res: never) => unknown;
 const routes: Record<string, ApiHandler> = {
@@ -25,6 +26,7 @@ const routes: Record<string, ApiHandler> = {
   '/api/livekit-mute': livekitMute,
   '/api/livekit-live': livekitLive,
   '/api/ai-judge': aiJudge,
+  '/api/track': track,
 };
 
 async function main() {

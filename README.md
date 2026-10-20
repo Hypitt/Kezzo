@@ -8,7 +8,7 @@ Kezzo is a social platform where creators compete in **live battles** (roasts, d
 
 - **Search & Feeds** is the default landing page (also right after login or sign-up). Search everyone's posts, battles and people; filter by *Everyone* or *Following*.
 - **Sign in or sign up with Google or with email + password** (Supabase Auth), then a short onboarding (handle, display name, 16+ confirmation). Terms and Privacy open in a pop-up from every sign-in screen.
-- **Posts**: text, photo, audio and video (video up to 60 minutes and 4 GB, like Instagram; photos and profile pictures are shrunk in the browser so any phone photo fits). Large files upload in resumable chunks with a progress bar, Cancel and Retry; photos are shrunk in the browser first. The file-size limit follows your Supabase plan (see *Upload limits* below). Likes, comments, edit, delete. Optional price in coins: paid files are stored in a private bucket and only owner and buyers can open them.
+- **Posts**: text, photo, audio and video (video up to 30 minutes). Large files upload in resumable chunks with a progress bar, Cancel and Retry; photos are shrunk in the browser first. The file-size limit follows your Supabase plan (see *Upload limits* below). Likes, comments, edit, delete. Optional price in coins: paid files are stored in a private bucket and only owner and buyers can open them.
 - **Live battles**: 2 to 5 competitors in **one shared video frame** that adapts to the number of people (video or audio), through **LiveKit**. Each competitor has a number and colour on their tile, score card and vote buttons.
   - Voting: **free like** (1 point, once per competitor per round), **2-coin vote** (2 points), **5-coin vote** (5 points).
   - Up to **3 public judges** picked by the host: each scores every competitor 0 to 10 with a comment (judges cannot compete or vote).
@@ -57,6 +57,7 @@ scripts/dev-server.ts  Local dev server (Express + Vite) and self-hosted product
 supabase/schema.sql  Whole database: tables, RLS, functions, storage buckets, realtime
 supabase/update-2.sql  Upgrade for an existing database: groups, judges, weights, likes, status pictures
 supabase/update-3.sql  Go Live streams (solo and group), livestream chat, battle highlight clip
+supabase/update-4.sql  Admin statistics: admins table, anonymous usage events, admin_stats()
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers
@@ -88,7 +89,7 @@ cp .env.example .env.local
 ### 2. Supabase
 
 1. Create a project. Copy **Project URL**, **anon key** and **service_role key** from *Project Settings → API*.
-2. Open *SQL Editor → New query*, paste the whole of `supabase/schema.sql` and run it. Then run `supabase/update-2.sql` and `supabase/update-3.sql` the same way. All three are safe to run again. Run `update-3.sql` before deploying the matching code: battle pages ask for its new `highlight_post_id` column.
+2. Open *SQL Editor → New query*, paste the whole of `supabase/schema.sql` and run it. Then run `supabase/update-2.sql`, `supabase/update-3.sql` and `supabase/update-4.sql` the same way. All are safe to run again. Run `update-3.sql` before deploying the matching code: battle pages ask for its new `highlight_post_id` column.
 3. *Authentication → Providers → Google*: enable it and paste your Google client ID and secret (step 3 below).
 4. *Authentication → URL Configuration*:
    - **Site URL**: your production URL (e.g. `https://kezzo.vercel.app`)
@@ -109,10 +110,10 @@ cp .env.example .env.local
 
 ### 5. Upload limits (video size)
 
-The app allows videos up to **60 minutes and 4 GB** (Instagram's feed-video limits), after you run `supabase/update-5.sql`. Large files are sent with resumable uploads. Photos and profile pictures are shrunk in the browser first, so they fit on any plan. The real ceiling for videos is your **Supabase plan**:
+The app itself no longer fixes 50 MB. Large files are sent with resumable uploads, and the buckets allow up to 5 GB. The real limit is set by your **Supabase plan**:
 
-- **Free plan**: Supabase refuses any single file over **50 MB**, and this cannot be raised. Set `VITE_MAX_UPLOAD_MB=50` in Vercel so people get a clear message instead of a failed upload.
-- **Pro plan or higher**: in Supabase open *Storage → Settings* and set **Global file size limit** to **4 GB**. Nothing else to set (the app's default is already 4 GB).
+- **Free plan**: Supabase refuses any single file over **50 MB**. Keep `VITE_MAX_UPLOAD_MB` at 50 (the default) so people get a clear message instead of a failed upload.
+- **Pro plan or higher**: in Supabase open *Storage → Settings*, raise **Upload file size limit** (for example 2 GB), then set `VITE_MAX_UPLOAD_MB=2000` in Vercel and redeploy.
 
 ### 6. Environment variables
 
@@ -126,7 +127,7 @@ Fill in `.env.local` (see `.env.example`):
 | `SUPABASE_SERVICE_ROLE_KEY` | server | **secret**, bypasses RLS, never expose |
 | `LIVEKIT_URL` | server | `wss://...` |
 | `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` | server | **secret** |
-| `VITE_MAX_UPLOAD_MB` | browser | optional, biggest upload in MB (default 4096 = 4 GB; set 50 on the Supabase Free plan) |
+| `VITE_MAX_UPLOAD_MB` | browser | optional, biggest upload in MB (default 50, see below) |
 | `GEMINI_API_KEY` | server | optional |
 
 ### 7. Run locally
@@ -195,6 +196,14 @@ MIT. See `LICENSE`.
 - `vercel.json` caches hashed files in `/assets` for a year and icons for a week; `index.html` is always revalidated.
 - Feed videos and audio use `preload="none"`, images are lazy and decoded off the main thread, photos are shrunk in the browser before upload, and the Google Fonts stylesheet no longer blocks the first paint.
 - The Search page requests the first page of results once (it used to request it twice for signed-in users) and loads the "people you follow" list only on the Following tab.
+
+## Admin statistics
+
+`#/admin` shows visitors, page views, visits, sign-ins, new accounts, active members, bounce rate, pages per visit, busy hours, top pages, referrers, countries, devices, browsers, languages, platform activity (posts, battles, votes, streams, messages), page load time and JavaScript errors, for the last 7, 30 or 90 days with a comparison to the period before.
+
+- **Who can open it:** only accounts listed in the `admins` table. Nobody can read or change that table from the app. After running `update-4.sql`, add yourself in the SQL Editor: `insert into public.admins (user_id) select id from auth.users where email = 'you@example.com';`. An **Admin** button then appears next to Sign out on your own profile page.
+- **How visits are counted:** the browser sends small events to `api/track.ts`, which stores them with the service-role key (the table has no public access). Stored: a random visitor id, page pattern such as `/battles/:id`, referring site, country (from the hosting platform header), device, browser, language, load time, sign-in events, a few error messages. Not stored: IP address, full user agent, real ids in addresses. Nothing is sent when the browser has Do Not Track or Global Privacy Control on. Events older than 13 months are deleted automatically.
+- **Numbers are approximate:** one person on two devices counts as two visitors, and ad blockers can hide visits. Visitors "active in the last 30 minutes" are page views in that window.
 
 ## Go Live, recording and highlights
 
