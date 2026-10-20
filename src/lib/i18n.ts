@@ -179,6 +179,10 @@ export const en = {
   err_host_cannot_judge: 'The host cannot be a judge.', err_invalid_score: 'Scores go from 0 to 10.', err_not_judge: 'Only judges can score.',
   err_weights_locked: 'Voting weights can only change before the battle starts.', err_invalid_weight: 'Choose a percentage from 0 to 100.',
   err_invalid_timer: 'Choose a timer between 10 seconds and 1 hour.', err_host_only: 'You are hosting only, so you cannot join the stage.',
+  // notifications
+  notif_title: 'Notifications', notif_empty: 'Nothing new yet. Messages, likes, new followers and live sessions show up here.', notif_mark_all: 'Mark all as read',
+  notif_unread: '{n} unread', notif_message: '{name} sent you a message', notif_messages: '{name} sent you {n} messages',
+  notif_like: '{name} liked your post', notif_follow: '{name} started following you', notif_live: '{name} is live now', notif_battle: '{name} started a live battle',
   // go live
   nav_live: 'Go Live', go_live: 'Go Live', live_sub: 'Stream on your own or bring guests on stage. No battle needed.',
   live_title_label: 'Title', live_title_ph: 'What are you streaming?', live_kind_label: 'Type', live_kind_solo: 'Solo', live_kind_group: 'Group',
@@ -375,6 +379,10 @@ export const fr: Record<Key, string> = {
   err_host_cannot_judge: 'L’hôte ne peut pas être juge.', err_invalid_score: 'Les notes vont de 0 à 10.', err_not_judge: 'Seuls les juges peuvent noter.',
   err_weights_locked: 'La pondération ne peut changer qu’avant le début du battle.', err_invalid_weight: 'Choisissez un pourcentage de 0 à 100.',
   err_invalid_timer: 'Choisissez un chrono entre 10 secondes et 1 heure.', err_host_only: 'Vous animez seulement, vous ne pouvez donc pas monter sur scène.',
+  // notifications
+  notif_title: 'Notifications', notif_empty: 'Rien de nouveau pour l’instant. Les messages, J’aime, nouveaux abonnés et directs apparaissent ici.', notif_mark_all: 'Tout marquer comme lu',
+  notif_unread: '{n} non lues', notif_message: '{name} vous a envoyé un message', notif_messages: '{name} vous a envoyé {n} messages',
+  notif_like: '{name} a aimé votre publication', notif_follow: '{name} s’est abonné à vous', notif_live: '{name} est en direct', notif_battle: '{name} a lancé un battle en direct',
   // go live
   nav_live: 'En direct', go_live: 'Passer en direct', live_sub: 'Diffusez seul ou invitez des personnes sur scène. Aucun battle nécessaire.',
   live_title_label: 'Titre', live_title_ph: 'Que diffusez-vous?', live_kind_label: 'Type', live_kind_solo: 'Solo', live_kind_group: 'Groupe',

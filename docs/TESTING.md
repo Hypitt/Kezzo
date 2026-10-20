@@ -62,3 +62,10 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 43. Sign out and sign in again: Sign-ins goes up by one and the method (Google or email) is shown.
 44. Turn on Do Not Track (or Global Privacy Control) in the browser, browse around: the counts do not change.
 45. Switch 7 / 30 / 90 days and the Table view; hover the charts to see the tooltip. Check the page on a phone width.
+
+## Notifications
+46. Run `update-5.sql`. With accounts A and B: B likes A's post. A sees a pop-up and the bell shows 1. Open the bell: "B liked your post"; click it and the counter drops.
+47. B follows A, then sends A three messages. A gets one "B sent you 3 messages" notification (not three). A opens the conversation: that notification disappears.
+48. A follows B. B starts a Go Live stream (and later a battle that goes live): A gets "B is live now" and clicking opens it. A person who blocked B gets nothing.
+49. Liking your own post, or unlike/like again, creates no extra notification. "Mark all as read" clears the counter. On a phone width the list opens full width under the top bar.
+

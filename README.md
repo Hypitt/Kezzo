@@ -58,6 +58,7 @@ supabase/schema.sql  Whole database: tables, RLS, functions, storage buckets, re
 supabase/update-2.sql  Upgrade for an existing database: groups, judges, weights, likes, status pictures
 supabase/update-3.sql  Go Live streams (solo and group), livestream chat, battle highlight clip
 supabase/update-4.sql  Admin statistics: admins table, anonymous usage events, admin_stats()
+supabase/update-5.sql  In-app notifications: messages, likes, new followers, live sessions
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers
@@ -89,7 +90,7 @@ cp .env.example .env.local
 ### 2. Supabase
 
 1. Create a project. Copy **Project URL**, **anon key** and **service_role key** from *Project Settings → API*.
-2. Open *SQL Editor → New query*, paste the whole of `supabase/schema.sql` and run it. Then run `supabase/update-2.sql`, `supabase/update-3.sql` and `supabase/update-4.sql` the same way. All are safe to run again. Run `update-3.sql` before deploying the matching code: battle pages ask for its new `highlight_post_id` column.
+2. Open *SQL Editor → New query*, paste the whole of `supabase/schema.sql` and run it. Then run `supabase/update-2.sql`, `supabase/update-3.sql`, `supabase/update-4.sql` and `supabase/update-5.sql` the same way. All are safe to run again. Run `update-3.sql` before deploying the matching code: battle pages ask for its new `highlight_post_id` column.
 3. *Authentication → Providers → Google*: enable it and paste your Google client ID and secret (step 3 below).
 4. *Authentication → URL Configuration*:
    - **Site URL**: your production URL (e.g. `https://kezzo.vercel.app`)
@@ -196,6 +197,10 @@ MIT. See `LICENSE`.
 - `vercel.json` caches hashed files in `/assets` for a year and icons for a week; `index.html` is always revalidated.
 - Feed videos and audio use `preload="none"`, images are lazy and decoded off the main thread, photos are shrunk in the browser before upload, and the Google Fonts stylesheet no longer blocks the first paint.
 - The Search page requests the first page of results once (it used to request it twice for signed-in users) and loads the "people you follow" list only on the Following tab.
+
+## Notifications
+
+A bell in the top bar (signed-in only) shows a red counter and a list of: new messages (several from one person are grouped with a counter), likes on your posts, new followers, and people you follow going live (Go Live streams and battles). New ones also appear as a short pop-up while the app is open. Clicking one opens the relevant page and marks it read; opening a conversation clears its message notification. They are created by database triggers (`update-5.sql`), never by the browser, skip people who blocked each other, never contain message text, and are cleared after about 60 days. Not included: push notifications when the app is closed (this is in-app only).
 
 ## Admin statistics
 

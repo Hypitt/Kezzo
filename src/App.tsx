@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './state/Auth';
 import { I18nProvider, useI18n } from './state/I18n';
 import { RouterProvider, useRouter } from './state/Router';
 import { LegalProvider } from './state/Legal';
+import { NotificationsProvider } from './state/Notifications';
 import { ToastProvider } from './state/Toast';
 import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScreens';
 import { Navbar } from './components/Navbar';
@@ -107,7 +108,9 @@ function Providers() {
   const { go } = useRouter();
   return (
     <AuthProvider onSignedIn={() => go('search')}>
-      <Shell />
+      <NotificationsProvider>
+        <Shell />
+      </NotificationsProvider>
     </AuthProvider>
   );
 }

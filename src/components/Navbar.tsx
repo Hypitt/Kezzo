@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import { explain } from '../lib/errors';
 import type { Key } from '../lib/i18n';
 import { Avatar } from './ui';
+import { NotificationBell } from './NotificationBell';
 
 const NAV: { tab: Exclude<Tab, 'legal'>; icon: LucideIcon; label: Key }[] = [
   { tab: 'home', icon: Home, label: 'nav_home' },
@@ -75,6 +76,7 @@ export function Navbar() {
                 )}
               </div>
             )}
+            {user && profile && <NotificationBell />}
             <button type="button" className="btn btn-sm border border-zinc-600 bg-transparent text-white hover:bg-zinc-800" onClick={switchLang} aria-label={t('language')}>
               <Languages className="h-3.5 w-3.5" aria-hidden="true" />
               {lang.toUpperCase()}
