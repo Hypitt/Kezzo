@@ -38,6 +38,7 @@ const COPY = {
     feedNow: 'Available now', feedNowItems: ['Video, audio, photo and text posts', 'Likes, comments and follows', 'Groups, chats and calls', '24-hour status updates'],
     feedSoon: 'Coming soon', feedSoonItems: ['Polls', 'Audience questions', 'Challenges', 'Creator prompts'],
     groupsKicker: 'Communities', groupsTitle: 'Groups you can join', groupsText: 'Open groups from the Kezzo community. Sign up or log in to join.',
+    example: 'Example', exGroups: [['Podcast & talk', 'Voices, interviews and live Q&A'], ['Creators corner', 'Share your setup and tips'], ['Friends & fun', 'Challenges with your crew']],
     groupMembers: (n: number) => (n === 1 ? '1 member' : `${n} members`), groupJoin: 'Sign up to join',
     cats: { dance: 'Dance crew', roasting: 'Roasting', singing: 'Singing', debate: 'Debate', comedy: 'Comedy', other: 'Community' } as Record<string, string>,
     members: 'Kezzo is for members. Sign up or log in to see the feed, videos, live streams, battles and profiles.',
@@ -69,6 +70,7 @@ const COPY = {
     feedNow: 'Disponible maintenant', feedNowItems: ['Publications vidéo, audio, photo et texte', 'J’aime, commentaires et abonnements', 'Groupes, messages et appels', 'Statuts de 24 heures'],
     feedSoon: 'Bientôt', feedSoonItems: ['Sondages', 'Questions du public', 'Défis', 'Suggestions pour créateurs'],
     groupsKicker: 'Communautés', groupsTitle: 'Des groupes à rejoindre', groupsText: 'Des groupes ouverts de la communauté Kezzo. Inscrivez-vous ou connectez-vous pour les rejoindre.',
+    example: 'Exemple', exGroups: [['Podcast et discussions', 'Voix, entrevues et questions en direct'], ['Coin des créateurs', 'Partagez votre installation et vos astuces'], ['Amis et plaisir', 'Des défis entre amis']],
     groupMembers: (n: number) => (n === 1 ? '1 membre' : `${n} membres`), groupJoin: 'S’inscrire pour rejoindre',
     cats: { dance: 'Équipe de danse', roasting: 'Roasting', singing: 'Chant', debate: 'Débat', comedy: 'Humour', other: 'Communauté' } as Record<string, string>,
     members: 'Kezzo est réservé aux membres. Inscrivez-vous ou connectez-vous pour voir le fil, les vidéos, les directs, les battles et les profils.',
@@ -164,10 +166,11 @@ function HeroVideo() {
   }, []);
   return (
     <div className="absolute inset-0" aria-hidden="true">
+      <img src="/landing/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" fetchPriority="high" decoding="async" />
       {play && (
         <video
           className={`h-full w-full object-cover transition-opacity duration-700 ${ready ? 'opacity-100' : 'opacity-0'}`}
-          autoPlay muted loop playsInline preload="metadata" poster="/landing/hero-poster.jpg"
+          autoPlay muted loop playsInline preload="metadata" poster="/landing/hero.jpg"
           onCanPlay={() => setReady(true)} onError={() => setReady(false)}
         >
           <source src="/landing/hero.mp4" type="video/mp4" />
@@ -183,7 +186,7 @@ function BattleMock() {
   const c = COPY[lang];
   const tile = (name: string, pct: number, bar: string, n: number) => (
     <div className="relative flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-xl bg-stone-200 p-3">
-      <Cover photo={`/landing/battle-${n + 1}.jpg`} />
+      <Cover photo={`/landing/tile-${n + 1}.jpg`} />
       <span className="relative self-end rounded-md bg-white px-1.5 py-0.5 text-xs font-semibold tabular-nums text-zinc-900 shadow-sm">{pct}%</span>
       <div className="relative rounded-lg bg-white/90 p-2">
         <p className="text-sm font-semibold text-zinc-900">{name}</p>
@@ -294,32 +297,42 @@ export function Landing({ invite }: { invite?: string }) {
         </ul>
       </section>
 
-      {/* Featured groups: only shown when a group admin chose to feature one */}
-      {groups.length > 0 && (
-        <section className="bg-white px-4 py-12 text-zinc-900">
-          <div className="mx-auto max-w-6xl">
-            <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.groupsKicker}</p>
-            <h2 className="mt-2 text-3xl font-bold">{c.groupsTitle}</h2>
-            <p className="mt-2 text-zinc-600">{c.groupsText}</p>
-            <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {groups.map((g) => (
-                <li key={g.id} className="flex flex-col rounded-2xl border border-stone-200 bg-white p-5">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-zinc-900"><Users className="h-5 w-5" aria-hidden="true" /></span>
-                  <h3 className="mt-4 text-lg font-semibold">{g.name}</h3>
-                  <p className="mt-0.5 text-xs text-zinc-500">{c.cats[g.category] ?? c.cats.other} · {c.groupMembers(g.member_count)}</p>
-                  {g.tagline && <p className="mt-2 text-sm leading-relaxed text-zinc-600">{g.tagline}</p>}
-                  <button type="button" className={`${outline} btn-sm mt-4 self-start`} onClick={() => joinGroup(g.id)}>
-                    <UserPlus className="h-3.5 w-3.5" aria-hidden="true" />{c.groupJoin}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      )}
+      {/* Groups: real featured groups when a group admin chose to feature one, otherwise clearly labelled examples */}
+      <section className="bg-white px-4 py-10 text-zinc-900">
+        <div className="mx-auto max-w-6xl">
+          <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.groupsKicker}</p>
+          <h2 className="mt-1 text-2xl font-bold sm:text-3xl">{c.groupsTitle}</h2>
+          <p className="mt-1 text-sm text-zinc-600">{c.groupsText}</p>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {groups.length > 0 ? groups.map((g) => (
+              <li key={g.id} className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white p-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-stone-100 text-zinc-900"><Users className="h-5 w-5" aria-hidden="true" /></span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="truncate text-sm font-semibold">{g.name}</h3>
+                  <p className="truncate text-xs text-zinc-500">{c.cats[g.category] ?? c.cats.other} · {c.groupMembers(g.member_count)}</p>
+                </div>
+                <button type="button" className={`${outline} btn-sm shrink-0`} onClick={() => joinGroup(g.id)}>
+                  <UserPlus className="h-3.5 w-3.5" aria-hidden="true" />{c.groupJoin}
+                </button>
+              </li>
+            )) : c.exGroups.map(([name, text], i) => (
+              <li key={name} className="overflow-hidden rounded-xl border border-stone-200 bg-white">
+                <div className="relative h-24">
+                  <img src={['/landing/group-podcast.jpg', '/landing/group-creators.jpg', '/landing/group-friends.jpg'][i]} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                  <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-700">{c.example}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2 p-3">
+                  <div className="min-w-0"><h3 className="truncate text-sm font-semibold">{name}</h3><p className="truncate text-xs text-zinc-500">{text}</p></div>
+                  <button type="button" className={`${outline} btn-sm shrink-0`} onClick={() => openAuth('signup')}>{c.groupJoin}</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
       {/* Battles anyone can join */}
-      <section className="bg-white px-4 py-16 text-zinc-900">
+      <section className="bg-white px-4 py-12 text-zinc-900">
         <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.battlesKicker}</p>
@@ -348,21 +361,23 @@ export function Landing({ invite }: { invite?: string }) {
       </section>
 
       {/* Solo, group, battle */}
-      <section className="bg-stone-50 px-4 py-16 text-zinc-900">
+      <section className="bg-stone-50 px-4 py-12 text-zinc-900">
         <div className="mx-auto max-w-6xl">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.liveKicker}</p>
             <h2 className="mt-2 text-3xl font-bold">{c.liveTitle}</h2>
             <p className="mt-3 leading-relaxed text-zinc-600">{c.liveText}</p>
           </div>
-          <ul className="mt-8 grid gap-4 md:grid-cols-3">
+          <ul className="mt-6 grid gap-3 md:grid-cols-3">
             {c.modes.map(([title, text], i) => {
               const Icon = MODE_ICONS[i];
               return (
-                <li key={title} className="rounded-2xl border border-stone-200 bg-white p-5">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-zinc-900"><Icon className="h-5 w-5" aria-hidden="true" /></span>
-                  <h3 className="mt-4 text-lg font-semibold">{title}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-zinc-600">{text}</p>
+                <li key={title} className="overflow-hidden rounded-xl border border-stone-200 bg-white">
+                  <img src={['/landing/mode-solo.jpg', '/landing/mode-group.jpg', '/landing/mode-battle.jpg'][i]} alt="" className="h-28 w-full object-cover" loading="lazy" decoding="async" />
+                  <div className="p-4">
+                    <h3 className="flex items-center gap-2 text-base font-semibold"><Icon className="h-4 w-4 text-accent" aria-hidden="true" />{title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-zinc-600">{text}</p>
+                  </div>
                 </li>
               );
             })}
@@ -371,19 +386,20 @@ export function Landing({ invite }: { invite?: string }) {
       </section>
 
       {/* Participation */}
-      <section className="bg-white px-4 py-16 text-zinc-900">
+      <section className="bg-white px-4 py-12 text-zinc-900">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-2">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.feedKicker}</p>
             <h2 className="mt-2 text-3xl font-bold">{c.feedTitle}</h2>
             <p className="mt-3 leading-relaxed text-zinc-600">{c.feedText}</p>
+            <img src="/landing/feed.jpg" alt="" className="mt-5 h-44 w-full rounded-xl object-cover sm:h-52" loading="lazy" decoding="async" />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-stone-200 p-5">
+            <div className="rounded-xl border border-stone-200 p-4">
               <h3 className="flex items-center gap-2 text-sm font-semibold"><Radio className="h-4 w-4 text-accent" aria-hidden="true" />{c.feedNow}</h3>
               <ul className="mt-3 space-y-3">{c.feedNowItems.map((p) => <Check key={p}>{p}</Check>)}</ul>
             </div>
-            <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-5">
+            <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50 p-4">
               <h3 className="flex items-center gap-2 text-sm font-semibold"><MessageCircle className="h-4 w-4 text-zinc-500" aria-hidden="true" />{c.feedSoon}</h3>
               <ul className="mt-3 space-y-2 text-sm text-zinc-600">{c.feedSoonItems.map((p) => <li key={p}>{p}</li>)}</ul>
             </div>
