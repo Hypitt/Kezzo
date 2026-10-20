@@ -298,7 +298,7 @@ export function GroupRoom({ id }: { id: string }) {
               </ul>
             </section>
 
-            {admin && <AdminTools group={group} owner={owner} members={members} onChanged={() => { load(); }} onPolicy={(p) => setGroup({ ...group, join_policy: p })} />}
+            {admin && <AdminTools group={group} owner={owner} members={members} onChanged={() => { load(); }} onPolicy={(p) => setGroup({ ...group, join_policy: p })} onFeatured={(on) => setGroup((g) => (g ? { ...g, featured: on } : g))} />}
           </div>
           <ChatPanel roomType="group" roomId={group.id} allowFiles canModerate={admin} />
         </div>
@@ -353,8 +353,8 @@ function MemberRow({ m, groupId, myRole, me, onChanged }: { m: GroupMember; grou
 }
 
 /** Owner / admin tools: add people directly, share an invite link, choose who may join. */
-function AdminTools({ group, owner, members, onChanged, onPolicy }: {
-  group: Group; owner: boolean; members: GroupMember[]; onChanged: () => void; onPolicy: (p: Group['join_policy']) => void;
+function AdminTools({ group, owner, members, onChanged, onPolicy, onFeatured }: {
+  group: Group; owner: boolean; members: GroupMember[]; onChanged: () => void; onPolicy: (p: Group['join_policy']) => void; onFeatured: (on: boolean) => void;
 }) {
   const { t } = useI18n();
   const { toast } = useToast();
@@ -413,6 +413,14 @@ function AdminTools({ group, owner, members, onChanged, onPolicy }: {
     const { error } = await supabase.from('groups').update({ join_policy: policy }).eq('id', group.id);
     if (error) return toast(t('error_generic'), 'error');
     onPolicy(policy);
+    if (policy === 'invite') onFeatured(false); // the database also un-features an invite-only group
+  };
+
+  const changeFeatured = async (on: boolean) => {
+    const { error } = await supabase.rpc('set_group_featured', { p_group: group.id, p_on: on });
+    if (error) return toast(t('error_generic'), 'error');
+    onFeatured(on);
+    toast(t('profile_saved'));
   };
 
   return (
@@ -450,6 +458,20 @@ function AdminTools({ group, owner, members, onChanged, onPolicy }: {
           <button type="button" className="btn btn-ghost" onClick={reset} disabled={busy === 'reset' || !code} aria-label={t('reset_link')} title={t('reset_link')}><RefreshCw className="h-4 w-4" aria-hidden="true" /></button>
         </div>
         <p className="flex items-start gap-1.5 text-xs text-zinc-500"><Link2 className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />{t('invite_link_hint')}</p>
+      </div>
+
+      <div>
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-black disabled:opacity-40"
+            checked={Boolean(group.featured) && group.join_policy === 'open'}
+            disabled={group.join_policy !== 'open'}
+            onChange={(e) => void changeFeatured(e.target.checked)}
+          />
+          {t('feature_group')}
+        </label>
+        <p className="mt-1 text-xs text-zinc-500">{group.join_policy === 'open' ? t('feature_group_hint') : t('feature_group_invite')}</p>
       </div>
 
       {owner && (

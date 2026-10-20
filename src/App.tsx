@@ -8,7 +8,7 @@ import { ToastProvider } from './state/Toast';
 import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScreens';
 import { Navbar } from './components/Navbar';
 import { Loading } from './components/ui';
-import { pendingInvite } from './lib/invite';
+import { PENDING_GROUP, pendingGroup, pendingInvite } from './lib/invite';
 import { startMonitoring, trackPage } from './lib/analytics';
 
 // Every page is its own downloadable chunk, so the first screen only loads the code it needs.
@@ -73,7 +73,16 @@ function Shell() {
   useEffect(() => {
     if (!profile) return;
     const code = pendingInvite();
-    if (code) go('join', code);
+    if (code) {
+      go('join', code);
+      return;
+    }
+    // A group the person clicked on the public landing page before signing up
+    const groupId = pendingGroup();
+    if (groupId) {
+      try { localStorage.removeItem(PENDING_GROUP); } catch { /* ignore */ }
+      go('groups', groupId);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id]);
 

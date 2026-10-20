@@ -81,3 +81,8 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 56. Signed out, type `#/battles`, `#/profile/<id>`, `#/live`, `#/media`, `#/groups` or `#/messages` after the address: you still see the landing page. Terms and Privacy (footer links) open without logging in. Open a group invite link signed out: the sign-up dialog appears, and after signing up you join the group.
 57. Sign out from your profile page: you return to the landing page. Signed-in people never see the landing page.
 
+## Landing page: groups and live counter
+58. Run `update-8.sql`. As the owner of an open group, open the group's admin tools and tick **Show this group on Kezzo's public home page**. In a private window the landing page now shows a **Groups you can join** section with that group (name, category, member count). Untick it: the section disappears (when it was the only one).
+59. Click **Sign up to join** on the group card, create an account: after onboarding you land on that group's page. Switch the group to *Invite only*: the checkbox becomes disabled and the group disappears from the landing page.
+60. A member who is not an admin of the group does not see the checkbox. While a battle is live, the landing page eyebrow says "1 battle live right now"; with no live battle it shows the normal line.
+

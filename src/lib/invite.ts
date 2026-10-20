@@ -5,3 +5,10 @@ export const PENDING_JOIN = 'kezzo.pendingJoin';
 export function pendingInvite(): string | null {
   try { return localStorage.getItem(PENDING_JOIN); } catch { return null; }
 }
+
+/** A group a visitor clicked on the landing page: after they sign up, open that group. */
+export const PENDING_GROUP = 'kezzo.pendingGroup';
+export function pendingGroup(): string | null {
+  try { return localStorage.getItem(PENDING_GROUP); } catch { return null; }
+}
+

@@ -115,6 +115,7 @@ export interface Group {
   category: string;
   member_count: number;
   join_policy: 'open' | 'invite';
+  featured?: boolean;
   created_at: string;
 }
 
