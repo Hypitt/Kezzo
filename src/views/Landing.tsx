@@ -1,5 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { Heart, Languages, MessageCircle, Mic, Radio, Swords, UserPlus, Users, Video, type LucideIcon } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Heart, Languages, Mic, Swords, UserPlus, Users, Video, type LucideIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
@@ -154,6 +154,25 @@ function Cover({ photo }: { photo: string }) {
   return ok ? <img src={photo} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" onError={() => setOk(false)} /> : null;
 }
 
+/** Tiny looping clip: shows a still picture, and only plays (muted) while on screen. Stays a still for reduced motion / Save-Data. */
+function LoopVideo({ name, className }: { name: string; className: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [ok, setOk] = useState(false);
+  useEffect(() => {
+    const nav = navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } };
+    if (nav.connection?.saveData || /(^|-)2g$/.test(nav.connection?.effectiveType ?? '') || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    setOk(true);
+    const v = ref.current;
+    if (!v || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) void v.play().catch(() => undefined); else v.pause(); }, { threshold: 0.25 });
+    io.observe(v);
+    return () => io.disconnect();
+  }, []);
+  return ok
+    ? <video ref={ref} className={className} muted loop playsInline preload="none" poster={`/landing/${name}.jpg`} src={`/landing/${name}.mp4`} aria-hidden="true" />
+    : <img src={`/landing/${name}.jpg`} alt="" className={className} loading="lazy" decoding="async" />;
+}
+
 /** Community video behind the hero. Optional: without /landing/hero.mp4 the card stays solid dark. Skipped for reduced motion or slow data. */
 function HeroVideo() {
   const [play, setPlay] = useState(false);
@@ -186,7 +205,7 @@ function BattleMock() {
   const c = COPY[lang];
   const tile = (name: string, pct: number, bar: string, n: number) => (
     <div className="relative flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-lg bg-stone-200 p-2">
-      <Cover photo={`/landing/tile-${n + 1}.jpg`} />
+      <Cover photo={`/landing/tile-${n === 0 ? "a" : "b"}.jpg`} />
       <span className="relative self-end rounded-md bg-white px-1.5 py-0.5 text-xs font-semibold tabular-nums text-zinc-900 shadow-sm">{pct}%</span>
       <div className="relative rounded-lg bg-white/90 p-2">
         <p className="text-sm font-semibold text-zinc-900">{name}</p>
@@ -279,11 +298,6 @@ export function Landing({ invite }: { invite?: string }) {
                 {c.h1a}<br />{c.h1b}
               </h1>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">{c.lead}</p>
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                <button type="button" className="btn btn-accent px-6 py-3 text-base" onClick={() => openAuth('signup')}>{c.cta}</button>
-                <button type="button" className="btn border border-white/60 bg-transparent px-6 py-3 text-base text-white hover:bg-white/10" onClick={() => openAuth('signin')}>{c.login}</button>
-              </div>
-              <p className="mt-3 text-xs text-white/70">{c.ctaNote}</p>
             </div>
             <BattleMock />
           </div>
@@ -347,8 +361,8 @@ export function Landing({ invite }: { invite?: string }) {
                 <div key={who as string} className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3">
                   <div className="flex items-center gap-3">
                     <span className="flex -space-x-3">
-                      <Person photo={`/landing/battle-${row * 2 + 1}.jpg`} />
-                      <Person photo={`/landing/battle-${row * 2 + 2}.jpg`} />
+                      <Person photo={`/landing/face-${row * 2 + 1}.jpg`} />
+                      <Person photo={`/landing/face-${row * 2 + 2}.jpg`} />
                     </span>
                     <div><p className="text-sm font-semibold text-zinc-900">{who}</p><p className="text-xs text-zinc-500">{tag}</p></div>
                   </div>
@@ -373,7 +387,9 @@ export function Landing({ invite }: { invite?: string }) {
               const Icon = MODE_ICONS[i];
               return (
                 <li key={title} className="overflow-hidden rounded-xl border border-stone-200 bg-white">
-                  <img src={['/landing/mode-solo.jpg', '/landing/mode-group.jpg', '/landing/mode-battle.jpg'][i]} alt="" className="h-28 w-full object-cover" loading="lazy" decoding="async" />
+                  {i < 2
+                    ? <LoopVideo name={['clip-solo', 'clip-group'][i]} className="h-28 w-full object-cover" />
+                    : <img src="/landing/mode-battle.jpg" alt="" className="h-28 w-full object-cover" loading="lazy" decoding="async" />}
                   <div className="p-4">
                     <h3 className="flex items-center gap-2 text-base font-semibold"><Icon className="h-4 w-4 text-accent" aria-hidden="true" />{title}</h3>
                     <p className="mt-1 text-sm leading-relaxed text-zinc-600">{text}</p>
@@ -392,18 +408,8 @@ export function Landing({ invite }: { invite?: string }) {
             <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.feedKicker}</p>
             <h2 className="mt-2 text-3xl font-bold">{c.feedTitle}</h2>
             <p className="mt-3 leading-relaxed text-zinc-600">{c.feedText}</p>
-            <img src="/landing/feed.jpg" alt="" className="mt-5 h-44 w-full rounded-xl object-cover sm:h-52" loading="lazy" decoding="async" />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-stone-200 p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold"><Radio className="h-4 w-4 text-accent" aria-hidden="true" />{c.feedNow}</h3>
-              <ul className="mt-3 space-y-3">{c.feedNowItems.map((p) => <Check key={p}>{p}</Check>)}</ul>
-            </div>
-            <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50 p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold"><MessageCircle className="h-4 w-4 text-zinc-500" aria-hidden="true" />{c.feedSoon}</h3>
-              <ul className="mt-3 space-y-2 text-sm text-zinc-600">{c.feedSoonItems.map((p) => <li key={p}>{p}</li>)}</ul>
-            </div>
-          </div>
+          <img src="/landing/feed.jpg" alt="" className="h-56 w-full rounded-xl object-cover sm:h-64" loading="lazy" decoding="async" />
         </div>
       </section>
 
