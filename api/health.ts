@@ -9,5 +9,6 @@ export default function handler(_req: VercelRequest, res: VercelResponse): void 
     supabase: Boolean((e.SUPABASE_URL || e.VITE_SUPABASE_URL) && e.SUPABASE_SERVICE_ROLE_KEY),
     livekit: Boolean(e.LIVEKIT_URL && e.LIVEKIT_API_KEY && e.LIVEKIT_API_SECRET),
     gemini: Boolean(e.GEMINI_API_KEY),
+    email: Boolean(e.RESEND_API_KEY && e.EMAIL_FROM),
   });
 }

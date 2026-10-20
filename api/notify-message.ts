@@ -99,13 +99,22 @@ export default route(async (req, res) => {
   if (candidates.length === 0) return skip('nobody');
 
   // 2. Keep only people who want the email, are not blocking each other, and were not emailed recently.
-  const [{ data: people }, { data: blocks }, { data: recent }] = await Promise.all([
+  const [people$, blocks$, recent$] = await Promise.all([
     db.from('profiles').select('id,display_name,language,email_messages').in('id', candidates).eq('email_messages', true),
     db.from('blocks').select('blocker_id,blocked_id').or(`blocker_id.eq.${user.id},blocked_id.eq.${user.id}`),
     kind === 'group'
       ? db.from('email_log').select('recipient_id').eq('kind', 'group').eq('room_id', roomId).gte('sent_at', since).in('recipient_id', candidates)
       : db.from('email_log').select('recipient_id').eq('kind', 'message').eq('sender_id', user.id).gte('sent_at', since).in('recipient_id', candidates),
   ]);
+  // A database error here almost always means supabase/update-6.sql has not been run yet. Say so in the logs instead of silently doing nothing.
+  const failed = people$.error ?? blocks$.error ?? recent$.error;
+  if (failed) {
+    console.error('notify-message: database query failed. Has supabase/update-6.sql been run?', failed.message);
+    throw new HttpError(500, 'Email notifications are not set up in the database yet');
+  }
+  const people = people$.data;
+  const blocks = blocks$.data;
+  const recent = recent$.data;
   const blockedIds = new Set((blocks ?? []).flatMap((b) => [b.blocker_id as string, b.blocked_id as string]));
   const throttled = new Set((recent ?? []).map((r) => r.recipient_id as string));
   const targets = (people ?? []).filter((p) => !blockedIds.has(p.id) && !throttled.has(p.id)).slice(0, MAX_GROUP_RECIPIENTS) as Person[];
