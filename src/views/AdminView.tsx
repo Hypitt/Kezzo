@@ -42,7 +42,7 @@ const TEXT = {
     hours: 'Busy hours', hoursSub: 'Page views by hour of day (your time zone)',
     pages: 'Top pages', referrers: 'Where visitors come from', countries: 'Countries', devices: 'Devices', browsers: 'Browsers', systems: 'Operating systems', languages: 'Languages',
     methods: 'Sign-in methods', platform: 'Platform activity', health: 'Performance and errors',
-    users: 'Total members', registered: 'Registered users', registeredSub: 'All accounts, all time', today: 'Today', todaySub: 'Since midnight in your time zone, compared with yesterday', auto: 'Updates itself every minute', posts: 'Posts (period)', likes: 'Likes', comments: 'Comments', follows: 'Follows', battles: 'Battles created', battlesLive: 'Battles live now',
+    users: 'Total members', registered: 'Registered users', registeredSub: 'All accounts, all time', today: 'Today', yesterday: 'Yesterday', todaySub: 'Today since midnight in your time zone, and yesterday as a full day', auto: 'Updates itself every minute', posts: 'Posts (period)', likes: 'Likes', comments: 'Comments', follows: 'Follows', battles: 'Battles created', battlesLive: 'Battles live now',
     battlesEnded: 'Battles ended (all time)', votes: 'Votes', lives: 'Go Live streams', liveNow: 'Streams live now', groups: 'Groups (all time)', messages: 'Messages', reports: 'Reports (all time)',
     table: 'Table', chart: 'Chart', day: 'Day', direct: 'direct', none: 'No data yet', error: 'Error', times: 'Times', last: 'Last seen',
     loadNote: 'Time until the page finished loading. Under 2.5 s is good.',
@@ -60,7 +60,7 @@ const TEXT = {
     hours: 'Heures de pointe', hoursSub: 'Pages vues par heure (votre fuseau horaire)',
     pages: 'Pages les plus vues', referrers: 'D’où viennent les visiteurs', countries: 'Pays', devices: 'Appareils', browsers: 'Navigateurs', systems: 'Systèmes', languages: 'Langues',
     methods: 'Méthodes de connexion', platform: 'Activité de la plateforme', health: 'Performance et erreurs',
-    users: 'Membres au total', registered: 'Utilisateurs inscrits', registeredSub: 'Tous les comptes, depuis le début', today: 'Aujourd’hui', todaySub: 'Depuis minuit dans votre fuseau horaire, comparé à hier', auto: 'Se met à jour chaque minute', posts: 'Publications (période)', likes: 'J’aime', comments: 'Commentaires', follows: 'Abonnements', battles: 'Battles créés', battlesLive: 'Battles en direct',
+    users: 'Membres au total', registered: 'Utilisateurs inscrits', registeredSub: 'Tous les comptes, depuis le début', today: 'Aujourd’hui', yesterday: 'Hier', todaySub: 'Aujourd’hui depuis minuit (votre fuseau horaire) et hier en journée complète', auto: 'Se met à jour chaque minute', posts: 'Publications (période)', likes: 'J’aime', comments: 'Commentaires', follows: 'Abonnements', battles: 'Battles créés', battlesLive: 'Battles en direct',
     battlesEnded: 'Battles terminés (total)', votes: 'Votes', lives: 'Directs (Go Live)', liveNow: 'Directs en cours', groups: 'Groupes (total)', messages: 'Messages', reports: 'Signalements (total)',
     table: 'Tableau', chart: 'Graphique', day: 'Jour', direct: 'direct', none: 'Aucune donnée', error: 'Erreur', times: 'Fois', last: 'Dernière fois',
     loadNote: 'Temps avant la fin du chargement de la page. Sous 2,5 s, c’est bon.',
@@ -322,7 +322,18 @@ export function AdminView() {
           {([['visitors', w.visitors], ['views', w.views], ['signins', w.signins], ['new_users', w.newUsers]] as const).map(([key, label]) => {
             const last = data.daily[data.daily.length - 1];
             const before = data.daily[data.daily.length - 2];
-            return <Tile key={key} label={label} value={nf(last?.[key] ?? 0)} extra={<Delta now={last?.[key] ?? 0} before={before?.[key] ?? 0} w={w} />} />;
+            return <Tile key={key} label={`${w.today} · ${label}`} value={nf(last?.[key] ?? 0)} extra={<Delta now={last?.[key] ?? 0} before={before?.[key] ?? 0} w={w} />} />;
+          })}
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {([['visitors', w.visitors], ['views', w.views], ['signins', w.signins], ['new_users', w.newUsers]] as const).map(([key, label]) => {
+            const before = data.daily[data.daily.length - 2];
+            return (
+              <div key={key} className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-3">
+                <div className="text-xs text-zinc-600">{w.yesterday} · {label}</div>
+                <div className="mt-1 text-xl font-semibold tabular-nums text-zinc-700">{nf(before?.[key] ?? 0)}</div>
+              </div>
+            );
           })}
         </div>
       </Panel>
