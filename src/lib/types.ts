@@ -15,6 +15,7 @@ export interface Profile extends PublicProfile {
   status_image_url: string | null;
   language: Lang;
   dm_policy: 'everyone' | 'followers' | 'nobody';
+  email_messages: boolean;
   created_at: string;
 }
 

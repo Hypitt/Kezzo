@@ -266,6 +266,15 @@ function OwnSettings({ profile }: { profile: Profile }) {
           {t('change_avatar')}
           <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => uploadAvatar(e.target.files?.[0])} />
         </label>
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-black"
+            checked={profile.email_messages}
+            onChange={(e) => updateProfile({ email_messages: e.target.checked }).then(() => toast(t('profile_saved'))).catch(() => toast(t('error_generic'), 'error'))}
+          />
+          {t('email_messages')}
+        </label>
         {editing && (
           <form onSubmit={save} className="space-y-3">
             <div>

@@ -1,3 +1,4 @@
+import { api } from '../lib/api';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { ArrowLeft, Phone, Send } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -142,6 +143,8 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
     if (error || !data) return toast(t('dm_not_allowed'), 'error');
     setText('');
     setMessages((m) => [...m, data as DirectMessage]);
+    // Optional email to the other person (they can turn it off). Failures never matter here.
+    void api('notify-message', { messageId: (data as DirectMessage).id }).catch(() => undefined);
     onSent();
   };
 

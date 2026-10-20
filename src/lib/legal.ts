@@ -71,7 +71,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
           'The Kezzo name, branding, design, software and other Platform materials belong to WeDIL Inc. or its licensors, except User Content and third-party material. Do not copy, modify, distribute, reverse-engineer or commercially use them without our permission, except as the law allows.',
         ] },
         { h: '11. Third-party services', body: [
-          'Kezzo relies on our third-party providers for sign-in, hosting, storage, livestreaming and AI features. Their own terms and privacy policies may also apply. We are not responsible for their outages or changes beyond what the law requires.',
+          'Kezzo relies on our third-party providers for sign-in, hosting, storage, livestreaming, email delivery and AI features. Their own terms and privacy policies may also apply. We are not responsible for their outages or changes beyond what the law requires.',
         ] },
         { h: '12. Availability and changes', body: [
           'We may update, change, suspend or discontinue features. We do not guarantee uninterrupted or error-free service, or that content, streams or recordings will always be available; keep your own copies of anything important. If we make significant changes to these Terms, we will notify you in the app at least 15 days before they take effect. If you keep using Kezzo after that, the new Terms apply.',
@@ -104,7 +104,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
             ['Account', 'Email address, password (stored encrypted), or your Google name, email and profile picture', 'You, or Google when you sign in with Google'],
             ['Profile', 'Handle, display name, bio, avatar, 16+ confirmation, language, message settings', 'You'],
             ['Your content', 'Posts (text, photo, audio, video), comments, likes, status pictures, livestreams, recordings and highlights you post, group files', 'You'],
-            ['Messages', 'Direct messages, group chat, battle and stream chat, files shared in chats', 'You'],
+            ['Messages', 'Direct messages, group chat, battle and stream chat, files shared in chats. When someone messages you, we may send you a short email saying who wrote (never the message text), at most once every 30 minutes per sender; you can turn this off in Settings', 'You'],
             ['Social activity', 'Follows, blocks, groups and roles, battles joined, votes, judge scores, reports you file, and the in-app notifications about activity involving you (message senders, likes, new followers, live sessions). Notifications never contain message text and are cleared automatically after about 60 days', 'Your use of Kezzo'],
             ['Coins', 'Balance, monthly grants, votes cast, unlocks, battle payouts', 'Your use of Kezzo'],
             ['Technical', 'IP address, browser and device type, diagnostic and error logs, login times, security events', 'Your browser, via our third-party providers'],
@@ -228,7 +228,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
           'Le nom Kezzo, l’image de marque, le design, les logiciels et les autres éléments de la Plateforme appartiennent à WeDIL Inc. ou à ses concédants, à l’exception du Contenu utilisateur et du matériel de tiers. Ne les copiez pas, ne les modifiez pas, ne les distribuez pas, ne les désassemblez pas et ne les utilisez pas à des fins commerciales sans notre permission, sauf dans la mesure permise par la loi.',
         ] },
         { h: '11. Services de tiers', body: [
-          'Kezzo s’appuie sur des fournisseurs tiers pour la connexion, l’hébergement, le stockage, la diffusion en direct et les fonctions d’IA. Leurs propres conditions et politiques de confidentialité peuvent aussi s’appliquer. Nous ne sommes pas responsables de leurs pannes ou de leurs changements au-delà de ce que la loi exige.',
+          'Kezzo s’appuie sur des fournisseurs tiers pour la connexion, l’hébergement, le stockage, la diffusion en direct, l’envoi de courriels et les fonctions d’IA. Leurs propres conditions et politiques de confidentialité peuvent aussi s’appliquer. Nous ne sommes pas responsables de leurs pannes ou de leurs changements au-delà de ce que la loi exige.',
         ] },
         { h: '12. Disponibilité et modifications', body: [
           'Nous pouvons mettre à jour, modifier, suspendre ou abandonner des fonctions. Nous ne garantissons pas un service ininterrompu ou sans erreur, ni que le contenu, les diffusions ou les enregistrements seront toujours disponibles; conservez vos propres copies de tout ce qui est important. Si nous apportons des modifications importantes à ces Conditions, nous vous en aviserons dans l’application au moins 15 jours avant leur entrée en vigueur. Si vous continuez à utiliser Kezzo par la suite, les nouvelles Conditions s’appliquent.',
@@ -261,7 +261,7 @@ export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
             ['Compte', 'Adresse courriel, mot de passe (stocké chiffré), ou votre nom, courriel et photo de profil Google', 'Vous, ou Google lorsque vous vous connectez avec Google'],
             ['Profil', 'Identifiant, nom affiché, bio, avatar, confirmation 16 ans et plus, langue, paramètres de messages', 'Vous'],
             ['Votre contenu', 'Publications (texte, photo, audio, vidéo), commentaires, mentions j’aime, images de statut, diffusions, enregistrements et faits saillants que vous publiez, fichiers de groupe', 'Vous'],
-            ['Messages', 'Messages privés, clavardage de groupe, de battle et de diffusion, fichiers partagés dans les conversations', 'Vous'],
+            ['Messages', 'Messages privés, clavardage de groupe, de battle et de diffusion, fichiers partagés dans les conversations. Lorsque quelqu’un vous écrit, nous pouvons vous envoyer un court courriel indiquant qui a écrit (jamais le texte du message), au plus une fois toutes les 30 minutes par expéditeur; vous pouvez le désactiver dans les paramètres', 'Vous'],
             ['Activité sociale', 'Abonnements, blocages, groupes et rôles, battles auxquels vous participez, votes, notes des juges, signalements que vous faites, et les notifications dans l’application sur l’activité qui vous concerne (auteurs de messages, J’aime, nouveaux abonnés, directs). Les notifications ne contiennent jamais le texte des messages et sont effacées automatiquement après environ 60 jours', 'Votre utilisation de Kezzo'],
             ['Pièces', 'Solde, attributions mensuelles, votes donnés, déblocages, gains de battles', 'Votre utilisation de Kezzo'],
             ['Technique', 'Adresse IP, type de navigateur et d’appareil, journaux de diagnostic et d’erreurs, heures de connexion, événements de sécurité', 'Votre navigateur, par l’intermédiaire de nos fournisseurs tiers'],

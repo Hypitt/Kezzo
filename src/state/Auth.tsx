@@ -12,7 +12,7 @@ export interface NewProfile {
   generation: Profile['generation'];
 }
 type ProfilePatch = Partial<
-  Pick<Profile, 'handle' | 'display_name' | 'avatar_url' | 'bio' | 'generation' | 'status_text' | 'status_expires_at' | 'status_image_url' | 'language' | 'dm_policy'>
+  Pick<Profile, 'handle' | 'display_name' | 'avatar_url' | 'bio' | 'generation' | 'status_text' | 'status_expires_at' | 'status_image_url' | 'language' | 'dm_policy' | 'email_messages'>
 >;
 
 interface AuthValue {

@@ -59,6 +59,7 @@ supabase/update-2.sql  Upgrade for an existing database: groups, judges, weights
 supabase/update-3.sql  Go Live streams (solo and group), livestream chat, battle highlight clip
 supabase/update-4.sql  Admin statistics: admins table, anonymous usage events, admin_stats()
 supabase/update-5.sql  In-app notifications: messages, likes, new followers, live sessions
+supabase/update-6.sql  Email notifications for new direct messages (opt-out switch, send log)
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers
@@ -90,7 +91,7 @@ cp .env.example .env.local
 ### 2. Supabase
 
 1. Create a project. Copy **Project URL**, **anon key** and **service_role key** from *Project Settings → API*.
-2. Open *SQL Editor → New query*, paste the whole of `supabase/schema.sql` and run it. Then run `supabase/update-2.sql`, `supabase/update-3.sql`, `supabase/update-4.sql` and `supabase/update-5.sql` the same way. All are safe to run again. Run `update-3.sql` before deploying the matching code: battle pages ask for its new `highlight_post_id` column.
+2. Open *SQL Editor → New query*, paste the whole of `supabase/schema.sql` and run it. Then run `supabase/update-2.sql`, `supabase/update-3.sql`, `supabase/update-4.sql`, `supabase/update-5.sql` and `supabase/update-6.sql` the same way. All are safe to run again. Run `update-3.sql` before deploying the matching code: battle pages ask for its new `highlight_post_id` column.
 3. *Authentication → Providers → Google*: enable it and paste your Google client ID and secret (step 3 below).
 4. *Authentication → URL Configuration*:
    - **Site URL**: your production URL (e.g. `https://kezzo.vercel.app`)
@@ -201,6 +202,12 @@ MIT. See `LICENSE`.
 ## Notifications
 
 A bell in the top bar (signed-in only) shows a red counter and a list of: new messages (several from one person are grouped with a counter), likes on your posts, new followers, and people you follow going live (Go Live streams and battles). New ones also appear as a short pop-up while the app is open. Clicking one opens the relevant page and marks it read; opening a conversation clears its message notification. They are created by database triggers (`update-5.sql`), never by the browser, skip people who blocked each other, never contain message text, and are cleared after about 60 days. Not included: push notifications when the app is closed (this is in-app only).
+
+## Email notifications for new messages
+
+When someone sends you a direct message, you get a short email ("X sent you a message on Kezzo") with a button that opens the conversation. It never contains the message text, is sent at most once every 30 minutes per sender, is skipped when the two people blocked each other, and each person can switch it off with the **Email me about new messages** checkbox in their profile settings (on by default). It is sent through Resend by `api/notify-message.ts`, which the sender's browser calls right after a message is saved.
+
+Setup: run `supabase/update-6.sql`, then add three variables in Vercel → Settings → Environment Variables and redeploy: `RESEND_API_KEY` (your Resend API key), `EMAIL_FROM` (for example `Kezzo <no-reply@kezzo.live>`, on a domain verified in Resend) and optionally `SITE_URL` (for example `https://www.kezzo.live`). Without the first two, the feature quietly does nothing. Group chat and battle chat do not send emails.
 
 ## Admin statistics
 

@@ -69,3 +69,8 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 48. A follows B. B starts a Go Live stream (and later a battle that goes live): A gets "B is live now" and clicking opens it. A person who blocked B gets nothing.
 49. Liking your own post, or unlike/like again, creates no extra notification. "Mark all as read" clears the counter. On a phone width the list opens full width under the top bar.
 
+## Email notifications for messages
+50. Run `update-6.sql`, add `RESEND_API_KEY` and `EMAIL_FROM` in Vercel and redeploy. A messages B (B's email is a real inbox): B gets "A sent you a message on Kezzo" within a minute, with no message text and a working button. A sends a second message right away: no second email.
+51. B unticks "Email me about new messages" in profile settings; A messages again (after 30 minutes or with a different sender): no email. Re-tick it and it works again.
+52. If B blocked A, no email. If `RESEND_API_KEY` is missing, sending a message still works normally.
+
