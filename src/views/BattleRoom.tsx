@@ -19,6 +19,7 @@ import { HighlightCard, RecordingPanel } from '../components/battle/BattleExtras
 import { activeRecorder, onRecordingsChanged, recordingSupported } from '../lib/recorder';
 import { ReportButton } from '../components/ReportButton';
 import { Avatar, Empty, Loading, Spinner } from '../components/ui';
+import { ProfileLink } from '../components/ProfileLink';
 
 interface Judge { user_id: string; profile: PublicProfile }
 
@@ -140,6 +141,12 @@ export function BattleRoom({ id }: { id: string }) {
 
   const standingMap = useMemo(() => new Map(standings.map((s) => [s.user_id, s])), [standings]);
 
+  // While a battle is open or live, profiles open in a new tab so nobody drops out of the battle.
+  const openProfile = (uid: string) => {
+    if (battle && battle.status !== 'ended') window.open(`#/profile/${uid}`, '_blank', 'noopener');
+    else go('profile', uid);
+  };
+
   if (missing) return <Empty text={t('battle_not_found')}><button type="button" className="btn btn-primary" onClick={() => go('battles')}>{t('back')}</button></Empty>;
   if (!battle) return <Loading />;
 
@@ -179,7 +186,7 @@ export function BattleRoom({ id }: { id: string }) {
         </div>
         <h1 className="text-2xl font-bold">{battle.title}</h1>
         {battle.topic && <p className="text-sm text-zinc-600">{battle.topic}</p>}
-        <p className="text-xs text-zinc-500">{t('hosted_by')} <button type="button" className="underline" onClick={() => go('profile', battle.host.id)}>{battle.host.display_name}</button></p>
+        <p className="text-xs text-zinc-500">{t('hosted_by')} <button type="button" className="underline" onClick={() => openProfile(battle.host.id)}>{battle.host.display_name}</button></p>
       </header>
 
       {isHost && !ended && <HostBar battle={battle} busy={busy} rpc={rpc} record={wantRecord} onRecord={setWantRecord} />}
@@ -233,7 +240,7 @@ export function BattleRoom({ id }: { id: string }) {
                   onVote={(n) => rpc('cast_vote', { p_battle: id, p_contender: c.user_id, p_amount: n }, t('voted_toast', { n, name: c.profile.display_name }))}
                   onMute={(muted) => mute(c.user_id, muted)}
                   onKick={() => kick(c.user_id)}
-                  onProfile={() => go('profile', c.user_id)}
+                  onProfile={() => openProfile(c.user_id)}
                 />
               ))}
             </ul>
@@ -403,7 +410,7 @@ function JudgesSection({ battle, judges, scores, isHost, isJudge, round, busy, r
         <ul className="flex flex-wrap gap-3">
           {judges.map((j) => (
             <li key={j.user_id} className="flex items-center gap-2 rounded-full bg-zinc-100 py-1 pl-1 pr-3 text-sm">
-              <Avatar p={j.profile} size={24} />{j.profile.display_name}
+              <ProfileLink to={j.user_id} newTab={!ended} className="flex items-center gap-2"><Avatar p={j.profile} size={24} />{j.profile.display_name}</ProfileLink>
               {isHost && !ended && (
                 <button type="button" className="ml-1 text-zinc-500 hover:text-red-600" aria-label={t('remove_judge_aria', { name: j.profile.display_name })} onClick={() => rpc('remove_judge', { p_battle: battle.id, p_user: j.user_id })}>×</button>
               )}
@@ -423,7 +430,7 @@ function JudgesSection({ battle, judges, scores, isHost, isJudge, round, busy, r
           <ul className="space-y-2">
             {roundScores.map((s) => (
               <li key={`${s.judge_id}-${s.contender_id}`} className="text-sm">
-                <span className="font-medium">{judgeName(s.judge_id)}</span> → <span className="font-medium">{nameOf(s.contender_id)}</span>
+                <ProfileLink to={s.judge_id} newTab={!ended} className="font-medium">{judgeName(s.judge_id)}</ProfileLink> → <ProfileLink to={s.contender_id} newTab={!ended} className="font-medium">{nameOf(s.contender_id)}</ProfileLink>
                 : <strong className="tabular-nums">{s.score}/10</strong>
                 {s.comment && <span className="block text-zinc-600">“{s.comment}”</span>}
               </li>
@@ -458,7 +465,7 @@ function AddJudge({ battle, judges, rpc, busy }: { battle: Battle; judges: Judge
           {options.map((p) => (
             <li key={p.id} className="flex items-center gap-3 px-3 py-2">
               <Avatar p={p} size={28} />
-              <span className="min-w-0 flex-1 truncate text-sm">{p.display_name} <span className="text-xs text-zinc-500">@{p.handle}</span></span>
+              <ProfileLink to={p.id} newTab className="min-w-0 flex-1 truncate text-sm">{p.display_name} <span className="text-xs text-zinc-500">@{p.handle}</span></ProfileLink>
               <button type="button" className="btn btn-primary btn-sm" disabled={busy === 'add_judge'} onClick={async () => { if (await rpc('add_judge', { p_battle: battle.id, p_user: p.id }, t('judge_added', { name: p.display_name }))) setTerm(''); }}>
                 {t('add')}
               </button>

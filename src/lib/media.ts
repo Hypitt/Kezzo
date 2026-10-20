@@ -28,8 +28,8 @@ export function mediaDuration(file: File, kind: 'audio' | 'video'): Promise<numb
   });
 }
 
-/** Longest video allowed (seconds). Matches the database rule. */
-export const MAX_VIDEO_SECONDS = 1800;
+/** Longest video allowed (seconds): 60 minutes, like Instagram feed videos. Matches the database rule. */
+export const MAX_VIDEO_SECONDS = 3600;
 
 /**
  * Shrinks big photos in the browser before upload (max 2048 px, JPEG/WebP). This makes uploads much faster.
@@ -45,9 +45,14 @@ export async function compressImage(file: File, maxSide = 2048, quality = 0.86):
     canvas.height = Math.round(bitmap.height * scale);
     const ctx = canvas.getContext('2d');
     if (!ctx) return file;
+    const type = file.type === 'image/png' && file.size < 1.5 * 1024 * 1024 ? 'image/png' : 'image/jpeg';
+    if (type === 'image/jpeg') {
+      // JPEG has no transparency: paint white first, or see-through parts of a PNG turn black.
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     bitmap.close();
-    const type = file.type === 'image/png' && file.size < 1.5 * 1024 * 1024 ? 'image/png' : 'image/jpeg';
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality));
     if (!blob || blob.size >= file.size) return file;
     const ext = type === 'image/png' ? 'png' : 'jpg';

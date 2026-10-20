@@ -11,6 +11,7 @@ import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { LiveRoom } from '../components/LiveRoom';
 import { Avatar, Empty, Loading } from '../components/ui';
+import { RichText } from '../components/ProfileLink';
 
 interface Conversation { otherId: string; last: DirectMessage; unread: number }
 const COLUMNS = 'id,sender_id,recipient_id,body,read_at,created_at';
@@ -166,7 +167,7 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
         {messages.length === 0 && <p className="text-sm text-zinc-500">{t('say_hello')}</p>}
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.sender_id === me ? 'justify-end' : ''}`}>
-            <p className={`max-w-[80%] break-words rounded-2xl px-3 py-1.5 text-sm ${m.sender_id === me ? 'bg-zinc-900 text-white' : 'bg-zinc-100'}`}>{m.body}</p>
+            <p className={`max-w-[80%] break-words rounded-2xl px-3 py-1.5 text-sm ${m.sender_id === me ? 'bg-zinc-900 text-white' : 'bg-zinc-100'}`}><RichText text={m.body} linkClassName="font-medium underline" /></p>
           </div>
         ))}
       </div>

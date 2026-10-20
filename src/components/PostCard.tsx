@@ -11,6 +11,7 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { Avatar, Spinner } from './ui';
+import { ProfileLink, RichText } from './ProfileLink';
 import { FeedVideo } from './FeedVideo';
 import { ReportButton } from './ReportButton';
 
@@ -134,7 +135,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
       ) : (
         <div>
           <h3 className="text-base font-semibold">{post.title}</h3>
-          {post.body && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-zinc-700">{post.body}</p>}
+          {post.body && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-zinc-700"><RichText text={post.body} /></p>}
         </div>
       )}
 
@@ -237,9 +238,9 @@ function Comments({ post, onCount }: { post: Post; onCount: (n: number) => void 
         <ul className="space-y-2">
           {rows.map((c) => (
             <li key={c.id} className="flex items-start gap-2 text-sm">
-              {c.author && <Avatar p={c.author} size={24} />}
+              {c.author && <ProfileLink to={c.author_id} className="shrink-0"><Avatar p={c.author} size={24} /></ProfileLink>}
               <p className="min-w-0 flex-1 break-words">
-                <span className="font-semibold">{c.author?.display_name ?? '…'}</span> {c.body}
+                <ProfileLink to={c.author_id} className="font-semibold" title={c.author ? `@${c.author.handle}` : undefined}>{c.author?.display_name ?? '…'}</ProfileLink> <RichText text={c.body} />
               </p>
               {(c.author_id === user?.id || post.author_id === user?.id) && (
                 <button type="button" className="text-zinc-400 hover:text-red-600" onClick={() => remove(c.id)} aria-label={t('delete')}>

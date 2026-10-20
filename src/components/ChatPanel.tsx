@@ -5,13 +5,13 @@ import { PUBLIC_PROFILE } from '../lib/data';
 import { fileExt } from '../lib/format';
 import { compressImage, formatBytes } from '../lib/media';
 import { isSafe } from '../lib/moderation';
-import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB, startUpload, type UploadFailure, type UploadHandle } from '../lib/upload';
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL, startUpload, type UploadFailure, type UploadHandle } from '../lib/upload';
 import type { ChatMessage, PublicProfile } from '../lib/types';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
-import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { UploadBar, failureKey, type UploadState } from './UploadBar';
+import { ProfileLink, RichText } from './ProfileLink';
 
 interface Props {
   roomType: 'battle' | 'group' | 'live';
@@ -32,7 +32,6 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
   const { user, ensureAuth, blocked } = useAuth();
   const { t } = useI18n();
   const { toast } = useToast();
-  const { go } = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState('');
   const [upload, setUpload] = useState<UploadState | null>(null);
@@ -135,8 +134,8 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
   const pick = async (file: File | undefined) => {
     if (picker.current) picker.current.value = '';
     if (!file || !ensureAuth() || !user) return;
-    if (file.size > MAX_UPLOAD_BYTES) return toast(t('err_file_too_big', { n: MAX_UPLOAD_MB }), 'error');
-    const ready = await compressImage(file);
+    const ready = await compressImage(file); // big photos are shrunk first, so they fit
+    if (ready.size > MAX_UPLOAD_BYTES) return toast(t('err_file_too_big', { n: MAX_UPLOAD_LABEL }), 'error');
     pending.current = { file: ready, path: `group/${roomId}/${user.id}/${crypto.randomUUID()}.${fileExt(ready.name)}` };
     void runUpload();
   };
@@ -165,10 +164,11 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
         {visible.map((m) => (
           <div key={m.id} className="group/msg break-words">
             <p>
-              <button type="button" className="font-semibold hover:underline" onClick={() => m.author && go('profile', m.author.id)}>
+              {/* In a live battle or stream, profiles open in a new tab so the person keeps watching. */}
+              <ProfileLink to={m.author_id} newTab={roomType !== 'group'} className="font-semibold" title={m.author ? `@${m.author.handle}` : undefined}>
                 {m.author?.display_name ?? '…'}
-              </button>{' '}
-              {m.body && <span className="text-zinc-700">{m.body}</span>}
+              </ProfileLink>{' '}
+              {m.body && <span className="text-zinc-700"><RichText text={m.body} newTab={roomType !== 'group'} /></span>}
               {(m.author_id === user?.id || canModerate) && (
                 <button type="button" className="ml-2 inline-flex align-middle text-zinc-400 hover:text-red-600" onClick={() => remove(m)} aria-label={t('delete')} title={t('delete')}>
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />

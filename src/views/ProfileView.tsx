@@ -5,6 +5,8 @@ import { explain } from '../lib/errors';
 import { loadPosts } from '../lib/data';
 import { fileExt, isActiveStatus } from '../lib/format';
 import { isSafe } from '../lib/moderation';
+import { compressImage } from '../lib/media';
+import { contentTypeOf } from '../lib/upload';
 import type { LedgerEntry, Post, Profile } from '../lib/types';
 import type { Key } from '../lib/i18n';
 import { useAuth } from '../state/Auth';
@@ -17,13 +19,30 @@ import { SignInCard } from '../components/AuthScreens';
 import { StatusViewer } from '../components/StatusViewer';
 import { useLegal } from '../state/Legal';
 import { AccountFooter } from '../components/AccountFooter';
+import { RichText } from '../components/ProfileLink';
 import { Avatar, Empty, Loading, LoadMore, Spinner } from '../components/ui';
 
 const PAGE = 8;
 
 export function ProfileView({ id }: { id?: string }) {
   const { user, profile: mine } = useAuth();
-  const targetId = id ?? user?.id;
+  const { t } = useI18n();
+  // "#/profile/@handle" (from an @mention) is looked up by handle.
+  const byHandle = id?.startsWith('@') ? id.slice(1).toLowerCase() : null;
+  const [found, setFound] = useState<{ handle: string; id: string | null } | null>(null);
+  useEffect(() => {
+    if (!byHandle) return;
+    let off = false;
+    supabase.from('profiles').select('id').eq('handle', byHandle).maybeSingle().then(({ data }) => {
+      if (!off) setFound({ handle: byHandle, id: (data?.id as string | undefined) ?? null });
+    });
+    return () => { off = true; };
+  }, [byHandle]);
+  if (byHandle) {
+    if (!found || found.handle !== byHandle) return <Loading />;
+    if (!found.id) return <Empty text={t('profile_not_found')} />;
+  }
+  const targetId = byHandle ? (found?.id ?? undefined) : id ?? user?.id;
   if (!targetId) return <SignInCard />;
   const own = Boolean(user && targetId === user.id);
   return <ProfileBody key={targetId} targetId={targetId} own={own} mine={mine} />;
@@ -134,7 +153,7 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
               {profile.status_text && <p className="text-sm text-accent">{profile.status_text}</p>}
             </div>
           )}
-          {profile.bio && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-zinc-700">{profile.bio}</p>}
+          {profile.bio && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-zinc-700"><RichText text={profile.bio} /></p>}
           <p className="mt-2 text-xs text-zinc-500">{t('followers_n', { n: followers })} · {t('following_n', { n: followingCount })}</p>
         </div>
         {!own && (
@@ -221,16 +240,24 @@ function OwnSettings({ profile }: { profile: Profile }) {
 
   const uploadAvatar = async (file: File | undefined) => {
     if (!file || !user) return;
-    if (file.size > 2 * 1024 * 1024) return toast(t('err_avatar_big'), 'error');
     setUploading(true);
-    const path = `${user.id}/avatar-${Date.now()}.${fileExt(file.name)}`;
-    const { error } = await supabase.storage.from('avatars').upload(path, file, { contentType: file.type, upsert: false });
+    // Any phone photo works: it is shrunk to 1080 px (Instagram's profile size is far smaller) before upload.
+    const ready = await compressImage(file, 1080, 0.88);
+    if (ready.size > 10 * 1024 * 1024) {
+      setUploading(false);
+      return toast(t('err_avatar_big'), 'error');
+    }
+    const previous = profile.avatar_url?.split('/object/public/avatars/')[1];
+    const path = `${user.id}/avatar-${Date.now()}.${fileExt(ready.name)}`;
+    const { error } = await supabase.storage.from('avatars').upload(path, ready, { contentType: contentTypeOf(ready), upsert: false });
     if (error) {
       setUploading(false);
       return toast(t('err_upload'), 'error');
     }
     try {
       await updateProfile({ avatar_url: supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl });
+      // Remove the old picture so it does not stay online (only files in your own folder can be removed).
+      if (previous) await supabase.storage.from('avatars').remove([decodeURIComponent(previous.split('?')[0])]);
     } catch {
       toast(t('error_generic'), 'error');
     }
@@ -274,7 +301,7 @@ function OwnSettings({ profile }: { profile: Profile }) {
         <label className="btn btn-ghost btn-sm w-fit cursor-pointer">
           {uploading && <Spinner />}
           {t('change_avatar')}
-          <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={uploading} onChange={(e) => { void uploadAvatar(e.target.files?.[0]); e.target.value = ''; }} />
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" disabled={uploading} onChange={(e) => { void uploadAvatar(e.target.files?.[0]); e.target.value = ''; }} />
         </label>
         {editing && (
           <form onSubmit={save} className="space-y-3">

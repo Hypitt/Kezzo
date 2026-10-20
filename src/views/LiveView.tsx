@@ -13,6 +13,7 @@ import { useToast } from '../state/Toast';
 import { ChatPanel } from '../components/ChatPanel';
 import { LiveControls, MediaTile, RemoteAudio } from '../components/LiveParts';
 import { Avatar, Chip, Empty, Loading, PageHeader, Spinner } from '../components/ui';
+import { ProfileLink } from '../components/ProfileLink';
 
 const asProfile = (v: unknown): PublicProfile => (Array.isArray(v) ? v[0] : v) as PublicProfile;
 const STREAM_SELECT = `id,host_id,title,kind,mode,max_guests,status,created_at,host:profiles!host_id(${PUBLIC_PROFILE})`;
@@ -258,7 +259,7 @@ export function LiveStreamRoom({ id }: { id: string }) {
           <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 font-medium">{t(stream.kind === 'solo' ? 'live_kind_solo' : 'live_kind_group')}</span>
         </div>
         <h1 className="text-2xl font-bold">{stream.title}</h1>
-        <p className="text-xs text-zinc-500">{t('hosted_by')} <button type="button" className="underline" onClick={() => go('profile', stream.host_id)}>{stream.host.display_name}</button></p>
+        <p className="text-xs text-zinc-500">{t('hosted_by')} <ProfileLink to={stream.host_id} newTab={!ended} className="underline">{stream.host.display_name}</ProfileLink></p>
       </header>
 
       <div className="grid gap-5 lg:grid-cols-3">
@@ -335,8 +336,7 @@ export function LiveStreamRoom({ id }: { id: string }) {
                     {requests.length === 0 && <p className="text-sm text-zinc-500">{t('live_no_requests')}</p>}
                     {requests.map((g) => (
                       <div key={g.user_id} className="flex items-center gap-2">
-                        <Avatar p={g.profile} size={28} />
-                        <span className="mr-auto truncate text-sm">{g.profile.display_name}</span>
+                        <ProfileLink to={g.user_id} newTab className="mr-auto flex min-w-0 items-center gap-2 truncate text-sm"><Avatar p={g.profile} size={28} />{g.profile.display_name}</ProfileLink>
                         <button type="button" className="btn btn-accent btn-sm" disabled={full || busy === `ok:${g.user_id}`} onClick={() => approve(g.user_id)} aria-label={`${t('live_approve')} ${g.profile.display_name}`}><Check className="h-3.5 w-3.5" aria-hidden="true" />{t('live_approve')}</button>
                         <button type="button" className="btn btn-ghost btn-sm" disabled={busy === `no:${g.user_id}`} onClick={() => decline(g.user_id)} aria-label={`${t('live_decline')} ${g.profile.display_name}`}><X className="h-3.5 w-3.5" aria-hidden="true" />{t('live_decline')}</button>
                       </div>
@@ -347,8 +347,7 @@ export function LiveStreamRoom({ id }: { id: string }) {
                       <h3 className="text-sm font-semibold">{t('live_on_stage_list')}</h3>
                       {approved.map((g) => (
                         <div key={g.user_id} className="flex items-center gap-2">
-                          <Avatar p={g.profile} size={28} />
-                          <span className="mr-auto truncate text-sm">{g.profile.display_name}</span>
+                          <ProfileLink to={g.user_id} newTab className="mr-auto flex min-w-0 items-center gap-2 truncate text-sm"><Avatar p={g.profile} size={28} />{g.profile.display_name}</ProfileLink>
                           <button type="button" className="btn btn-danger btn-sm" disabled={busy === `no:${g.user_id}`} onClick={() => decline(g.user_id)}><UserMinus className="h-3.5 w-3.5" aria-hidden="true" />{t('live_remove')}</button>
                         </div>
                       ))}

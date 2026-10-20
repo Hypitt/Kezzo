@@ -5,7 +5,7 @@ import { fileExt } from '../lib/format';
 import { formatClock } from '../lib/battle';
 import { isSafe } from '../lib/moderation';
 import { MAX_VIDEO_SECONDS, compressImage, mediaDuration } from '../lib/media';
-import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB, startUpload, type UploadFailure, type UploadHandle } from '../lib/upload';
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL, startUpload, type UploadFailure, type UploadHandle } from '../lib/upload';
 import { BATTLE_CATEGORIES, type BattleCategory, type PostKind } from '../lib/types';
 import type { Key } from '../lib/i18n';
 import { useAuth } from '../state/Auth';
@@ -18,8 +18,8 @@ import { Chip, PageHeader, Spinner } from '../components/ui';
 type Mode = 'post' | 'battle' | 'status';
 const ACCEPT: Record<Exclude<PostKind, 'text'>, string> = {
   photo: 'image/jpeg,image/png,image/webp,image/gif',
-  audio: 'audio/mpeg,audio/wav,audio/mp4,audio/webm,audio/ogg',
-  video: 'video/mp4,video/webm,video/quicktime',
+  audio: 'audio/mpeg,audio/wav,audio/mp4,audio/x-m4a,audio/aac,audio/webm,audio/ogg,.m4a,.mp3,.aac',
+  video: 'video/mp4,video/webm,video/quicktime,video/x-m4v,video/3gpp,.mp4,.mov,.m4v,.3gp',
 };
 
 export function CreateView({ initial }: { initial?: string }) {
@@ -121,22 +121,27 @@ function PostForm() {
       return run();
     }
     if (!file) return setError(t('err_file_required'));
-    if (file.size > MAX_UPLOAD_BYTES) return setError(t('err_file_too_big', { n: MAX_UPLOAD_MB }));
     setBusy(true);
+    // Shrink photos first (max 2048 px, more than Instagram's 1080 px), so even very large phone photos fit.
+    const ready = kind === 'photo' ? await compressImage(file) : file;
+    if (ready.size > MAX_UPLOAD_BYTES) {
+      setBusy(false);
+      return setError(t('err_file_too_big', { n: MAX_UPLOAD_LABEL }));
+    }
     let duration: number | null = null;
     if (kind !== 'photo') {
       try {
         duration = Math.round(await mediaDuration(file, kind));
       } catch {
-        setBusy(false);
-        return setError(t('err_file_unreadable'));
+        // Some browsers cannot read the length of every phone video (for example HEVC on Windows).
+        // Upload it anyway rather than refusing a normal file.
+        duration = 0;
       }
       if (kind === 'video' && duration > MAX_VIDEO_SECONDS) {
         setBusy(false);
         return setError(t('err_video_too_long', { min: MAX_VIDEO_SECONDS / 60 }));
       }
     }
-    const ready = kind === 'photo' ? await compressImage(file) : file; // smaller photos upload much faster
     // The storage path is created once, so Retry continues the same upload instead of starting over.
     if (!job.current || job.current.file !== ready) {
       job.current = {
@@ -173,7 +178,7 @@ function PostForm() {
           <div>
             <label className="label" htmlFor="pf-file">{t('file')}</label>
             <input id="pf-file" type="file" accept={ACCEPT[kind]} disabled={busy} onChange={(e) => { setFile(e.target.files?.[0] ?? null); job.current = null; setUpload(null); }} className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm" />
-            <p className="mt-1 text-xs text-zinc-500">{kind === 'video' ? t('file_hint_video', { n: MAX_UPLOAD_MB, min: MAX_VIDEO_SECONDS / 60 }) : t('file_hint', { n: MAX_UPLOAD_MB })}</p>
+            <p className="mt-1 text-xs text-zinc-500">{kind === 'video' ? t('file_hint_video', { n: MAX_UPLOAD_LABEL, min: MAX_VIDEO_SECONDS / 60 }) : t('file_hint', { n: MAX_UPLOAD_LABEL })}</p>
           </div>
           <div>
             <label className="label" htmlFor="pf-price">{t('price_label')}</label>

@@ -8,7 +8,7 @@ Kezzo is a social platform where creators compete in **live battles** (roasts, d
 
 - **Search & Feeds** is the default landing page (also right after login or sign-up). Search everyone's posts, battles and people; filter by *Everyone* or *Following*.
 - **Sign in or sign up with Google or with email + password** (Supabase Auth), then a short onboarding (handle, display name, 16+ confirmation). Terms and Privacy open in a pop-up from every sign-in screen.
-- **Posts**: text, photo, audio and video (video up to 30 minutes). Large files upload in resumable chunks with a progress bar, Cancel and Retry; photos are shrunk in the browser first. The file-size limit follows your Supabase plan (see *Upload limits* below). Likes, comments, edit, delete. Optional price in coins: paid files are stored in a private bucket and only owner and buyers can open them.
+- **Posts**: text, photo, audio and video (video up to 60 minutes and 4 GB, like Instagram; photos and profile pictures are shrunk in the browser so any phone photo fits). Large files upload in resumable chunks with a progress bar, Cancel and Retry; photos are shrunk in the browser first. The file-size limit follows your Supabase plan (see *Upload limits* below). Likes, comments, edit, delete. Optional price in coins: paid files are stored in a private bucket and only owner and buyers can open them.
 - **Live battles**: 2 to 5 competitors in **one shared video frame** that adapts to the number of people (video or audio), through **LiveKit**. Each competitor has a number and colour on their tile, score card and vote buttons.
   - Voting: **free like** (1 point, once per competitor per round), **2-coin vote** (2 points), **5-coin vote** (5 points).
   - Up to **3 public judges** picked by the host: each scores every competitor 0 to 10 with a comment (judges cannot compete or vote).
@@ -109,10 +109,10 @@ cp .env.example .env.local
 
 ### 5. Upload limits (video size)
 
-The app itself no longer fixes 50 MB. Large files are sent with resumable uploads, and the buckets allow up to 5 GB. The real limit is set by your **Supabase plan**:
+The app allows videos up to **60 minutes and 4 GB** (Instagram's feed-video limits), after you run `supabase/update-5.sql`. Large files are sent with resumable uploads. Photos and profile pictures are shrunk in the browser first, so they fit on any plan. The real ceiling for videos is your **Supabase plan**:
 
-- **Free plan**: Supabase refuses any single file over **50 MB**. Keep `VITE_MAX_UPLOAD_MB` at 50 (the default) so people get a clear message instead of a failed upload.
-- **Pro plan or higher**: in Supabase open *Storage → Settings*, raise **Upload file size limit** (for example 2 GB), then set `VITE_MAX_UPLOAD_MB=2000` in Vercel and redeploy.
+- **Free plan**: Supabase refuses any single file over **50 MB**, and this cannot be raised. Set `VITE_MAX_UPLOAD_MB=50` in Vercel so people get a clear message instead of a failed upload.
+- **Pro plan or higher**: in Supabase open *Storage → Settings* and set **Global file size limit** to **4 GB**. Nothing else to set (the app's default is already 4 GB).
 
 ### 6. Environment variables
 
@@ -126,7 +126,7 @@ Fill in `.env.local` (see `.env.example`):
 | `SUPABASE_SERVICE_ROLE_KEY` | server | **secret**, bypasses RLS, never expose |
 | `LIVEKIT_URL` | server | `wss://...` |
 | `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` | server | **secret** |
-| `VITE_MAX_UPLOAD_MB` | browser | optional, biggest upload in MB (default 50, see below) |
+| `VITE_MAX_UPLOAD_MB` | browser | optional, biggest upload in MB (default 4096 = 4 GB; set 50 on the Supabase Free plan) |
 | `GEMINI_API_KEY` | server | optional |
 
 ### 7. Run locally
