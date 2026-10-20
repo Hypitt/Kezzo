@@ -86,7 +86,7 @@ export function Navbar() {
                 <Avatar p={profile} size={30} />
               </button>
             ) : (
-              <button type="button" className="btn btn-sm bg-white text-black hover:bg-zinc-200" onClick={openAuth}>
+              <button type="button" className="btn btn-sm bg-white text-black hover:bg-zinc-200" onClick={() => openAuth()}>
                 <LogIn className="h-3.5 w-3.5" aria-hidden="true" />
                 {t('sign_in')}
               </button>

@@ -72,7 +72,7 @@ export function track(ev: Ev): void {
 /** Turns "/battles/3f2a…" into "/battles/:id" so no identifier ever leaves the browser. */
 export function pagePattern(hash: string): string {
   const [tab, id] = hash.replace(/^#\/?/, '').split('/').filter(Boolean);
-  if (!tab) return '/search';
+  if (!tab) return '/';
   if (tab === 'legal') return `/legal/${id === 'privacy' ? 'privacy' : 'terms'}`;
   if (tab === 'join') return '/join/:code';
   return id ? `/${tab}/:id` : `/${tab}`;

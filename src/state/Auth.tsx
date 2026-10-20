@@ -32,7 +32,8 @@ interface AuthValue {
   /** True while the user arrived from a password-reset email and must choose a new password. */
   recovering: boolean;
   authOpen: boolean;
-  openAuth: () => void;
+  openAuth: (mode?: 'signin' | 'signup') => void;
+  authMode: 'signin' | 'signup';
   closeAuth: () => void;
   signOut: () => Promise<void>;
   createProfile: (values: NewProfile) => Promise<void>;
@@ -56,6 +57,7 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
   const [loading, setLoading] = useState(configured);
   const [recovering, setRecovering] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const lastUser = useRef<string | null>(null);
   const signedInCb = useRef(onSignedIn);
   signedInCb.current = onSignedIn;
@@ -142,7 +144,10 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
     setRecovering(false);
   }, []);
 
-  const openAuth = useCallback(() => setAuthOpen(true), []);
+  const openAuth = useCallback((mode?: 'signin' | 'signup') => {
+    setAuthMode(mode === 'signup' ? 'signup' : 'signin');
+    setAuthOpen(true);
+  }, []);
   const closeAuth = useCallback(() => {
     setAuthOpen(false);
     setRecovering(false);
@@ -223,11 +228,11 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
     () => ({
       configured, loading, session, user, profile, wallet, blocked,
       signInWithGoogle, signUpWithEmail, signInWithEmail, sendPasswordReset, updatePassword, recovering,
-      authOpen, openAuth, closeAuth,
+      authOpen, authMode, openAuth, closeAuth,
       signOut, createProfile, updateProfile, refreshWallet, refreshBlocked, deleteAccount, ensureAuth,
     }),
     [loading, session, user, profile, wallet, blocked, signInWithGoogle, signUpWithEmail, signInWithEmail, sendPasswordReset,
-      updatePassword, recovering, authOpen, openAuth, closeAuth, signOut, createProfile, updateProfile, refreshWallet, refreshBlocked, deleteAccount, ensureAuth],
+      updatePassword, recovering, authOpen, authMode, openAuth, closeAuth, signOut, createProfile, updateProfile, refreshWallet, refreshBlocked, deleteAccount, ensureAuth],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

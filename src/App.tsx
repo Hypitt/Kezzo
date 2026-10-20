@@ -27,6 +27,8 @@ const MediaView = page(() => import('./views/MediaView').then((m) => ({ default:
 const MessagesView = page(() => import('./views/MessagesView').then((m) => ({ default: m.MessagesView })));
 const ProfileView = page(() => import('./views/ProfileView').then((m) => ({ default: m.ProfileView })));
 const AdminView = page(() => import('./views/AdminView').then((m) => ({ default: m.AdminView })));
+const Landing = page(() => import('./views/Landing').then((m) => ({ default: m.Landing })));
+const PublicFrame = page(() => import('./views/Landing').then((m) => ({ default: m.PublicFrame })));
 const SearchView = page(() => import('./views/SearchView').then((m) => ({ default: m.SearchView })));
 
 function View() {
@@ -75,14 +77,30 @@ function Shell() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id]);
 
-  // Signed-out users or an unknown route land on Search & Feeds; Home stays reachable from the navbar.
+  // Signed-in people land on Search & Feeds (Home stays reachable from the navbar). Visitors see the public landing page instead.
   useEffect(() => {
-    if (!window.location.hash) go('search');
+    if (!loading && user && !window.location.hash) go('search');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loading, user?.id]);
 
   if (!configured) return <SetupNotice />;
   if (loading) return <Loading />;
+
+  // Visitors only get the public landing page (and the Terms and Privacy pages). Everything else needs an account.
+  if (!user) {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-black" />}>
+        {route.tab === 'legal' ? (
+          <PublicFrame>
+            <div className="mx-auto w-full max-w-6xl px-4 py-6"><LegalView id={route.id} /></div>
+          </PublicFrame>
+        ) : (
+          <Landing invite={route.tab === 'join' ? route.id : undefined} />
+        )}
+        <AuthDialog />
+      </Suspense>
+    );
+  }
   // The Terms and Privacy pages stay reachable while a new person is still choosing their profile.
   if (user && !profile && route.tab !== 'legal') return <Onboarding />;
 

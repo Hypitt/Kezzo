@@ -204,7 +204,7 @@ export function SignInCard() {
 
 /** Pop-up opened by the navbar "Sign in" button, or whenever a signed-out user tries to act. */
 export function AuthDialog() {
-  const { authOpen, closeAuth, recovering, user } = useAuth();
+  const { authOpen, authMode, closeAuth, recovering, user } = useAuth();
   const { t } = useI18n();
 
   useEffect(() => {
@@ -223,7 +223,7 @@ export function AuthDialog() {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center" onMouseDown={(e) => e.target === e.currentTarget && closeAuth()}>
       <div role="dialog" aria-modal="true" aria-label={t('sign_in')} className="max-h-full w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
-        <AuthPanel onDone={closeAuth} initialMode={recovering ? 'recovery' : 'signin'} />
+        <AuthPanel onDone={closeAuth} initialMode={recovering ? 'recovery' : authMode} />
         <button type="button" className="mt-4 block w-full text-center text-xs text-zinc-500 underline" onClick={closeAuth}>
           {t('cancel')}
         </button>

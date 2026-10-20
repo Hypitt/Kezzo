@@ -6,7 +6,8 @@ Kezzo is a social platform where creators compete in **live battles** (roasts, d
 
 ## Features
 
-- **Search & Feeds** is the default landing page (also right after login or sign-up). Search everyone's posts, battles and people; filter by *Everyone* or *Following*.
+- **Public landing page and members-only app.** Anyone opening the site sees a public page that explains Kezzo with **Sign up** and **Log in** buttons (English / French). Nothing else is visible without an account: feed, videos, live streams, battles, profiles and groups all need a login. This is enforced in the database too (`supabase/update-7.sql` removes read access for signed-out visitors), not only by the screens. Only the landing page and the Terms and Privacy pages are public.
+- **Search & Feeds** is the first page right after login or sign-up. Search everyone's posts, battles and people; filter by *Everyone* or *Following*.
 - **Sign in or sign up with Google or with email + password** (Supabase Auth), then a short onboarding (handle, display name, 16+ confirmation). Terms and Privacy open in a pop-up from every sign-in screen.
 - **Posts**: text, photo, audio and video (video up to 30 minutes). Large files upload in resumable chunks with a progress bar, Cancel and Retry; photos are shrunk in the browser first. The file-size limit follows your Supabase plan (see *Upload limits* below). Likes, comments, edit, delete. Optional price in coins: paid files are stored in a private bucket and only owner and buyers can open them.
 - **Live battles**: 2 to 5 competitors in **one shared video frame** that adapts to the number of people (video or audio), through **LiveKit**. Each competitor has a number and colour on their tile, score card and vote buttons.
@@ -60,6 +61,7 @@ supabase/update-3.sql  Go Live streams (solo and group), livestream chat, battle
 supabase/update-4.sql  Admin statistics: admins table, anonymous usage events, admin_stats()
 supabase/update-5.sql  In-app notifications: messages, likes, new followers, live sessions
 supabase/update-6.sql  Email notifications for new direct messages (opt-out switch, send log)
+supabase/update-7.sql  Members-only: signed-out visitors can no longer read app data
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers
@@ -91,7 +93,7 @@ cp .env.example .env.local
 ### 2. Supabase
 
 1. Create a project. Copy **Project URL**, **anon key** and **service_role key** from *Project Settings → API*.
-2. Open *SQL Editor → New query*, paste the whole of `supabase/schema.sql` and run it. Then run `supabase/update-2.sql`, `supabase/update-3.sql`, `supabase/update-4.sql`, `supabase/update-5.sql` and `supabase/update-6.sql` the same way. All are safe to run again. Run `update-3.sql` before deploying the matching code: battle pages ask for its new `highlight_post_id` column.
+2. Open *SQL Editor → New query*, paste the whole of `supabase/schema.sql` and run it. Then run `supabase/update-2.sql`, `supabase/update-3.sql`, `supabase/update-4.sql`, `supabase/update-5.sql`, `supabase/update-6.sql` and `supabase/update-7.sql` the same way. All are safe to run again. Run `update-3.sql` before deploying the matching code: battle pages ask for its new `highlight_post_id` column.
 3. *Authentication → Providers → Google*: enable it and paste your Google client ID and secret (step 3 below).
 4. *Authentication → URL Configuration*:
    - **Site URL**: your production URL (e.g. `https://kezzo.vercel.app`)

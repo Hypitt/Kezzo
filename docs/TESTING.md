@@ -3,7 +3,7 @@
 Use two different Google accounts in two browser profiles (call them **A** and **B**). Run after every deploy.
 
 ## Authentication
-1. A signs in with Google. Expected: onboarding appears; after submitting, the landing page is **Search & Feeds**.
+1. A signs in with Google. Expected: onboarding appears; after submitting, the first page is **Search & Feeds**.
 2. Reload the page. Expected: still signed in, no redirect away from the current page.
 3. Sign out and back in. Expected: Search & Feeds again; Home is still reachable in the navbar.
 4. Try a taken handle with B. Expected: "handle is taken".
@@ -74,3 +74,10 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 51. A group with A, B, C: A writes in the group chat. B and C each get the same generic email (not A). A does not get one. A writes again right away: no new emails.
 52. B unticks "Email me about new direct and group messages" in profile settings: no more emails to B. Re-tick it: emails work again.
 53. In an email, click "Stop these emails": a page asks for confirmation; press the button and the profile checkbox is now unticked. A changed or truncated link shows "Invalid link". If B blocked A, B gets no email. If `RESEND_API_KEY` is missing, sending messages still works normally.
+
+## Landing page and login required
+54. Run `update-7.sql`. In a private window open the site address: the black-and-white landing page appears (hero, how it works, features, Sign up / Log in). On a phone width everything stacks and nothing scrolls sideways. EN/FR switch works.
+55. Click **Sign up**: the dialog opens on the sign-up tab. Click **Log in**: it opens on the sign-in tab. After signing in you land on **Search & Feeds**.
+56. Signed out, type `#/battles`, `#/profile/<id>`, `#/live`, `#/media`, `#/groups` or `#/messages` after the address: you still see the landing page. Terms and Privacy (footer links) open without logging in. Open a group invite link signed out: the sign-up dialog appears, and after signing up you join the group.
+57. Sign out from your profile page: you return to the landing page. Signed-in people never see the landing page.
+

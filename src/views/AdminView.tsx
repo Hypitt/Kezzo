@@ -264,7 +264,7 @@ export function AdminView() {
       <div className="card mx-auto max-w-md space-y-3 text-center">
         <ShieldAlert className="mx-auto h-8 w-8 text-zinc-500" aria-hidden="true" />
         <p className="text-sm text-zinc-700">{w.noAccess}</p>
-        <button type="button" className="btn btn-primary" onClick={openAuth}>{lang === 'fr' ? 'Se connecter' : 'Sign in'}</button>
+        <button type="button" className="btn btn-primary" onClick={() => openAuth()}>{lang === 'fr' ? 'Se connecter' : 'Sign in'}</button>
       </div>
     );
   }
