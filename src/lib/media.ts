@@ -32,14 +32,19 @@ export function mediaDuration(file: File, kind: 'audio' | 'video'): Promise<numb
 export const MAX_VIDEO_SECONDS = 3600;
 
 /**
- * Shrinks big photos in the browser before upload (max 2048 px, JPEG/WebP). This makes uploads much faster.
+ * Shrinks big photos in the browser before upload (max 1440 px by default, JPEG). This makes uploads much faster.
  * GIFs and small files are left alone. If anything goes wrong the original file is returned.
  */
-export async function compressImage(file: File, maxSide = 2048, quality = 0.86): Promise<File> {
-  if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 400 * 1024) return file;
+export async function compressImage(file: File, maxSide = 1440, quality = 0.86): Promise<File> {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return file;
   try {
     const bitmap = await createImageBitmap(file);
     const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+    // Small files that are already small enough on screen are kept as they are.
+    if (scale === 1 && file.size < 400 * 1024) {
+      bitmap.close();
+      return file;
+    }
     const canvas = document.createElement('canvas');
     canvas.width = Math.round(bitmap.width * scale);
     canvas.height = Math.round(bitmap.height * scale);
@@ -54,7 +59,8 @@ export async function compressImage(file: File, maxSide = 2048, quality = 0.86):
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     bitmap.close();
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality));
-    if (!blob || blob.size >= file.size) return file;
+    // Keep the original only if it already had the right size and re-saving would not make it smaller.
+    if (!blob || (scale === 1 && blob.size >= file.size)) return file;
     const ext = type === 'image/png' ? 'png' : 'jpg';
     return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.' + ext, { type, lastModified: file.lastModified });
   } catch {

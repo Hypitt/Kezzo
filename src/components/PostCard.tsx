@@ -140,7 +140,8 @@ export function PostCard({ post, onChange, onDelete }: Props) {
       )}
 
       {post.kind !== 'text' && (
-        <div>
+        // Off-screen photos and players are skipped by the browser until they come back into view, which saves memory on long feeds.
+        <div className="[content-visibility:auto] [contain-intrinsic-size:auto_320px]">
           {locked ? (
             <div className="flex flex-col items-center gap-3 rounded-xl bg-zinc-100 px-4 py-8 text-center">
               <Lock className="h-6 w-6 text-zinc-500" aria-hidden="true" />

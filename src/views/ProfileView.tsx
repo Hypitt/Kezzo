@@ -20,6 +20,7 @@ import { StatusViewer } from '../components/StatusViewer';
 import { useLegal } from '../state/Legal';
 import { AccountFooter } from '../components/AccountFooter';
 import { RichText } from '../components/ProfileLink';
+import { InstallApp } from '../components/InstallApp';
 import { Avatar, Empty, Loading, LoadMore, Spinner } from '../components/ui';
 
 const PAGE = 8;
@@ -241,8 +242,9 @@ function OwnSettings({ profile }: { profile: Profile }) {
   const uploadAvatar = async (file: File | undefined) => {
     if (!file || !user) return;
     setUploading(true);
-    // Any phone photo works: it is shrunk to 1080 px (Instagram's profile size is far smaller) before upload.
-    const ready = await compressImage(file, 1080, 0.88);
+    // Any phone photo works: it is shrunk to 512 px before upload (Instagram shows profile photos at 320 px).
+    // Profile photos appear many times on every page, so keeping them small saves a lot of memory on phones.
+    const ready = await compressImage(file, 512, 0.88);
     if (ready.size > 10 * 1024 * 1024) {
       setUploading(false);
       return toast(t('err_avatar_big'), 'error');
@@ -341,6 +343,7 @@ function OwnSettings({ profile }: { profile: Profile }) {
         <div className="flex flex-wrap items-center gap-4 border-t border-zinc-100 pt-4 text-xs">
           <button type="button" className="text-zinc-500 underline" onClick={() => openLegal('terms')}>{t('terms')}</button>
           <button type="button" className="text-zinc-500 underline" onClick={() => openLegal('privacy')}>{t('privacy')}</button>
+          <InstallApp className="text-zinc-500" />
         </div>
 
       </section>

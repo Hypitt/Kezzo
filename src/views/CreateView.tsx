@@ -122,7 +122,7 @@ function PostForm() {
     }
     if (!file) return setError(t('err_file_required'));
     setBusy(true);
-    // Shrink photos first (max 2048 px, more than Instagram's 1080 px), so even very large phone photos fit.
+    // Shrink photos first (max 1440 px, sharper than Instagram's 1080 px), so even very large phone photos fit.
     const ready = kind === 'photo' ? await compressImage(file) : file;
     if (ready.size > MAX_UPLOAD_BYTES) {
       setBusy(false);
@@ -359,7 +359,7 @@ function StatusForm() {
     try {
       let imageUrl: string | null = null;
       if (image) {
-        const ready = await compressImage(image, 1600, 0.85);
+        const ready = await compressImage(image, 1080, 0.85);
         const path = `${user.id}/status-${crypto.randomUUID()}.${fileExt(ready.name)}`;
         setUpload({ sent: 0, total: ready.size, failed: false });
         const h = startUpload({ bucket: 'media-public', path, file: ready, onProgress: (sent, total) => setUpload((u) => (u ? { ...u, sent, total } : u)) });

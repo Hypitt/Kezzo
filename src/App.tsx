@@ -8,6 +8,7 @@ import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScre
 import { Navbar } from './components/Navbar';
 import { Loading } from './components/ui';
 import { pendingInvite } from './lib/invite';
+import { InstallApp } from './components/InstallApp';
 import { ErrorBoundary, loadPage } from './components/ErrorBoundary';
 
 // Every page is its own downloadable chunk, so the first screen only loads the code it needs.
@@ -89,6 +90,7 @@ function Shell() {
         <button type="button" className="underline" onClick={() => go('legal', 'terms')}>{lang === 'fr' ? 'Conditions' : 'Terms'}</button>
         {' · '}
         <button type="button" className="underline" onClick={() => go('legal', 'privacy')}>{lang === 'fr' ? 'Confidentialité' : 'Privacy'}</button>
+        <InstallApp className="ml-3" />
       </footer>
       <AuthDialog />
     </div>
