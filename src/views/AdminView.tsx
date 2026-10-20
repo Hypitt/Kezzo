@@ -42,7 +42,7 @@ const TEXT = {
     hours: 'Busy hours', hoursSub: 'Page views by hour of day (your time zone)',
     pages: 'Top pages', referrers: 'Where visitors come from', countries: 'Countries', devices: 'Devices', browsers: 'Browsers', systems: 'Operating systems', languages: 'Languages',
     methods: 'Sign-in methods', platform: 'Platform activity', health: 'Performance and errors',
-    users: 'Total members', posts: 'Posts (period)', likes: 'Likes', comments: 'Comments', follows: 'Follows', battles: 'Battles created', battlesLive: 'Battles live now',
+    users: 'Total members', registered: 'Registered users', registeredSub: 'All accounts, all time', today: 'Today', todaySub: 'Since midnight in your time zone, compared with yesterday', auto: 'Updates itself every minute', posts: 'Posts (period)', likes: 'Likes', comments: 'Comments', follows: 'Follows', battles: 'Battles created', battlesLive: 'Battles live now',
     battlesEnded: 'Battles ended (all time)', votes: 'Votes', lives: 'Go Live streams', liveNow: 'Streams live now', groups: 'Groups (all time)', messages: 'Messages', reports: 'Reports (all time)',
     table: 'Table', chart: 'Chart', day: 'Day', direct: 'direct', none: 'No data yet', error: 'Error', times: 'Times', last: 'Last seen',
     loadNote: 'Time until the page finished loading. Under 2.5 s is good.',
@@ -60,7 +60,7 @@ const TEXT = {
     hours: 'Heures de pointe', hoursSub: 'Pages vues par heure (votre fuseau horaire)',
     pages: 'Pages les plus vues', referrers: 'D’où viennent les visiteurs', countries: 'Pays', devices: 'Appareils', browsers: 'Navigateurs', systems: 'Systèmes', languages: 'Langues',
     methods: 'Méthodes de connexion', platform: 'Activité de la plateforme', health: 'Performance et erreurs',
-    users: 'Membres au total', posts: 'Publications (période)', likes: 'J’aime', comments: 'Commentaires', follows: 'Abonnements', battles: 'Battles créés', battlesLive: 'Battles en direct',
+    users: 'Membres au total', registered: 'Utilisateurs inscrits', registeredSub: 'Tous les comptes, depuis le début', today: 'Aujourd’hui', todaySub: 'Depuis minuit dans votre fuseau horaire, comparé à hier', auto: 'Se met à jour chaque minute', posts: 'Publications (période)', likes: 'J’aime', comments: 'Commentaires', follows: 'Abonnements', battles: 'Battles créés', battlesLive: 'Battles en direct',
     battlesEnded: 'Battles terminés (total)', votes: 'Votes', lives: 'Directs (Go Live)', liveNow: 'Directs en cours', groups: 'Groupes (total)', messages: 'Messages', reports: 'Signalements (total)',
     table: 'Tableau', chart: 'Graphique', day: 'Jour', direct: 'direct', none: 'Aucune donnée', error: 'Erreur', times: 'Fois', last: 'Dernière fois',
     loadNote: 'Temps avant la fin du chargement de la page. Sous 2,5 s, c’est bon.',
@@ -247,7 +247,13 @@ export function AdminView() {
   }, [days]);
 
   useEffect(() => {
-    if (user) void load();
+    if (!user) return;
+    void load();
+    // Real numbers refresh by themselves every minute while the tab is open and visible.
+    const id = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void load();
+    }, 60_000);
+    return () => window.clearInterval(id);
   }, [user, load]);
 
   const labels = useMemo(() => data?.daily.map((d) => d.day) ?? [], [data]);
@@ -299,12 +305,27 @@ export function AdminView() {
       <div className="flex flex-wrap items-center gap-2">
         {[7, 30, 90].map((n) => <Chip key={n} active={days === n} onClick={() => setDays(n)}>{w.days(n)}</Chip>)}
         <span className="ml-auto text-xs text-zinc-500">
-          {w.updated} {new Date(data.generated_at).toLocaleTimeString()}
+          {w.auto} · {w.updated} {new Date(data.generated_at).toLocaleTimeString()}
           {data.tracking_since ? ` · ${w.since} ${new Date(data.tracking_since).toLocaleDateString()}` : ''}
         </span>
       </div>
 
       {!hasTraffic && <p className="rounded-xl border border-dashed border-zinc-300 p-4 text-sm text-zinc-700">{w.empty}</p>}
+
+      <Panel title={w.today} sub={w.todaySub}>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="col-span-2 rounded-xl border border-zinc-900 bg-white p-3 sm:col-span-3 lg:col-span-1" title={w.registeredSub}>
+            <div className="text-xs text-zinc-600">{w.registered}</div>
+            <div className="mt-1 text-3xl font-semibold tabular-nums text-zinc-900">{nf(pf.users)}</div>
+            <div className="mt-0.5 text-xs text-zinc-500">{w.registeredSub}</div>
+          </div>
+          {([['visitors', w.visitors], ['views', w.views], ['signins', w.signins], ['new_users', w.newUsers]] as const).map(([key, label]) => {
+            const last = data.daily[data.daily.length - 1];
+            const before = data.daily[data.daily.length - 2];
+            return <Tile key={key} label={label} value={nf(last?.[key] ?? 0)} extra={<Delta now={last?.[key] ?? 0} before={before?.[key] ?? 0} w={w} />} />;
+          })}
+        </div>
+      </Panel>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {tile(w.visitors, 'visitors')}
@@ -318,7 +339,6 @@ export function AdminView() {
         <Tile label={w.newVisitors} value={nf(data.new_visitors)} />
         <Tile label={w.returning} value={nf(returning)} />
         <Tile label={w.online} value={nf(data.online_now)} />
-        <Tile label={w.users} value={nf(pf.users)} />
       </div>
 
       <Panel
