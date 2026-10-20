@@ -18,6 +18,7 @@ import livekitLive from '../api/livekit-live';
 import aiJudge from '../api/ai-judge';
 import track from '../api/track';
 import notifyMessage from '../api/notify-message';
+import emailOptout from '../api/email-optout';
 
 type ApiHandler = (req: never, res: never) => unknown;
 const routes: Record<string, ApiHandler> = {
@@ -29,6 +30,7 @@ const routes: Record<string, ApiHandler> = {
   '/api/ai-judge': aiJudge,
   '/api/track': track,
   '/api/notify-message': notifyMessage,
+  '/api/email-optout': emailOptout,
 };
 
 async function main() {

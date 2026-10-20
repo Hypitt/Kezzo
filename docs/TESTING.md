@@ -70,7 +70,7 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 49. Liking your own post, or unlike/like again, creates no extra notification. "Mark all as read" clears the counter. On a phone width the list opens full width under the top bar.
 
 ## Email notifications for messages
-50. Run `update-6.sql`, add `RESEND_API_KEY` and `EMAIL_FROM` in Vercel and redeploy. A messages B (B's email is a real inbox): B gets "A sent you a message on Kezzo" within a minute, with no message text and a working button. A sends a second message right away: no second email.
-51. B unticks "Email me about new messages" in profile settings; A messages again (after 30 minutes or with a different sender): no email. Re-tick it and it works again.
-52. If B blocked A, no email. If `RESEND_API_KEY` is missing, sending a message still works normally.
-
+50. Run `update-6.sql`, add `RESEND_API_KEY` and `EMAIL_FROM` in Vercel and redeploy. A messages B (B's email is a real inbox): B gets "You have a new message on Kezzo" within a minute. The email has no sender name and no message text. A sends a second message right away: no second email.
+51. A group with A, B, C: A writes in the group chat. B and C each get the same generic email (not A). A does not get one. A writes again right away: no new emails.
+52. B unticks "Email me about new direct and group messages" in profile settings: no more emails to B. Re-tick it: emails work again.
+53. In an email, click "Stop these emails": a page asks for confirmation; press the button and the profile checkbox is now unticked. A changed or truncated link shows "Invalid link". If B blocked A, B gets no email. If `RESEND_API_KEY` is missing, sending messages still works normally.

@@ -205,9 +205,11 @@ A bell in the top bar (signed-in only) shows a red counter and a list of: new me
 
 ## Email notifications for new messages
 
-When someone sends you a direct message, you get a short email ("X sent you a message on Kezzo") with a button that opens the conversation. It never contains the message text, is sent at most once every 30 minutes per sender, is skipped when the two people blocked each other, and each person can switch it off with the **Email me about new messages** checkbox in their profile settings (on by default). It is sent through Resend by `api/notify-message.ts`, which the sender's browser calls right after a message is saved.
+When you receive a direct message, or a message in one of your groups, you can get a short email: "You have a new message" with an **Open Kezzo** button. It is deliberately generic: it never contains the sender's name, the group's name or the message text, so nothing private passes through email. It is sent at most once every 30 minutes per conversation (or per group), skipped when the two people blocked each other, and sent through Resend by `api/notify-message.ts`, which the sender's browser calls right after the message is saved. Battle chat and livestream chat do not send emails. A group email goes to at most 100 members per message.
 
-Setup: run `supabase/update-6.sql`, then add three variables in Vercel → Settings → Environment Variables and redeploy: `RESEND_API_KEY` (your Resend API key), `EMAIL_FROM` (for example `Kezzo <no-reply@kezzo.live>`, on a domain verified in Resend) and optionally `SITE_URL` (for example `https://www.kezzo.live`). Without the first two, the feature quietly does nothing. Group chat and battle chat do not send emails.
+**Opting out:** every person can untick **Email me about new direct and group messages** in their profile settings (on by default). Every email also has a "Stop these emails" link (and the one-click unsubscribe button some mail apps show) that works without signing in: `api/email-optout.ts` checks a signed link, so nobody can switch off another person's emails.
+
+Setup: run `supabase/update-6.sql`, then add three variables in Vercel → Settings → Environment Variables and redeploy: `RESEND_API_KEY` (your Resend API key), `EMAIL_FROM` (for example `Kezzo <no-reply@kezzo.live>`, on a domain verified in Resend) and optionally `SITE_URL` (for example `https://www.kezzo.live`). Without the first two, the feature quietly does nothing.
 
 ## Admin statistics
 

@@ -1,3 +1,4 @@
+import { api } from '../lib/api';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Download, FileText, Paperclip, Send, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -84,6 +85,11 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
     setMessages((m) => (m.some((x) => x.id === row.id) ? m : [...m, row]));
   };
 
+  // Group members who turned it on get a short, generic email (never the text). Failures never matter here.
+  const notifyGroup = (chatMessageId: string) => {
+    if (roomType === 'group') void api('notify-message', { chatMessageId }).catch(() => undefined);
+  };
+
   const send = async (e: FormEvent) => {
     e.preventDefault();
     const body = text.trim();
@@ -93,6 +99,7 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
       .from('chat_messages').insert({ room_type: roomType, room_id: roomId, author_id: user.id, body }).select(COLUMNS).single();
     if (error || !data) return toast(t('error_generic'), 'error');
     setText('');
+    notifyGroup((data as ChatMessage).id);
     await addRow(data as ChatMessage);
   };
 
@@ -117,6 +124,7 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
       pending.current = null;
       setUpload(null);
       setText('');
+      notifyGroup((data as ChatMessage).id);
       await addRow(data as ChatMessage);
     } catch (err) {
       const reason = err instanceof Error && 'reason' in err ? (err as { reason: UploadFailure }).reason : 'unknown';
