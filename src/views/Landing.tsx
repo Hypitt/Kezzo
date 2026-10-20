@@ -38,7 +38,7 @@ const COPY = {
     feedNow: 'Available now', feedNowItems: ['Video, audio, photo and text posts', 'Likes, comments and follows', 'Groups, chats and calls', '24-hour status updates'],
     feedSoon: 'Coming soon', feedSoonItems: ['Polls', 'Audience questions', 'Challenges', 'Creator prompts'],
     groupsKicker: 'Communities', groupsTitle: 'Groups you can join', groupsText: 'Open groups from the Kezzo community. Sign up or log in to join.',
-    example: 'Example', exGroups: [['Podcast & talk', 'Voices, interviews and live Q&A'], ['Creators corner', 'Share your setup and tips'], ['Friends & fun', 'Challenges with your crew']],
+    example: 'Example', exGroups: [['Podcast & talk', 'Voices, interviews and live Q&A', 2415], ['Creators corner', 'Share your setup and tips', 1248], ['Friends & fun', 'Challenges with your crew', 862]],
     groupMembers: (n: number) => (n === 1 ? '1 member' : `${n} members`), groupJoin: 'Sign up to join',
     cats: { dance: 'Dance crew', roasting: 'Roasting', singing: 'Singing', debate: 'Debate', comedy: 'Comedy', other: 'Community' } as Record<string, string>,
     members: 'Kezzo is for members. Sign up or log in to see the feed, videos, live streams, battles and profiles.',
@@ -70,7 +70,7 @@ const COPY = {
     feedNow: 'Disponible maintenant', feedNowItems: ['Publications vidéo, audio, photo et texte', 'J’aime, commentaires et abonnements', 'Groupes, messages et appels', 'Statuts de 24 heures'],
     feedSoon: 'Bientôt', feedSoonItems: ['Sondages', 'Questions du public', 'Défis', 'Suggestions pour créateurs'],
     groupsKicker: 'Communautés', groupsTitle: 'Des groupes à rejoindre', groupsText: 'Des groupes ouverts de la communauté Kezzo. Inscrivez-vous ou connectez-vous pour les rejoindre.',
-    example: 'Exemple', exGroups: [['Podcast et discussions', 'Voix, entrevues et questions en direct'], ['Coin des créateurs', 'Partagez votre installation et vos astuces'], ['Amis et plaisir', 'Des défis entre amis']],
+    example: 'Exemple', exGroups: [['Podcast et discussions', 'Voix, entrevues et questions en direct', 2415], ['Coin des créateurs', 'Partagez votre installation et vos astuces', 1248], ['Amis et plaisir', 'Des défis entre amis', 862]],
     groupMembers: (n: number) => (n === 1 ? '1 membre' : `${n} membres`), groupJoin: 'S’inscrire pour rejoindre',
     cats: { dance: 'Équipe de danse', roasting: 'Roasting', singing: 'Chant', debate: 'Débat', comedy: 'Humour', other: 'Communauté' } as Record<string, string>,
     members: 'Kezzo est réservé aux membres. Inscrivez-vous ou connectez-vous pour voir le fil, les vidéos, les directs, les battles et les profils.',
@@ -185,7 +185,7 @@ function BattleMock() {
   const { lang } = useI18n();
   const c = COPY[lang];
   const tile = (name: string, pct: number, bar: string, n: number) => (
-    <div className="relative flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-xl bg-stone-200 p-3">
+    <div className="relative flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-lg bg-stone-200 p-2">
       <Cover photo={`/landing/tile-${n + 1}.jpg`} />
       <span className="relative self-end rounded-md bg-white px-1.5 py-0.5 text-xs font-semibold tabular-nums text-zinc-900 shadow-sm">{pct}%</span>
       <div className="relative rounded-lg bg-white/90 p-2">
@@ -195,7 +195,7 @@ function BattleMock() {
     </div>
   );
   return (
-    <div className="mx-auto w-full max-w-md rounded-3xl border border-stone-200 bg-white p-3 shadow-sm" aria-hidden="true">
+    <div className="w-full max-w-[17rem] justify-self-start rounded-2xl border border-stone-200 bg-white p-2 shadow-sm lg:justify-self-end" aria-hidden="true">
       <div className="mb-3 flex items-center justify-between px-1 text-xs text-zinc-600">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2 py-0.5 font-bold text-white"><span className="h-1.5 w-1.5 rounded-full bg-white" />{c.mockLive}</span>
         <span>{c.mockRound} · 0:42</span>
@@ -267,7 +267,7 @@ export function Landing({ invite }: { invite?: string }) {
       <section className="bg-white px-3 pb-3 pt-4 sm:px-4 sm:pb-4 sm:pt-6">
         <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl bg-zinc-900 text-white">
           <HeroVideo />
-          <div className="relative grid items-center gap-12 px-5 py-12 sm:px-10 sm:py-16 lg:grid-cols-2">
+          <div className="relative grid items-center gap-8 px-5 py-10 sm:px-10 sm:py-12 lg:grid-cols-[1fr_17rem]">
             <div>
               {liveBattles > 0 && (
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-3 py-1 text-xs font-medium text-white backdrop-blur">
@@ -291,14 +291,14 @@ export function Landing({ invite }: { invite?: string }) {
       </section>
 
       {/* Four lines that sum Kezzo up */}
-      <section className="border-y border-stone-200 bg-stone-50 px-4 py-6" aria-label="Kezzo">
-        <ul className="mx-auto grid max-w-6xl gap-x-8 gap-y-5 text-center sm:grid-cols-2 lg:grid-cols-4">
-          {c.lines.map((line) => <li key={line} className="font-display text-lg font-semibold leading-snug text-zinc-900">{line}</li>)}
+      <section className="border-y border-stone-200 bg-stone-50 px-4 py-3" aria-label="Kezzo">
+        <ul className="mx-auto grid max-w-6xl gap-x-6 gap-y-2 text-center sm:grid-cols-2 lg:grid-cols-4">
+          {c.lines.map((line) => <li key={line} className="font-display text-sm font-semibold leading-snug text-zinc-900 sm:text-base">{line}</li>)}
         </ul>
       </section>
 
       {/* Groups: real featured groups when a group admin chose to feature one, otherwise clearly labelled examples */}
-      <section className="bg-white px-4 py-10 text-zinc-900">
+      <section className="bg-white px-4 py-6 text-zinc-900">
         <div className="mx-auto max-w-6xl">
           <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.groupsKicker}</p>
           <h2 className="mt-1 text-2xl font-bold sm:text-3xl">{c.groupsTitle}</h2>
@@ -315,14 +315,14 @@ export function Landing({ invite }: { invite?: string }) {
                   <UserPlus className="h-3.5 w-3.5" aria-hidden="true" />{c.groupJoin}
                 </button>
               </li>
-            )) : c.exGroups.map(([name, text], i) => (
+            )) : c.exGroups.map(([name, text, n], i) => (
               <li key={name} className="overflow-hidden rounded-xl border border-stone-200 bg-white">
                 <div className="relative h-24">
                   <img src={['/landing/group-podcast.jpg', '/landing/group-creators.jpg', '/landing/group-friends.jpg'][i]} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
                   <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-700">{c.example}</span>
                 </div>
                 <div className="flex items-center justify-between gap-2 p-3">
-                  <div className="min-w-0"><h3 className="truncate text-sm font-semibold">{name}</h3><p className="truncate text-xs text-zinc-500">{text}</p></div>
+                  <div className="min-w-0"><h3 className="truncate text-sm font-semibold">{name}</h3><p className="truncate text-xs text-zinc-500">{text}</p><p className="text-xs font-medium text-zinc-700">{c.groupMembers(n as number)}</p></div>
                   <button type="button" className={`${outline} btn-sm shrink-0`} onClick={() => openAuth('signup')}>{c.groupJoin}</button>
                 </div>
               </li>
