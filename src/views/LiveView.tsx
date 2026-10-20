@@ -215,6 +215,15 @@ export function LiveStreamRoom({ id }: { id: string }) {
     if (res.error) return res;
     await api('livekit-live', { streamId: id, action: 'revoke', userId: uid }).catch(() => undefined);
   });
+  const removeUser = async (uid: string) => {
+    if (!window.confirm(t('confirm_remove_live'))) return;
+    try {
+      await api('livekit-kick', { streamId: id, userId: uid });
+      await reload();
+    } catch (err) {
+      toast((err as Error).message, 'error');
+    }
+  };
   const endStream = () => {
     if (!window.confirm(t('live_end_confirm'))) return;
     run('end', async () => {
@@ -349,7 +358,7 @@ export function LiveStreamRoom({ id }: { id: string }) {
             </section>
           )}
         </div>
-        <ChatPanel roomType="live" roomId={stream.id} canWrite={!ended} />
+        <ChatPanel roomType="live" roomId={stream.id} canWrite={!ended} canModerate={isHost} onRemoveUser={isHost && !ended ? removeUser : undefined} />
       </div>
     </div>
   );

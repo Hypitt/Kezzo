@@ -193,12 +193,31 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
   const deleteAccount = useCallback(async () => {
     if (!user) return;
     // Files this person shared in group chats live in a private bucket.
-    const { data: shared } = await supabase.from('chat_messages').select('file_path').eq('author_id', user.id).not('file_path', 'is', null).limit(1000);
-    const sharedPaths = (shared ?? []).map((r) => r.file_path as string).filter(Boolean);
-    if (sharedPaths.length) await supabase.storage.from('chat-files').remove(sharedPaths);
+    // Work in pages of 500 so nobody's files are left behind, however many they uploaded.
+    // If any removal fails we stop before deleting the account, so the person can simply try again.
+    const PAGE = 500;
+    for (let round = 0; round < 200; round++) {
+      const { data: shared, error } = await supabase
+        .from('chat_messages').select('id,file_path').eq('author_id', user.id).not('file_path', 'is', null)
+        .order('id').range(round * PAGE, round * PAGE + PAGE - 1);
+      if (error) throw error;
+      const paths = (shared ?? []).map((r) => r.file_path as string).filter(Boolean);
+      if (paths.length) {
+        const { error: removeError } = await supabase.storage.from('chat-files').remove(paths);
+        if (removeError) throw removeError;
+      }
+      if ((shared ?? []).length < PAGE) break;
+    }
     for (const bucket of ['avatars', 'media-public', 'media-paid']) {
-      const { data } = await supabase.storage.from(bucket).list(user.id, { limit: 1000 });
-      if (data?.length) await supabase.storage.from(bucket).remove(data.map((f) => `${user.id}/${f.name}`));
+      // Removing files shifts the list, so read the first page again until the folder is empty.
+      for (let round = 0; round < 200; round++) {
+        const { data, error } = await supabase.storage.from(bucket).list(user.id, { limit: PAGE });
+        if (error) throw error;
+        if (!data?.length) break;
+        const { error: removeError } = await supabase.storage.from(bucket).remove(data.map((f) => `${user.id}/${f.name}`));
+        if (removeError) throw removeError;
+        if (data.length < PAGE) break;
+      }
     }
     const { error } = await supabase.rpc('delete_my_account');
     if (error) throw error;

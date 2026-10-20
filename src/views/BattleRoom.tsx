@@ -276,7 +276,7 @@ export function BattleRoom({ id }: { id: string }) {
           <div className="flex justify-end"><ReportButton targetType="battle" targetId={battle.id} /></div>
         </div>
 
-        <ChatPanel roomType="battle" roomId={battle.id} canWrite={!ended} />
+        <ChatPanel roomType="battle" roomId={battle.id} canWrite={!ended} canModerate={isHost} onRemoveUser={isHost && !ended ? kick : undefined} />
       </div>
     </div>
   );
