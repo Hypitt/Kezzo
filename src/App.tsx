@@ -8,9 +8,10 @@ import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScre
 import { Navbar } from './components/Navbar';
 import { Loading } from './components/ui';
 import { pendingInvite } from './lib/invite';
+import { ErrorBoundary, loadPage } from './components/ErrorBoundary';
 
 // Every page is its own downloadable chunk, so the first screen only loads the code it needs.
-const page = <P extends object>(load: () => Promise<{ default: ComponentType<P> }>) => lazy(load);
+const page = <P extends object>(load: () => Promise<{ default: ComponentType<P> }>) => lazy(() => loadPage(load));
 const BattleRoom = page(() => import('./views/BattleRoom').then((m) => ({ default: m.BattleRoom })));
 const BattlesView = page(() => import('./views/BattlesView').then((m) => ({ default: m.BattlesView })));
 const CreateView = page(() => import('./views/CreateView').then((m) => ({ default: m.CreateView })));
@@ -78,9 +79,11 @@ function Shell() {
     <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
       <Navbar />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-        <Suspense fallback={<Loading />}>
-          <View />
-        </Suspense>
+        <ErrorBoundary resetKey={`${route.tab}/${route.id ?? ''}`}>
+          <Suspense fallback={<Loading />}>
+            <View />
+          </Suspense>
+        </ErrorBoundary>
       </main>
       <footer className="border-t border-zinc-100 py-6 text-center text-xs text-zinc-500">
         <button type="button" className="underline" onClick={() => go('legal', 'terms')}>{lang === 'fr' ? 'Conditions' : 'Terms'}</button>

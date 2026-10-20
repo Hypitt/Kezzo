@@ -24,7 +24,9 @@ export function SearchView() {
   const [input, setInput] = useState('');
   const [term, setTerm] = useState('');
   const [tab, setTab] = useState<Tab>('feed');
-  const [scope, setScope] = useState<'all' | 'following'>('all');
+  const [chosenScope, setScope] = useState<'all' | 'following'>('all');
+  // "Following" only exists when signed in; after signing out the feed falls back to everyone.
+  const scope = user ? chosenScope : 'all';
   const [following, setFollowing] = useState<string[] | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [battles, setBattles] = useState<Battle[]>([]);

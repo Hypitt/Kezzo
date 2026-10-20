@@ -196,17 +196,27 @@ function OwnSettings({ profile }: { profile: Profile }) {
 
   const save = async (e: FormEvent) => {
     e.preventDefault();
+    if (!displayName.trim()) return toast(t('err_name_required'), 'error');
     if (!isSafe(displayName) || !isSafe(bio)) return toast(t('blocked_content'), 'error');
     setSaving(true);
     try {
       await updateProfile({ display_name: displayName.trim(), bio: bio.trim(), generation, dm_policy: dmPolicy });
       toast(t('profile_saved'));
       setEditing(false);
-    } catch {
-      toast(t('error_generic'), 'error');
+    } catch (err) {
+      toast((err as { code?: string }).code === 'not_saved' ? t('err_not_saved') : explain(err, t), 'error');
     } finally {
       setSaving(false);
     }
+  };
+
+  // Always start editing from the saved profile.
+  const startEdit = () => {
+    setDisplayName(profile.display_name);
+    setBio(profile.bio);
+    setGeneration(profile.generation);
+    setDmPolicy(profile.dm_policy);
+    setEditing(true);
   };
 
   const uploadAvatar = async (file: File | undefined) => {
@@ -259,12 +269,12 @@ function OwnSettings({ profile }: { profile: Profile }) {
       <section className="card space-y-4" aria-label={t('settings')}>
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">{t('settings')}</h2>
-          {!editing && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}><Pencil className="h-3.5 w-3.5" aria-hidden="true" />{t('edit_profile')}</button>}
+          {!editing && <button type="button" className="btn btn-ghost btn-sm" onClick={startEdit}><Pencil className="h-3.5 w-3.5" aria-hidden="true" />{t('edit_profile')}</button>}
         </div>
         <label className="btn btn-ghost btn-sm w-fit cursor-pointer">
           {uploading && <Spinner />}
           {t('change_avatar')}
-          <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => uploadAvatar(e.target.files?.[0])} />
+          <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={uploading} onChange={(e) => { void uploadAvatar(e.target.files?.[0]); e.target.value = ''; }} />
         </label>
         {editing && (
           <form onSubmit={save} className="space-y-3">

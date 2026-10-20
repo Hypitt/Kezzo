@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Flag } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../state/Auth';
@@ -13,6 +13,17 @@ export function ReportButton({ targetType, targetId }: { targetType: 'post' | 'p
   const { t } = useI18n();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const box = useRef<HTMLSpanElement>(null);
+
+  // Close the menu when clicking anywhere else or pressing Escape.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (box.current && !box.current.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    window.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('mousedown', onDown); window.removeEventListener('keydown', onKey); };
+  }, [open]);
 
   const send = async (reason: (typeof REASONS)[number]) => {
     if (!ensureAuth() || !user) return;
@@ -22,7 +33,7 @@ export function ReportButton({ targetType, targetId }: { targetType: 'post' | 'p
   };
 
   return (
-    <span className="relative">
+    <span className="relative" ref={box}>
       <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         <Flag className="h-3.5 w-3.5" aria-hidden="true" />
         {t('report')}

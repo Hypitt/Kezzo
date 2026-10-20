@@ -53,6 +53,11 @@ export function MessagesView({ otherId }: { otherId?: string }) {
         loadConversations();
         setRefresh((n) => n + 1);
       })
+      // Messages you send from your phone or another tab show up here too.
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'direct_messages', filter: `sender_id=eq.${me}` }, () => {
+        loadConversations();
+        setRefresh((n) => n + 1);
+      })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -141,7 +146,7 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
     const { data, error } = await supabase.from('direct_messages').insert({ sender_id: me, recipient_id: otherId, body }).select(COLUMNS).single();
     if (error || !data) return toast(t('dm_not_allowed'), 'error');
     setText('');
-    setMessages((m) => [...m, data as DirectMessage]);
+    setMessages((m) => (m.some((x) => x.id === (data as DirectMessage).id) ? m : [...m, data as DirectMessage]));
     onSent();
   };
 

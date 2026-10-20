@@ -170,8 +170,10 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
   const updateProfile = useCallback(
     async (patch: ProfilePatch) => {
       if (!user) return;
-      const { error } = await supabase.from('profiles').update(patch).eq('id', user.id);
+      // Ask for the saved row back: if the database refused the change silently, nothing comes back.
+      const { data, error } = await supabase.from('profiles').update(patch).eq('id', user.id).select('id');
       if (error) throw error;
+      if (!data?.length) throw Object.assign(new Error('not_saved'), { code: 'not_saved' });
       setProfile((prev) => (prev ? { ...prev, ...patch } : prev));
     },
     [user],

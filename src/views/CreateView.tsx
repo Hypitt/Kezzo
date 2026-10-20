@@ -177,7 +177,12 @@ function PostForm() {
           </div>
           <div>
             <label className="label" htmlFor="pf-price">{t('price_label')}</label>
-            <input id="pf-price" type="number" min={0} max={100} className="input" value={price} disabled={busy} onChange={(e) => setPrice(Math.max(0, Math.min(100, Number(e.target.value) || 0)))} />
+            <input id="pf-price" type="number" min={0} max={100} className="input" value={price} disabled={busy} onChange={(e) => {
+              const next = Math.max(0, Math.min(100, Number(e.target.value) || 0));
+              // Free and paid files live in different places, so switching between them means uploading again.
+              if ((next > 0) !== (price > 0)) { job.current = null; setUpload(null); }
+              setPrice(next);
+            }} />
             <p className="mt-1 text-xs text-zinc-500">{t('price_hint')}</p>
           </div>
         </>

@@ -5,6 +5,7 @@ import type { Battle, Post } from '../lib/types';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
+import { useToast } from '../state/Toast';
 import { BattleCard } from '../components/BattleCard';
 import { PostCard } from '../components/PostCard';
 import { Avatar, Empty, Loading } from '../components/ui';
@@ -12,6 +13,7 @@ import { Avatar, Empty, Loading } from '../components/ui';
 export function HomeView() {
   const { user, profile, blocked } = useAuth();
   const { t } = useI18n();
+  const { toast } = useToast();
   const { go } = useRouter();
   const [statuses, setStatuses] = useState<PersonRow[]>([]);
   const [battles, setBattles] = useState<Battle[]>([]);
@@ -32,11 +34,12 @@ export function HomeView() {
         setBattles(b);
         setPosts(p);
       })
+      .catch(() => !off && toast(t('error_generic'), 'error'))
       .finally(() => !off && setLoading(false));
     return () => {
       off = true;
     };
-  }, [user, blocked]);
+  }, [user, blocked, toast, t]);
 
   if (loading) return <Loading />;
 

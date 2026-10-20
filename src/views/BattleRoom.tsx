@@ -44,7 +44,8 @@ export function BattleRoom({ id }: { id: string }) {
 
   const reload = useCallback(async () => {
     const { data, error } = await supabase.from('battles').select(BATTLE_SELECT).eq('id', id).maybeSingle();
-    if (error || !data) return setMissing(true);
+    if (error) return toast(t('error_generic'), 'error'); // a network hiccup is not "battle not found"
+    if (!data) return setMissing(true);
     setBattle(normalizeBattle(data));
     const [j, st, sc, lk] = await Promise.all([
       supabase.from('battle_judges').select(`user_id,profile:profiles!user_id(${PUBLIC_PROFILE})`).eq('battle_id', id).order('added_at'),
@@ -56,7 +57,7 @@ export function BattleRoom({ id }: { id: string }) {
     setStandings((st.data ?? []) as Standing[]);
     setScores((sc.data ?? []) as JudgeScore[]);
     setLiked(new Set(((lk.data ?? []) as Array<{ contender_id: string; round: number }>).map((r) => `${r.contender_id}:${r.round}`)));
-  }, [id, user]);
+  }, [id, user, toast, t]);
 
   // Many votes can arrive at once, so coalesce realtime refreshes.
   const reloadSoon = useCallback(() => {
@@ -475,12 +476,15 @@ function JudgeForm({ battle, mine, rpc, busy }: { battle: Battle; mine: JudgeSco
   const { toast } = useToast();
   const [draft, setDraft] = useState<Record<string, { score: number; comment: string }>>({});
   const [saving, setSaving] = useState<string | null>(null);
+  const draftRound = useRef(battle.current_round);
 
-  // Start from what the judge already saved this round; switch when the round changes.
+  // Start from what the judge already saved this round. A new round starts clean (last round's scores do not carry over).
   useEffect(() => {
     const next: Record<string, { score: number; comment: string }> = {};
     for (const s of mine) next[s.contender_id] = { score: s.score, comment: s.comment };
-    setDraft((d) => ({ ...next, ...Object.fromEntries(Object.entries(d).filter(([k]) => !(k in next))) }));
+    const newRound = draftRound.current !== battle.current_round;
+    draftRound.current = battle.current_round;
+    setDraft((d) => (newRound ? next : { ...next, ...Object.fromEntries(Object.entries(d).filter(([k]) => !(k in next))) }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [battle.current_round, mine.length]);
 

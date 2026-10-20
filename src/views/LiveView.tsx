@@ -155,10 +155,11 @@ export function LiveStreamRoom({ id }: { id: string }) {
       supabase.from('live_streams').select(STREAM_SELECT).eq('id', id).maybeSingle(),
       supabase.from('live_guests').select(`user_id,status,profile:profiles!user_id(${PUBLIC_PROFILE})`).eq('stream_id', id).order('created_at'),
     ]);
-    if (s.error || !s.data) return setMissing(true);
+    if (s.error) return toast(t('error_generic'), 'error'); // a network hiccup is not "stream not found"
+    if (!s.data) return setMissing(true);
     setStream(normalize(s.data));
     setGuests(((g.data ?? []) as unknown as Array<{ user_id: string; status: 'requested' | 'approved'; profile: unknown }>).map((r) => ({ ...r, profile: asProfile(r.profile) })).filter((r) => r.profile));
-  }, [id]);
+  }, [id, toast, t]);
 
   useEffect(() => {
     reload();
