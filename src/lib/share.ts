@@ -1,4 +1,4 @@
-export type ShareType = 'post' | 'profile' | 'battle' | 'live' | 'group';
+export type ShareType = 'post' | 'profile' | 'battle' | 'live' | 'group' | 'event' | 'poll';
 
 /** The link people paste elsewhere. It shows the Kezzo name and a preview picture, then opens the right page in Kezzo. */
 export function shareUrl(type: ShareType, id: string): string {

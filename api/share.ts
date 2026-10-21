@@ -7,7 +7,7 @@ import { adminClient, UUID_RE } from './_lib/server';
  * (title, picture, Kezzo name) from this page; real visitors are sent straight on to the app.
  * Only public details are used: a post's title, its photo when the post is free, a profile's name and picture.
  */
-const TARGET: Record<string, string> = { post: 'post', profile: 'profile', battle: 'battles', live: 'live', group: 'groups' };
+const TARGET: Record<string, string> = { post: 'post', profile: 'profile', battle: 'battles', live: 'live', group: 'groups', event: 'community', poll: 'community' };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' })[c] as string);
 const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
@@ -50,6 +50,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         title = `${clip(String(data.display_name), 60)} (@${data.handle})`;
         description = 'See their posts, lives and battles on Kezzo.';
               }
+    } else if (type === 'event') {
+      const { data } = await db.from('events').select('title,starts_at').eq('id', id).maybeSingle();
+      if (data) {
+        title = clip(String(data.title), 90);
+        description = `Event on Kezzo · ${new Date(String(data.starts_at)).toUTCString().slice(0, 16)}`;
+      }
+    } else if (type === 'poll') {
+      const { data } = await db.from('polls').select('question').eq('id', id).maybeSingle();
+      if (data) {
+        title = clip(String(data.question), 90);
+        description = 'Vote on Kezzo';
+      }
     } else if (type === 'battle') {
       title = 'Join this live battle on Kezzo';
       description = 'Watch, vote and cheer. Kezzo: live creator battles.';

@@ -182,3 +182,19 @@ export interface LiveGuest {
   status: 'requested' | 'approved';
   profile: PublicProfile;
 }
+
+export interface EventRow {
+  id: string;
+  host_id: string;
+  title: string;
+  description: string;
+  starts_at: string;
+  ends_at: string | null;
+  location: string;
+  link: string | null;
+  cover_path: string | null;
+  created_at: string;
+  host: PublicProfile;
+  going?: number;
+  me?: boolean;
+}

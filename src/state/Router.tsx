@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-export const TABS = ['home', 'battles', 'live', 'search', 'create', 'media', 'groups', 'messages', 'profile'] as const;
+export const TABS = ['home', 'battles', 'live', 'search', 'create', 'media', 'groups', 'messages', 'profile', 'community'] as const;
 export type Tab = (typeof TABS)[number] | 'legal' | 'join' | 'admin' | 'post';
 export interface Route { tab: Tab; id?: string }
 

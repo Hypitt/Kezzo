@@ -15,8 +15,10 @@ import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { UploadBar, failureKey, type UploadState } from '../components/UploadBar';
 import { Chip, PageHeader, Spinner } from '../components/ui';
+import { EventForm } from '../components/EventForm';
+import { PollForm } from '../components/PollCard';
 
-type Mode = 'post' | 'battle' | 'status';
+type Mode = 'post' | 'battle' | 'status' | 'event' | 'poll';
 const ACCEPT: Record<Exclude<PostKind, 'text'>, string> = {
   photo: 'image/jpeg,image/png,image/webp,image/gif',
   audio: 'audio/mpeg,audio/wav,audio/mp4,audio/webm,audio/ogg',
@@ -25,7 +27,8 @@ const ACCEPT: Record<Exclude<PostKind, 'text'>, string> = {
 
 export function CreateView({ initial }: { initial?: string }) {
   const { t } = useI18n();
-  const [mode, setMode] = useState<Mode>(initial === 'battle' || initial === 'status' ? initial : 'post');
+  const { go } = useRouter();
+  const [mode, setMode] = useState<Mode>(initial === 'battle' || initial === 'status' || initial === 'event' || initial === 'poll' ? initial : 'post');
   return (
     <div className="mx-auto max-w-xl">
       <PageHeader title={t('nav_create')} />
@@ -33,8 +36,10 @@ export function CreateView({ initial }: { initial?: string }) {
         <Chip active={mode === 'post'} onClick={() => setMode('post')}>{t('create_post')}</Chip>
         <Chip active={mode === 'battle'} onClick={() => setMode('battle')}>{t('create_battle')}</Chip>
         <Chip active={mode === 'status'} onClick={() => setMode('status')}>{t('create_status')}</Chip>
+        <Chip active={mode === 'event'} onClick={() => setMode('event')}>{t('create_event')}</Chip>
+        <Chip active={mode === 'poll'} onClick={() => setMode('poll')}>{t('create_poll')}</Chip>
       </div>
-      <div className="card">{mode === 'post' ? <PostForm /> : mode === 'battle' ? <BattleForm /> : <StatusForm />}</div>
+      <div className="card">{mode === 'post' ? <PostForm /> : mode === 'battle' ? <BattleForm /> : mode === 'event' ? <EventForm onCreated={(id) => go('community', id)} /> : mode === 'poll' ? <PollForm onCreated={(id) => go('community', id)} /> : <StatusForm />}</div>
     </div>
   );
 }

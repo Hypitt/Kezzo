@@ -12,6 +12,7 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { ChatPanel } from '../components/ChatPanel';
+import { LivePolls } from '../components/LivePolls';
 import { LiveControls, MediaTile, RemoteAudio } from '../components/LiveParts';
 import { Avatar, Chip, Empty, Loading, PageHeader, Spinner } from '../components/ui';
 
@@ -352,6 +353,7 @@ export function LiveStreamRoom({ id }: { id: string }) {
               )}
             </section>
           )}
+          <LivePolls streamId={stream.id} isHost={Boolean(isHost)} ended={Boolean(ended)} />
         </div>
         <ChatPanel roomType="live" roomId={stream.id} canWrite={!ended} />
       </div>

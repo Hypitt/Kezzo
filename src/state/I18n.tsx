@@ -12,14 +12,28 @@ interface I18nValue {
 
 const I18nContext = createContext<I18nValue | null>(null);
 
-function initialLang(): Lang {
+const STORAGE_KEY = 'kezzo_lang';
+
+/** The language the person chose themselves (kept across visits), if any. */
+function savedLang(): Lang | null {
   try {
-    const saved = localStorage.getItem('kezzo_lang');
+    const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === 'en' || saved === 'fr') return saved;
   } catch {
     /* storage unavailable */
   }
-  return navigator.language?.toLowerCase().startsWith('fr') ? 'fr' : 'en';
+  return null;
+}
+
+/** Browser/device language: French if the first language the person prefers (among French or English) is French, otherwise English. */
+function detectLang(): Lang {
+  const prefs = (navigator.languages?.length ? navigator.languages : [navigator.language]).filter(Boolean).map((l) => l.toLowerCase());
+  const first = prefs.find((l) => l.startsWith('fr') || l.startsWith('en'));
+  return first?.startsWith('fr') ? 'fr' : 'en';
+}
+
+function initialLang(): Lang {
+  return savedLang() ?? detectLang();
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -29,10 +43,17 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = lang;
   }, [lang]);
 
+  // Until the person picks a language themselves, follow the browser/device language if it changes.
+  useEffect(() => {
+    const onChange = () => { if (!savedLang()) setLangState(detectLang()); };
+    window.addEventListener('languagechange', onChange);
+    return () => window.removeEventListener('languagechange', onChange);
+  }, []);
+
   const setLang = useCallback((next: Lang) => {
     setLangState(next);
     try {
-      localStorage.setItem('kezzo_lang', next);
+      localStorage.setItem(STORAGE_KEY, next);
     } catch {
       /* ignore */
     }

@@ -9,6 +9,7 @@ const KNOWN = [
   'already_liked', 'judge_cannot_vote', 'judge_cannot_compete', 'judge_is_contender', 'already_judge', 'max_judges',
   'host_cannot_judge', 'invalid_score', 'not_judge', 'weights_locked', 'invalid_weight', 'invalid_timer', 'host_only',
   'stage_full', 'invalid_live', 'not_group_live', 'is_host', 'no_profile', 'invalid_highlight', 'highlight_too_long',
+  'invalid_question', 'invalid_options', 'invalid_close', 'not_live_host', 'too_many_polls', 'poll_closed', 'invalid_option',
 ] as const;
 
 /** Turns a Supabase/Postgres error into a friendly, translated message. */

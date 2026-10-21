@@ -101,3 +101,11 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 70. Open a shared link in a private window: you land on the Kezzo landing page; after logging in you are taken to that post (`#/post/<id>`), profile, battle, live or group. Pasting the link in WhatsApp/Facebook/X shows "Title · Kezzo" as text, with the post's photo for free photo posts; no logo is added to links and paid posts never show their media.
 71. On a free photo or video post press **Share → Prepare**. The picture(s) or video come back with a small Kezzo logo + name in the bottom-right corner. Photos take a second; a video is re-recorded in real time (a progress bar shows; Cancel works; videos over 3 minutes are refused with a message).
 72. After preparing, **Share to apps** (phones/Safari/Chrome on Android) opens the phone's share sheet with the file attached: pick TikTok, Instagram, WhatsApp, etc. **Download** saves the file(s) and copies the caption + link. Paid posts of other people show no watermark option.
+
+## Language, events and polls
+73. Open Kezzo in a browser set to French (or with French first in its language list): the whole app is in French. Any other language: English. Press EN/FR in the header: everything switches at once, without reloading. Reload and reopen the site later: your choice is kept. Posts, comments, messages and group names stay in the language they were written in.
+74. Run `update-10.sql`. Create → **Event**: fill title, start date/time, place and/or an https online link, optional cover photo. After publishing you land on **Events & polls** (new tab) with the event on top. Another account can press **I'm going** (count goes up, press again to undo), **Join online**, **Share**. Only the host sees **Delete**.
+75. Create → **Poll**: question, 2 to 6 answers, closing time. Another account votes: results (percent and count) appear after voting; they can change their vote while the poll is open. After the closing time the poll shows Closed and voting is refused.
+76. In a live stream you host: below the video, **Add a poll**. Viewers vote inside the live page and results refresh every few seconds; the poll closes when the live ends. Other users do not see the Add button.
+77. A shared event/poll link (`/s/event/<id>`, `/s/poll/<id>`) opens Events & polls with that item first.
+

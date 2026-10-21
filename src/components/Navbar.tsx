@@ -1,4 +1,4 @@
-import { Coins, Home, Image as ImageIcon, Languages, LogIn, MessageCircle, PlusCircle, Radio, Search, Swords, User, Users, type LucideIcon } from 'lucide-react';
+import { CalendarDays, Coins, Home, Image as ImageIcon, Languages, LogIn, MessageCircle, PlusCircle, Radio, Search, Swords, User, Users, type LucideIcon } from 'lucide-react';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter, type Tab } from '../state/Router';
@@ -17,6 +17,7 @@ const NAV: { tab: Exclude<Tab, 'legal'>; icon: LucideIcon; label: Key }[] = [
   { tab: 'create', icon: PlusCircle, label: 'nav_create' },
   { tab: 'media', icon: ImageIcon, label: 'nav_media' },
   { tab: 'groups', icon: Users, label: 'nav_groups' },
+  { tab: 'community', icon: CalendarDays, label: 'nav_community' },
   { tab: 'messages', icon: MessageCircle, label: 'nav_messages' },
   { tab: 'profile', icon: User, label: 'nav_profile' },
 ];
@@ -95,7 +96,7 @@ export function Navbar() {
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-9 border-t border-zinc-800 bg-black lg:hidden" aria-label="Main">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-10 border-t border-zinc-800 bg-black lg:hidden" aria-label="Main">
         {NAV.map(({ tab, icon: Icon, label }) => (
           <button
             key={tab}

@@ -66,6 +66,7 @@ supabase/update-6.sql  Email notifications for new direct messages (opt-out swit
 supabase/update-7.sql  Members-only: signed-out visitors can no longer read app data
 supabase/update-8.sql  Featured groups and live counters for the public landing page
 supabase/update-9.sql  Up to 10 photos per post (swipeable)
+supabase/update-10.sql Events to promote and polls (also inside live streams)
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers

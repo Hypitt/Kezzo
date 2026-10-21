@@ -239,14 +239,11 @@ export function Gate({ children }: { children: ReactNode }) {
 }
 
 export function SetupNotice() {
+  const { t } = useI18n();
   return (
     <div className="mx-auto mt-16 max-w-lg rounded-2xl border border-amber-300 bg-amber-50 p-6 text-sm text-amber-900">
-      <h1 className="mb-2 text-lg font-semibold">Kezzo is not configured yet</h1>
-      <p>
-        Add <code className="rounded bg-white px-1">VITE_SUPABASE_URL</code> and{' '}
-        <code className="rounded bg-white px-1">VITE_SUPABASE_ANON_KEY</code> to <code className="rounded bg-white px-1">.env.local</code>{' '}
-        (or to your Vercel environment variables), then restart. See the README for the full setup.
-      </p>
+      <h1 className="mb-2 text-lg font-semibold">{t('setup_title')}</h1>
+      <p>{t('setup_text')}</p>
     </div>
   );
 }
