@@ -14,6 +14,7 @@ import { Avatar, Spinner } from './ui';
 import { FeedVideo } from './FeedVideo';
 import { PhotoCarousel } from './PhotoCarousel';
 import { ReportButton } from './ReportButton';
+import { ShareButton } from './ShareButton';
 
 interface Props {
   post: Post;
@@ -168,6 +169,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
           <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
           {post.comments}
         </button>
+        <ShareButton type="post" id={post.id} title={post.title} />
         <span className="flex-1" />
         {mine ? (
           <>

@@ -1,16 +1,16 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 export const TABS = ['home', 'battles', 'live', 'search', 'create', 'media', 'groups', 'messages', 'profile'] as const;
-export type Tab = (typeof TABS)[number] | 'legal' | 'join' | 'admin';
+export type Tab = (typeof TABS)[number] | 'legal' | 'join' | 'admin' | 'post';
 export interface Route { tab: Tab; id?: string }
 
 interface RouterValue { route: Route; go: (tab: Tab, id?: string) => void }
 const RouterContext = createContext<RouterValue | null>(null);
 
-/** Hash routes: #/search, #/battles/<id>, #/live/<id>, #/profile/<userId>, #/messages/<userId>, #/groups/<id>, #/join/<inviteCode>, #/legal/privacy */
+/** Hash routes: #/search, #/battles/<id>, #/live/<id>, #/profile/<userId>, #/messages/<userId>, #/groups/<id>, #/post/<postId>, #/join/<inviteCode>, #/legal/privacy */
 function parse(): Route {
   const [tab, id] = window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
-  if (tab === 'legal' || tab === 'admin' || tab === 'join' || (TABS as readonly string[]).includes(tab)) return { tab: tab as Tab, id };
+  if (tab === 'legal' || tab === 'admin' || tab === 'join' || tab === 'post' || (TABS as readonly string[]).includes(tab)) return { tab: tab as Tab, id };
   return { tab: 'search' }; // default landing page: Search & Feeds
 }
 

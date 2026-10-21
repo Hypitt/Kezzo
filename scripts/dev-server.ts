@@ -19,6 +19,7 @@ import aiJudge from '../api/ai-judge';
 import track from '../api/track';
 import notifyMessage from '../api/notify-message';
 import emailOptout from '../api/email-optout';
+import share from '../api/share';
 
 type ApiHandler = (req: never, res: never) => unknown;
 const routes: Record<string, ApiHandler> = {
@@ -31,6 +32,7 @@ const routes: Record<string, ApiHandler> = {
   '/api/track': track,
   '/api/notify-message': notifyMessage,
   '/api/email-optout': emailOptout,
+  '/api/share': share,
 };
 
 async function main() {
@@ -46,6 +48,8 @@ async function main() {
       });
     });
   }
+
+  app.get('/s/:type/:id', (req: Request, res: Response) => res.redirect(`/api/share?type=${encodeURIComponent(req.params.type)}&id=${encodeURIComponent(req.params.id)}`));
 
   if (process.env.NODE_ENV === 'production') {
     const dist = path.resolve(process.cwd(), 'dist');

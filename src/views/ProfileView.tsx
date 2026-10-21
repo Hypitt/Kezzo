@@ -11,6 +11,7 @@ import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
+import { ShareButton } from '../components/ShareButton';
 import { PostGrid } from '../components/PostGrid';
 import { ReportButton } from '../components/ReportButton';
 import { SignInCard } from '../components/AuthScreens';
@@ -136,6 +137,7 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
           )}
           {profile.bio && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-zinc-700">{profile.bio}</p>}
           <p className="mt-2 text-xs text-zinc-500">{t('followers_n', { n: followers })} · {t('following_n', { n: followingCount })}</p>
+          <div className="mt-3"><ShareButton type="profile" id={targetId} title={profile.display_name} /></div>
         </div>
         {!own && (
           <div className="flex flex-wrap gap-2">

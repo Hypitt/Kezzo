@@ -180,6 +180,11 @@ export const en = {
   err_weights_locked: 'Voting weights can only change before the battle starts.', err_invalid_weight: 'Choose a percentage from 0 to 100.',
   err_invalid_timer: 'Choose a timer between 10 seconds and 1 hour.', err_host_only: 'You are hosting only, so you cannot join the stage.',
   // notifications
+  share: 'Share', share_title: 'Share on other platforms', share_whatsapp: 'WhatsApp', share_facebook: 'Facebook', share_x: 'X', share_copy: 'Copy link',
+  share_more: 'More apps…', share_copied: 'Link copied.', share_social_copied: 'Text and link copied. Paste them in your post, story or bio.',
+  share_hint: 'The link shows the Kezzo name and brings viewers back to Kezzo. TikTok and Instagram don’t accept ready-made links: we copy it for you to paste.',
+  share_text_post: '“{title}” on Kezzo', share_text_profile: '{title} on Kezzo', share_text_battle: 'Watch “{title}”, a live battle on Kezzo', share_text_live: 'Watch “{title}” live on Kezzo', share_text_group: 'Join “{title}” on Kezzo',
+  post_not_found: 'This post is not available.',
   photos: 'Photos', file_hint_photos: 'Up to {max} photos, {n} MB each. Viewers swipe through them.', photos_count: '{n} of {max} photos', err_max_photos: 'You can add up to {n} photos to one post.',
   photo_n: 'Photo {i} of {n}', prev_photo: 'Previous photo', next_photo: 'Next photo', open_post: 'Open post',
   feature_group: 'Show this group on Kezzo’s public home page', feature_group_hint: 'Visitors see the name, description and member count. They must sign up or log in to join.', feature_group_invite: 'Only open groups can be shown on the public home page.',
@@ -384,6 +389,11 @@ export const fr: Record<Key, string> = {
   err_weights_locked: 'La pondération ne peut changer qu’avant le début du battle.', err_invalid_weight: 'Choisissez un pourcentage de 0 à 100.',
   err_invalid_timer: 'Choisissez un chrono entre 10 secondes et 1 heure.', err_host_only: 'Vous animez seulement, vous ne pouvez donc pas monter sur scène.',
   // notifications
+  share: 'Partager', share_title: 'Partager sur d’autres plateformes', share_whatsapp: 'WhatsApp', share_facebook: 'Facebook', share_x: 'X', share_copy: 'Copier le lien',
+  share_more: 'Autres applications…', share_copied: 'Lien copié.', share_social_copied: 'Texte et lien copiés. Collez-les dans votre publication, story ou bio.',
+  share_hint: 'Le lien affiche le nom Kezzo et ramène les gens sur Kezzo. TikTok et Instagram n’acceptent pas de lien prêt à publier : nous le copions pour que vous le colliez.',
+  share_text_post: '« {title} » sur Kezzo', share_text_profile: '{title} sur Kezzo', share_text_battle: 'Regardez « {title} », une battle en direct sur Kezzo', share_text_live: 'Regardez « {title} » en direct sur Kezzo', share_text_group: 'Rejoignez « {title} » sur Kezzo',
+  post_not_found: 'Cette publication n’est pas disponible.',
   photos: 'Photos', file_hint_photos: 'Jusqu’à {max} photos de {n} Mo chacune. Les gens les font défiler en glissant.', photos_count: '{n} photos sur {max}', err_max_photos: 'Vous pouvez ajouter jusqu’à {n} photos à une publication.',
   photo_n: 'Photo {i} sur {n}', prev_photo: 'Photo précédente', next_photo: 'Photo suivante', open_post: 'Ouvrir la publication',
   feature_group: 'Afficher ce groupe sur la page d’accueil publique de Kezzo', feature_group_hint: 'Les visiteurs voient le nom, la description et le nombre de membres. Ils doivent s’inscrire ou se connecter pour rejoindre.', feature_group_invite: 'Seuls les groupes ouverts peuvent apparaître sur la page d’accueil publique.',

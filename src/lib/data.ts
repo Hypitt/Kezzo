@@ -16,6 +16,7 @@ const POST_SELECT =
   `author:profiles!author_id(${PUBLIC_PROFILE}),likes:post_likes(count),comments:post_comments(count)`;
 
 export interface PostQuery {
+  id?: string;
   q?: string;
   authorId?: string;
   authorIds?: string[];
@@ -31,6 +32,7 @@ export async function loadPosts(me: string | null, o: PostQuery = {}): Promise<P
   const from = o.from ?? 0;
   const limit = o.limit ?? 12;
   let q = supabase.from('posts').select(POST_SELECT).order('created_at', { ascending: false }).range(from, from + limit - 1);
+  if (o.id) q = q.eq('id', o.id);
   if (o.authorId) q = q.eq('author_id', o.authorId);
   if (o.authorIds) q = q.in('author_id', o.authorIds);
   if (o.excludeAuthors?.length) q = q.not('author_id', 'in', `(${o.excludeAuthors.join(',')})`);

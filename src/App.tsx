@@ -26,6 +26,7 @@ const LegalView = page(() => import('./views/LegalView').then((m) => ({ default:
 const MediaView = page(() => import('./views/MediaView').then((m) => ({ default: m.MediaView })));
 const MessagesView = page(() => import('./views/MessagesView').then((m) => ({ default: m.MessagesView })));
 const ProfileView = page(() => import('./views/ProfileView').then((m) => ({ default: m.ProfileView })));
+const PostView = page(() => import('./views/PostView').then((m) => ({ default: m.PostView })));
 const AdminView = page(() => import('./views/AdminView').then((m) => ({ default: m.AdminView })));
 const Landing = page(() => import('./views/Landing').then((m) => ({ default: m.Landing })));
 const PublicFrame = page(() => import('./views/Landing').then((m) => ({ default: m.PublicFrame })));
@@ -43,6 +44,7 @@ function View() {
     case 'messages': return <Gate><MessagesView otherId={route.id} /></Gate>;
     case 'profile': return <ProfileView id={route.id} />;
     case 'admin': return <AdminView />;
+    case 'post': return <PostView id={route.id} />;
     case 'legal': return <LegalView id={route.id} />;
     case 'join': return <JoinGroupView code={route.id} />;
     case 'search':

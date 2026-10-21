@@ -1,3 +1,4 @@
+import { ShareButton } from '../components/ShareButton';
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { ArrowLeft, Check, Mic, Radio, UserMinus, Users, Video, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -247,7 +248,10 @@ export function LiveStreamRoom({ id }: { id: string }) {
           </span>
           <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 font-medium">{t(stream.kind === 'solo' ? 'live_kind_solo' : 'live_kind_group')}</span>
         </div>
-        <h1 className="text-2xl font-bold">{stream.title}</h1>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h1 className="text-2xl font-bold">{stream.title}</h1>
+          <ShareButton type="live" id={stream.id} title={stream.title} />
+        </div>
         <p className="text-xs text-zinc-500">{t('hosted_by')} <button type="button" className="underline" onClick={() => go('profile', stream.host_id)}>{stream.host.display_name}</button></p>
       </header>
 

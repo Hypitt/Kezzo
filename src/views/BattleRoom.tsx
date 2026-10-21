@@ -1,3 +1,4 @@
+import { ShareButton } from '../components/ShareButton';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Coins, Crown, Flame, Heart, Scale, Sparkles, Timer, UserMinus, Volume2, VolumeX } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -176,7 +177,10 @@ export function BattleRoom({ id }: { id: string }) {
           {!battle.host_competes && <span className="rounded-full bg-zinc-100 px-2 py-0.5 font-medium text-zinc-700">{t('host_only_badge')}</span>}
           <RoundTimer endsAt={live ? battle.timer_ends_at : null} offsetMs={offsetMs} />
         </div>
-        <h1 className="text-2xl font-bold">{battle.title}</h1>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h1 className="text-2xl font-bold">{battle.title}</h1>
+          <ShareButton type="battle" id={battle.id} title={battle.title} />
+        </div>
         {battle.topic && <p className="text-sm text-zinc-600">{battle.topic}</p>}
         <p className="text-xs text-zinc-500">{t('hosted_by')} <button type="button" className="underline" onClick={() => go('profile', battle.host.id)}>{battle.host.display_name}</button></p>
       </header>

@@ -93,3 +93,10 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 64. Open a profile: posts appear three per row. A multi-photo tile has a small gallery icon, a video tile a play icon, a locked paid post a padlock. Click a tile: the full post opens in a window (Esc or the X closes it); like, comment, edit and delete work there.
 65. Landing page: the line "Live battles · Live streams · Groups" is gone. The top card has a dark background; with `public/landing/hero.mp4` present the video plays muted behind white text; without it the card stays dark. With "reduce motion" on, the video does not load. The "Live battles that anyone can join" box shows faces (drawn ones, or photos if `battle-1.jpg`… exist).
 66. Landing: the top card has no Sign up / Log in buttons (they stay in the header and the bottom band); the "Available now / Coming soon" boxes are gone. The hero video (`hero.mp4`, ~0.5 MB) plays muted behind the text; the Solo and Group cards play small clips only while visible. With reduce-motion or Data Saver on, only still pictures load.
+
+## Sharing to other platforms
+67. On a post, a profile, a battle page and a live page, press **Share**. A window lists WhatsApp, Facebook, X, TikTok, Instagram and Copy link (plus "More apps…" on phones). Esc or the X closes it.
+68. WhatsApp, Facebook and X open their own share page with the text "“Title” on Kezzo" and a link like `https://your-site/s/post/<id>`. Copy link puts that link in the clipboard.
+69. TikTok and Instagram: the text and link are copied and the app/site opens; paste it in a post, story or bio.
+70. Open a shared link in a private window: you land on the Kezzo landing page; after logging in you are taken to that post (`#/post/<id>`), profile, battle, live or group. Pasting the link in WhatsApp/Facebook/X shows "Title · Kezzo" with the post's photo (free photo posts) or the Kezzo logo picture; paid posts never show their media.
+
