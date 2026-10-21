@@ -13,6 +13,9 @@ export const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
 const SIMPLE_LIMIT = 6 * 1024 * 1024;
 const CHUNK = 6 * 1024 * 1024; // Supabase requires exactly 6 MB chunks for resumable uploads
 
+/** Uploaded files get random names and never change, so browsers may keep them for a year (saves Supabase bandwidth). */
+export const CACHE_SECONDS = '31536000';
+
 export type UploadFailure = 'too_big' | 'denied' | 'network' | 'cancelled' | 'unknown';
 
 export class UploadError extends Error {
@@ -54,7 +57,7 @@ export function startUpload({ bucket, path, file, onProgress }: UploadOptions): 
   const done = (async () => {
     if (file.size <= SIMPLE_LIMIT) {
       onProgress?.(0, file.size);
-      const { error } = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type || undefined, upsert: false });
+      const { error } = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type || undefined, upsert: false, cacheControl: CACHE_SECONDS });
       if (cancelled) throw new UploadError('cancelled');
       if (error) {
         const raw = (error as { statusCode?: string | number }).statusCode;
@@ -81,7 +84,7 @@ export function startUpload({ bucket, path, file, onProgress }: UploadOptions): 
         chunkSize: CHUNK,
         // Tie "resume" to this exact storage path, so a retry can never continue into a different file name.
         fingerprint: async (f: File) => ['kezzo', bucket, path, f.name, f.size, f.lastModified].join('|'),
-        metadata: { bucketName: bucket, objectName: path, contentType: file.type || 'application/octet-stream', cacheControl: '3600' },
+        metadata: { bucketName: bucket, objectName: path, contentType: file.type || 'application/octet-stream', cacheControl: CACHE_SECONDS },
         // The sign-in token is refreshed before every request, so a long upload never fails with "expired".
         onBeforeRequest: async (req) => {
           req.setHeader('Authorization', `Bearer ${await freshToken()}`);

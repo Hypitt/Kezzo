@@ -119,3 +119,10 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 82. A new message in a group you belong to shows one in-app line "X wrote in your group" (with a counter if several). Opening that group removes it.
 83. Create more than 10 notifications for one account (for example 12 likes): the bell never shows more than 10; the oldest are deleted automatically.
 
+## Saving Supabase bandwidth (free plan)
+84. Upload a profile photo from a phone (several MB): it is stored at about 256 px (tens of KB). Upload a multi-photo post: photos are stored at 1600 px max; the first photo also gets a preview file `<name>-t.jpg` in the `media-public` bucket.
+85. Profile grids load the small previews (older posts fall back to the full photo); video tiles are plain dark squares with a play icon and download nothing.
+86. A video in the feed shows a Play button and downloads nothing until it is pressed (to bring back autoplay, set `AUTOPLAY = true` in `src/components/FeedVideo.tsx`). Photos inside a post load lazily, one by one.
+87. In the browser's network tab, reopening a page shows photos coming from the cache ("disk cache"): new uploads are kept for a year.
+88. Optional one-off for photos already stored: `npm install --no-save sharp`, then `node --env-file=.env.local scripts/shrink-storage.mjs` (dry run) and with `--apply`.
+

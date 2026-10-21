@@ -3,6 +3,8 @@ import { Coins, Pencil } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { explain } from '../lib/errors';
 import { loadPosts } from '../lib/data';
+import { compressImage } from '../lib/media';
+import { CACHE_SECONDS } from '../lib/upload';
 import { fileExt, isActiveStatus } from '../lib/format';
 import { isSafe } from '../lib/moderation';
 import type { LedgerEntry, Post, Profile } from '../lib/types';
@@ -210,10 +212,11 @@ function OwnSettings({ profile }: { profile: Profile }) {
 
   const uploadAvatar = async (file: File | undefined) => {
     if (!file || !user) return;
-    if (file.size > 2 * 1024 * 1024) return toast(t('err_avatar_big'), 'error');
     setUploading(true);
-    const path = `${user.id}/avatar-${Date.now()}.${fileExt(file.name)}`;
-    const { error } = await supabase.storage.from('avatars').upload(path, file, { contentType: file.type, upsert: false });
+    const small = await compressImage(file, 256, 0.8); // shown at 30-72 px everywhere: keep it tiny
+    if (small.size > 2 * 1024 * 1024) { setUploading(false); return toast(t('err_avatar_big'), 'error'); }
+    const path = `${user.id}/avatar-${Date.now()}.${fileExt(small.name)}`;
+    const { error } = await supabase.storage.from('avatars').upload(path, small, { contentType: small.type, upsert: false, cacheControl: CACHE_SECONDS });
     if (error) {
       setUploading(false);
       return toast(t('err_upload'), 'error');

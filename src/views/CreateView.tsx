@@ -5,7 +5,7 @@ import { explain } from '../lib/errors';
 import { fileExt } from '../lib/format';
 import { formatClock } from '../lib/battle';
 import { isSafe } from '../lib/moderation';
-import { MAX_VIDEO_SECONDS, compressImage, mediaDuration } from '../lib/media';
+import { MAX_VIDEO_SECONDS, compressImage, makeThumbnail, mediaDuration, thumbPath } from '../lib/media';
 import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB, startUpload, type UploadFailure, type UploadHandle } from '../lib/upload';
 import { BATTLE_CATEGORIES, type BattleCategory, type PostKind } from '../lib/types';
 import type { Key } from '../lib/i18n';
@@ -68,6 +68,7 @@ function PostForm() {
   const [error, setError] = useState<string | null>(null);
   const [upload, setUpload] = useState<UploadState | null>(null);
   const jobs = useRef<PostJob[]>([]);
+  const thumb = useRef<File | null>(null);
   const handle = useRef<UploadHandle | null>(null);
   const previews = useMemo(() => (kind === 'photo' ? files.map((f) => URL.createObjectURL(f)) : []), [kind, files]);
   useEffect(() => () => previews.forEach((u) => URL.revokeObjectURL(u)), [previews]);
@@ -96,6 +97,10 @@ function PostForm() {
         j.uploaded = true;
       }
       const first = list[0];
+      // A small preview for profile grids, so the full photo is only downloaded when someone opens the post. Failure is harmless.
+      if (kind === 'photo' && first?.bucket === 'media-public' && thumb.current) {
+        try { await startUpload({ bucket: 'media-public', path: thumbPath(first.path), file: thumb.current }).done; } catch { /* the grid falls back to the full photo */ }
+      }
       const { error: insErr } = await supabase.from('posts').insert({
         author_id: user.id, kind, title: title.trim(), body: body.trim(),
         media_bucket: first?.bucket ?? null, media_path: first?.path ?? null, media_extra: list.slice(1).map((j) => j.path),
@@ -122,7 +127,7 @@ function PostForm() {
     const done = jobs.current.filter((j) => j.uploaded);
     for (const bucket of ['media-public', 'media-paid'] as const) {
       const paths = done.filter((j) => j.bucket === bucket).map((j) => j.path);
-      if (paths.length) void supabase.storage.from(bucket).remove(paths);
+      if (paths.length) void supabase.storage.from(bucket).remove(bucket === 'media-public' ? [...paths, ...paths.map(thumbPath)] : paths);
     }
   };
 
@@ -167,6 +172,7 @@ function PostForm() {
     const same = jobs.current.length === ready.length && jobs.current.every((j, i) => j.file === ready[i]);
     if (!same) {
       discardUploaded();
+      thumb.current = kind === 'photo' ? await makeThumbnail(ready[0]) : null;
       jobs.current = ready.map((file) => ({
         bucket: price > 0 ? 'media-paid' : 'media-public',
         path: `${user.id}/${crypto.randomUUID()}.${fileExt(file.name)}`,

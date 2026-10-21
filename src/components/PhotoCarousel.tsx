@@ -40,7 +40,7 @@ export function PhotoCarousel({ urls, alt }: { urls: string[]; alt: string }) {
         {urls.map((u, i) => (
           <img
             key={u} src={u} alt={t('photo_n', { i: i + 1, n: urls.length })}
-            className="h-[min(32rem,70vh)] w-full shrink-0 snap-center object-contain" loading={i === 0 ? 'lazy' : 'eager'} decoding="async" draggable={false}
+            className="h-[min(32rem,70vh)] w-full shrink-0 snap-center object-contain" loading="lazy" decoding="async" draggable={false}
           />
         ))}
       </div>

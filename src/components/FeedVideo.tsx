@@ -5,6 +5,12 @@ import { useI18n } from '../state/I18n';
 /** Only one feed video plays at a time. */
 let active: HTMLVideoElement | null = null;
 
+/**
+ * Videos use the most Supabase bandwidth. With AUTOPLAY off (default) nothing is downloaded until someone presses Play.
+ * Set to true to go back to playing by themselves when scrolled into view (uses much more bandwidth).
+ */
+const AUTOPLAY = false;
+
 const dataSaver = (): boolean => (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
 const reducedMotion = (): boolean => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
@@ -19,6 +25,8 @@ export function FeedVideo({ src }: { src: string }) {
   const video = useRef<HTMLVideoElement>(null);
   const manualPause = useRef(false);
   const [near, setNear] = useState(false);
+  const [armed, setArmed] = useState(false); // pressed Play at least once
+  const live = AUTOPLAY ? near : armed;
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -26,7 +34,7 @@ export function FeedVideo({ src }: { src: string }) {
   // Start loading shortly before the video scrolls into view.
   useEffect(() => {
     const el = box.current;
-    if (!el) return;
+    if (!el || !AUTOPLAY) return;
     const io = new IntersectionObserver(([entry]) => entry.isIntersecting && setNear(true), { rootMargin: '400px 0px' });
     io.observe(el);
     return () => io.disconnect();
@@ -44,11 +52,11 @@ export function FeedVideo({ src }: { src: string }) {
   useEffect(() => {
     const el = box.current;
     const v = video.current;
-    if (!el || !v || !near) return;
+    if (!el || !v || !live) return;
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          if (!manualPause.current && !dataSaver() && !reducedMotion()) start();
+          if (AUTOPLAY && !manualPause.current && !dataSaver() && !reducedMotion()) start();
         } else v.pause();
       },
       { threshold: 0.6 },
@@ -62,11 +70,15 @@ export function FeedVideo({ src }: { src: string }) {
       v.pause();
       if (active === v) active = null;
     };
-  }, [near, start]);
+  }, [live, start]);
+
+  // First press on Play: the file is requested now, then plays.
+  useEffect(() => { if (armed) start(); }, [armed, start]);
 
   const toggle = () => {
     const v = video.current;
     if (!v) return;
+    if (!armed) { manualPause.current = false; setArmed(true); return; }
     if (v.paused) {
       manualPause.current = false;
       start();
@@ -85,11 +97,11 @@ export function FeedVideo({ src }: { src: string }) {
     <div ref={box} className="relative overflow-hidden rounded-xl bg-black">
       <video
         ref={video}
-        src={near ? src : undefined}
+        src={live ? src : undefined}
         muted={muted}
         playsInline
         loop
-        preload={near ? 'metadata' : 'none'}
+        preload={live ? 'metadata' : 'none'}
         className="max-h-[32rem] min-h-40 w-full bg-black"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
@@ -99,6 +111,11 @@ export function FeedVideo({ src }: { src: string }) {
         }}
         onClick={toggle}
       />
+      {!armed && !AUTOPLAY && (
+        <button type="button" onClick={toggle} aria-label={t('play')} className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 text-white"><Play className="h-6 w-6 fill-white" aria-hidden="true" /></span>
+        </button>
+      )}
       <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-6">
         <button type="button" onClick={toggle} aria-label={playing ? t('pause') : t('play')} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
           {playing ? <Pause className="h-4 w-4" aria-hidden="true" /> : <Play className="h-4 w-4" aria-hidden="true" />}

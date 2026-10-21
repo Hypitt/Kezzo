@@ -32,11 +32,11 @@ export function mediaDuration(file: File, kind: 'audio' | 'video'): Promise<numb
 export const MAX_VIDEO_SECONDS = 1800;
 
 /**
- * Shrinks big photos in the browser before upload (max 2048 px, JPEG/WebP). This makes uploads much faster.
+ * Shrinks big photos in the browser before upload (max 1600 px, JPEG). This makes uploads much faster.
  * GIFs and small files are left alone. If anything goes wrong the original file is returned.
  */
-export async function compressImage(file: File, maxSide = 2048, quality = 0.86): Promise<File> {
-  if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 400 * 1024) return file;
+export async function compressImage(file: File, maxSide = 1600, quality = 0.8): Promise<File> {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 150 * 1024) return file;
   try {
     const bitmap = await createImageBitmap(file);
     const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
@@ -56,6 +56,27 @@ export async function compressImage(file: File, maxSide = 2048, quality = 0.86):
     return file;
   }
 }
+
+/** A small square-ish preview (about 480 px, 30-60 KB) used in grids so the full photo is only loaded when opened. */
+export async function makeThumbnail(file: File, maxSide = 480): Promise<File | null> {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return null;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const blob = await new Promise<Blob | null>((ok) => canvas.toBlob(ok, 'image/jpeg', 0.72));
+    return blob ? new File([blob], 'thumb.jpg', { type: 'image/jpeg' }) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Where the preview of a photo is stored: next to it, with "-t.jpg" added. */
+export const thumbPath = (path: string): string => path.replace(/\.[^.\/]+$/, '') + '-t.jpg';
 
 export function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;

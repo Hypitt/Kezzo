@@ -5,6 +5,7 @@ import { explain } from '../lib/errors';
 import { timeAgo } from '../lib/format';
 import { isSafe } from '../lib/moderation';
 import { PUBLIC_PROFILE } from '../lib/data';
+import { thumbPath } from '../lib/media';
 import type { Post, PublicProfile } from '../lib/types';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
@@ -102,7 +103,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
     if (!window.confirm(t('confirm_delete'))) return;
     const { error } = await supabase.from('posts').delete().eq('id', post.id);
     if (error) return toast(t('error_generic'), 'error');
-    if (post.media_bucket && post.media_path) await supabase.storage.from(post.media_bucket).remove([post.media_path, ...(post.media_extra ?? [])]);
+    if (post.media_bucket && post.media_path) await supabase.storage.from(post.media_bucket).remove([post.media_path, ...(post.media_extra ?? []), ...(post.media_bucket === 'media-public' ? [thumbPath(post.media_path)] : [])]);
     onDelete(post.id);
   };
 

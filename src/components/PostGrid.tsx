@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Images, Lock, Music, Play, Type, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { thumbPath } from '../lib/media';
 import type { Post } from '../lib/types';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
@@ -60,7 +61,8 @@ function Tile({ post, onOpen, label }: { post: Post; onOpen: () => void; label: 
     let off = false;
     setSrc(null);
     if (locked || !post.media_path || !post.media_bucket || (post.kind !== 'photo' && post.kind !== 'video')) return;
-    if (post.media_bucket === 'media-public') setSrc(supabase.storage.from('media-public').getPublicUrl(post.media_path).data.publicUrl);
+    if (post.kind === 'video') return; // the tile is a plain dark square: no video bytes are downloaded for a grid
+    if (post.media_bucket === 'media-public') setSrc(supabase.storage.from('media-public').getPublicUrl(thumbPath(post.media_path)).data.publicUrl);
     else supabase.storage.from('media-paid').createSignedUrl(post.media_path, 3600).then(({ data }) => !off && data && setSrc(data.signedUrl));
     return () => {
       off = true;
@@ -73,15 +75,19 @@ function Tile({ post, onOpen, label }: { post: Post; onOpen: () => void; label: 
       {locked ? (
         <span className="flex h-full w-full items-center justify-center text-zinc-500"><Lock className="h-6 w-6" aria-hidden="true" /></span>
       ) : post.kind === 'photo' && src ? (
-        <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
-      ) : post.kind === 'video' && src ? (
-        <video src={`${src}#t=0.1`} preload="metadata" muted playsInline className="pointer-events-none h-full w-full object-cover" />
+        <img
+          src={src} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async"
+          onError={() => { // older posts have no preview: use the full photo
+            if (post.media_bucket === 'media-public' && post.media_path && src.includes('-t.jpg')) setSrc(supabase.storage.from('media-public').getPublicUrl(post.media_path).data.publicUrl);
+          }}
+        />
+      ) : post.kind === 'video' ? (
+        <span className="flex h-full w-full items-center justify-center bg-zinc-800 text-white"><Play className="h-7 w-7 fill-white" aria-hidden="true" /></span>
       ) : post.kind === 'audio' ? (
         <span className="flex h-full w-full flex-col items-center justify-center gap-1 p-2 text-zinc-500"><Music className="h-6 w-6" aria-hidden="true" /><span className="line-clamp-2 text-center text-[11px]">{post.title}</span></span>
       ) : post.kind === 'text' ? (
         <span className="flex h-full w-full flex-col gap-1 p-2 text-zinc-600"><Type className="h-4 w-4 shrink-0" aria-hidden="true" /><span className="line-clamp-4 text-xs font-medium">{post.title}</span></span>
       ) : null}
-      {post.kind === 'video' && !locked && <Play className="absolute right-1.5 top-1.5 h-4 w-4 fill-white text-white drop-shadow" aria-hidden="true" />}
       {extra > 0 && !locked && <Images className="absolute right-1.5 top-1.5 h-4 w-4 text-white drop-shadow" aria-hidden="true" />}
     </button>
   );
