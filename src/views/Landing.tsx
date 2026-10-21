@@ -259,7 +259,7 @@ export function Landing({ invite }: { invite?: string }) {
   }, [invite]);
 
   useEffect(() => {
-    document.title = lang === 'fr' ? 'Kezzo – Battles de créateurs en direct' : 'Kezzo – Live creator battles';
+    document.title = 'Kezzo';
   }, [lang]);
 
   // Featured groups and a live counter. Nothing is shown if there is nothing to show (or if update-8.sql has not been run yet).
