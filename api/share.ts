@@ -28,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
   let title = 'Kezzo';
   let description = 'Social is better when you’re in it. Join Kezzo.';
-  let image = `${base}/og.png`;
+  let image = '';
 
   try {
     const db = adminClient();
@@ -49,8 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       if (data) {
         title = `${clip(String(data.display_name), 60)} (@${data.handle})`;
         description = 'See their posts, lives and battles on Kezzo.';
-        if (typeof data.avatar_url === 'string' && /^https:\/\//.test(data.avatar_url)) image = data.avatar_url;
-      }
+              }
     } else if (type === 'battle') {
       title = 'Join this live battle on Kezzo';
       description = 'Watch, vote and cheer. Kezzo: live creator battles.';
@@ -80,11 +79,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 <meta property="og:title" content="${esc(title)} · Kezzo" />
 <meta property="og:description" content="${esc(description)}" />
 <meta property="og:url" content="${esc(self)}" />
-<meta property="og:image" content="${esc(image)}" />
-<meta name="twitter:card" content="summary_large_image" />
+${image ? `<meta property="og:image" content="${esc(image)}" />\n` : ''}<meta name="twitter:card" content="${image ? 'summary_large_image' : 'summary'}" />
 <meta name="twitter:title" content="${esc(title)} · Kezzo" />
 <meta name="twitter:description" content="${esc(description)}" />
-<meta name="twitter:image" content="${esc(image)}" />
+${image ? `<meta name="twitter:image" content="${esc(image)}" />` : ''}
 <meta http-equiv="refresh" content="0;url=${esc(dest)}" />
 <script>location.replace(${JSON.stringify(dest).replace(/</g, '\\u003c')});</script>
 </head><body style="font-family:Helvetica,Arial,sans-serif;padding:24px"><p><a href="${esc(dest)}">Open on Kezzo</a></p></body></html>`);

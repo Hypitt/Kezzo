@@ -62,6 +62,11 @@ export function PostCard({ post, onChange, onDelete }: Props) {
     };
   }, [post.media_path, post.media_bucket, extraKey, locked]);
 
+  // Picture/video that can be shared with the Kezzo watermark: free posts, or the author's own.
+  const shareMedia = mediaUrl && !locked && (post.download_price === 0 || mine) && (post.kind === 'photo' || post.kind === 'video')
+    ? { kind: post.kind, urls: post.kind === 'photo' ? [mediaUrl, ...extraUrls] : [mediaUrl] }
+    : undefined;
+
   const toggleLike = async () => {
     if (!ensureAuth() || !user) return;
     const next = !post.liked;
@@ -169,7 +174,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
           <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
           {post.comments}
         </button>
-        <ShareButton type="post" id={post.id} title={post.title} />
+        <ShareButton type="post" id={post.id} title={post.title} media={shareMedia} />
         <span className="flex-1" />
         {mine ? (
           <>

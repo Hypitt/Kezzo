@@ -182,7 +182,10 @@ export const en = {
   // notifications
   share: 'Share', share_title: 'Share on other platforms', share_whatsapp: 'WhatsApp', share_facebook: 'Facebook', share_x: 'X', share_copy: 'Copy link',
   share_more: 'More apps…', share_copied: 'Link copied.', share_social_copied: 'Text and link copied. Paste them in your post, story or bio.',
-  share_hint: 'The link shows the Kezzo name and brings viewers back to Kezzo. TikTok and Instagram don’t accept ready-made links: we copy it for you to paste.',
+  share_hint: 'The link brings viewers back to Kezzo. TikTok and Instagram can’t be posted to directly from a website: use the watermarked picture or video above, or paste the copied link.',
+  share_media_photo: 'Share the picture with the Kezzo watermark', share_media_video: 'Share the video with the Kezzo watermark', share_media_hint: 'Adds a small Kezzo logo and name in the bottom-right corner. On a phone you can send it straight to TikTok, Instagram, WhatsApp…',
+  share_media_prepare: 'Prepare', share_media_working: 'Adding the watermark…', share_media_send: 'Share to apps', share_media_download: 'Download', share_downloaded: 'Saved. The text and link are copied too.',
+  share_media_failed: 'Could not prepare the file. Share the link instead.', share_video_too_long: 'Videos longer than {n} min can’t get a watermark here. Share the link instead.',
   share_text_post: '“{title}” on Kezzo', share_text_profile: '{title} on Kezzo', share_text_battle: 'Watch “{title}”, a live battle on Kezzo', share_text_live: 'Watch “{title}” live on Kezzo', share_text_group: 'Join “{title}” on Kezzo',
   post_not_found: 'This post is not available.',
   photos: 'Photos', file_hint_photos: 'Up to {max} photos, {n} MB each. Viewers swipe through them.', photos_count: '{n} of {max} photos', err_max_photos: 'You can add up to {n} photos to one post.',
@@ -391,7 +394,10 @@ export const fr: Record<Key, string> = {
   // notifications
   share: 'Partager', share_title: 'Partager sur d’autres plateformes', share_whatsapp: 'WhatsApp', share_facebook: 'Facebook', share_x: 'X', share_copy: 'Copier le lien',
   share_more: 'Autres applications…', share_copied: 'Lien copié.', share_social_copied: 'Texte et lien copiés. Collez-les dans votre publication, story ou bio.',
-  share_hint: 'Le lien affiche le nom Kezzo et ramène les gens sur Kezzo. TikTok et Instagram n’acceptent pas de lien prêt à publier : nous le copions pour que vous le colliez.',
+  share_hint: 'Le lien ramène les gens sur Kezzo. On ne peut pas publier directement sur TikTok ou Instagram depuis un site : utilisez l’image ou la vidéo avec filigrane ci-dessus, ou collez le lien copié.',
+  share_media_photo: 'Partager l’image avec le filigrane Kezzo', share_media_video: 'Partager la vidéo avec le filigrane Kezzo', share_media_hint: 'Ajoute un petit logo et le nom Kezzo dans le coin inférieur droit. Sur téléphone, envoyez-la directement vers TikTok, Instagram, WhatsApp…',
+  share_media_prepare: 'Préparer', share_media_working: 'Ajout du filigrane…', share_media_send: 'Partager vers une appli', share_media_download: 'Télécharger', share_downloaded: 'Enregistré. Le texte et le lien sont aussi copiés.',
+  share_media_failed: 'Impossible de préparer le fichier. Partagez plutôt le lien.', share_video_too_long: 'Les vidéos de plus de {n} min ne peuvent pas recevoir de filigrane ici. Partagez plutôt le lien.',
   share_text_post: '« {title} » sur Kezzo', share_text_profile: '{title} sur Kezzo', share_text_battle: 'Regardez « {title} », une battle en direct sur Kezzo', share_text_live: 'Regardez « {title} » en direct sur Kezzo', share_text_group: 'Rejoignez « {title} » sur Kezzo',
   post_not_found: 'Cette publication n’est pas disponible.',
   photos: 'Photos', file_hint_photos: 'Jusqu’à {max} photos de {n} Mo chacune. Les gens les font défiler en glissant.', photos_count: '{n} photos sur {max}', err_max_photos: 'Vous pouvez ajouter jusqu’à {n} photos à une publication.',
