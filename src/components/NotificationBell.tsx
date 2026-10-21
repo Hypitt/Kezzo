@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { BarChart3, Bell, CalendarDays, CheckCheck, FileText, Heart, MessageCircle, Radio, Swords, UserPlus, type LucideIcon } from 'lucide-react';
+import { BarChart3, Bell, CalendarDays, CheckCheck, FileText, Heart, MessageCircle, Radio, Swords, UserPlus, Users, type LucideIcon } from 'lucide-react';
 import { describe, useNotifications, type AppNotification, type NotificationKind } from '../state/Notifications';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { timeAgo } from '../lib/format';
 import { Avatar } from './ui';
 
-const ICON: Record<NotificationKind, LucideIcon> = { message: MessageCircle, like: Heart, follow: UserPlus, live: Radio, battle: Swords, post: FileText, event: CalendarDays, poll: BarChart3 };
+const ICON: Record<NotificationKind, LucideIcon> = { message: MessageCircle, like: Heart, follow: UserPlus, live: Radio, battle: Swords, post: FileText, event: CalendarDays, poll: BarChart3, group: Users };
 
 /** Bell with an unread counter in the top bar. Opens the list of notifications. */
 export function NotificationBell() {
@@ -51,6 +51,7 @@ export function NotificationBell() {
       case 'battle': return n.ref_id ? go('battles', n.ref_id) : go('battles');
       case 'post': return n.count === 1 && n.ref_id ? go('post', n.ref_id) : go('profile', n.actor.id);
       case 'event': return n.ref_id ? go('community', n.ref_id) : go('community');
+      case 'group': return n.ref_id ? go('groups', n.ref_id) : go('groups');
       case 'poll': return n.ref_id ? go('community', n.ref_id) : go('community');
     }
   };

@@ -5,7 +5,7 @@ import { useAuth } from './Auth';
 import { useI18n } from './I18n';
 import { useToast } from './Toast';
 
-export type NotificationKind = 'message' | 'like' | 'follow' | 'live' | 'battle' | 'post' | 'event' | 'poll';
+export type NotificationKind = 'message' | 'like' | 'follow' | 'live' | 'battle' | 'post' | 'event' | 'poll' | 'group';
 export interface AppNotification {
   id: string;
   kind: NotificationKind;
@@ -39,7 +39,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
   const load = useCallback(async (announce: boolean) => {
     if (!uid) return;
-    const { data } = await supabase.from('notifications').select(SELECT).eq('user_id', uid).order('created_at', { ascending: false }).limit(50);
+    const { data } = await supabase.from('notifications').select(SELECT).eq('user_id', uid).order('created_at', { ascending: false }).limit(10);
     const rows = ((data ?? []) as unknown as AppNotification[]).filter((n) => n.actor);
     setItems(rows);
     const fresh = rows.filter((n) => !n.read_at && (!newest.current || n.created_at > newest.current));
@@ -105,6 +105,7 @@ export function describe(n: AppNotification, t: ReturnType<typeof useI18n>['t'])
     case 'battle': return t('notif_battle', { name });
     case 'post': return n.count > 1 ? t('notif_posts', { name, n: n.count }) : t('notif_post', { name });
     case 'event': return n.count > 1 ? t('notif_events', { name, n: n.count }) : t('notif_event', { name });
+    case 'group': return n.count > 1 ? t('notif_groups', { name, n: n.count }) : t('notif_group', { name });
     case 'poll': return n.count > 1 ? t('notif_polls', { name, n: n.count }) : t('notif_poll', { name });
   }
 }

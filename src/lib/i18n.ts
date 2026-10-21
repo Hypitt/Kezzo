@@ -209,7 +209,7 @@ export const en = {
   notif_title: 'Notifications', notif_empty: 'Nothing new. Messages, likes, new followers, live sessions and new posts, events and polls from people you follow show up here, and disappear once you’ve seen them.', notif_mark_all: 'Mark all as read',
   notif_unread: '{n} unread', notif_message: '{name} sent you a message', notif_messages: '{name} sent you {n} messages',
   notif_like: '{name} liked your post', notif_follow: '{name} started following you', notif_live: '{name} is live now', notif_battle: '{name} started a live battle',
-  notif_post: '{name} shared a new post', notif_posts: '{name} shared {n} new posts', notif_event: '{name} is promoting a new event', notif_events: '{name} promoted {n} new events', notif_poll: '{name} started a poll', notif_polls: '{name} started {n} polls',
+  notif_post: '{name} shared a new post', notif_posts: '{name} shared {n} new posts', notif_group: '{name} wrote in your group', notif_groups: '{n} new messages in your group, latest from {name}', notif_event: '{name} is promoting a new event', notif_events: '{name} promoted {n} new events', notif_poll: '{name} started a poll', notif_polls: '{name} started {n} polls',
   // go live
   nav_live: 'Go Live', go_live: 'Go Live', live_sub: 'Stream on your own or bring guests on stage. No battle needed.',
   live_title_label: 'Title', live_title_ph: 'What are you streaming?', live_kind_label: 'Type', live_kind_solo: 'Solo', live_kind_group: 'Group',
@@ -436,7 +436,7 @@ export const fr: Record<Key, string> = {
   notif_title: 'Notifications', notif_empty: 'Rien de nouveau. Les messages, J’aime, nouveaux abonnés, directs et les nouvelles publications, événements et sondages des personnes que vous suivez apparaissent ici, puis disparaissent une fois vus.', notif_mark_all: 'Tout marquer comme lu',
   notif_unread: '{n} non lues', notif_message: '{name} vous a envoyé un message', notif_messages: '{name} vous a envoyé {n} messages',
   notif_like: '{name} a aimé votre publication', notif_follow: '{name} s’est abonné à vous', notif_live: '{name} est en direct', notif_battle: '{name} a lancé un battle en direct',
-  notif_post: '{name} a partagé une nouvelle publication', notif_posts: '{name} a partagé {n} nouvelles publications', notif_event: '{name} promeut un nouvel événement', notif_events: '{name} a promu {n} nouveaux événements', notif_poll: '{name} a lancé un sondage', notif_polls: '{name} a lancé {n} sondages',
+  notif_post: '{name} a partagé une nouvelle publication', notif_posts: '{name} a partagé {n} nouvelles publications', notif_group: '{name} a écrit dans votre groupe', notif_groups: '{n} nouveaux messages dans votre groupe, dernier de {name}', notif_event: '{name} promeut un nouvel événement', notif_events: '{name} a promu {n} nouveaux événements', notif_poll: '{name} a lancé un sondage', notif_polls: '{name} a lancé {n} sondages',
   // go live
   nav_live: 'En direct', go_live: 'Passer en direct', live_sub: 'Diffusez seul ou invitez des personnes sur scène. Aucun battle nécessaire.',
   live_title_label: 'Titre', live_title_ph: 'Que diffusez-vous?', live_kind_label: 'Type', live_kind_solo: 'Solo', live_kind_group: 'Groupe',

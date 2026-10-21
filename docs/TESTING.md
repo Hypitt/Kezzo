@@ -114,3 +114,8 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 79. Click a notification: it disappears from the list and the counter drops. Open the bell and close it again without clicking: everything that was shown is gone. "Mark all as read" empties the list.
 80. Open a conversation: its message notification disappears. Notifications older than 30 days are removed automatically (when the app loads and occasionally on the server).
 
+## Fewer e-mails, at most 10 notifications
+81. Run `update-12.sql`. Only direct and group messages send an e-mail (generic, at most one per 30 minutes per conversation or group, with opt-out in Settings: "Email me about new direct and group messages"). Likes, follows, posts, events, polls, lives and battles never send e-mail.
+82. A new message in a group you belong to shows one in-app line "X wrote in your group" (with a counter if several). Opening that group removes it.
+83. Create more than 10 notifications for one account (for example 12 likes): the bell never shows more than 10; the oldest are deleted automatically.
+

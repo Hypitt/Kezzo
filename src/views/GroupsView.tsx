@@ -180,6 +180,7 @@ type CallMode = null | 'audio' | 'video';
 
 export function GroupRoom({ id }: { id: string }) {
   const { user, ensureAuth } = useAuth();
+  useEffect(() => { void supabase.rpc('clear_notifications_for', { p_kind: 'group', p_ref: id }); }, [id]);
   const { t } = useI18n();
   const { toast } = useToast();
   const { go } = useRouter();
