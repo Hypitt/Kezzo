@@ -109,3 +109,8 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 76. In a live stream you host: below the video, **Add a poll**. Viewers vote inside the live page and results refresh every few seconds; the poll closes when the live ends. Other users do not see the Add button.
 77. A shared event/poll link (`/s/event/<id>`, `/s/poll/<id>`) opens Events & polls with that item first.
 
+## Notifications that clear themselves, and following
+78. Run `update-11.sql`. Account A follows account B. B publishes a post: A's bell shows "B shared a new post". B publishes two more in a row: it becomes one line "B shared 3 new posts". Same for an event ("is promoting a new event") and a standalone poll. Clicking one opens it (a single post, the event/poll, or B's profile).
+79. Click a notification: it disappears from the list and the counter drops. Open the bell and close it again without clicking: everything that was shown is gone. "Mark all as read" empties the list.
+80. Open a conversation: its message notification disappears. Notifications older than 30 days are removed automatically (when the app loads and occasionally on the server).
+

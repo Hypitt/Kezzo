@@ -5,7 +5,7 @@ import { useAuth } from './Auth';
 import { useI18n } from './I18n';
 import { useToast } from './Toast';
 
-export type NotificationKind = 'message' | 'like' | 'follow' | 'live' | 'battle';
+export type NotificationKind = 'message' | 'like' | 'follow' | 'live' | 'battle' | 'post' | 'event' | 'poll';
 export interface AppNotification {
   id: string;
   kind: NotificationKind;
@@ -51,7 +51,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     newest.current = null;
     setItems([]);
     if (!uid) return;
-    void load(false);
+    void supabase.rpc('prune_notifications').then(() => load(false), () => load(false));
     let timer: number | undefined;
     const channel = supabase
       .channel(`notifications:${uid}`)
@@ -73,14 +73,13 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
   const markRead = useCallback(async (ids: string[]) => {
     if (ids.length === 0) return;
-    const now = new Date().toISOString();
-    setItems((list) => list.map((n) => (ids.includes(n.id) ? { ...n, read_at: n.read_at ?? now } : n)));
+    // Viewed notifications disappear (the database deletes them too)
+    setItems((list) => list.filter((n) => !ids.includes(n.id)));
     await supabase.rpc('mark_notifications_read', { p_ids: ids });
   }, []);
 
   const markAllRead = useCallback(async () => {
-    const now = new Date().toISOString();
-    setItems((list) => list.map((n) => ({ ...n, read_at: n.read_at ?? now })));
+    setItems([]);
     await supabase.rpc('mark_notifications_read');
   }, []);
 
@@ -104,5 +103,8 @@ export function describe(n: AppNotification, t: ReturnType<typeof useI18n>['t'])
     case 'follow': return t('notif_follow', { name });
     case 'live': return t('notif_live', { name });
     case 'battle': return t('notif_battle', { name });
+    case 'post': return n.count > 1 ? t('notif_posts', { name, n: n.count }) : t('notif_post', { name });
+    case 'event': return n.count > 1 ? t('notif_events', { name, n: n.count }) : t('notif_event', { name });
+    case 'poll': return n.count > 1 ? t('notif_polls', { name, n: n.count }) : t('notif_poll', { name });
   }
 }

@@ -206,9 +206,10 @@ export const en = {
   photo_n: 'Photo {i} of {n}', prev_photo: 'Previous photo', next_photo: 'Next photo', open_post: 'Open post',
   feature_group: 'Show this group on Kezzo’s public home page', feature_group_hint: 'Visitors see the name, description and member count. They must sign up or log in to join.', feature_group_invite: 'Only open groups can be shown on the public home page.',
   email_messages: 'Email me about new direct and group messages',
-  notif_title: 'Notifications', notif_empty: 'Nothing new yet. Messages, likes, new followers and live sessions show up here.', notif_mark_all: 'Mark all as read',
+  notif_title: 'Notifications', notif_empty: 'Nothing new. Messages, likes, new followers, live sessions and new posts, events and polls from people you follow show up here, and disappear once you’ve seen them.', notif_mark_all: 'Mark all as read',
   notif_unread: '{n} unread', notif_message: '{name} sent you a message', notif_messages: '{name} sent you {n} messages',
   notif_like: '{name} liked your post', notif_follow: '{name} started following you', notif_live: '{name} is live now', notif_battle: '{name} started a live battle',
+  notif_post: '{name} shared a new post', notif_posts: '{name} shared {n} new posts', notif_event: '{name} is promoting a new event', notif_events: '{name} promoted {n} new events', notif_poll: '{name} started a poll', notif_polls: '{name} started {n} polls',
   // go live
   nav_live: 'Go Live', go_live: 'Go Live', live_sub: 'Stream on your own or bring guests on stage. No battle needed.',
   live_title_label: 'Title', live_title_ph: 'What are you streaming?', live_kind_label: 'Type', live_kind_solo: 'Solo', live_kind_group: 'Group',
@@ -432,9 +433,10 @@ export const fr: Record<Key, string> = {
   photo_n: 'Photo {i} sur {n}', prev_photo: 'Photo précédente', next_photo: 'Photo suivante', open_post: 'Ouvrir la publication',
   feature_group: 'Afficher ce groupe sur la page d’accueil publique de Kezzo', feature_group_hint: 'Les visiteurs voient le nom, la description et le nombre de membres. Ils doivent s’inscrire ou se connecter pour rejoindre.', feature_group_invite: 'Seuls les groupes ouverts peuvent apparaître sur la page d’accueil publique.',
   email_messages: 'Me envoyer un courriel pour les nouveaux messages privés et de groupe',
-  notif_title: 'Notifications', notif_empty: 'Rien de nouveau pour l’instant. Les messages, J’aime, nouveaux abonnés et directs apparaissent ici.', notif_mark_all: 'Tout marquer comme lu',
+  notif_title: 'Notifications', notif_empty: 'Rien de nouveau. Les messages, J’aime, nouveaux abonnés, directs et les nouvelles publications, événements et sondages des personnes que vous suivez apparaissent ici, puis disparaissent une fois vus.', notif_mark_all: 'Tout marquer comme lu',
   notif_unread: '{n} non lues', notif_message: '{name} vous a envoyé un message', notif_messages: '{name} vous a envoyé {n} messages',
   notif_like: '{name} a aimé votre publication', notif_follow: '{name} s’est abonné à vous', notif_live: '{name} est en direct', notif_battle: '{name} a lancé un battle en direct',
+  notif_post: '{name} a partagé une nouvelle publication', notif_posts: '{name} a partagé {n} nouvelles publications', notif_event: '{name} promeut un nouvel événement', notif_events: '{name} a promu {n} nouveaux événements', notif_poll: '{name} a lancé un sondage', notif_polls: '{name} a lancé {n} sondages',
   // go live
   nav_live: 'En direct', go_live: 'Passer en direct', live_sub: 'Diffusez seul ou invitez des personnes sur scène. Aucun battle nécessaire.',
   live_title_label: 'Titre', live_title_ph: 'Que diffusez-vous?', live_kind_label: 'Type', live_kind_solo: 'Solo', live_kind_group: 'Groupe',

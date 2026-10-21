@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bell, CheckCheck, Heart, MessageCircle, Radio, Swords, UserPlus, type LucideIcon } from 'lucide-react';
+import { BarChart3, Bell, CalendarDays, CheckCheck, FileText, Heart, MessageCircle, Radio, Swords, UserPlus, type LucideIcon } from 'lucide-react';
 import { describe, useNotifications, type AppNotification, type NotificationKind } from '../state/Notifications';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { timeAgo } from '../lib/format';
 import { Avatar } from './ui';
 
-const ICON: Record<NotificationKind, LucideIcon> = { message: MessageCircle, like: Heart, follow: UserPlus, live: Radio, battle: Swords };
+const ICON: Record<NotificationKind, LucideIcon> = { message: MessageCircle, like: Heart, follow: UserPlus, live: Radio, battle: Swords, post: FileText, event: CalendarDays, poll: BarChart3 };
 
 /** Bell with an unread counter in the top bar. Opens the list of notifications. */
 export function NotificationBell() {
@@ -15,6 +15,14 @@ export function NotificationBell() {
   const { go } = useRouter();
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
+  const seen = useRef<string[]>([]);
+
+  // What was on screen when the list was opened counts as viewed once it is closed, and then disappears.
+  useEffect(() => {
+    if (open) { seen.current = items.map((n) => n.id); return; }
+    if (seen.current.length) { void markRead(seen.current); seen.current = []; }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -41,6 +49,9 @@ export function NotificationBell() {
       case 'follow': return go('profile', n.actor.id);
       case 'live': return n.ref_id ? go('live', n.ref_id) : go('live');
       case 'battle': return n.ref_id ? go('battles', n.ref_id) : go('battles');
+      case 'post': return n.count === 1 && n.ref_id ? go('post', n.ref_id) : go('profile', n.actor.id);
+      case 'event': return n.ref_id ? go('community', n.ref_id) : go('community');
+      case 'poll': return n.ref_id ? go('community', n.ref_id) : go('community');
     }
   };
 
