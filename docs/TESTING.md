@@ -163,3 +163,7 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 111. As host, go live (solo or group) and leave nobody in it. In Live, your own stream card has an "End livestream" button. It ends the stream for everyone and the card disappears.
 112. Other people's cards never show these buttons. Inside the battle/live page, the host's End buttons still work as before.
 113. A battle that was never started and has fewer than 2 competitors is cancelled automatically after 12 hours (fees refunded); a live stream still marked live after 12 hours is ended automatically. This runs when someone opens the Battles or Live list.
+
+## Cancel battle fix (run supabase/update-15.sql) and new hero photo
+114. As host, create a battle, leave it with 0 or 1 competitors and press "Cancel battle": it is cancelled and entry fees are refunded (before update-15 it could show "That is not possible in this battle's current state" if schema.sql had been run again after update-2).
+115. The landing hero shows the group selfie on the right, fading into the warm card (on phones: below the text, fading at its top edge).

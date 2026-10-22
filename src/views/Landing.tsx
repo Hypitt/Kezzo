@@ -203,10 +203,10 @@ export function Landing({ invite }: { invite?: string }) {
 
   return (
     <PublicFrame>
-      {/* Hero: warm light card with a photo of people (white background, blended into the card) */}
+      {/* Hero: warm light card with a group photo that fades into it */}
       <section className="bg-white px-3 pb-3 pt-4 sm:px-4 sm:pb-4 sm:pt-6">
         <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#fff8f4] via-[#fdeee6] to-[#f8d9cb] text-zinc-900">
-          <div className="relative grid items-end gap-0 lg:grid-cols-[1.05fr_1fr]">
+          <div className="relative grid gap-0 lg:grid-cols-[1fr_1.15fr]">
             <div className="px-5 pb-6 pt-10 sm:px-10 sm:pb-12 sm:pt-12 lg:self-center">
               {liveBattles > 0 && (
                 <span className="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white/70 px-3 py-1 text-xs font-medium text-zinc-800 backdrop-blur">
@@ -220,15 +220,14 @@ export function Landing({ invite }: { invite?: string }) {
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-zinc-700 sm:text-base">{c.lead}</p>
               <p className="mt-4 max-w-xl text-base font-semibold leading-snug text-zinc-900 sm:text-lg">{c.leadTag}</p>
             </div>
-            <div className="relative">
-              {/* a soft colour disc behind the people */}
-              <div className="pointer-events-none absolute inset-x-[10%] top-[8%] aspect-square rounded-full bg-[#f4b9a3]/45" aria-hidden="true" />
+            <div className="relative min-h-64 sm:min-h-80 lg:min-h-[26rem]">
+              {/* the photo melts into the card: faded on its left edge (on phones: on its top edge) */}
               <img
-                src="/landing/hero-people.jpg"
+                src="/landing/hero-photo.jpg"
                 alt=""
                 width="1400"
-                height="1059"
-                className="relative block w-full object-contain object-bottom mix-blend-multiply"
+                height="905"
+                className="absolute inset-0 h-full w-full object-cover object-[60%_35%] [mask-image:linear-gradient(to_right,transparent,black_32%)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_32%)] max-lg:[mask-image:linear-gradient(to_bottom,transparent,black_30%)] max-lg:[-webkit-mask-image:linear-gradient(to_bottom,transparent,black_30%)]"
                 fetchPriority="high"
                 decoding="async"
               />
