@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { useI18n } from '../state/I18n';
+import { R2_URL, r2Enabled } from '../lib/storage';
 
 /** Only one feed video plays at a time. */
 let active: HTMLVideoElement | null = null;
 
 /**
- * Videos use the most Supabase bandwidth. With AUTOPLAY off (default) nothing is downloaded until someone presses Play.
- * Set to true to go back to playing by themselves when scrolled into view (uses much more bandwidth).
+ * Videos use the most bandwidth. Videos stored in Cloudflare R2 (no download fees) play by themselves when scrolled into view.
+ * Videos still stored in Supabase wait for a press on Play, so they do not use up Supabase's free bandwidth.
+ * Set FORCE_AUTOPLAY to true to autoplay everything.
  */
-const AUTOPLAY = false;
+const FORCE_AUTOPLAY = false;
 
 const dataSaver = (): boolean => (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
 const reducedMotion = (): boolean => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
@@ -21,6 +23,7 @@ const reducedMotion = (): boolean => window.matchMedia?.('(prefers-reduced-motio
  */
 export function FeedVideo({ src }: { src: string }) {
   const { t } = useI18n();
+  const AUTOPLAY = FORCE_AUTOPLAY || (r2Enabled && src.startsWith(`${R2_URL}/`));
   const box = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const manualPause = useRef(false);
@@ -38,7 +41,7 @@ export function FeedVideo({ src }: { src: string }) {
     const io = new IntersectionObserver(([entry]) => entry.isIntersecting && setNear(true), { rootMargin: '400px 0px' });
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [AUTOPLAY]);
 
   const start = useCallback(() => {
     const v = video.current;
@@ -70,7 +73,7 @@ export function FeedVideo({ src }: { src: string }) {
       v.pause();
       if (active === v) active = null;
     };
-  }, [live, start]);
+  }, [live, start, AUTOPLAY]);
 
   // First press on Play: the file is requested now, then plays.
   useEffect(() => { if (armed) start(); }, [armed, start]);

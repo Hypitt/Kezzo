@@ -169,3 +169,4 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 115. The landing hero shows the group selfie on the right, fading into the warm card (on phones: below the text, fading at its top edge).
 116. (After R2 is set up) Post a photo, a video, change your avatar, post a status picture: each shows, and the address of the picture starts with your pub-….r2.dev link. Delete the post: the file disappears from R2 (Cloudflare > R2 > kezzo-media). Old posts still show.
 117. (Admin, R2 on) Admin page > Move old files to R2 > Move old videos: the counter goes down, old videos still play, and the files appear in the R2 bucket with r- names.
+118. (R2 on) Scroll the feed: videos stored in R2 (new ones and moved old ones) start by themselves, muted, when mostly on screen, and pause when you scroll away; only one plays at a time. Pausing by hand keeps it paused. Videos still in Supabase show a Play button.
