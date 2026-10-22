@@ -5,9 +5,6 @@
   "functions": {
     "api/*.ts": {
       "maxDuration": 30
-    },
-    "api/r2-migrate.ts": {
-      "maxDuration": 60
     }
   },
   "rewrites": [
