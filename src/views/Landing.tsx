@@ -22,7 +22,7 @@ const COPY = {
     lead: 'Show the world what makes your culture unique. Share your traditions, celebrate your heritage, exchange stories, and discover music, food, languages, and lifestyles from around the world.',
     leadTag: 'Share your culture. Discover the world.',
     cta: 'Create your free account', ctaNote: 'Free to join · 16+ · Takes less than a minute',
-    lines: ['Don’t just watch. Be part of it.', 'Your people. Your moments. Your stage.', 'More than a feed. A whole experience.', 'Where the crowd makes the moment.'],
+    lines: ['Don’t just watch. Be part of it.', 'Your people. Your moments. Your stage.'],
     pillars: [
       ['02 · Social participation', 'Don’t just scroll. Get involved.', 'Join conversations, react to live moments, meet new people, and become part of experiences that bring communities together.'],
       ['03 · Cultural exchange', 'Your culture. Your stories. Your world.', 'Show the world what makes your culture unique. Share your traditions, celebrate your heritage, exchange stories, and discover music, food, languages, and lifestyles from around the world.'],
@@ -57,7 +57,7 @@ const COPY = {
     lead: 'Montrez au monde ce qui rend votre culture unique. Partagez vos traditions, célébrez votre héritage, échangez des histoires et découvrez la musique, la cuisine, les langues et les modes de vie du monde entier.',
     leadTag: 'Partagez votre culture. Découvrez le monde.',
     cta: 'Créer mon compte gratuit', ctaNote: 'Gratuit · 16 ans et plus · Moins d’une minute',
-    lines: ['Ne faites pas que regarder. Faites-en partie.', 'Vos gens. Vos moments. Votre scène.', 'Plus qu’un fil. Toute une expérience.', 'Là où la foule fait le moment.'],
+    lines: ['Ne faites pas que regarder. Faites-en partie.', 'Vos gens. Vos moments. Votre scène.'],
     pillars: [
       ['02 · Participation sociale', 'Ne faites pas que défiler. Participez.', 'Joignez des conversations, réagissez aux moments en direct, rencontrez de nouvelles personnes et faites partie d’expériences qui rassemblent les communautés.'],
       ['03 · Échange culturel', 'Votre culture. Vos histoires. Votre monde.', 'Montrez au monde ce qui rend votre culture unique. Partagez vos traditions, célébrez votre héritage, échangez des histoires et découvrez la musique, la cuisine, les langues et les modes de vie du monde entier.'],
@@ -237,9 +237,9 @@ export function Landing({ invite }: { invite?: string }) {
         </div>
       </section>
 
-      {/* Four lines that sum Kezzo up */}
+      {/* Two lines that sum Kezzo up */}
       <section className="border-y border-stone-200 bg-stone-50 px-4 py-3" aria-label="Kezzo">
-        <ul className="mx-auto grid max-w-6xl gap-x-6 gap-y-2 text-center sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mx-auto grid max-w-3xl gap-x-6 gap-y-2 text-center sm:grid-cols-2">
           {c.lines.map((line) => <li key={line} className="font-display text-sm font-semibold leading-snug text-zinc-900 sm:text-base">{line}</li>)}
         </ul>
       </section>
