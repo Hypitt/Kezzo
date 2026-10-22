@@ -11,7 +11,7 @@ let active: HTMLVideoElement | null = null;
  * Videos still stored in Supabase wait for a press on Play, so they do not use up Supabase's free bandwidth.
  * Set FORCE_AUTOPLAY to true to autoplay everything.
  */
-const FORCE_AUTOPLAY = false;
+const FORCE_AUTOPLAY = true;
 
 const dataSaver = (): boolean => (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
 const reducedMotion = (): boolean => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
