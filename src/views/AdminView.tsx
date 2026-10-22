@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useMemo, useState, type PointerEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import { ArrowDown, ArrowUp, Minus, RefreshCw, ShieldAlert, Table2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { Chip, Loading, PageHeader, Spinner } from '../components/ui';
+import { api } from '../lib/api';
+import { r2Enabled } from '../lib/storage';
 
 /** Admin statistics. Only people listed in the `admins` table can load data (checked in the database, not here). */
 
@@ -220,6 +222,58 @@ function Panel({ title, sub, children, action }: { title: string; sub?: string; 
       </div>
       {children}
     </section>
+  );
+}
+
+/** Moves old public videos (and optionally photos) from Supabase Storage to Cloudflare R2, one post at a time. */
+function MoveToR2({ fr }: { fr: boolean }) {
+  const [running, setRunning] = useState(false);
+  const [moved, setMoved] = useState(0);
+  const [left, setLeft] = useState<number | null>(null);
+  const [failed, setFailed] = useState<string[]>([]);
+  const [note, setNote] = useState('');
+  const stop = useRef(false);
+
+  const run = async (kind: 'video' | 'all') => {
+    stop.current = false;
+    setRunning(true);
+    setNote('');
+    const skip: string[] = [];
+    try {
+      for (;;) {
+        if (stop.current) break;
+        const r = await api<{ remaining: number; moved?: string | null; failedId?: string; error?: string }>('r2-migrate', { kind, skip });
+        setLeft(r.remaining);
+        if (r.failedId) {
+          skip.push(r.failedId);
+          setFailed((f) => [...f, `${r.failedId?.slice(0, 8)}: ${r.error ?? ''}`]);
+        } else if (r.moved) setMoved((m) => m + 1);
+        if (!r.moved && !r.failedId) break;
+        if (r.remaining <= 0) break;
+      }
+      setNote(fr ? 'Terminé.' : 'Finished.');
+    } catch (e) {
+      setNote(e instanceof Error ? e.message : 'Error');
+    }
+    setRunning(false);
+  };
+
+  return (
+    <Panel
+      title={fr ? 'Déplacer les anciens fichiers vers R2' : 'Move old files to R2'}
+      sub={fr ? 'Les anciennes vidéos et photos publiques quittent Supabase (moins de bande passante). Gardez cette page ouverte.' : 'Old public videos and photos leave Supabase (less bandwidth). Keep this page open while it runs.'}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <button type="button" className="btn btn-primary" disabled={running} onClick={() => void run('video')}>{fr ? 'Déplacer les vidéos' : 'Move old videos'}</button>
+        <button type="button" className="btn btn-ghost" disabled={running} onClick={() => void run('all')}>{fr ? 'Vidéos et photos' : 'Videos and photos'}</button>
+        {running && <button type="button" className="btn btn-ghost" onClick={() => { stop.current = true; }}>{fr ? 'Arrêter' : 'Stop'}</button>}
+        {running && <Spinner />}
+      </div>
+      <p className="text-sm text-zinc-700" role="status">
+        {fr ? 'Déplacés' : 'Moved'}: {moved}{left !== null ? ` · ${fr ? 'restants' : 'left'}: ${left}` : ''} {note}
+      </p>
+      {failed.length > 0 && <ul className="list-disc pl-5 text-xs text-red-700">{failed.map((f) => <li key={f}>{f}</li>)}</ul>}
+    </Panel>
   );
 }
 
@@ -440,6 +494,7 @@ export function AdminView() {
           </table>
         )}
       </Panel>
+      {r2Enabled && <MoveToR2 fr={lang === 'fr'} />}
     </div>
   );
 }
