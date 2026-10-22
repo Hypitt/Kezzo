@@ -6,6 +6,7 @@ import type { Post } from '../lib/types';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { PostCard } from './PostCard';
+import { publicUrl } from '../lib/storage';
 
 /** Profile posts, three tiles per row. Pressing a tile opens the full post (with its swipeable photos) in a window. */
 export function PostGrid({ posts, onChange, onDelete }: { posts: Post[]; onChange: (p: Post) => void; onDelete: (id: string) => void }) {
@@ -62,7 +63,7 @@ function Tile({ post, onOpen, label }: { post: Post; onOpen: () => void; label: 
     setSrc(null);
     if (locked || !post.media_path || !post.media_bucket || (post.kind !== 'photo' && post.kind !== 'video')) return;
     if (post.kind === 'video') return; // the tile is a plain dark square: no video bytes are downloaded for a grid
-    if (post.media_bucket === 'media-public') setSrc(supabase.storage.from('media-public').getPublicUrl(thumbPath(post.media_path)).data.publicUrl);
+    if (post.media_bucket === 'media-public') setSrc(publicUrl('media-public', thumbPath(post.media_path)));
     else supabase.storage.from('media-paid').createSignedUrl(post.media_path, 3600).then(({ data }) => !off && data && setSrc(data.signedUrl));
     return () => {
       off = true;
@@ -78,7 +79,7 @@ function Tile({ post, onOpen, label }: { post: Post; onOpen: () => void; label: 
         <img
           src={src} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async"
           onError={() => { // older posts have no preview: use the full photo
-            if (post.media_bucket === 'media-public' && post.media_path && src.includes('-t.jpg')) setSrc(supabase.storage.from('media-public').getPublicUrl(post.media_path).data.publicUrl);
+            if (post.media_bucket === 'media-public' && post.media_path && src.includes('-t.jpg')) setSrc(publicUrl('media-public', post.media_path));
           }}
         />
       ) : post.kind === 'video' ? (

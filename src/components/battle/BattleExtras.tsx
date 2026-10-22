@@ -16,6 +16,7 @@ import { useToast } from '../../state/Toast';
 import { FeedVideo } from '../FeedVideo';
 import { UploadBar, failureKey, type UploadState } from '../UploadBar';
 import { Spinner } from '../ui';
+import { publicFilePath, publicUrl } from '../../lib/storage';
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'battle';
 /** Files already saved to the device in this browser session (so the automatic download never runs twice). */
@@ -36,7 +37,7 @@ export function HighlightCard({ battle, canRemove, onRemoved }: { battle: Battle
     if (!postId) return;
     let off = false;
     supabase.from('posts').select('media_path').eq('id', postId).maybeSingle().then(({ data }) => {
-      if (!off && data?.media_path) setSrc(supabase.storage.from('media-public').getPublicUrl(data.media_path as string).data.publicUrl);
+      if (!off && data?.media_path) setSrc(publicUrl('media-public', data.media_path as string));
     });
     return () => { off = true; };
   }, [postId]);
@@ -222,7 +223,7 @@ function HighlightSection({ battle, recordings, onPosted }: { battle: Battle; re
     if (blob.size > MAX_UPLOAD_BYTES) return setError(t('err_file_too_big', { n: MAX_UPLOAD_MB }));
     const ext = fileExtension(blob.type || 'video/webm');
     const file = new File([blob], `highlight.${ext}`, { type: ext === 'mp4' ? 'video/mp4' : 'video/webm' });
-    const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+    const path = publicFilePath(user.id, `${crypto.randomUUID()}.${ext}`);
     setPosting(true);
     setError(null);
     try {

@@ -6,6 +6,7 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { ShareButton } from './ShareButton';
+import { publicUrl, removePublic } from '../lib/storage';
 
 export function EventCard({ event, onChange }: { event: EventRow; onChange: () => void }) {
   const { user, ensureAuth } = useAuth();
@@ -13,7 +14,7 @@ export function EventCard({ event, onChange }: { event: EventRow; onChange: () =
   const { toast } = useToast();
   const { go } = useRouter();
   const mine = user?.id === event.host_id;
-  const cover = event.cover_path ? supabase.storage.from('media-public').getPublicUrl(event.cover_path).data.publicUrl : null;
+  const cover = event.cover_path ? publicUrl('media-public', event.cover_path) : null;
   const fmt = (iso: string) => new Date(iso).toLocaleString(lang, { dateStyle: 'medium', timeStyle: 'short' });
   const past = new Date(event.ends_at ?? event.starts_at).getTime() < Date.now();
 
@@ -29,7 +30,7 @@ export function EventCard({ event, onChange }: { event: EventRow; onChange: () =
     if (!window.confirm(t('confirm_delete'))) return;
     const { error } = await supabase.from('events').delete().eq('id', event.id);
     if (error) return toast(t('error_generic'), 'error');
-    if (event.cover_path) void supabase.storage.from('media-public').remove([event.cover_path]);
+    if (event.cover_path) void removePublic('media-public', [event.cover_path]);
     onChange();
   };
 

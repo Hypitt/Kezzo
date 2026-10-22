@@ -1,4 +1,6 @@
 import { supabase } from './supabase';
+import { api } from './api';
+import { isR2Path } from './storage';
 
 /**
  * Biggest file the app accepts, in MB. The real ceiling is your Supabase plan:
@@ -53,8 +55,43 @@ function reasonFromStatus(status: number | undefined): UploadFailure {
 export function startUpload({ bucket, path, file, onProgress }: UploadOptions): UploadHandle {
   let cancelled = false;
   let upload: import('tus-js-client').Upload | null = null;
+  let xhr: XMLHttpRequest | null = null;
+
+  /** Cloudflare R2: the server hands out a short-lived link, then the browser sends the file straight to R2. */
+  const putToR2 = async (): Promise<void> => {
+    let target: { url: string; headers: Record<string, string> };
+    try {
+      target = await api<{ url: string; headers: Record<string, string> }>('r2-sign', { path, contentType: file.type || 'application/octet-stream', size: file.size });
+    } catch (err) {
+      const status = (err as { status?: number }).status;
+      throw new UploadError(status === 413 ? 'too_big' : status === 401 || status === 403 || status === 415 ? 'denied' : 'network');
+    }
+    if (cancelled) throw new UploadError('cancelled');
+    const delays = [0, 1000, 3000];
+    for (let attempt = 0; attempt < delays.length; attempt += 1) {
+      if (delays[attempt]) await new Promise((r) => setTimeout(r, delays[attempt]));
+      if (cancelled) throw new UploadError('cancelled');
+      const status = await new Promise<number>((resolve) => {
+        const req = new XMLHttpRequest();
+        xhr = req;
+        req.open('PUT', target.url);
+        for (const [k, v] of Object.entries(target.headers)) req.setRequestHeader(k, v);
+        req.upload.onprogress = (e) => { if (e.lengthComputable) onProgress?.(e.loaded, e.total); };
+        req.onload = () => resolve(req.status);
+        req.onerror = () => resolve(0);
+        req.ontimeout = () => resolve(0);
+        req.onabort = () => resolve(-1);
+        req.send(file);
+      });
+      if (cancelled || status === -1) throw new UploadError('cancelled');
+      if (status >= 200 && status < 300) { onProgress?.(file.size, file.size); return; }
+      if (status !== 0 && status < 500) throw new UploadError(reasonFromStatus(status));
+    }
+    throw new UploadError('network');
+  };
 
   const done = (async () => {
+    if (isR2Path(path)) return putToR2();
     if (file.size <= SIMPLE_LIMIT) {
       onProgress?.(0, file.size);
       const { error } = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type || undefined, upsert: false, cacheControl: CACHE_SECONDS });
@@ -108,6 +145,7 @@ export function startUpload({ bucket, path, file, onProgress }: UploadOptions): 
     done,
     cancel: () => {
       cancelled = true;
+      xhr?.abort();
       upload?.abort(true).catch(() => undefined);
     },
   };

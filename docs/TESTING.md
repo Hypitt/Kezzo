@@ -167,3 +167,4 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 ## Cancel battle fix (run supabase/update-15.sql) and new hero photo
 114. As host, create a battle, leave it with 0 or 1 competitors and press "Cancel battle": it is cancelled and entry fees are refunded (before update-15 it could show "That is not possible in this battle's current state" if schema.sql had been run again after update-2).
 115. The landing hero shows the group selfie on the right, fading into the warm card (on phones: below the text, fading at its top edge).
+116. (After R2 is set up) Post a photo, a video, change your avatar, post a status picture: each shows, and the address of the picture starts with your pub-….r2.dev link. Delete the post: the file disappears from R2 (Cloudflare > R2 > kezzo-media). Old posts still show.

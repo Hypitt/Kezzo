@@ -17,6 +17,7 @@ import { UploadBar, failureKey, type UploadState } from '../components/UploadBar
 import { Chip, PageHeader, Spinner } from '../components/ui';
 import { EventForm } from '../components/EventForm';
 import { PollForm } from '../components/PollCard';
+import { pathFromPublicUrl, publicFilePath, publicUrl, removePublic } from '../lib/storage';
 
 type Mode = 'post' | 'battle' | 'status' | 'event' | 'poll';
 const ACCEPT: Record<Exclude<PostKind, 'text'>, string> = {
@@ -127,7 +128,9 @@ function PostForm() {
     const done = jobs.current.filter((j) => j.uploaded);
     for (const bucket of ['media-public', 'media-paid'] as const) {
       const paths = done.filter((j) => j.bucket === bucket).map((j) => j.path);
-      if (paths.length) void supabase.storage.from(bucket).remove(bucket === 'media-public' ? [...paths, ...paths.map(thumbPath)] : paths);
+      if (!paths.length) continue;
+      if (bucket === 'media-public') void removePublic(bucket, [...paths, ...paths.map(thumbPath)]);
+      else void supabase.storage.from(bucket).remove(paths);
     }
   };
 
@@ -175,7 +178,7 @@ function PostForm() {
       thumb.current = kind === 'photo' ? await makeThumbnail(ready[0]) : null;
       jobs.current = ready.map((file) => ({
         bucket: price > 0 ? 'media-paid' : 'media-public',
-        path: `${user.id}/${crypto.randomUUID()}.${fileExt(file.name)}`,
+        path: price > 0 ? `${user.id}/${crypto.randomUUID()}.${fileExt(file.name)}` : publicFilePath(user.id, `${crypto.randomUUID()}.${fileExt(file.name)}`),
         file, duration, uploaded: false,
       }));
     }
@@ -410,8 +413,8 @@ function StatusForm() {
 
   /** Best-effort removal of the previous status picture. */
   const dropOldImage = async () => {
-    const old = profile?.status_image_url?.split('/object/public/media-public/')[1];
-    if (old) await supabase.storage.from('media-public').remove([decodeURIComponent(old)]);
+    const old = pathFromPublicUrl(profile?.status_image_url, 'media-public');
+    if (old) await removePublic('media-public', [old]);
   };
 
   const save = async (e: FormEvent) => {
@@ -424,12 +427,12 @@ function StatusForm() {
       let imageUrl: string | null = null;
       if (image) {
         const ready = await compressImage(image, 1600, 0.85);
-        const path = `${user.id}/status-${crypto.randomUUID()}.${fileExt(ready.name)}`;
+        const path = publicFilePath(user.id, `status-${crypto.randomUUID()}.${fileExt(ready.name)}`);
         setUpload({ sent: 0, total: ready.size, failed: false });
         const h = startUpload({ bucket: 'media-public', path, file: ready, onProgress: (sent, total) => setUpload((u) => (u ? { ...u, sent, total } : u)) });
         handle.current = h;
         await h.done;
-        imageUrl = supabase.storage.from('media-public').getPublicUrl(path).data.publicUrl;
+        imageUrl = publicUrl('media-public', path);
       }
       await updateProfile({
         status_text: text.trim() || null,

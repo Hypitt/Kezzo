@@ -16,6 +16,7 @@ import { FeedVideo } from './FeedVideo';
 import { PhotoCarousel } from './PhotoCarousel';
 import { ReportButton } from './ReportButton';
 import { ShareButton } from './ShareButton';
+import { publicUrl, removePublic } from '../lib/storage';
 
 interface Props {
   post: Post;
@@ -47,9 +48,8 @@ export function PostCard({ post, onChange, onDelete }: Props) {
     if (!post.media_path || !post.media_bucket || locked) return;
     const extra = extraKey ? extraKey.split('|') : [];
     if (post.media_bucket === 'media-public') {
-      const store = supabase.storage.from('media-public');
-      setMediaUrl(store.getPublicUrl(post.media_path).data.publicUrl);
-      setExtraUrls(extra.map((p) => store.getPublicUrl(p).data.publicUrl));
+      setMediaUrl(publicUrl('media-public', post.media_path));
+      setExtraUrls(extra.map((p) => publicUrl('media-public', p)));
     } else {
       supabase.storage.from('media-paid').createSignedUrls([post.media_path, ...extra], 3600).then(({ data }) => {
         if (cancelled || !data) return;
@@ -103,7 +103,11 @@ export function PostCard({ post, onChange, onDelete }: Props) {
     if (!window.confirm(t('confirm_delete'))) return;
     const { error } = await supabase.from('posts').delete().eq('id', post.id);
     if (error) return toast(t('error_generic'), 'error');
-    if (post.media_bucket && post.media_path) await supabase.storage.from(post.media_bucket).remove([post.media_path, ...(post.media_extra ?? []), ...(post.media_bucket === 'media-public' ? [thumbPath(post.media_path)] : [])]);
+    if (post.media_bucket && post.media_path) {
+      const files = [post.media_path, ...(post.media_extra ?? []), ...(post.media_bucket === 'media-public' ? [thumbPath(post.media_path)] : [])];
+      if (post.media_bucket === 'media-public') await removePublic('media-public', files);
+      else await supabase.storage.from(post.media_bucket).remove(files);
+    }
     onDelete(post.id);
   };
 

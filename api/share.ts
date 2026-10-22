@@ -41,7 +41,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         title = clip(String(data.title), 90);
         description = `${author?.display_name ?? 'Someone'} on Kezzo`;
         if (data.kind === 'photo' && data.media_bucket === 'media-public' && data.media_path && !data.download_price && supaUrl) {
-          image = `${supaUrl}/storage/v1/object/public/media-public/${data.media_path}`;
+          image = /^[0-9a-f-]{36}\/r-/i.test(String(data.media_path)) && process.env.R2_PUBLIC_URL
+            ? `${process.env.R2_PUBLIC_URL.replace(/\/$/, '')}/${data.media_path}`
+            : `${supaUrl}/storage/v1/object/public/media-public/${data.media_path}`;
         }
       }
     } else if (type === 'profile') {

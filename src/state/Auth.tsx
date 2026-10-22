@@ -5,6 +5,8 @@ import { configured, supabase } from '../lib/supabase';
 import type { Profile, Wallet } from '../lib/types';
 import { useI18n } from './I18n';
 import { useToast } from './Toast';
+import { api } from '../lib/api';
+import { r2Enabled } from '../lib/storage';
 
 export interface NewProfile {
   handle: string;
@@ -215,6 +217,7 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
       const { data } = await supabase.storage.from(bucket).list(user.id, { limit: 1000 });
       if (data?.length) await supabase.storage.from(bucket).remove(data.map((f) => `${user.id}/${f.name}`));
     }
+    if (r2Enabled) await api('r2-delete', { all: true }).catch(() => undefined); // files kept in Cloudflare R2
     const { error } = await supabase.rpc('delete_my_account');
     if (error) throw error;
     await supabase.auth.signOut();

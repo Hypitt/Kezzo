@@ -9,6 +9,7 @@ import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
 import { Spinner } from './ui';
+import { publicFilePath, removePublic } from '../lib/storage';
 
 /** Promote an event: title, date, place and/or online link, optional cover photo. */
 export function EventForm({ onCreated }: { onCreated: (id: string) => void }) {
@@ -43,7 +44,7 @@ export function EventForm({ onCreated }: { onCreated: (id: string) => void }) {
     try {
       if (cover) {
         const file = await compressImage(cover);
-        coverPath = `${user.id}/${crypto.randomUUID()}.${fileExt(file.name)}`;
+        coverPath = publicFilePath(user.id, `${crypto.randomUUID()}.${fileExt(file.name)}`);
         await startUpload({ bucket: 'media-public', path: coverPath, file, onProgress: () => undefined }).done;
       }
       const { data, error: err } = await supabase.from('events').insert({
@@ -54,7 +55,7 @@ export function EventForm({ onCreated }: { onCreated: (id: string) => void }) {
       toast(t('event_created'));
       onCreated(data.id as string);
     } catch (err) {
-      if (coverPath) void supabase.storage.from('media-public').remove([coverPath]);
+      if (coverPath) void removePublic('media-public', [coverPath]);
       setError(typeof err === 'object' && err && 'reason' in err ? t('error_generic') : explain(err, t));
     } finally {
       setBusy(false);

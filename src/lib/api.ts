@@ -26,6 +26,6 @@ export async function api<T>(path: string, body: unknown): Promise<T> {
     await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
     window.dispatchEvent(new Event('kezzo:session-expired'));
   }
-  if (!res.ok) throw new Error(json.error || `Request failed (${res.status})`);
+  if (!res.ok) throw Object.assign(new Error(json.error || `Request failed (${res.status})`), { status: res.status });
   return json as T;
 }

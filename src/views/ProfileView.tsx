@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { explain } from '../lib/errors';
 import { loadPosts } from '../lib/data';
 import { compressImage } from '../lib/media';
-import { CACHE_SECONDS } from '../lib/upload';
+import { CACHE_SECONDS, startUpload } from '../lib/upload';
 import { fileExt, isActiveStatus } from '../lib/format';
 import { isSafe } from '../lib/moderation';
 import type { LedgerEntry, Post, Profile } from '../lib/types';
@@ -21,6 +21,7 @@ import { StatusViewer } from '../components/StatusViewer';
 import { useLegal } from '../state/Legal';
 import { AccountFooter } from '../components/AccountFooter';
 import { Avatar, Empty, Loading, LoadMore, Spinner } from '../components/ui';
+import { isR2Path, publicFilePath, publicUrl } from '../lib/storage';
 
 const PAGE = 8;
 
@@ -215,14 +216,18 @@ function OwnSettings({ profile }: { profile: Profile }) {
     setUploading(true);
     const small = await compressImage(file, 256, 0.8); // shown at 30-72 px everywhere: keep it tiny
     if (small.size > 2 * 1024 * 1024) { setUploading(false); return toast(t('err_avatar_big'), 'error'); }
-    const path = `${user.id}/avatar-${Date.now()}.${fileExt(small.name)}`;
-    const { error } = await supabase.storage.from('avatars').upload(path, small, { contentType: small.type, upsert: false, cacheControl: CACHE_SECONDS });
-    if (error) {
-      setUploading(false);
-      return toast(t('err_upload'), 'error');
+    const path = publicFilePath(user.id, `avatar-${Date.now()}.${fileExt(small.name)}`);
+    if (isR2Path(path)) {
+      try { await startUpload({ bucket: 'avatars', path, file: small }).done; } catch { setUploading(false); return toast(t('err_upload'), 'error'); }
+    } else {
+      const { error } = await supabase.storage.from('avatars').upload(path, small, { contentType: small.type, upsert: false, cacheControl: CACHE_SECONDS });
+      if (error) {
+        setUploading(false);
+        return toast(t('err_upload'), 'error');
+      }
     }
     try {
-      await updateProfile({ avatar_url: supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl });
+      await updateProfile({ avatar_url: isR2Path(path) ? publicUrl('avatars', path) : supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl });
     } catch {
       toast(t('error_generic'), 'error');
     }
