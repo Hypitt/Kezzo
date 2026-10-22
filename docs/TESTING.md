@@ -139,3 +139,10 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 95. A blocked user cannot ring you; someone who is not allowed to message you cannot ring you.
 96. Ringing only works while Kezzo is open in a browser tab (it also shows a browser banner if the tab is in the background and notifications were allowed). It cannot ring a phone whose browser is closed: that needs push notifications.
 97. Stale login: sign in on a browser, then in Supabase delete that user's session (or sign out everywhere elsewhere). Press Join on a call: the app signs out, shows "Your session expired. Please sign in again." and the sign-in screen opens.
+
+## Install as an app, landing page
+98. The landing hero has no battle card any more (Maya / Jo): only the title, the text and the community video.
+99. On the landing page header there is an "Install app" button (icon only on small screens). In Chrome or Edge, pressing it opens the browser's install window; after installing, Kezzo opens in its own window and the button disappears (also when opened from the installed icon).
+100. Signed in: the same button sits in the top bar just left of your profile picture.
+101. On an iPhone/iPad (Safari) or in Firefox, pressing it shows a short how-to (Share, then Add to Home Screen). French users get the French text.
+102. `https://your-site/manifest.webmanifest` and `https://your-site/sw.js` open without error. The service worker caches nothing, so new versions always show.

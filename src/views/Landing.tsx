@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Heart, Languages, Mic, Swords, UserPlus, Users, Video, type LucideIcon } from 'lucide-react';
+import { Languages, Mic, Swords, UserPlus, Users, type LucideIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { PENDING_GROUP, PENDING_JOIN } from '../lib/invite';
+import { InstallButton } from '../components/InstallButton';
 
 /**
  * The public page every visitor sees first. Everything else in Kezzo needs an account.
@@ -20,7 +21,6 @@ const COPY = {
     h1a: 'Social is better', h1b: 'when you’re in it.',
     lead: 'A place to discover people, share your world, join live conversations, challenge creators, and turn ordinary moments into something everyone can be part of.',
     cta: 'Create your free account', ctaNote: 'Free to join · 16+ · Takes less than a minute',
-    mockLive: 'LIVE', mockRound: 'Round 2', mockVotes: 'votes',
     lines: ['Don’t just scroll. Get involved.', 'Your people. Your moments. Your stage.', 'More than a feed. A whole experience.', 'Where the crowd makes the moment.'],
     battlesKicker: 'Open to everyone', battlesTitle: 'Live battles that anyone can join',
     battlesText: 'Discover ongoing battles without having to know the creators beforehand. Watch, vote with your coins as it happens, or step on stage yourself.',
@@ -52,7 +52,6 @@ const COPY = {
     h1a: 'Le social est meilleur', h1b: 'quand on y participe.',
     lead: 'Un endroit pour découvrir des gens, partager votre univers, rejoindre des conversations en direct, défier des créateurs et transformer des moments ordinaires en quelque chose auquel tout le monde peut participer.',
     cta: 'Créer mon compte gratuit', ctaNote: 'Gratuit · 16 ans et plus · Moins d’une minute',
-    mockLive: 'EN DIRECT', mockRound: 'Manche 2', mockVotes: 'votes',
     lines: ['Ne faites pas que défiler. Participez.', 'Vos gens. Vos moments. Votre scène.', 'Plus qu’un fil. Toute une expérience.', 'Là où la foule fait le moment.'],
     battlesKicker: 'Ouvert à tous', battlesTitle: 'Des battles en direct où tout le monde peut entrer',
     battlesText: 'Découvrez les battles en cours sans avoir à connaître les créateurs d’avance. Regardez, votez avec vos pièces en direct, ou montez vous-même sur scène.',
@@ -102,6 +101,7 @@ function Header() {
           <button type="button" className={`${outline} btn-sm`} onClick={() => setLang(lang === 'en' ? 'fr' : 'en')} aria-label={c.language}>
             <Languages className="h-3.5 w-3.5" aria-hidden="true" />{lang.toUpperCase()}
           </button>
+          <InstallButton compact className={`${outline} btn-sm`} />
           <button type="button" className={`${outline} btn-sm`} onClick={() => openAuth('signin')}>{c.login}</button>
           <button type="button" className="btn btn-sm btn-accent" onClick={() => openAuth('signup')}>{c.signup}</button>
         </div>
@@ -148,12 +148,6 @@ function Person({ photo }: { photo: string }) {
   );
 }
 
-/** Full-tile real photo (public/landing); hidden when the file is missing. */
-function Cover({ photo }: { photo: string }) {
-  const [ok, setOk] = useState(true);
-  return ok ? <img src={photo} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" onError={() => setOk(false)} /> : null;
-}
-
 /** Tiny looping clip: shows a still picture, and only plays (muted) while on screen. Stays a still for reduced motion / Save-Data. */
 function LoopVideo({ name, className }: { name: string; className: string }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -196,38 +190,6 @@ function HeroVideo() {
         </video>
       )}
       <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/35" />
-    </div>
-  );
-}
-
-function BattleMock() {
-  const { lang } = useI18n();
-  const c = COPY[lang];
-  const tile = (name: string, pct: number, bar: string, n: number) => (
-    <div className="relative flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-lg bg-stone-200 p-2">
-      <Cover photo={`/landing/tile-${n === 0 ? "a" : "b"}.jpg`} />
-      <span className="relative self-end rounded-md bg-white px-1.5 py-0.5 text-xs font-semibold tabular-nums text-zinc-900 shadow-sm">{pct}%</span>
-      <div className="relative rounded-lg bg-white/90 p-2">
-        <p className="text-sm font-semibold text-zinc-900">{name}</p>
-        <div className="mt-2 h-1.5 w-full rounded-full bg-stone-300"><div className={`h-full rounded-full ${bar}`} style={{ width: `${pct}%` }} /></div>
-      </div>
-    </div>
-  );
-  return (
-    <div className="w-full max-w-[17rem] justify-self-start rounded-2xl border border-stone-200 bg-white p-2 shadow-sm lg:justify-self-end" aria-hidden="true">
-      <div className="mb-3 flex items-center justify-between px-1 text-xs text-zinc-600">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2 py-0.5 font-bold text-white"><span className="h-1.5 w-1.5 rounded-full bg-white" />{c.mockLive}</span>
-        <span>{c.mockRound} · 0:42</span>
-        <span className="inline-flex items-center gap-1"><Video className="h-3.5 w-3.5" />1.2k</span>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        {tile('Maya', 54, 'bg-accent', 0)}
-        {tile('Jo', 46, 'bg-zinc-800', 1)}
-      </div>
-      <div className="mt-3 flex items-center justify-between rounded-xl bg-stone-50 px-3 py-2 text-xs text-zinc-600">
-        <span className="inline-flex items-center gap-1.5"><Heart className="h-3.5 w-3.5 text-accent" />+5 {c.mockVotes}</span>
-        <span className="font-semibold text-zinc-900">Maya 54% · Jo 46%</span>
-      </div>
     </div>
   );
 }
@@ -286,7 +248,7 @@ export function Landing({ invite }: { invite?: string }) {
       <section className="bg-white px-3 pb-3 pt-4 sm:px-4 sm:pb-4 sm:pt-6">
         <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl bg-zinc-900 text-white">
           <HeroVideo />
-          <div className="relative grid items-center gap-8 px-5 py-10 sm:px-10 sm:py-12 lg:grid-cols-[1fr_17rem]">
+          <div className="relative grid items-center gap-8 px-5 py-10 sm:px-10 sm:py-12 lg:grid-cols-1">
             <div>
               {liveBattles > 0 && (
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-3 py-1 text-xs font-medium text-white backdrop-blur">
@@ -299,7 +261,6 @@ export function Landing({ invite }: { invite?: string }) {
               </h1>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">{c.lead}</p>
             </div>
-            <BattleMock />
           </div>
         </div>
       </section>

@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import { explain } from '../lib/errors';
 import type { Key } from '../lib/i18n';
 import { Avatar } from './ui';
+import { InstallButton } from './InstallButton';
 import { NotificationBell } from './NotificationBell';
 
 const NAV: { tab: Exclude<Tab, 'legal'>; icon: LucideIcon; label: Key }[] = [
@@ -83,9 +84,12 @@ export function Navbar() {
               {lang.toUpperCase()}
             </button>
             {user && profile ? (
-              <button type="button" onClick={() => go('profile')} aria-label={t('nav_profile')}>
-                <Avatar p={profile} size={30} />
-              </button>
+              <>
+                <InstallButton compact className="btn btn-sm border border-zinc-600 bg-transparent text-white hover:bg-zinc-800" />
+                <button type="button" onClick={() => go('profile')} aria-label={t('nav_profile')}>
+                  <Avatar p={profile} size={30} />
+                </button>
+              </>
             ) : (
               <button type="button" className="btn btn-sm bg-white text-black hover:bg-zinc-200" onClick={() => openAuth()}>
                 <LogIn className="h-3.5 w-3.5" aria-hidden="true" />
