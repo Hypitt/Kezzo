@@ -133,7 +133,7 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 ## Ringing calls (run supabase/update-13.sql first)
 90. Two accounts (A and B) on two browsers. A opens the conversation with B and presses Voice call or Video call: A connects straight away (no extra Join click) and B sees a dark "Incoming call" card at the top of the screen with the caller's photo, a ringtone (after B has clicked anywhere on the page once) and Accept / Decline. The tab title blinks "Incoming call".
 91. B presses Accept: B lands on the conversation with A and joins the call automatically; the ringing stops on every B device. A and B see and hear each other.
-92. B presses Decline: A sees "B declined the call." The ringing stops.
+92. B presses Decline: A sees "B declined the call." and A's call screen closes by itself. In a group, the call closes only when every member who was rung has declined.
 93. A presses Hide before B answers: B's incoming card disappears. If nobody answers, the card disappears after 45 seconds.
 94. In a group, a member presses Voice or Video call: every other member who is online gets the incoming card ("... is starting a video call in <group>"); Accept opens the group page with the call joined. Groups with more than 50 members do not ring (members still see the Join the call button).
 95. A blocked user cannot ring you; someone who is not allowed to message you cannot ring you.

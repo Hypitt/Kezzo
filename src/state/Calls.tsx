@@ -26,7 +26,11 @@ interface Invite {
 /** Set when the person pressed Accept: the page they land on joins the call by itself. */
 export interface PendingJoin { kind: CallKind; target: string; video: boolean }
 
+/** Everyone I rang said no: the call screen for this person or group should close. */
+export interface Declined { kind: CallKind; target: string; at: number }
+
 interface Value {
+  declined: Declined | null;
   pendingJoin: PendingJoin | null;
   /** Takes the pending join if it is for this person or group (returns it once, then clears it). */
   takeJoin: (kind: CallKind, target: string) => PendingJoin | null;
@@ -48,6 +52,7 @@ export function CallsProvider({ children }: { children: ReactNode }) {
   const uid = user?.id;
   const [queue, setQueue] = useState<Invite[]>([]);
   const [pendingJoin, setPendingJoin] = useState<PendingJoin | null>(null);
+  const [declined, setDeclined] = useState<Declined | null>(null);
   const pendingRef = useRef<PendingJoin | null>(null);
   const tRef = useRef(t);
   tRef.current = t;
@@ -94,9 +99,21 @@ export function CallsProvider({ children }: { children: ReactNode }) {
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'call_invites', filter: `caller_id=eq.${uid}` }, (payload) => {
         const row = payload.new as InviteRow;
-        if (row.status !== 'declined' || row.kind !== 'dm') return;
-        void supabase.from('profiles').select('display_name').eq('id', (payload.new as { recipient_id: string }).recipient_id).maybeSingle()
-          .then(({ data: p }) => toast(tRef.current('call_declined', { name: (p as { display_name: string } | null)?.display_name ?? '' })));
+        if (row.status !== 'declined') return;
+        const recipient = (payload.new as { recipient_id: string }).recipient_id;
+        void (async () => {
+          // Is anyone still ringing or in the call? If not, the call is over for the caller.
+          let q = supabase.from('call_invites').select('id', { count: 'exact', head: true })
+            .eq('caller_id', uid).in('status', ['ringing', 'accepted']).gt('created_at', new Date(Date.now() - 120_000).toISOString());
+          q = row.kind === 'dm' ? q.eq('kind', 'dm').eq('recipient_id', recipient) : q.eq('group_id', row.group_id ?? '');
+          const { count } = await q;
+          if ((count ?? 0) > 0) return;
+          const target = row.kind === 'dm' ? recipient : row.group_id ?? '';
+          setDeclined({ kind: row.kind, target, at: Date.now() });
+          if (row.kind === 'group') return toast(tRef.current('call_all_declined'));
+          const { data: p } = await supabase.from('profiles').select('display_name').eq('id', recipient).maybeSingle();
+          toast(tRef.current('call_declined', { name: (p as { display_name: string } | null)?.display_name ?? '' }));
+        })();
       })
       .subscribe();
     return () => {
@@ -173,7 +190,7 @@ export function CallsProvider({ children }: { children: ReactNode }) {
     try { await supabase.rpc('cancel_call', { p_kind: kind, p_target: target }); } catch { /* nothing to cancel */ }
   }, []);
 
-  const value = useMemo(() => ({ pendingJoin, takeJoin, ring, hangUp }), [pendingJoin, takeJoin, ring, hangUp]);
+  const value = useMemo(() => ({ declined, pendingJoin, takeJoin, ring, hangUp }), [declined, pendingJoin, takeJoin, ring, hangUp]);
 
   return (
     <Ctx.Provider value={value}>

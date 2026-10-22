@@ -112,7 +112,11 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [text, setText] = useState('');
   const [calling, setCalling] = useState<null | 'audio' | 'video'>(null);
-  const { ring, hangUp, takeJoin, pendingJoin } = useCalls();
+  const { ring, hangUp, takeJoin, pendingJoin, declined } = useCalls();
+  // The other person declined: the call ends for the caller too.
+  useEffect(() => {
+    if (declined && declined.kind === 'dm' && declined.target === otherId && Date.now() - declined.at < 5000) setCalling(null);
+  }, [declined, otherId]);
   // Someone answered an incoming call from this person: join straight away.
   useEffect(() => {
     const join = takeJoin('dm', otherId);

@@ -189,7 +189,11 @@ export function GroupRoom({ id }: { id: string }) {
   const [missing, setMissing] = useState(false);
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [call, setCall] = useState<CallMode>(null);
-  const { ring, hangUp, takeJoin, pendingJoin } = useCalls();
+  const { ring, hangUp, takeJoin, pendingJoin, declined } = useCalls();
+  // Every member declined: close the call.
+  useEffect(() => {
+    if (declined && declined.kind === 'group' && declined.target === id && Date.now() - declined.at < 5000) setCall(null);
+  }, [declined, id]);
   // Someone answered a ringing group call: open the call and join straight away.
   useEffect(() => {
     const join = takeJoin('group', id);
