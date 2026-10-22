@@ -61,7 +61,10 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
   const lastUser = useRef<string | null>(null);
   const signedInCb = useRef(onSignedIn);
   signedInCb.current = onSignedIn;
-  const user = session?.user ?? null;
+  // Same person = same object. Supabase hands out a new user object on every token refresh and whenever the tab is focused again;
+  // pages that reload when `user` changes would otherwise restart (and cut the call) each time.
+  const sessionUser = session?.user ?? null;
+  const user = useMemo(() => sessionUser, [sessionUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadAll = useCallback(async (uid: string) => {
     const [p, w, b] = await Promise.all([

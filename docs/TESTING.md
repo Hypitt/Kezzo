@@ -146,3 +146,9 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 100. Signed in: the same button sits in the top bar just left of your profile picture.
 101. On an iPhone/iPad (Safari) or in Firefox, pressing it shows a short how-to (Share, then Add to Home Screen). French users get the French text.
 102. `https://your-site/manifest.webmanifest` and `https://your-site/sw.js` open without error. The service worker caches nothing, so new versions always show.
+
+## Stale tabs, call reliability, hero text
+103. Leave Kezzo open in a tab, deploy a new version, then click to a page you had not opened yet (for example Profile): the page reloads once by itself and works. The "Failed to fetch dynamically imported module" error no longer appears in Admin → Performance and errors for normal users.
+104. Start a group call (or a battle), switch to another tab for a couple of minutes (or let the login refresh), then come back: the call is still connected and the page did not reload.
+105. During a call, turn Wi-Fi off for about 10 seconds and on again: the call shows "Connection lost. Reconnecting…" and comes back by itself. If you stay offline for about a minute, the Rejoin button appears; coming back online reconnects automatically.
+106. The landing hero shows "Get to know the world through its people." with the new paragraph and the line "Share your culture. Discover the world. Connect beyond borders." In French the hero is in French.

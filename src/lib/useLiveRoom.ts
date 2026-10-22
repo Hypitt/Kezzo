@@ -92,6 +92,12 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
   const roomRef = useRef<Room | null>(null);
   const leftByUser = useRef(false);
   const autoDone = useRef(false);
+  // Automatic comeback after a network drop: the number of tries so far, whether we are in the middle of one, and the timer.
+  const retries = useRef(0);
+  const rejoining = useRef(false);
+  const lost = useRef(false);
+  const retryTimer = useRef<number | undefined>(undefined);
+  const joinRef = useRef<() => Promise<void>>(async () => undefined);
   const [phase, setPhase] = useState<Phase>('idle');
   const [error, setError] = useState<string | null>(null);
   const [canPublish, setCanPublish] = useState(false);
@@ -118,6 +124,9 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
 
   const leave = useCallback(() => {
     leftByUser.current = true;
+    lost.current = false;
+    rejoining.current = false;
+    window.clearTimeout(retryTimer.current);
     autoDone.current = false;
     const room = roomRef.current;
     roomRef.current = null;
@@ -162,8 +171,22 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
     [refreshDevices, t],
   );
 
+  /** Tries to get back into the room after an unexpected drop: 1, 2, 4, 8 and 8 seconds apart, then gives up and shows Rejoin. */
+  const scheduleRejoin = useCallback((): boolean => {
+    if (leftByUser.current || retries.current >= 5) return false;
+    retries.current += 1;
+    rejoining.current = true;
+    setReconnecting(true);
+    window.clearTimeout(retryTimer.current);
+    retryTimer.current = window.setTimeout(() => {
+      if (!leftByUser.current && !roomRef.current) void joinRef.current();
+    }, Math.min(1000 * 2 ** (retries.current - 1), 8000));
+    return true;
+  }, []);
+
   const join = useCallback(async () => {
     if (!ensureAuth() || roomRef.current) return;
+    if (!rejoining.current) retries.current = 0;
     leftByUser.current = false;
     autoDone.current = false;
     setPhase('connecting');
@@ -179,6 +202,8 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
         audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         videoCaptureDefaults: { resolution: VideoPresets.h720.resolution, facingMode: 'user' },
         publishDefaults: { simulcast: true },
+        // Keep trying to reconnect for about a minute before the room is considered disconnected (default is shorter).
+        reconnectPolicy: { nextRetryDelayInMs: (ctx: { retryCount: number }) => (ctx.retryCount < 15 ? Math.min(300 * 2 ** ctx.retryCount, 4000) : null) },
       });
       room
         .on(RoomEvent.ParticipantConnected, bump)
@@ -206,7 +231,11 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
           if (leftByUser.current) return;
           if (reason === Reason.PARTICIPANT_REMOVED) setError(t('removed_from_room'));
           else if (reason === Reason.DUPLICATE_IDENTITY) setError(t('duplicate_session'));
-          else setError(t('conn_lost'));
+          else {
+            // Internet dropped or the phone slept: try to come back by ourselves before showing Rejoin.
+            lost.current = true;
+            if (!scheduleRejoin()) setError(t('conn_lost'));
+          }
         });
       await room.connect(url, token, { autoSubscribe: true });
       if (leftByUser.current) {
@@ -214,6 +243,10 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
         return;
       }
       roomRef.current = room;
+      retries.current = 0;
+      rejoining.current = false;
+      lost.current = false;
+      setReconnecting(false);
       await room.startAudio().catch(() => undefined);
       setAudioBlocked(!room.canPlaybackAudio);
       if (allowed && autoPublish) autoDone.current = true;
@@ -228,10 +261,35 @@ export function useLiveRoom({ roomName, video, autoPublish }: { roomName: string
       }
     } catch (err) {
       setPhase('idle');
+      // A failed automatic comeback (still offline): keep trying quietly.
+      if (rejoining.current && scheduleRejoin()) return;
+      rejoining.current = false;
+      setReconnecting(false);
       const message = (err as Error).message || '';
       setError(/not configured/i.test(message) ? t('live_not_configured') : message || t('error_generic'));
     }
-  }, [ensureAuth, roomName, t, refreshDevices, autoPublish, video, publish]);
+  }, [ensureAuth, roomName, t, refreshDevices, autoPublish, video, publish, scheduleRejoin]);
+  joinRef.current = join;
+
+  // Back online, or the app comes back to the front: if we were cut off, reconnect right away.
+  useEffect(() => {
+    const retryNow = () => {
+      if (!lost.current || leftByUser.current || roomRef.current) return;
+      if (document.visibilityState === 'hidden') return;
+      window.clearTimeout(retryTimer.current);
+      retries.current = 0;
+      rejoining.current = true;
+      setReconnecting(true);
+      void joinRef.current();
+    };
+    window.addEventListener('online', retryNow);
+    document.addEventListener('visibilitychange', retryNow);
+    return () => {
+      window.removeEventListener('online', retryNow);
+      document.removeEventListener('visibilitychange', retryNow);
+      window.clearTimeout(retryTimer.current);
+    };
+  }, []);
 
   // A guest the host lets on stage while connected: turn their devices on without making them reconnect.
   useEffect(() => {

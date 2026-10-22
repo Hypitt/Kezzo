@@ -11,9 +11,15 @@ import { Navbar } from './components/Navbar';
 import { Loading } from './components/ui';
 import { PENDING_GROUP, pendingGroup, pendingInvite } from './lib/invite';
 import { startMonitoring, trackPage } from './lib/analytics';
+import { isStaleChunkError, reloadOnce } from './lib/reload';
 
 // Every page is its own downloadable chunk, so the first screen only loads the code it needs.
-const page = <P extends object>(load: () => Promise<{ default: ComponentType<P> }>) => lazy(load);
+const page = <P extends object>(load: () => Promise<{ default: ComponentType<P> }>) =>
+  lazy(() => load().catch((err: unknown) => {
+    // An old tab after a new deployment: reload once to get the new files.
+    if (isStaleChunkError(err)) reloadOnce();
+    throw err;
+  }));
 const BattleRoom = page(() => import('./views/BattleRoom').then((m) => ({ default: m.BattleRoom })));
 const BattlesView = page(() => import('./views/BattlesView').then((m) => ({ default: m.BattlesView })));
 const CreateView = page(() => import('./views/CreateView').then((m) => ({ default: m.CreateView })));

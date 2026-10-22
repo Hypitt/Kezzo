@@ -18,8 +18,9 @@ const COPY = {
     login: 'Log in', signup: 'Sign up', language: 'Language',
     eyebrow: 'Live battles · Live streams · Groups',
     live: (n: number) => (n === 1 ? '1 battle live right now' : `${n} battles live right now`),
-    h1a: 'Social is better', h1b: 'when you’re in it.',
-    lead: 'A place to discover people, share your world, join live conversations, challenge creators, and turn ordinary moments into something everyone can be part of.',
+    h1a: 'Get to know the world', h1b: 'through its people.',
+    lead: 'Show the world what makes your culture unique. Share your traditions, celebrate your heritage, exchange stories, and discover how people live, celebrate, communicate, and see the world. Explore and share music, food, languages, lifestyles, and everyday experiences from different cultures. Connect through live conversations, learn from different perspectives, and discover the beauty of our differences.',
+    leadTag: 'Share your culture. Discover the world. Connect beyond borders.',
     cta: 'Create your free account', ctaNote: 'Free to join · 16+ · Takes less than a minute',
     lines: ['Don’t just scroll. Get involved.', 'Your people. Your moments. Your stage.', 'More than a feed. A whole experience.', 'Where the crowd makes the moment.'],
     battlesKicker: 'Open to everyone', battlesTitle: 'Live battles that anyone can join',
@@ -49,8 +50,9 @@ const COPY = {
     login: 'Se connecter', signup: 'S’inscrire', language: 'Langue',
     eyebrow: 'Battles en direct · Directs · Groupes',
     live: (n: number) => (n === 1 ? '1 battle en direct maintenant' : `${n} battles en direct maintenant`),
-    h1a: 'Le social est meilleur', h1b: 'quand on y participe.',
-    lead: 'Un endroit pour découvrir des gens, partager votre univers, rejoindre des conversations en direct, défier des créateurs et transformer des moments ordinaires en quelque chose auquel tout le monde peut participer.',
+    h1a: 'Découvrez le monde', h1b: 'à travers ses gens.',
+    lead: 'Montrez au monde ce qui rend votre culture unique. Partagez vos traditions, célébrez votre héritage, échangez des histoires et découvrez comment les gens vivent, célèbrent, communiquent et voient le monde. Explorez et partagez la musique, la cuisine, les langues, les modes de vie et les expériences du quotidien de différentes cultures. Connectez-vous par des conversations en direct, apprenez d’autres points de vue et découvrez la beauté de nos différences.',
+    leadTag: 'Partagez votre culture. Découvrez le monde. Connectez-vous au-delà des frontières.',
     cta: 'Créer mon compte gratuit', ctaNote: 'Gratuit · 16 ans et plus · Moins d’une minute',
     lines: ['Ne faites pas que défiler. Participez.', 'Vos gens. Vos moments. Votre scène.', 'Plus qu’un fil. Toute une expérience.', 'Là où la foule fait le moment.'],
     battlesKicker: 'Ouvert à tous', battlesTitle: 'Des battles en direct où tout le monde peut entrer',
@@ -259,7 +261,8 @@ export function Landing({ invite }: { invite?: string }) {
               <h1 className="mt-5 text-4xl font-bold leading-[1.08] text-white sm:text-6xl">
                 {c.h1a}<br />{c.h1b}
               </h1>
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">{c.lead}</p>
+              <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">{c.lead}</p>
+              <p className="mt-4 max-w-2xl text-base font-semibold leading-snug text-white sm:text-lg">{c.leadTag}</p>
             </div>
           </div>
         </div>

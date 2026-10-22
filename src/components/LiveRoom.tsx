@@ -34,7 +34,7 @@ export function LiveRoom({ roomName, video, autoJoin = false }: Props) {
     return (
       <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-2xl bg-zinc-900 p-6 text-center text-white">
         <Radio className="h-6 w-6 text-accent" aria-hidden="true" />
-        <p className="max-w-sm text-sm text-zinc-300">{t(video ? 'call_intro_video' : 'call_intro_audio')}</p>
+        <p className="max-w-sm text-sm text-zinc-300">{live.reconnecting ? t('reconnecting') : t(video ? 'call_intro_video' : 'call_intro_audio')}</p>
         <button type="button" className="btn btn-accent" onClick={live.join} disabled={live.phase === 'connecting'}>
           {live.phase === 'connecting' && <Spinner />}
           {t(live.error ? 'rejoin' : 'join_call')}

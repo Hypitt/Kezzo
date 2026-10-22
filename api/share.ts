@@ -27,7 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   let title = 'Kezzo';
-  let description = 'Social is better when you’re in it. Join Kezzo.';
+  let description = 'Get to know the world through its people. Join Kezzo.';
   let image = '';
 
   try {
