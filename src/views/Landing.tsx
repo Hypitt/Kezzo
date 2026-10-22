@@ -164,33 +164,6 @@ function LoopVideo({ name, className }: { name: string; className: string }) {
     : <img src={`/landing/${name}.jpg`} alt="" className={className} loading="lazy" decoding="async" />;
 }
 
-/** Community video behind the hero. Optional: without /landing/hero.mp4 the card stays solid dark. Skipped for reduced motion or slow data. */
-function HeroVideo() {
-  const [play, setPlay] = useState(false);
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    const nav = navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } };
-    const slow = nav.connection?.saveData || /(^|-)2g$/.test(nav.connection?.effectiveType ?? '');
-    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    setPlay(!slow && !still);
-  }, []);
-  return (
-    <div className="absolute inset-0" aria-hidden="true">
-      <img src="/landing/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" fetchPriority="high" decoding="async" />
-      {play && (
-        <video
-          className={`h-full w-full object-cover transition-opacity duration-700 ${ready ? 'opacity-100' : 'opacity-0'}`}
-          autoPlay muted loop playsInline preload="metadata" poster="/landing/hero.jpg"
-          onCanPlay={() => setReady(true)} onError={() => setReady(false)}
-        >
-          <source src="/landing/hero.mp4" type="video/mp4" />
-        </video>
-      )}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/35" />
-    </div>
-  );
-}
-
 export function Landing({ invite }: { invite?: string }) {
   const { openAuth } = useAuth();
   const { lang } = useI18n();
@@ -230,23 +203,35 @@ export function Landing({ invite }: { invite?: string }) {
 
   return (
     <PublicFrame>
-      {/* Hero: a card with a short community video behind it */}
+      {/* Hero: warm light card with a photo of people (white background, blended into the card) */}
       <section className="bg-white px-3 pb-3 pt-4 sm:px-4 sm:pb-4 sm:pt-6">
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl bg-zinc-900 text-white">
-          <HeroVideo />
-          <div className="relative grid items-center gap-8 px-5 py-10 sm:px-10 sm:py-12 lg:grid-cols-1">
-            <div>
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#fff8f4] via-[#fdeee6] to-[#f8d9cb] text-zinc-900">
+          <div className="relative grid items-end gap-0 lg:grid-cols-[1.05fr_1fr]">
+            <div className="px-5 pb-6 pt-10 sm:px-10 sm:pb-12 sm:pt-12 lg:self-center">
               {liveBattles > 0 && (
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+                <span className="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white/70 px-3 py-1 text-xs font-medium text-zinc-800 backdrop-blur">
                   <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
                   {c.live(liveBattles)}
                 </span>
               )}
-              <h1 className="mt-5 text-4xl font-bold leading-[1.08] text-white sm:text-6xl">
-                {c.h1a}<br />{c.h1b}
+              <h1 className="mt-5 text-4xl font-bold leading-[1.08] text-zinc-900 sm:text-5xl">
+                {c.h1a}<br /><span className="text-accent">{c.h1b}</span>
               </h1>
-              <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">{c.lead}</p>
-              <p className="mt-4 max-w-2xl text-base font-semibold leading-snug text-white sm:text-lg">{c.leadTag}</p>
+              <p className="mt-5 max-w-xl text-sm leading-relaxed text-zinc-700 sm:text-base">{c.lead}</p>
+              <p className="mt-4 max-w-xl text-base font-semibold leading-snug text-zinc-900 sm:text-lg">{c.leadTag}</p>
+            </div>
+            <div className="relative">
+              {/* a soft colour disc behind the people */}
+              <div className="pointer-events-none absolute inset-x-[10%] top-[8%] aspect-square rounded-full bg-[#f4b9a3]/45" aria-hidden="true" />
+              <img
+                src="/landing/hero-people.jpg"
+                alt=""
+                width="1400"
+                height="1059"
+                className="relative block w-full object-contain object-bottom mix-blend-multiply"
+                fetchPriority="high"
+                decoding="async"
+              />
             </div>
           </div>
         </div>
