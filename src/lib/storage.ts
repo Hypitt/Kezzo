@@ -38,6 +38,6 @@ export async function removePublic(bucket: string, paths: Array<string | null | 
   const supa = list.filter((p) => !isR2Path(p));
   await Promise.all([
     supa.length ? supabase.storage.from(bucket).remove(supa).then(() => undefined, () => undefined) : Promise.resolve(),
-    r2.length ? api('r2-delete', { paths: r2 }).then(() => undefined, () => undefined) : Promise.resolve(),
+    r2.length ? api('r2', { action: 'delete', paths: r2 }).then(() => undefined, () => undefined) : Promise.resolve(),
   ]);
 }

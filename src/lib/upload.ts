@@ -61,7 +61,7 @@ export function startUpload({ bucket, path, file, onProgress }: UploadOptions): 
   const putToR2 = async (): Promise<void> => {
     let target: { url: string; headers: Record<string, string> };
     try {
-      target = await api<{ url: string; headers: Record<string, string> }>('r2-sign', { path, contentType: file.type || 'application/octet-stream', size: file.size });
+      target = await api<{ url: string; headers: Record<string, string> }>('r2', { action: 'sign', path, contentType: file.type || 'application/octet-stream', size: file.size });
     } catch (err) {
       const status = (err as { status?: number }).status;
       throw new UploadError(status === 413 ? 'too_big' : status === 401 || status === 403 || status === 415 ? 'denied' : 'network');

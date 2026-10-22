@@ -217,7 +217,7 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
       const { data } = await supabase.storage.from(bucket).list(user.id, { limit: 1000 });
       if (data?.length) await supabase.storage.from(bucket).remove(data.map((f) => `${user.id}/${f.name}`));
     }
-    if (r2Enabled) await api('r2-delete', { all: true }).catch(() => undefined); // files kept in Cloudflare R2
+    if (r2Enabled) await api('r2', { action: 'delete', all: true }).catch(() => undefined); // files kept in Cloudflare R2
     const { error } = await supabase.rpc('delete_my_account');
     if (error) throw error;
     await supabase.auth.signOut();

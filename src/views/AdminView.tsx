@@ -242,7 +242,7 @@ function MoveToR2({ fr }: { fr: boolean }) {
     try {
       for (;;) {
         if (stop.current) break;
-        const r = await api<{ remaining: number; moved?: string | null; failedId?: string; error?: string }>('r2-migrate', { kind, skip });
+        const r = await api<{ remaining: number; moved?: string | null; failedId?: string; error?: string }>('r2', { action: 'migrate', kind, skip });
         setLeft(r.remaining);
         if (r.failedId) {
           skip.push(r.failedId);
