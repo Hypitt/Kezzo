@@ -61,7 +61,7 @@ export default route(async (req, res) => {
       if (blob.size > MAX_COPY_BYTES) throw new Error('file too big for this tool');
       const type = blob.type || (post.kind === 'video' ? 'video/mp4' : 'image/jpeg');
       const target = uploadTarget(env, to, type);
-      const put = await fetch(target.url, { method: 'PUT', headers: target.headers, body: new Uint8Array(await blob.arrayBuffer()) });
+      const put = await fetch(target.url, { method: 'PUT', headers: target.headers, body: await blob.arrayBuffer() });
       if (!put.ok) throw new Error(`R2 upload failed (${put.status})`);
       copied.push(from);
     }
