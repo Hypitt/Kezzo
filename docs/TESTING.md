@@ -126,3 +126,6 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 87. In the browser's network tab, reopening a page shows photos coming from the cache ("disk cache"): new uploads are kept for a year.
 88. Optional one-off for photos already stored: `npm install --no-save sharp`, then `node --env-file=.env.local scripts/shrink-storage.mjs` (dry run) and with `--apply`.
 
+## Calls and live video: "Invalid or expired session"
+89. Open `https://your-site/api/health`. `supabase_server_works` must be `true` and `supabase_hosts_match` must be `true`. If it says `no: ...` the server key in Vercel (`SUPABASE_SERVICE_ROLE_KEY`) is wrong for this project; if the hosts differ, `SUPABASE_URL` in Vercel points to another Supabase project. Fix the variable, then Redeploy (changes only apply to a new deployment). Then Rejoin a call: it connects and asks for camera/microphone.
+

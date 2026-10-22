@@ -60,6 +60,6 @@ export async function authenticate(req: VercelRequest): Promise<{ user: User; db
   if (!token) throw new HttpError(401, 'Sign in required');
   const db = adminClient();
   const { data, error } = await db.auth.getUser(token);
-  if (error || !data.user) throw new HttpError(401, 'Invalid or expired session');
+  if (error || !data.user) throw new HttpError(401, `Invalid or expired session${error?.message ? ` (${error.message.slice(0, 120)})` : ''}`);
   return { user: data.user, db };
 }
