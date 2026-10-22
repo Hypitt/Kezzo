@@ -72,6 +72,7 @@ supabase/update-12.sql At most 10 notifications per person; group messages as in
 supabase/update-13.sql Ringing calls: incoming-call screen for direct messages and groups
 supabase/update-14.sql Cleanup of forgotten battles and live streams
 supabase/update-15.sql Re-applies the battle functions (fixes Cancel battle after schema.sql was run again)
+supabase/update-16.sql Lets profiles use Spanish, Portuguese and Hindi (run it before using the new languages)
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers

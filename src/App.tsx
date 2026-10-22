@@ -12,6 +12,7 @@ import { Loading } from './components/ui';
 import { PENDING_GROUP, pendingGroup, pendingInvite } from './lib/invite';
 import { startMonitoring, trackPage } from './lib/analytics';
 import { isStaleChunkError, reloadOnce } from './lib/reload';
+import type { Lang } from './lib/types';
 
 // Every page is its own downloadable chunk, so the first screen only loads the code it needs.
 const page = <P extends object>(load: () => Promise<{ default: ComponentType<P> }>) =>
@@ -35,6 +36,10 @@ const MessagesView = page(() => import('./views/MessagesView').then((m) => ({ de
 const ProfileView = page(() => import('./views/ProfileView').then((m) => ({ default: m.ProfileView })));
 const PostView = page(() => import('./views/PostView').then((m) => ({ default: m.PostView })));
 const CommunityView = page(() => import('./views/CommunityView').then((m) => ({ default: m.CommunityView })));
+const FOOT: Record<Lang, { terms: string; privacy: string }> = {
+  en: { terms: 'Terms', privacy: 'Privacy' }, fr: { terms: 'Conditions', privacy: 'Confidentialité' },
+  es: { terms: 'Términos', privacy: 'Privacidad' }, pt: { terms: 'Termos', privacy: 'Privacidade' }, hi: { terms: 'नियम', privacy: 'गोपनीयता' },
+};
 const AdminView = page(() => import('./views/AdminView').then((m) => ({ default: m.AdminView })));
 const Landing = page(() => import('./views/Landing').then((m) => ({ default: m.Landing })));
 const PublicFrame = page(() => import('./views/Landing').then((m) => ({ default: m.PublicFrame })));
@@ -141,9 +146,9 @@ function Shell() {
         </Suspense>
       </main>
       <footer className="border-t border-zinc-100 py-6 text-center text-xs text-zinc-500">
-        <button type="button" className="underline" onClick={() => go('legal', 'terms')}>{lang === 'fr' ? 'Conditions' : 'Terms'}</button>
+        <button type="button" className="underline" onClick={() => go('legal', 'terms')}>{FOOT[lang].terms}</button>
         {' · '}
-        <button type="button" className="underline" onClick={() => go('legal', 'privacy')}>{lang === 'fr' ? 'Confidentialité' : 'Privacy'}</button>
+        <button type="button" className="underline" onClick={() => go('legal', 'privacy')}>{FOOT[lang].privacy}</button>
       </footer>
       <AuthDialog />
     </div>

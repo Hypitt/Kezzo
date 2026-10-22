@@ -20,7 +20,7 @@ function siteUrl(host: string | undefined): string {
   return `https://${host ?? 'kezzo.vercel.app'}`;
 }
 
-interface Person { id: string; display_name: string; language: 'en' | 'fr' }
+interface Person { id: string; display_name: string; language: string }
 
 function compose(person: Person, link: string, optOut: string) {
   const fr = person.language === 'fr';

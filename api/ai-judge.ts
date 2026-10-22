@@ -15,7 +15,9 @@ export default route(async (req, res) => {
   const { user, db } = await authenticate(req);
   const body = readBody(req);
   const battleId = String(body.battleId ?? '');
-  const language = body.language === 'fr' ? 'French' : 'English';
+  const LANGUAGES: Record<string, string> = { en: 'English', fr: 'French', es: 'Spanish', pt: 'Portuguese', hi: 'Hindi' };
+  const code = typeof body.language === 'string' && body.language in LANGUAGES ? body.language : 'en';
+  const language = LANGUAGES[code];
   if (!UUID_RE.test(battleId)) throw new HttpError(400, 'Invalid battle');
 
   const { data: battle } = await db.from('battles').select('id,host_id,title,topic,category,status,current_round,total_rounds').eq('id', battleId).maybeSingle();
@@ -77,7 +79,7 @@ export default route(async (req, res) => {
 
   const { data: saved, error } = await db
     .from('ai_verdicts')
-    .insert({ battle_id: battleId, requested_by: user.id, winner_id: winnerId, verdict, highlights, language: language === 'French' ? 'fr' : 'en' })
+    .insert({ battle_id: battleId, requested_by: user.id, winner_id: winnerId, verdict, highlights, language: code })
     .select('*').single();
   if (error) throw new HttpError(500, 'Could not save the recap');
   res.status(200).json(saved);

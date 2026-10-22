@@ -5,7 +5,7 @@ export type LegalBlock = string | string[] | { head: string[]; rows: string[][] 
 export interface LegalSection { h: string; body: LegalBlock[] }
 export interface LegalDoc { title: string; updated: string; sections: LegalSection[] }
 
-export const LEGAL: Record<Lang, { privacy: LegalDoc; terms: LegalDoc }> = {
+export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> = {
   en: {
     terms: {
       title: 'Terms of Service',

@@ -31,7 +31,7 @@ function Block({ block }: { block: LegalBlock }) {
 /** The Terms / Privacy text with its two tabs. Used by the legal page and by the pop-up shown at sign-in. */
 export function LegalBody({ tab, onTab }: { tab: LegalTab; onTab: (tab: LegalTab) => void }) {
   const { lang, t } = useI18n();
-  const doc = LEGAL[lang][tab];
+  const doc = LEGAL[lang === 'fr' ? 'fr' : 'en'][tab];
   return (
     <div>
       <div className="mb-5 flex gap-2">

@@ -1,4 +1,4 @@
-import { CalendarDays, Coins, Home, Image as ImageIcon, Languages, LogIn, MessageCircle, PlusCircle, Radio, Search, Swords, User, Users, type LucideIcon } from 'lucide-react';
+import { CalendarDays, Coins, Home, Image as ImageIcon, LogIn, MessageCircle, PlusCircle, Radio, Search, Swords, User, Users, type LucideIcon } from 'lucide-react';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter, type Tab } from '../state/Router';
@@ -9,6 +9,8 @@ import type { Key } from '../lib/i18n';
 import { Avatar } from './ui';
 import { InstallButton } from './InstallButton';
 import { NotificationBell } from './NotificationBell';
+import { LanguageSwitch } from './LanguageSwitch';
+import type { Lang } from '../lib/types';
 
 const NAV: { tab: Exclude<Tab, 'legal'>; icon: LucideIcon; label: Key }[] = [
   { tab: 'home', icon: Home, label: 'nav_home' },
@@ -25,7 +27,7 @@ const NAV: { tab: Exclude<Tab, 'legal'>; icon: LucideIcon; label: Key }[] = [
 
 export function Navbar() {
   const { user, profile, wallet, openAuth, updateProfile, refreshWallet } = useAuth();
-  const { t, lang, setLang } = useI18n();
+  const { t } = useI18n();
   const { route, go } = useRouter();
   const { toast } = useToast();
 
@@ -39,9 +41,7 @@ export function Navbar() {
     toast(t('claimed_toast'));
   };
 
-  const switchLang = () => {
-    const next = lang === 'en' ? 'fr' : 'en';
-    setLang(next);
+  const saveLang = (next: Lang) => {
     if (profile) updateProfile({ language: next }).catch(() => undefined);
   };
 
@@ -79,10 +79,7 @@ export function Navbar() {
               </div>
             )}
             {user && profile && <NotificationBell />}
-            <button type="button" className="btn btn-sm border border-zinc-600 bg-transparent text-white hover:bg-zinc-800" onClick={switchLang} aria-label={t('language')}>
-              <Languages className="h-3.5 w-3.5" aria-hidden="true" />
-              {lang.toUpperCase()}
-            </button>
+            <LanguageSwitch className="btn btn-sm border border-zinc-600 bg-transparent text-white hover:bg-zinc-800" onPick={saveLang} />
             {user && profile ? (
               <>
                 <InstallButton compact className="btn btn-sm border border-zinc-600 bg-transparent text-white hover:bg-zinc-800" />

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Languages, Mic, Swords, UserPlus, Users, type LucideIcon } from 'lucide-react';
+import { Mic, Swords, UserPlus, Users, type LucideIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { PENDING_GROUP, PENDING_JOIN } from '../lib/invite';
 import { InstallButton } from '../components/InstallButton';
+import { LanguageSwitch } from '../components/LanguageSwitch';
 
 /**
  * The public page every visitor sees first. Everything else in Kezzo needs an account.
@@ -84,6 +85,111 @@ const COPY = {
     finalTitle: 'Ne faites pas que défiler. Participez.', finalSub: 'Joignez Kezzo aujourd’hui et faites partie du prochain moment.',
     terms: 'Conditions', privacy: 'Confidentialité', contact: 'Contact',
   },
+  es: {
+    login: 'Iniciar sesión', signup: 'Registrarse', language: 'Idioma',
+    eyebrow: 'Batallas en vivo · Transmisiones en vivo · Grupos',
+    live: (n: number) => (n === 1 ? '1 batalla en vivo ahora mismo' : `${n} batallas en vivo ahora mismo`),
+    h1a: 'Conoce el mundo', h1b: 'a través de su gente.',
+    lead: 'Muestra al mundo lo que hace única a tu cultura. Comparte tus tradiciones, celebra tu herencia, intercambia historias y descubre la música, la comida, los idiomas y los estilos de vida de todo el mundo.',
+    leadTag: 'Comparte tu cultura. Descubre el mundo.',
+    cta: 'Crea tu cuenta gratis', ctaNote: 'Gratis · 16+ · Menos de un minuto',
+    lines: ['No te limites a mirar. Sé parte de ello.', 'Tu gente. Tus momentos. Tu escenario.'],
+    pillars: [
+      ['02 · Participación social', 'No te limites a desplazarte. Participa.', 'Únete a conversaciones, reacciona a los momentos en vivo, conoce gente nueva y forma parte de experiencias que unen a las comunidades.'],
+      ['03 · Intercambio cultural', 'Tu cultura. Tus historias. Tu mundo.', 'Muestra al mundo lo que hace única a tu cultura. Comparte tus tradiciones, celebra tu herencia, intercambia historias y descubre la música, la comida, los idiomas y los estilos de vida de todo el mundo.'],
+      ['04 · Competiciones en vivo', 'Trae tu talento. Acepta el reto.', 'Participa en competiciones en vivo, rétate con otros creadores, muestra tus habilidades y moviliza a tu comunidad. Entra en la acción y mira lo que pasa cuando el talento se encuentra con la competencia sana.'],
+      ['05 · Eventos en vivo', 'Está ahí cuando suceda.', 'Descubre eventos en vivo, comparte experiencias, conoce gente con intereses parecidos y sé parte de los momentos de los que todos hablan.'],
+      ['06 · Comunidad y conexión', 'Más que un feed. Toda una experiencia.', 'Desde descubrimientos culturales hasta competiciones en vivo y eventos comunitarios, encuentra nuevas formas de expresarte, conectar con los demás y dar valor a cada interacción.'],
+    ],
+    liveKicker: 'Tres formas de estar en vivo', liveTitle: 'En vivo juntos, no solo',
+    liveText: 'Las transmisiones en solitario, los directos en grupo y las batallas son experiencias distintas, y Kezzo las trata así. Sube a tus amigos u otros creadores a la pantalla y conversa con tu audiencia mientras sucede.',
+    modes: [
+      ['Transmisión en solitario', 'Sal en vivo por tu cuenta, con chat en directo. No hace falta una batalla.'],
+      ['Directo en grupo', 'Invita a otras personas a la pantalla. Los espectadores piden subir y tú decides quién entra.'],
+      ['Batalla', 'Creador contra creador, con marcador en vivo y votos del público.'],
+    ],
+    feedKicker: 'Más que me gusta', feedTitle: 'Un feed que lleva a participar',
+    feedText: 'Los vídeos, el audio, las fotos y las publicaciones sirven para empezar algo. Reacciona, comenta, sigue, únete a un grupo y súmate a los momentos en vivo a tu alrededor.',
+    feedNow: 'Disponible ahora', feedNowItems: ['Publicaciones de vídeo, audio, foto y texto', 'Me gusta, comentarios y seguidores', 'Grupos, chats y llamadas', 'Estados de 24 horas'],
+    feedSoon: 'Próximamente', feedSoonItems: ['Encuestas', 'Preguntas del público', 'Retos', 'Ideas para creadores'],
+    groupsKicker: 'Comunidades', groupsTitle: 'Grupos a los que puedes unirte', groupsText: 'Grupos abiertos de la comunidad de Kezzo. Regístrate o inicia sesión para unirte.',
+    example: 'Ejemplo', exGroups: [['Pódcast y charlas', 'Voces, entrevistas y preguntas en vivo', 2415], ['Rincón de creadores', 'Comparte tu equipo y tus trucos', 1248], ['Amigos y diversión', 'Retos con tu grupo', 862]],
+    groupMembers: (n: number) => (n === 1 ? '1 miembro' : `${n} miembros`), groupJoin: 'Regístrate para unirte',
+    cats: { dance: 'Crew de baile', roasting: 'Roast', singing: 'Canto', debate: 'Debate', comedy: 'Comedia', other: 'Comunidad' } as Record<string, string>,
+    members: 'Kezzo es para miembros. Regístrate o inicia sesión para ver el feed, los vídeos, las transmisiones en vivo, las batallas y los perfiles.',
+    finalTitle: 'No te limites a desplazarte. Participa.', finalSub: 'Únete hoy a Kezzo y sé parte del próximo momento.',
+    terms: 'Términos', privacy: 'Privacidad', contact: 'Contacto',
+  },
+  pt: {
+    login: 'Entrar', signup: 'Cadastrar-se', language: 'Idioma',
+    eyebrow: 'Batalhas ao vivo · Transmissões ao vivo · Grupos',
+    live: (n: number) => (n === 1 ? '1 batalha ao vivo agora' : `${n} batalhas ao vivo agora`),
+    h1a: 'Conheça o mundo', h1b: 'por meio das pessoas.',
+    lead: 'Mostre ao mundo o que torna a sua cultura única. Compartilhe suas tradições, celebre sua herança, troque histórias e descubra música, comida, idiomas e estilos de vida do mundo inteiro.',
+    leadTag: 'Compartilhe sua cultura. Descubra o mundo.',
+    cta: 'Crie sua conta grátis', ctaNote: 'Grátis · 16+ · Leva menos de um minuto',
+    lines: ['Não fique só assistindo. Faça parte.', 'Suas pessoas. Seus momentos. Seu palco.'],
+    pillars: [
+      ['02 · Participação social', 'Não fique só rolando a tela. Participe.', 'Entre em conversas, reaja a momentos ao vivo, conheça gente nova e faça parte de experiências que unem comunidades.'],
+      ['03 · Intercâmbio cultural', 'Sua cultura. Suas histórias. Seu mundo.', 'Mostre ao mundo o que torna a sua cultura única. Compartilhe suas tradições, celebre sua herança, troque histórias e descubra música, comida, idiomas e estilos de vida do mundo inteiro.'],
+      ['04 · Competições ao vivo', 'Traga seu talento. Aceite o desafio.', 'Participe de competições ao vivo, desafie criadores, mostre suas habilidades e mobilize sua comunidade. Entre em ação e veja o que acontece quando o talento encontra a competição amigável.'],
+      ['05 · Eventos ao vivo', 'Esteja lá quando acontecer.', 'Descubra eventos ao vivo, viva experiências compartilhadas, conheça pessoas com interesses parecidos e faça parte dos momentos de que todo mundo está falando.'],
+      ['06 · Comunidade e conexão', 'Mais que um feed. Uma experiência completa.', 'De descobertas culturais a competições ao vivo e eventos da comunidade, encontre novas formas de se expressar, se conectar com os outros e dar valor a cada interação.'],
+    ],
+    liveKicker: 'Três formas de estar ao vivo', liveTitle: 'Ao vivo juntos, não só sozinho',
+    liveText: 'Transmissões solo, lives em grupo e batalhas são experiências diferentes, e o Kezzo trata cada uma assim. Leve amigos ou outros criadores para a tela e converse com seu público enquanto acontece.',
+    modes: [
+      ['Transmissão solo', 'Vá ao vivo sozinho, com chat ao vivo. Não precisa de batalha.'],
+      ['Live em grupo', 'Convide pessoas para a tela. Os espectadores pedem para entrar e você decide quem sobe.'],
+      ['Batalha', 'Criador contra criador, com placar ao vivo e votos da plateia.'],
+    ],
+    feedKicker: 'Mais que curtidas', feedTitle: 'Um feed que leva à participação',
+    feedText: 'Vídeos, áudios, fotos e publicações estão aqui para começar algo. Reaja, comente, siga, entre em um grupo e mergulhe nos momentos ao vivo ao seu redor.',
+    feedNow: 'Disponível agora', feedNowItems: ['Publicações de vídeo, áudio, foto e texto', 'Curtidas, comentários e seguidores', 'Grupos, chats e chamadas', 'Status de 24 horas'],
+    feedSoon: 'Em breve', feedSoonItems: ['Enquetes', 'Perguntas da plateia', 'Desafios', 'Ideias para criadores'],
+    groupsKicker: 'Comunidades', groupsTitle: 'Grupos em que você pode entrar', groupsText: 'Grupos abertos da comunidade Kezzo. Cadastre-se ou entre para participar.',
+    example: 'Exemplo', exGroups: [['Podcast e bate-papo', 'Vozes, entrevistas e perguntas ao vivo', 2415], ['Cantinho dos criadores', 'Compartilhe seu equipamento e suas dicas', 1248], ['Amigos e diversão', 'Desafios com a sua turma', 862]],
+    groupMembers: (n: number) => (n === 1 ? '1 membro' : `${n} membros`), groupJoin: 'Cadastre-se para entrar',
+    cats: { dance: 'Crew de dança', roasting: 'Roast', singing: 'Canto', debate: 'Debate', comedy: 'Comédia', other: 'Comunidade' } as Record<string, string>,
+    members: 'O Kezzo é para membros. Cadastre-se ou entre para ver o feed, os vídeos, as lives, as batalhas e os perfis.',
+    finalTitle: 'Não fique só rolando a tela. Participe.', finalSub: 'Entre hoje no Kezzo e faça parte do próximo momento.',
+    terms: 'Termos', privacy: 'Privacidade', contact: 'Contato',
+  },
+  hi: {
+    login: 'लॉग इन', signup: 'साइन अप', language: 'भाषा',
+    eyebrow: 'लाइव बैटल · लाइव स्ट्रीम · ग्रुप',
+    live: (n: number) => (n === 1 ? 'अभी 1 बैटल लाइव है' : `अभी ${n} बैटल लाइव हैं`),
+    h1a: 'दुनिया को जानिए', h1b: 'उसके लोगों के ज़रिए।',
+    lead: 'दुनिया को दिखाइए कि आपकी संस्कृति को क्या खास बनाता है। अपनी परंपराएँ साझा करें, अपनी विरासत का जश्न मनाएँ, कहानियों का आदान-प्रदान करें, और दुनिया भर का संगीत, खान-पान, भाषाएँ और जीवनशैली जानें।',
+    leadTag: 'अपनी संस्कृति साझा करें। दुनिया को जानें।',
+    cta: 'अपना मुफ़्त खाता बनाएँ', ctaNote: 'जुड़ना मुफ़्त · 16+ · एक मिनट से भी कम',
+    lines: ['सिर्फ़ देखिए मत। हिस्सा बनिए।', 'आपके अपने लोग। आपके पल। आपका मंच।'],
+    pillars: [
+      ['02 · सामाजिक भागीदारी', 'सिर्फ़ स्क्रॉल मत कीजिए। जुड़िए।', 'बातचीत में शामिल हों, लाइव पलों पर प्रतिक्रिया दें, नए लोगों से मिलें और ऐसे अनुभवों का हिस्सा बनें जो समुदायों को जोड़ते हैं।'],
+      ['03 · सांस्कृतिक आदान-प्रदान', 'आपकी संस्कृति। आपकी कहानियाँ। आपकी दुनिया।', 'दुनिया को दिखाइए कि आपकी संस्कृति को क्या खास बनाता है। अपनी परंपराएँ साझा करें, अपनी विरासत का जश्न मनाएँ, कहानियों का आदान-प्रदान करें, और दुनिया भर का संगीत, खान-पान, भाषाएँ और जीवनशैली जानें।'],
+      ['04 · लाइव प्रतियोगिताएँ', 'अपनी प्रतिभा लाइए। चुनौती स्वीकारिए।', 'लाइव प्रतियोगिताओं में हिस्सा लें, क्रिएटरों को चुनौती दें, अपना हुनर दिखाएँ और अपने समुदाय को साथ लाएँ। मैदान में उतरिए और देखिए कि जब प्रतिभा दोस्ताना मुकाबले से मिलती है तो क्या होता है।'],
+      ['05 · लाइव इवेंट', 'जब कुछ हो रहा हो, तब वहाँ रहिए।', 'लाइव इवेंट खोजें, साझा अनुभवों में शामिल हों, एक जैसी रुचि वाले लोगों से मिलें और उन पलों का हिस्सा बनें जिनकी हर कोई बात कर रहा है।'],
+      ['06 · समुदाय और जुड़ाव', 'सिर्फ़ एक फ़ीड नहीं। एक पूरा अनुभव।', 'सांस्कृतिक खोजों से लेकर लाइव प्रतियोगिताओं और सामुदायिक इवेंट तक, खुद को व्यक्त करने, दूसरों से जुड़ने और हर बातचीत को मायने देने के नए तरीके खोजें।'],
+    ],
+    liveKicker: 'लाइव होने के तीन तरीके', liveTitle: 'सिर्फ़ अकेले नहीं, साथ मिलकर लाइव',
+    liveText: 'अकेले प्रसारण, ग्रुप लाइव स्ट्रीम और बैटल अलग-अलग अनुभव हैं, और Kezzo उन्हें वैसे ही संभालता है। दोस्तों या दूसरे क्रिएटरों को स्क्रीन पर बुलाएँ और अपने दर्शकों से उसी पल बात करें।',
+    modes: [
+      ['अकेले प्रसारण', 'लाइव चैट के साथ अकेले लाइव आएँ। बैटल की ज़रूरत नहीं।'],
+      ['ग्रुप लाइव स्ट्रीम', 'मेहमानों को स्क्रीन पर बुलाएँ। दर्शक जुड़ने का अनुरोध करते हैं और कौन आएगा, यह आप तय करते हैं।'],
+      ['बैटल', 'क्रिएटर बनाम क्रिएटर, लाइव स्कोरबोर्ड और भीड़ के वोटों के साथ।'],
+    ],
+    feedKicker: 'लाइक से कहीं ज़्यादा', feedTitle: 'एक फ़ीड जो भागीदारी तक ले जाए',
+    feedText: 'वीडियो, ऑडियो, फ़ोटो और पोस्ट कुछ शुरू करने के लिए हैं। प्रतिक्रिया दें, टिप्पणी करें, फ़ॉलो करें, किसी ग्रुप से जुड़ें और अपने आस-पास के लाइव पलों में कूद पड़ें।',
+    feedNow: 'अभी उपलब्ध', feedNowItems: ['वीडियो, ऑडियो, फ़ोटो और टेक्स्ट पोस्ट', 'लाइक, टिप्पणियाँ और फ़ॉलो', 'ग्रुप, चैट और कॉल', '24 घंटे के स्टेटस'],
+    feedSoon: 'जल्द आ रहा है', feedSoonItems: ['पोल', 'दर्शकों के सवाल', 'चैलेंज', 'क्रिएटरों के लिए सुझाव'],
+    groupsKicker: 'समुदाय', groupsTitle: 'ग्रुप जिनसे आप जुड़ सकते हैं', groupsText: 'Kezzo समुदाय के खुले ग्रुप। जुड़ने के लिए साइन अप या लॉग इन करें।',
+    example: 'उदाहरण', exGroups: [['पॉडकास्ट और बातचीत', 'आवाज़ें, इंटरव्यू और लाइव सवाल-जवाब', 2415], ['क्रिएटर कॉर्नर', 'अपना सेटअप और सुझाव साझा करें', 1248], ['दोस्त और मस्ती', 'अपनी टोली के साथ चैलेंज', 862]],
+    groupMembers: (n: number) => (n === 1 ? '1 सदस्य' : `${n} सदस्य`), groupJoin: 'जुड़ने के लिए साइन अप करें',
+    cats: { dance: 'डांस क्रू', roasting: 'रोस्टिंग', singing: 'गायन', debate: 'बहस', comedy: 'कॉमेडी', other: 'समुदाय' } as Record<string, string>,
+    members: 'Kezzo सदस्यों के लिए है। फ़ीड, वीडियो, लाइव स्ट्रीम, बैटल और प्रोफ़ाइल देखने के लिए साइन अप या लॉग इन करें।',
+    finalTitle: 'सिर्फ़ स्क्रॉल मत कीजिए। जुड़िए।', finalSub: 'आज ही Kezzo से जुड़ें और अगले पल का हिस्सा बनें।',
+    terms: 'नियम', privacy: 'गोपनीयता', contact: 'संपर्क',
+  },
 } as const;
 
 const MODE_ICONS: LucideIcon[] = [Mic, Users, Swords];
@@ -95,7 +201,7 @@ const outline = 'btn border border-zinc-300 bg-white text-zinc-900 hover:bg-ston
 /** White top bar with the logo, language switch and the Log in / Sign up buttons. */
 function Header() {
   const { openAuth } = useAuth();
-  const { lang, setLang } = useI18n();
+  const { lang } = useI18n();
   const { go } = useRouter();
   const c = COPY[lang];
   return (
@@ -106,9 +212,7 @@ function Header() {
           Kezzo
         </a>
         <div className="flex items-center gap-2">
-          <button type="button" className={`${outline} btn-sm`} onClick={() => setLang(lang === 'en' ? 'fr' : 'en')} aria-label={c.language}>
-            <Languages className="h-3.5 w-3.5" aria-hidden="true" />{lang.toUpperCase()}
-          </button>
+          <LanguageSwitch className={`${outline} btn-sm`} />
           <InstallButton compact className={`${outline} btn-sm`} />
           <button type="button" className={`${outline} btn-sm`} onClick={() => openAuth('signin')}>{c.login}</button>
           <button type="button" className="btn btn-sm btn-accent" onClick={() => openAuth('signup')}>{c.signup}</button>

@@ -2,7 +2,7 @@ import { track } from '../lib/analytics';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { configured, supabase } from '../lib/supabase';
-import type { Profile, Wallet } from '../lib/types';
+import { isLang, type Profile, type Wallet } from '../lib/types';
 import { useI18n } from './I18n';
 import { useToast } from './Toast';
 import { api } from '../lib/api';
@@ -167,7 +167,8 @@ export function AuthProvider({ children, onSignedIn }: { children: ReactNode; on
     async (values: NewProfile) => {
       if (!user) throw new Error('not_authenticated');
       const meta = user.user_metadata as { avatar_url?: string; picture?: string };
-      const lang = localStorage.getItem('kezzo_lang') === 'fr' ? 'fr' : 'en';
+      const saved = localStorage.getItem('kezzo_lang');
+      const lang = isLang(saved) ? saved : 'en';
       const { error } = await supabase.from('profiles').insert({
         id: user.id,
         handle: values.handle,

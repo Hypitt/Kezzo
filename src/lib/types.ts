@@ -1,4 +1,13 @@
-export type Lang = 'en' | 'fr';
+export type Lang = 'en' | 'fr' | 'es' | 'pt' | 'hi';
+/** Languages Kezzo speaks, in the order of the language menu (each shown in its own language). */
+export const LANGS: ReadonlyArray<{ code: Lang; label: string; short: string }> = [
+  { code: 'en', label: 'English', short: 'EN' },
+  { code: 'fr', label: 'Français', short: 'FR' },
+  { code: 'es', label: 'Español', short: 'ES' },
+  { code: 'pt', label: 'Português', short: 'PT' },
+  { code: 'hi', label: 'हिन्दी', short: 'HI' },
+];
+export const isLang = (v: unknown): v is Lang => LANGS.some((l) => l.code === v);
 
 export interface PublicProfile {
   id: string;

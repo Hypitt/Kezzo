@@ -173,3 +173,6 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 119. Landing page: under the hero text there are two buttons, Download Kezzo (opens the install window or how-to) and Sign in (opens sign in). Download is hidden once Kezzo is installed.
 120. Feed videos autoplay WITH sound once you have tapped/clicked anywhere on Kezzo (browser rule); if the browser blocks it the video plays muted. Pressing the sound button mutes/unmutes every feed video from then on.
 121. Profile grid: videos stored in R2 show a real frame from the video with a small Play circle on top; videos still in Supabase show a dark tile with Play.
+122. (Run update-16.sql first) Language menu in the top bar (and on the landing page) lists English, Français, Español, Português, हिन्दी. Pick each: the whole app and the landing page change language, the choice is remembered after a reload, and for a signed-in person it is saved on their profile (no error after reload).
+123. In a private window with the browser language set to Spanish, Portuguese or Hindi, the landing page opens in that language. With any other browser language it opens in English.
+124. Hindi text shows properly (no empty boxes) on phone and computer. Terms and Privacy pages, the Admin page and emails stay in English or French for now.

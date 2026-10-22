@@ -1,6 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { en, fr, type Key } from '../lib/i18n';
-import type { Lang } from '../lib/types';
+import { es } from '../lib/i18n-es';
+import { pt } from '../lib/i18n-pt';
+import { hi } from '../lib/i18n-hi';
+import { isLang, type Lang } from '../lib/types';
+
+const DICTIONARIES: Record<Lang, Partial<Record<Key, string>>> = { en, fr, es, pt, hi };
 
 export type TFn = (key: Key, vars?: Record<string, string | number>) => string;
 
@@ -18,18 +23,21 @@ const STORAGE_KEY = 'kezzo_lang';
 function savedLang(): Lang | null {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === 'en' || saved === 'fr') return saved;
+    if (isLang(saved)) return saved;
   } catch {
     /* storage unavailable */
   }
   return null;
 }
 
-/** Browser/device language: French if the first language the person prefers (among French or English) is French, otherwise English. */
+/** Browser/device language: the first language the person prefers that Kezzo speaks, otherwise English. */
 function detectLang(): Lang {
   const prefs = (navigator.languages?.length ? navigator.languages : [navigator.language]).filter(Boolean).map((l) => l.toLowerCase());
-  const first = prefs.find((l) => l.startsWith('fr') || l.startsWith('en'));
-  return first?.startsWith('fr') ? 'fr' : 'en';
+  for (const p of prefs) {
+    const code = p.slice(0, 2);
+    if (isLang(code)) return code;
+  }
+  return 'en';
 }
 
 function initialLang(): Lang {
@@ -61,7 +69,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback<TFn>(
     (key, vars) => {
-      let text: string = (lang === 'fr' ? fr : en)[key] ?? en[key] ?? key;
+      let text: string = DICTIONARIES[lang][key] ?? en[key] ?? key;
       if (vars) for (const [k, v] of Object.entries(vars)) text = text.split(`{${k}}`).join(String(v));
       return text;
     },
