@@ -23,10 +23,13 @@ const COPY = {
     leadTag: 'Share your culture. Discover the world.',
     cta: 'Create your free account', ctaNote: 'Free to join · 16+ · Takes less than a minute',
     lines: ['Don’t just scroll. Get involved.', 'Your people. Your moments. Your stage.', 'More than a feed. A whole experience.', 'Where the crowd makes the moment.'],
-    battlesKicker: 'Open to everyone', battlesTitle: 'Live battles that anyone can join',
-    battlesText: 'Discover ongoing battles without having to know the creators beforehand. Watch, vote with your coins as it happens, or step on stage yourself.',
-    battlesPoints: ['Find battles happening right now', 'Vote live and watch the scores move', 'Join the stage with up to 5 competitors'],
-    battlesCta: 'Sign up to join a battle',
+    pillars: [
+      ['02 · Social participation', 'Don’t just scroll. Get involved.', 'Join conversations, react to live moments, meet new people, and become part of experiences that bring communities together.'],
+      ['03 · Cultural exchange', 'Your culture. Your stories. Your world.', 'Show the world what makes your culture unique. Share your traditions, celebrate your heritage, exchange stories, and discover music, food, languages, and lifestyles from around the world.'],
+      ['04 · Live competitions', 'Bring your talent. Join the challenge.', 'Take part in live competitions, challenge creators, showcase your skills, and rally your community. Step into the action and see what happens when talent meets friendly competition.'],
+      ['05 · Live events', 'Be there when it happens.', 'Discover live events, join shared experiences, meet people with similar interests, and be part of the moments everyone is talking about.'],
+      ['06 · Community & connection', 'More than a feed. A whole experience.', 'From cultural discoveries to live competitions and community events, find new ways to express yourself, connect with others, and make every interaction count.'],
+    ],
     liveKicker: 'Three ways to be live', liveTitle: 'Live together, not just alone',
     liveText: 'Solo broadcasts, group livestreams and battles are different experiences, and Kezzo treats them that way. Bring friends or other creators on screen and talk with your audience as it happens.',
     modes: [
@@ -55,10 +58,13 @@ const COPY = {
     leadTag: 'Partagez votre culture. Découvrez le monde.',
     cta: 'Créer mon compte gratuit', ctaNote: 'Gratuit · 16 ans et plus · Moins d’une minute',
     lines: ['Ne faites pas que défiler. Participez.', 'Vos gens. Vos moments. Votre scène.', 'Plus qu’un fil. Toute une expérience.', 'Là où la foule fait le moment.'],
-    battlesKicker: 'Ouvert à tous', battlesTitle: 'Des battles en direct où tout le monde peut entrer',
-    battlesText: 'Découvrez les battles en cours sans avoir à connaître les créateurs d’avance. Regardez, votez avec vos pièces en direct, ou montez vous-même sur scène.',
-    battlesPoints: ['Trouvez les battles qui se déroulent maintenant', 'Votez en direct et regardez les scores bouger', 'Montez sur scène avec jusqu’à 5 concurrents'],
-    battlesCta: 'S’inscrire pour rejoindre un battle',
+    pillars: [
+      ['02 · Participation sociale', 'Ne faites pas que défiler. Participez.', 'Joignez des conversations, réagissez aux moments en direct, rencontrez de nouvelles personnes et faites partie d’expériences qui rassemblent les communautés.'],
+      ['03 · Échange culturel', 'Votre culture. Vos histoires. Votre monde.', 'Montrez au monde ce qui rend votre culture unique. Partagez vos traditions, célébrez votre héritage, échangez des histoires et découvrez la musique, la cuisine, les langues et les modes de vie du monde entier.'],
+      ['04 · Compétitions en direct', 'Apportez votre talent. Relevez le défi.', 'Participez à des compétitions en direct, défiez des créateurs, mettez vos talents en valeur et mobilisez votre communauté. Entrez dans l’action et voyez ce qui arrive quand le talent rencontre la compétition amicale.'],
+      ['05 · Événements en direct', 'Soyez là quand ça se passe.', 'Découvrez des événements en direct, vivez des expériences partagées, rencontrez des gens qui partagent vos intérêts et faites partie des moments dont tout le monde parle.'],
+      ['06 · Communauté et connexion', 'Plus qu’un fil. Toute une expérience.', 'Des découvertes culturelles aux compétitions en direct et aux événements communautaires, trouvez de nouvelles façons de vous exprimer, de vous connecter aux autres et de donner du sens à chaque interaction.'],
+    ],
     liveKicker: 'Trois façons d’être en direct', liveTitle: 'En direct ensemble, pas seulement seul',
     liveText: 'Les diffusions solo, les directs de groupe et les battles sont des expériences différentes, et Kezzo les traite ainsi. Faites monter vos amis ou d’autres créateurs à l’écran et échangez avec votre public en temps réel.',
     modes: [
@@ -139,17 +145,6 @@ export function PublicFrame({ children }: { children: ReactNode }) {
   );
 }
 
-/** A calm, stylised battle frame made of plain boxes: shows the idea without loading any picture. */
-/** A real photo from public/landing. No drawn avatar: until the photo is added, a plain neutral circle is shown. */
-function Person({ photo }: { photo: string }) {
-  const [ok, setOk] = useState(true);
-  return (
-    <span className="relative inline-block h-11 w-11 overflow-hidden rounded-full border-2 border-white bg-stone-200">
-      {ok && <img src={photo} alt="" className="h-full w-full object-cover" loading="lazy" onError={() => setOk(false)} />}
-    </span>
-  );
-}
-
 /** Tiny looping clip: shows a still picture, and only plays (muted) while on screen. Stays a still for reduced motion / Save-Data. */
 function LoopVideo({ name, className }: { name: string; className: string }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -193,17 +188,6 @@ function HeroVideo() {
       )}
       <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/35" />
     </div>
-  );
-}
-
-function Check({ children }: { children: ReactNode }) {
-  return (
-    <li className="flex gap-3 text-sm text-zinc-700">
-      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-stone-100 text-accent" aria-hidden="true">
-        <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3.2 3L13 4.5" /></svg>
-      </span>
-      {children}
-    </li>
   );
 }
 
@@ -309,33 +293,19 @@ export function Landing({ invite }: { invite?: string }) {
         </div>
       </section>
 
-      {/* Battles anyone can join */}
-      <section className="bg-white px-4 py-12 text-zinc-900">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.battlesKicker}</p>
-            <h2 className="mt-2 text-3xl font-bold">{c.battlesTitle}</h2>
-            <p className="mt-3 leading-relaxed text-zinc-600">{c.battlesText}</p>
-            <ul className="mt-5 space-y-3">{c.battlesPoints.map((p) => <Check key={p}>{p}</Check>)}</ul>
-            <button type="button" className="btn btn-accent mt-6 px-5 py-2.5" onClick={() => openAuth('signup')}>{c.battlesCta}</button>
-          </div>
-          <div className="rounded-3xl border border-stone-200 bg-stone-50 p-6" aria-hidden="true">
-            <div className="space-y-3">
-              {[['Dance', 'Maya vs Jo', 0, 1], ['Comedy', 'Sam vs Lee vs Noor', 2, 3], ['Singing', 'Ana vs Eli', 4, 5]].map(([tag, who, a, b], row) => (
-                <div key={who as string} className="flex items-center justify-between rounded-xl border border-stone-200 bg-white px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <span className="flex -space-x-3">
-                      <Person photo={`/landing/face-${row * 2 + 1}.jpg`} />
-                      <Person photo={`/landing/face-${row * 2 + 2}.jpg`} />
-                    </span>
-                    <div><p className="text-sm font-semibold text-zinc-900">{who}</p><p className="text-xs text-zinc-500">{tag}</p></div>
-                  </div>
-                  <Swords className="h-4 w-4 text-zinc-400" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+      {/* Five things Kezzo is about */}
+      <section className="bg-white px-4 py-10 text-zinc-900" aria-label="Kezzo">
+        <ul className="mx-auto max-w-6xl divide-y divide-stone-200 border-y border-stone-200">
+          {c.pillars.map(([kicker, title, text]) => (
+            <li key={kicker} className="grid gap-2 py-6 lg:grid-cols-[1fr_1.4fr] lg:gap-10">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-accent">{kicker}</p>
+                <h2 className="mt-2 text-2xl font-bold leading-tight sm:text-3xl">{title}</h2>
+              </div>
+              <p className="leading-relaxed text-zinc-600 lg:pt-6">{text}</p>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* Solo, group, battle */}
