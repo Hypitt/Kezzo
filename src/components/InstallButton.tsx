@@ -7,7 +7,7 @@ import { useI18n } from '../state/I18n';
  * "Install app" button. Hidden when Kezzo is already installed. Opens the browser's install window when there is one;
  * otherwise (iPhone/iPad Safari, Firefox, ...) it shows a short how-to.
  */
-export function InstallButton({ className = '', compact = false }: { className?: string; compact?: boolean }) {
+export function InstallButton({ className = '', compact = false, label }: { className?: string; compact?: boolean; label?: string }) {
   const { t } = useI18n();
   const { installed, ios, install } = useInstall();
   const [help, setHelp] = useState(false);
@@ -29,7 +29,7 @@ export function InstallButton({ className = '', compact = false }: { className?:
     <>
       <button type="button" className={className} onClick={press} aria-label={t('install_app')} title={t('install_app')}>
         <Download className="h-3.5 w-3.5" aria-hidden="true" />
-        <span className={compact ? 'hidden xl:inline' : ''}>{t('install_app')}</span>
+        <span className={compact ? 'hidden xl:inline' : ''}>{label ?? t('install_app')}</span>
       </button>
       {help && (
         <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/50 p-4 sm:items-center" onMouseDown={(e) => e.target === e.currentTarget && setHelp(false)}>

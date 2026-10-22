@@ -166,7 +166,7 @@ function LoopVideo({ name, className }: { name: string; className: string }) {
 
 export function Landing({ invite }: { invite?: string }) {
   const { openAuth } = useAuth();
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const c = COPY[lang];
   const [groups, setGroups] = useState<LandingGroup[]>([]);
   const [liveBattles, setLiveBattles] = useState(0);
@@ -219,6 +219,10 @@ export function Landing({ invite }: { invite?: string }) {
               </h1>
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-zinc-700 sm:text-base">{c.lead}</p>
               <p className="mt-4 max-w-xl text-base font-semibold leading-snug text-zinc-900 sm:text-lg">{c.leadTag}</p>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <InstallButton className="btn btn-accent px-6 py-3 text-base" label={t('download_kezzo')} />
+                <button type="button" className={`${outline} px-6 py-3 text-base`} onClick={() => openAuth('signin')}>{c.login}</button>
+              </div>
             </div>
             <div className="relative min-h-64 sm:min-h-80 lg:min-h-[26rem]">
               {/* the photo melts into the card: faded on its left edge (on phones: on its top edge) */}
