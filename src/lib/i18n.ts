@@ -103,6 +103,10 @@ export const en = {
   // chat and messages
   chat: 'Chat', chat_empty: 'No messages yet.', chat_placeholder: 'Write a message', chat_closed: 'Chat is closed.',
   no_conversations: 'No conversations yet.', pick_conversation: 'Choose a conversation or open someone’s profile to message them.',
+  incoming_call: 'Incoming call', incoming_call_body: 'Open Kezzo to answer.', incoming_voice: 'is calling you (voice)', incoming_video: 'is calling you (video)',
+  incoming_group_voice: 'is starting a voice call in {group}', incoming_group_video: 'is starting a video call in {group}',
+  accept: 'Accept', decline: 'Decline', more_calls: '{n} more call(s) waiting', call_declined: '{name} declined the call.',
+  session_expired: 'Your session expired. Please sign in again.',
   say_hello: 'Say hello.', message_placeholder: 'Write a message', call: 'Call', dm_not_allowed: 'You cannot message this person.',
   // groups
   groups_sub: 'Join a group, chat and share files with its members, and hop on a voice or video call.',
@@ -334,6 +338,10 @@ export const fr: Record<Key, string> = {
   media_insecure: 'La caméra et le micro nécessitent une connexion sécurisée (HTTPS).',
   chat: 'Chat', chat_empty: 'Aucun message pour l’instant.', chat_placeholder: 'Écrire un message', chat_closed: 'Le chat est fermé.',
   no_conversations: 'Aucune conversation pour l’instant.', pick_conversation: 'Choisissez une conversation ou ouvrez le profil de quelqu’un pour lui écrire.',
+  incoming_call: 'Appel entrant', incoming_call_body: 'Ouvrez Kezzo pour répondre.', incoming_voice: 'vous appelle (voix)', incoming_video: 'vous appelle (vidéo)',
+  incoming_group_voice: 'lance un appel vocal dans {group}', incoming_group_video: 'lance un appel vidéo dans {group}',
+  accept: 'Répondre', decline: 'Refuser', more_calls: '{n} autre(s) appel(s) en attente', call_declined: '{name} a refusé l’appel.',
+  session_expired: 'Votre session a expiré. Veuillez vous reconnecter.',
   say_hello: 'Dites bonjour.', message_placeholder: 'Écrire un message', call: 'Appeler', dm_not_allowed: 'Vous ne pouvez pas écrire à cette personne.',
   groups_sub: 'Rejoignez un groupe, discutez et partagez des fichiers avec ses membres, et lancez un appel vocal ou vidéo.',
   create_group: 'Créer un groupe', group_name: 'Nom du groupe', tagline: 'Slogan',

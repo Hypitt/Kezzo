@@ -11,6 +11,7 @@ import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
+import { useCalls } from '../state/Calls';
 import { ChatPanel } from '../components/ChatPanel';
 import { LiveRoom } from '../components/LiveRoom';
 import { ReportButton } from '../components/ReportButton';
@@ -188,6 +189,20 @@ export function GroupRoom({ id }: { id: string }) {
   const [missing, setMissing] = useState(false);
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [call, setCall] = useState<CallMode>(null);
+  const { ring, hangUp, takeJoin, pendingJoin } = useCalls();
+  // Someone answered a ringing group call: open the call and join straight away.
+  useEffect(() => {
+    const join = takeJoin('group', id);
+    if (join) setCall(join.video ? 'video' : 'audio');
+  }, [id, pendingJoin, takeJoin]);
+  const startCall = (mode: 'audio' | 'video') => {
+    setCall(mode);
+    void ring('group', id, mode === 'video');
+  };
+  const endCall = () => {
+    setCall(null);
+    void hangUp('group', id);
+  };
 
   const load = useCallback(async () => {
     const { data } = await supabase.from('groups').select('*').eq('id', id).maybeSingle();
@@ -279,15 +294,15 @@ export function GroupRoom({ id }: { id: string }) {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="font-semibold">{t('group_call')}</h2>
                 {call ? (
-                  <Chip active onClick={() => setCall(null)}>{t('hide')}</Chip>
+                  <Chip active onClick={endCall}>{t('hide')}</Chip>
                 ) : (
                   <div className="flex gap-2">
-                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => setCall('audio')}><Mic className="h-3.5 w-3.5" aria-hidden="true" />{t('voice_call')}</button>
-                    <button type="button" className="btn btn-primary btn-sm" onClick={() => setCall('video')}><Video className="h-3.5 w-3.5" aria-hidden="true" />{t('video_call')}</button>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => startCall('audio')}><Mic className="h-3.5 w-3.5" aria-hidden="true" />{t('voice_call')}</button>
+                    <button type="button" className="btn btn-primary btn-sm" onClick={() => startCall('video')}><Video className="h-3.5 w-3.5" aria-hidden="true" />{t('video_call')}</button>
                   </div>
                 )}
               </div>
-              {call && <LiveRoom key={call} roomName={`group:${group.id}`} video={call === 'video'} />}
+              {call && <LiveRoom key={call} roomName={`group:${group.id}`} video={call === 'video'} autoJoin />}
             </section>
 
             <section className="card space-y-3">

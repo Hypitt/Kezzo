@@ -4,7 +4,8 @@ import { I18nProvider, useI18n } from './state/I18n';
 import { RouterProvider, useRouter } from './state/Router';
 import { LegalProvider } from './state/Legal';
 import { NotificationsProvider } from './state/Notifications';
-import { ToastProvider } from './state/Toast';
+import { CallsProvider } from './state/Calls';
+import { ToastProvider, useToast } from './state/Toast';
 import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScreens';
 import { Navbar } from './components/Navbar';
 import { Loading } from './components/ui';
@@ -56,8 +57,16 @@ function View() {
 
 function Shell() {
   const { user, profile, loading, configured } = useAuth();
-  const { lang, setLang } = useI18n();
+  const { lang, setLang, t } = useI18n();
   const { go, route } = useRouter();
+  const { toast } = useToast();
+
+  // A saved login that Supabase no longer accepts is cleared by lib/api.ts; tell the person why they are back at the start.
+  useEffect(() => {
+    const onExpired = () => toast(t('session_expired'), 'error');
+    window.addEventListener('kezzo:session-expired', onExpired);
+    return () => window.removeEventListener('kezzo:session-expired', onExpired);
+  }, [toast, t]);
 
   // Adopt the saved language of the signed-in profile once it loads.
   useEffect(() => {
@@ -140,7 +149,9 @@ function Providers() {
   return (
     <AuthProvider onSignedIn={() => go('search')}>
       <NotificationsProvider>
-        <Shell />
+        <CallsProvider>
+          <Shell />
+        </CallsProvider>
       </NotificationsProvider>
     </AuthProvider>
   );

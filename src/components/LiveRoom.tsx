@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Radio } from 'lucide-react';
 import { useLiveRoom } from '../lib/useLiveRoom';
 import { useI18n } from '../state/I18n';
@@ -9,15 +10,25 @@ interface Props {
   roomName: string;
   /** Show camera controls and video tiles (false = audio-only room). */
   video: boolean;
+  /** Connect right away (used when someone answers a ringing call or starts one). */
+  autoJoin?: boolean;
 }
 
 /**
  * A simple call: everyone who is publishing gets a tile in a grid. Used for group calls and direct-message calls.
  * (Battles use BattleStage, which puts the competitors in one shared frame.)
  */
-export function LiveRoom({ roomName, video }: Props) {
+export function LiveRoom({ roomName, video, autoJoin = false }: Props) {
   const { t } = useI18n();
   const live = useLiveRoom({ roomName, video, autoPublish: true });
+  const joined = useRef(false);
+  useEffect(() => {
+    if (autoJoin && !joined.current) {
+      joined.current = true;
+      void live.join();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoJoin]);
 
   if (live.phase !== 'connected') {
     return (
