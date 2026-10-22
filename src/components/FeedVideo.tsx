@@ -5,6 +5,9 @@ import { R2_URL, r2Enabled } from '../lib/storage';
 
 /** Only one feed video plays at a time. */
 let active: HTMLVideoElement | null = null;
+/** The person's sound choice, shared by every feed video: once they mute, videos stay muted until they turn sound on. */
+let wantSound = true;
+const canHaveSound = (): boolean => wantSound && ((navigator as Navigator & { userActivation?: { hasBeenActive: boolean } }).userActivation?.hasBeenActive ?? false);
 
 /**
  * Videos use the most bandwidth. Videos stored in Cloudflare R2 (no download fees) play by themselves when scrolled into view.
@@ -31,7 +34,7 @@ export function FeedVideo({ src }: { src: string }) {
   const [armed, setArmed] = useState(false); // pressed Play at least once
   const live = AUTOPLAY ? near : armed;
   const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(() => !canHaveSound());
   const [progress, setProgress] = useState(0);
 
   // Start loading shortly before the video scrolls into view.
@@ -48,7 +51,17 @@ export function FeedVideo({ src }: { src: string }) {
     if (!v) return;
     if (active && active !== v) active.pause();
     active = v;
-    v.play().catch(() => setPlaying(false)); // the browser may refuse; the Play button still works
+    // Sound is on when the browser allows it (after the person has tapped or clicked on the page); otherwise muted.
+    const wantMuted = !canHaveSound();
+    v.muted = wantMuted;
+    setMuted(wantMuted);
+    v.play().catch(() => {
+      if (!v.muted) { // blocked with sound: play muted instead; the sound button turns it on
+        v.muted = true;
+        setMuted(true);
+        v.play().catch(() => setPlaying(false));
+      } else setPlaying(false);
+    });
   }, []);
 
   // Play while mostly visible, pause when it leaves the screen or the tab is hidden.
@@ -91,6 +104,11 @@ export function FeedVideo({ src }: { src: string }) {
     }
   };
 
+  const v_sync = (next: boolean) => {
+    if (video.current) video.current.muted = next;
+    setMuted(next);
+  };
+
   const seek = (value: number) => {
     const v = video.current;
     if (v && Number.isFinite(v.duration)) v.currentTime = (value / 100) * v.duration;
@@ -127,7 +145,7 @@ export function FeedVideo({ src }: { src: string }) {
           type="range" min={0} max={100} step={0.1} value={progress} onChange={(e) => seek(Number(e.target.value))}
           aria-label={t('seek')} className="h-1 min-w-0 flex-1 accent-white"
         />
-        <button type="button" onClick={() => setMuted((m) => !m)} aria-label={muted ? t('sound_on') : t('sound_off')} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
+        <button type="button" onClick={() => { const next = !muted; wantSound = !next; v_sync(next); }} aria-label={muted ? t('sound_on') : t('sound_off')} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
           {muted ? <VolumeX className="h-4 w-4" aria-hidden="true" /> : <Volume2 className="h-4 w-4" aria-hidden="true" />}
         </button>
       </div>

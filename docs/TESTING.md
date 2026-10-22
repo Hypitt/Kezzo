@@ -171,3 +171,4 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 117. (Admin, R2 on) Admin page > Move old files to R2 > Move old videos: the counter goes down, old videos still play, and the files appear in the R2 bucket with r- names.
 118. (R2 on) Scroll the feed: videos stored in R2 (new ones and moved old ones) start by themselves, muted, when mostly on screen, and pause when you scroll away; only one plays at a time. Pausing by hand keeps it paused. Videos still in Supabase show a Play button.
 119. Landing page: under the hero text there are two buttons, Download Kezzo (opens the install window or how-to) and Sign in (opens sign in). Download is hidden once Kezzo is installed.
+120. Feed videos autoplay WITH sound once you have tapped/clicked anywhere on Kezzo (browser rule); if the browser blocks it the video plays muted. Pressing the sound button mutes/unmutes every feed video from then on.
