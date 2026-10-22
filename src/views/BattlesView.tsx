@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { loadBattles } from '../lib/data';
+import { supabase } from '../lib/supabase';
 import { BATTLE_CATEGORIES, type Battle, type BattleStatus } from '../lib/types';
 import type { Key } from '../lib/i18n';
 import { useI18n } from '../state/I18n';
@@ -23,6 +24,9 @@ export function BattlesView() {
   const [busy, setBusy] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const request = useRef(0);
+
+  // Forgotten battles that nobody joined are cancelled after 12 hours (entry fees refunded); tidy up when the list opens.
+  useEffect(() => { void supabase.rpc('close_stale_rooms'); }, []);
 
   const fetchPage = useCallback(
     (offset: number) => loadBattles({ status: STATUSES[filter], category: category || undefined, from: offset, limit: PAGE }),

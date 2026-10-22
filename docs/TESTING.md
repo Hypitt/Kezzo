@@ -157,3 +157,9 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 107. Start a voice or video call in a direct message or a group (or accept an incoming call): the call opens in a small window at the bottom right (above the bottom menu on a phone). Open other pages (Search, Profile, Messages with someone else, scroll the feed): the call keeps running with sound and the window stays.
 108. The window's minimize button hides the pictures but the call and the sound continue; the red phone button (or Leave) ends the call for you. Pressing "End call" in the conversation or group does the same.
 109. The conversation/group page shows "Call in progress…" instead of the call; signing out ends the call. Starting another call replaces the running one.
+
+## Ending battles and live streams nobody joined (run supabase/update-14.sql)
+110. As host, create a battle and leave it with nobody (or one person) in it. In Battles (and Search/Home), your own card shows a button "Cancel battle" (not started) or "End and pay out" (running). Press it and confirm: the card disappears, entry fees (if any) are refunded.
+111. As host, go live (solo or group) and leave nobody in it. In Live, your own stream card has an "End livestream" button. It ends the stream for everyone and the card disappears.
+112. Other people's cards never show these buttons. Inside the battle/live page, the host's End buttons still work as before.
+113. A battle that was never started and has fewer than 2 competitors is cancelled automatically after 12 hours (fees refunded); a live stream still marked live after 12 hours is ended automatically. This runs when someone opens the Battles or Live list.

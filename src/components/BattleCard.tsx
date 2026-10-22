@@ -1,16 +1,39 @@
-import { Coins, Users } from 'lucide-react';
+import { useState } from 'react';
+import { Coins, Users, XCircle } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { explain } from '../lib/errors';
 import type { Battle } from '../lib/types';
 import type { Key } from '../lib/i18n';
+import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
+import { useToast } from '../state/Toast';
 import { Avatar } from './ui';
 
 export function BattleCard({ battle }: { battle: Battle }) {
   const { t } = useI18n();
   const { go } = useRouter();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [busy, setBusy] = useState(false);
+  const [gone, setGone] = useState(false);
   const live = battle.status === 'live';
+  const open = battle.status === 'open';
+  // The host can always close their own battle from the list (for example when nobody joined), without opening it first.
+  const canEnd = Boolean(user && battle.host_id === user.id && (live || open));
+  const end = async () => {
+    if (!window.confirm(t(open ? 'confirm_cancel' : 'confirm_end'))) return;
+    setBusy(true);
+    const { error } = await supabase.rpc('end_battle', { p_battle: battle.id });
+    setBusy(false);
+    if (error) return toast(explain(error, t), 'error');
+    toast(t(open ? 'cancelled_toast' : 'ended_toast'));
+    setGone(true);
+  };
+  if (gone) return null;
   return (
-    <button type="button" onClick={() => go('battles', battle.id)} className="card w-full space-y-3 text-left transition hover:border-zinc-400">
+    <div className="card space-y-3 transition hover:border-zinc-400">
+    <button type="button" onClick={() => go('battles', battle.id)} className="block w-full space-y-3 text-left">
       <div className="flex items-center justify-between gap-2 text-xs">
         <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 font-medium text-zinc-700">
           {battle.category === 'custom' && battle.custom_theme ? battle.custom_theme : t(`cat_${battle.category}` as Key)}
@@ -34,5 +57,11 @@ export function BattleCard({ battle }: { battle: Battle }) {
         </div>
       </div>
     </button>
+    {canEnd && (
+      <button type="button" className="btn btn-ghost btn-sm w-full" disabled={busy} onClick={end}>
+        <XCircle className="h-3.5 w-3.5" aria-hidden="true" />{t(open ? 'cancel_battle' : 'end_battle')}
+      </button>
+    )}
+    </div>
   );
 }

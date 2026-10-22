@@ -1,6 +1,6 @@
 import { ShareButton } from '../components/ShareButton';
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { ArrowLeft, Check, Mic, Radio, UserMinus, Users, Video, X } from 'lucide-react';
+import { ArrowLeft, Check, Mic, Radio, UserMinus, Users, Video, X, XCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { api } from '../lib/api';
 import { PUBLIC_PROFILE } from '../lib/data';
@@ -31,7 +31,7 @@ const STALE_HOURS = 12;
 export function LiveView() {
   const { t } = useI18n();
   const { go } = useRouter();
-  const { ensureAuth } = useAuth();
+  const { user, ensureAuth } = useAuth();
   const { toast } = useToast();
   const [streams, setStreams] = useState<LiveStream[] | null>(null);
   const [creating, setCreating] = useState(false);
@@ -46,6 +46,22 @@ export function LiveView() {
     const { data } = await supabase.from('live_streams').select(STREAM_SELECT).eq('status', 'live').gt('created_at', since).order('created_at', { ascending: false }).limit(24);
     setStreams((data ?? []).map(normalize));
   }, []);
+
+  // Streams the host forgot to end stay listed otherwise: tidy up very old ones when the list opens.
+  useEffect(() => {
+    void supabase.rpc('close_stale_rooms').then(() => load(), () => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // The host can end their own stream right from the list, without opening it (for example when nobody joined).
+  const endFromList = async (id: string) => {
+    if (!window.confirm(t('live_end_confirm'))) return;
+    const res = await supabase.rpc('end_live', { p_stream: id });
+    if (res.error) return toast(explain(res.error, t), 'error');
+    await api('livekit-live', { streamId: id, action: 'close' }).catch(() => undefined);
+    toast(t('live_ended_toast'));
+    load();
+  };
 
   useEffect(() => {
     load();
@@ -131,6 +147,11 @@ export function LiveView() {
                     </span>
                   </span>
                 </button>
+                {user && s.host_id === user.id && (
+                  <button type="button" className="btn btn-ghost btn-sm mt-1 w-full" onClick={() => void endFromList(s.id)}>
+                    <XCircle className="h-3.5 w-3.5" aria-hidden="true" />{t('live_end')}
+                  </button>
+                )}
               </li>
             ))}
           </ul>

@@ -70,6 +70,7 @@ supabase/update-10.sql Events to promote and polls (also inside live streams)
 supabase/update-11.sql Notifications that disappear once viewed, 30-day clean-up, follower notifications
 supabase/update-12.sql At most 10 notifications per person; group messages as in-app notifications
 supabase/update-13.sql Ringing calls: incoming-call screen for direct messages and groups
+supabase/update-14.sql Cleanup of forgotten battles and live streams
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers
