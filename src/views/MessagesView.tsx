@@ -1,6 +1,6 @@
 import { api } from '../lib/api';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { ArrowLeft, Mic, Send, Video } from 'lucide-react';
+import { ArrowLeft, Mic, PhoneOff, Send, Video } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { PUBLIC_PROFILE } from '../lib/data';
 import { isSafe } from '../lib/moderation';
@@ -11,7 +11,6 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { useCalls } from '../state/Calls';
-import { LiveRoom } from '../components/LiveRoom';
 import { Avatar, Empty, Loading } from '../components/ui';
 
 interface Conversation { otherId: string; last: DirectMessage; unread: number }
@@ -111,25 +110,9 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
   const [other, setOther] = useState<PublicProfile | null>(null);
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [text, setText] = useState('');
-  const [calling, setCalling] = useState<null | 'audio' | 'video'>(null);
-  const { ring, hangUp, takeJoin, pendingJoin, declined } = useCalls();
-  // The other person declined: the call ends for the caller too.
-  useEffect(() => {
-    if (declined && declined.kind === 'dm' && declined.target === otherId && Date.now() - declined.at < 5000) setCalling(null);
-  }, [declined, otherId]);
-  // Someone answered an incoming call from this person: join straight away.
-  useEffect(() => {
-    const join = takeJoin('dm', otherId);
-    if (join) setCalling(join.video ? 'video' : 'audio');
-  }, [otherId, pendingJoin, takeJoin]);
-  const startCall = (mode: 'audio' | 'video') => {
-    setCalling(mode);
-    void ring('dm', otherId, mode === 'video');
-  };
-  const endCall = () => {
-    setCalling(null);
-    void hangUp('dm', otherId);
-  };
+  const { active, startCall, endCall } = useCalls();
+  // The call runs in a floating window (see CallDock), so it keeps going while the person browses the rest of Kezzo.
+  const calling = active?.kind === 'dm' && active.target === otherId;
 
   useEffect(() => {
     supabase.from('profiles').select(PUBLIC_PROFILE).eq('id', otherId).maybeSingle().then(({ data }) => setOther((data as PublicProfile | null) ?? null));
@@ -167,8 +150,6 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
     onSent();
   };
 
-  const roomName = `dm:${[me, otherId].sort().join(':')}`;
-
   return (
     <div className="card flex h-[32rem] flex-col p-0 sm:p-0">
       <header className="flex items-center gap-3 border-b border-zinc-100 px-4 py-3">
@@ -176,16 +157,16 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
         {other && <button type="button" className="flex items-center gap-2" onClick={() => go('profile', other.id)}><Avatar p={other} size={30} /><span className="text-sm font-semibold">{other.display_name}</span></button>}
         <div className="ml-auto flex gap-2">
           {calling ? (
-            <button type="button" className="btn btn-ghost btn-sm" onClick={endCall}>{t('hide')}</button>
+            <button type="button" className="btn btn-danger btn-sm" onClick={endCall}><PhoneOff className="h-3.5 w-3.5" aria-hidden="true" />{t('call_end')}</button>
           ) : (
             <>
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => startCall('audio')}><Mic className="h-3.5 w-3.5" aria-hidden="true" />{t('voice_call')}</button>
-              <button type="button" className="btn btn-primary btn-sm" onClick={() => startCall('video')}><Video className="h-3.5 w-3.5" aria-hidden="true" />{t('video_call')}</button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => startCall('dm', otherId, false, other?.display_name ?? '')}><Mic className="h-3.5 w-3.5" aria-hidden="true" />{t('voice_call')}</button>
+              <button type="button" className="btn btn-primary btn-sm" onClick={() => startCall('dm', otherId, true, other?.display_name ?? '')}><Video className="h-3.5 w-3.5" aria-hidden="true" />{t('video_call')}</button>
             </>
           )}
         </div>
       </header>
-      {calling && <div className="border-b border-zinc-100 p-3"><LiveRoom key={calling} roomName={roomName} video={calling === 'video'} autoJoin /></div>}
+      {calling && <p className="border-b border-zinc-100 bg-emerald-50 px-4 py-2 text-xs text-emerald-800">{t('call_hint')}</p>}
       <div className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
         {messages.length === 0 && <p className="text-sm text-zinc-500">{t('say_hello')}</p>}
         {messages.map((m) => (

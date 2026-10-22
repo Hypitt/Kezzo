@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Radio } from 'lucide-react';
+import { PhoneOff, Radio } from 'lucide-react';
 import { useLiveRoom } from '../lib/useLiveRoom';
 import { useI18n } from '../state/I18n';
 import { LiveControls, MediaTile, RemoteAudio } from './LiveParts';
@@ -12,13 +12,15 @@ interface Props {
   video: boolean;
   /** Connect right away (used when someone answers a ringing call or starts one). */
   autoJoin?: boolean;
+  /** When set, Leave ends the whole call (used by the floating call window). */
+  onEnd?: () => void;
 }
 
 /**
  * A simple call: everyone who is publishing gets a tile in a grid. Used for group calls and direct-message calls.
  * (Battles use BattleStage, which puts the competitors in one shared frame.)
  */
-export function LiveRoom({ roomName, video, autoJoin = false }: Props) {
+export function LiveRoom({ roomName, video, autoJoin = false, onEnd }: Props) {
   const { t } = useI18n();
   const live = useLiveRoom({ roomName, video, autoPublish: true });
   const joined = useRef(false);
@@ -55,7 +57,12 @@ export function LiveRoom({ roomName, video, autoJoin = false }: Props) {
         ))}
       </div>
       {remotes.map((p) => <RemoteAudio key={p.identity} p={p} />)}
-      <LiveControls live={live} video={video} />
+      <LiveControls live={live} video={video} showLeave={!onEnd} />
+      {onEnd && (
+        <button type="button" className="btn btn-danger w-full" onClick={() => { live.leave(); onEnd(); }}>
+          <PhoneOff className="h-4 w-4" aria-hidden="true" />{t('leave_room')}
+        </button>
+      )}
     </div>
   );
 }

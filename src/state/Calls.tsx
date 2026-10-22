@@ -5,9 +5,9 @@ import { PUBLIC_PROFILE } from '../lib/data';
 import { startRingtone, stopRingtone, unlockAudio } from '../lib/ringtone';
 import type { PublicProfile } from '../lib/types';
 import { Avatar } from '../components/ui';
+import { CallDock } from '../components/CallDock';
 import { useAuth } from './Auth';
 import { useI18n } from './I18n';
-import { useRouter } from './Router';
 import { useToast } from './Toast';
 
 /** How long a call rings before it counts as missed. */
@@ -23,21 +23,16 @@ interface Invite {
   caller: PublicProfile;
   groupName: string | null;
 }
-/** Set when the person pressed Accept: the page they land on joins the call by itself. */
-export interface PendingJoin { kind: CallKind; target: string; video: boolean }
-
-/** Everyone I rang said no: the call screen for this person or group should close. */
-export interface Declined { kind: CallKind; target: string; at: number }
+/** The call the person is in right now. It lives here (above every page), so browsing Kezzo never cuts it. */
+export interface ActiveCall { kind: CallKind; target: string; video: boolean; label: string; key: number }
 
 interface Value {
-  declined: Declined | null;
-  pendingJoin: PendingJoin | null;
-  /** Takes the pending join if it is for this person or group (returns it once, then clears it). */
-  takeJoin: (kind: CallKind, target: string) => PendingJoin | null;
-  /** Rings the other person (or the group's members). Never throws. */
-  ring: (kind: CallKind, target: string, video: boolean) => Promise<void>;
-  /** Stops the ringing on the other side (the caller hung up before anyone answered). */
-  hangUp: (kind: CallKind, target: string) => Promise<void>;
+  /** The running call, shown in a floating window that stays while the person uses the rest of the app. */
+  active: ActiveCall | null;
+  /** Starts a call (rings the other person or the group's members) and opens the floating call window. */
+  startCall: (kind: CallKind, target: string, video: boolean, label: string) => void;
+  /** Leaves the call; stops the ringing if nobody answered yet. */
+  endCall: () => void;
 }
 const Ctx = createContext<Value | null>(null);
 
@@ -48,12 +43,11 @@ export function CallsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { t } = useI18n();
   const { toast } = useToast();
-  const { go } = useRouter();
   const uid = user?.id;
   const [queue, setQueue] = useState<Invite[]>([]);
-  const [pendingJoin, setPendingJoin] = useState<PendingJoin | null>(null);
-  const [declined, setDeclined] = useState<Declined | null>(null);
-  const pendingRef = useRef<PendingJoin | null>(null);
+  const [active, setActive] = useState<ActiveCall | null>(null);
+  const activeRef = useRef<ActiveCall | null>(null);
+  activeRef.current = active;
   const tRef = useRef(t);
   tRef.current = t;
   const current = queue[0] ?? null;
@@ -109,7 +103,8 @@ export function CallsProvider({ children }: { children: ReactNode }) {
           const { count } = await q;
           if ((count ?? 0) > 0) return;
           const target = row.kind === 'dm' ? recipient : row.group_id ?? '';
-          setDeclined({ kind: row.kind, target, at: Date.now() });
+          // Everyone said no: close the call window if it is this call.
+          setActive((a) => (a && a.kind === row.kind && a.target === target ? null : a));
           if (row.kind === 'group') return toast(tRef.current('call_all_declined'));
           const { data: p } = await supabase.from('profiles').select('display_name').eq('id', recipient).maybeSingle();
           toast(tRef.current('call_declined', { name: (p as { display_name: string } | null)?.display_name ?? '' }));
@@ -155,13 +150,14 @@ export function CallsProvider({ children }: { children: ReactNode }) {
     const invite = current;
     setQueue((q) => q.filter((x) => x.caller_id !== invite.caller_id || x.kind !== invite.kind));
     await supabase.rpc('respond_call', { p_id: invite.id, p_accept: true });
-    const join: PendingJoin = invite.kind === 'dm'
-      ? { kind: 'dm', target: invite.caller_id, video: invite.video }
-      : { kind: 'group', target: invite.group_id ?? '', video: invite.video };
-    pendingRef.current = join;
-    setPendingJoin(join);
-    if (join.kind === 'dm') go('messages', join.target);
-    else go('groups', join.target);
+    // Join right here: the call opens in the floating window and the person stays wherever they were.
+    setActive({
+      kind: invite.kind,
+      target: invite.kind === 'dm' ? invite.caller_id : invite.group_id ?? '',
+      video: invite.video,
+      label: invite.kind === 'dm' ? invite.caller.display_name : invite.groupName ?? invite.caller.display_name,
+      key: Date.now(),
+    });
   };
   const decline = async () => {
     if (!current) return;
@@ -169,14 +165,6 @@ export function CallsProvider({ children }: { children: ReactNode }) {
     setQueue((q) => q.filter((x) => x.id !== id));
     await supabase.rpc('respond_call', { p_id: id, p_accept: false });
   };
-
-  const takeJoin = useCallback((kind: CallKind, target: string): PendingJoin | null => {
-    const p = pendingRef.current;
-    if (!p || p.kind !== kind || p.target !== target) return null;
-    pendingRef.current = null;
-    setPendingJoin(null);
-    return p;
-  }, []);
 
   const ring = useCallback(async (kind: CallKind, target: string, video: boolean) => {
     // Let the browser show a banner when the page is in the background (asked only while the person presses Call).
@@ -190,11 +178,37 @@ export function CallsProvider({ children }: { children: ReactNode }) {
     try { await supabase.rpc('cancel_call', { p_kind: kind, p_target: target }); } catch { /* nothing to cancel */ }
   }, []);
 
-  const value = useMemo(() => ({ declined, pendingJoin, takeJoin, ring, hangUp }), [declined, pendingJoin, takeJoin, ring, hangUp]);
+  const startCall = useCallback((kind: CallKind, target: string, video: boolean, label: string) => {
+    const a = activeRef.current;
+    if (a && a.kind === kind && a.target === target && a.video === video) return;
+    if (a) void hangUp(a.kind, a.target);
+    setActive({ kind, target, video, label, key: Date.now() });
+    void ring(kind, target, video);
+  }, [ring, hangUp]);
+
+  const endCall = useCallback(() => {
+    const a = activeRef.current;
+    setActive(null);
+    if (a) void hangUp(a.kind, a.target);
+  }, [hangUp]);
+
+  // Signing out ends the call.
+  useEffect(() => { if (!uid) setActive(null); }, [uid]);
+
+  const value = useMemo(() => ({ active, startCall, endCall }), [active, startCall, endCall]);
 
   return (
     <Ctx.Provider value={value}>
       {children}
+      {active && uid && (
+        <CallDock
+          key={active.key}
+          roomName={active.kind === 'dm' ? `dm:${[uid, active.target].sort().join(':')}` : `group:${active.target}`}
+          video={active.video}
+          label={active.label}
+          onEnd={endCall}
+        />
+      )}
       {current && (
         <div className="fixed inset-x-0 top-0 z-[100] flex justify-center p-3 sm:p-4" role="alertdialog" aria-live="assertive" aria-label={t('incoming_call')}>
           <div className="w-full max-w-sm rounded-3xl bg-zinc-900 p-5 text-white shadow-2xl ring-1 ring-white/10">

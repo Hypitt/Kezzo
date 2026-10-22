@@ -103,6 +103,7 @@ export const en = {
   // chat and messages
   chat: 'Chat', chat_empty: 'No messages yet.', chat_placeholder: 'Write a message', chat_closed: 'Chat is closed.',
   no_conversations: 'No conversations yet.', pick_conversation: 'Choose a conversation or open someone’s profile to message them.',
+  call_hint: 'Call in progress. The call window stays open while you browse Kezzo.', call_end: 'End call', call_min: 'Minimize', call_max: 'Expand',
   install_app: 'Install app', install_title: 'Install Kezzo on your device', install_intro: 'Kezzo is a web app: no app store needed. Installed, it opens in its own window with its own icon.',
   install_ios_1: 'Tap the Share button in Safari (the square with an arrow).', install_ios_2: 'Choose “Add to Home Screen”.', install_ios_3: 'Tap Add. The Kezzo icon appears on your home screen.',
   install_other_1: 'Chrome or Edge: open the browser menu (⋮) and choose “Install Kezzo” or “Add to Home screen”.', install_other_2: 'You can also click the install icon at the right end of the address bar.', got_it: 'Got it',
@@ -341,6 +342,7 @@ export const fr: Record<Key, string> = {
   media_insecure: 'La caméra et le micro nécessitent une connexion sécurisée (HTTPS).',
   chat: 'Chat', chat_empty: 'Aucun message pour l’instant.', chat_placeholder: 'Écrire un message', chat_closed: 'Le chat est fermé.',
   no_conversations: 'Aucune conversation pour l’instant.', pick_conversation: 'Choisissez une conversation ou ouvrez le profil de quelqu’un pour lui écrire.',
+  call_hint: 'Appel en cours. La fenêtre d’appel reste ouverte pendant que vous naviguez dans Kezzo.', call_end: 'Terminer l’appel', call_min: 'Réduire', call_max: 'Agrandir',
   install_app: 'Installer l’app', install_title: 'Installer Kezzo sur votre appareil', install_intro: 'Kezzo est une application web: aucune boutique d’applications nécessaire. Installée, elle s’ouvre dans sa propre fenêtre avec sa propre icône.',
   install_ios_1: 'Touchez le bouton Partager dans Safari (le carré avec une flèche).', install_ios_2: 'Choisissez « Sur l’écran d’accueil ».', install_ios_3: 'Touchez Ajouter. L’icône Kezzo apparaît sur votre écran d’accueil.',
   install_other_1: 'Chrome ou Edge: ouvrez le menu du navigateur (⋮) et choisissez « Installer Kezzo » ou « Ajouter à l’écran d’accueil ».', install_other_2: 'Vous pouvez aussi cliquer sur l’icône d’installation à droite de la barre d’adresse.', got_it: 'Compris',

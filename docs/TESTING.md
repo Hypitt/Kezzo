@@ -152,3 +152,8 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 104. Start a group call (or a battle), switch to another tab for a couple of minutes (or let the login refresh), then come back: the call is still connected and the page did not reload.
 105. During a call, turn Wi-Fi off for about 10 seconds and on again: the call shows "Connection lost. Reconnecting…" and comes back by itself. If you stay offline for about a minute, the Rejoin button appears; coming back online reconnects automatically.
 106. The landing hero shows "Get to know the world through its people." with the new paragraph and the line "Share your culture. Discover the world. Connect beyond borders." In French the hero is in French.
+
+## Floating call window
+107. Start a voice or video call in a direct message or a group (or accept an incoming call): the call opens in a small window at the bottom right (above the bottom menu on a phone). Open other pages (Search, Profile, Messages with someone else, scroll the feed): the call keeps running with sound and the window stays.
+108. The window's minimize button hides the pictures but the call and the sound continue; the red phone button (or Leave) ends the call for you. Pressing "End call" in the conversation or group does the same.
+109. The conversation/group page shows "Call in progress…" instead of the call; signing out ends the call. Starting another call replaces the running one.
