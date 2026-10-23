@@ -48,10 +48,10 @@ export function ContestBadge({ info, link = true }: { info: Info; link?: boolean
   const { lang } = useI18n();
   const { go } = useRouter();
   const w = CONTEST[lang];
-  const cls = 'inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-white';
+  const cls = 'inline-flex items-center gap-1.5 rounded-full bg-zinc-900 px-2.5 py-1 text-xs font-semibold text-white';
   const body = (
     <>
-      <Trophy className="h-3.5 w-3.5" aria-hidden="true" />
+      <Trophy className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
       {info.winner ? w.winnerBadge : w.entryBadge} · #{info.rank}
     </>
   );

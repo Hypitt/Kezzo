@@ -220,13 +220,13 @@ export function ContestView() {
 
       {contest && (
         <>
-          <section className="rounded-2xl border border-orange-200 bg-orange-50 p-4 text-zinc-900">
+          <section className="rounded-2xl border border-zinc-200 bg-white p-4 text-zinc-900">
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
               <span className="inline-flex items-center gap-2 font-semibold"><Trophy className="h-5 w-5 text-accent" aria-hidden="true" />{contest.prize || w.nav}</span>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold">{phase === 'soon' ? w.soon : phase === 'open' ? w.open : w.ended}</span>
               <span className="text-zinc-600">{phase === 'soon' ? `${w.startsOn} ${fmt(contest.starts_at)}` : `${w.endsOn} ${fmt(contest.ends_at)}`}</span>
               <span className="text-zinc-600">{w.entriesN(board.length)}</span>
-              {phase === 'open' && <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white">{left.d === 0 && left.h < 6 ? w.lastHours : w.left(left.d, left.h)}</span>}
+              {phase === 'open' && <span className="rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white">{left.d === 0 && left.h < 6 ? w.lastHours : w.left(left.d, left.h)}</span>}
             </div>
             <h2 className="mt-4 text-sm font-semibold">{w.how}</h2>
             <ol className="mt-1 list-decimal space-y-1 pl-5 text-sm text-zinc-700">
@@ -241,7 +241,7 @@ export function ContestView() {
           </section>
 
           {phase === 'ended' && board[0] && (
-            <section className="rounded-2xl border border-accent bg-white p-4 text-zinc-900">
+            <section className="rounded-2xl border-2 border-zinc-900 bg-white p-4 text-zinc-900">
               <p className="flex items-center gap-2 text-sm font-semibold"><Trophy className="h-5 w-5 text-accent" aria-hidden="true" />{w.winner}</p>
               <div className="mt-3 flex items-center gap-3">
                 <Avatar p={{ display_name: board[0].author_name, avatar_url: board[0].author_avatar }} size={44} />
@@ -258,7 +258,7 @@ export function ContestView() {
             <section className="rounded-2xl border border-zinc-200 bg-white p-4 text-zinc-900" aria-label={w.enter}>
               <h2 className="text-sm font-semibold">{w.enter}</h2>
               {!user ? (
-                <button type="button" className="btn btn-accent mt-3" onClick={() => openAuth('signup')}>{w.signup}</button>
+                <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 mt-3" onClick={() => openAuth('signup')}>{w.signup}</button>
               ) : entry ? (
                 <div className="mt-2 space-y-3">
                   <p className="text-sm text-zinc-700">{w.entered}</p>
@@ -269,7 +269,7 @@ export function ContestView() {
                         <input className={field} maxLength={120} value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} aria-label={w.myEntry} />
                         <textarea className={field} rows={3} maxLength={2000} placeholder={w.desc} value={editing.body} onChange={(e) => setEditing({ ...editing, body: e.target.value })} />
                         <div className="flex gap-2">
-                          <button type="button" className="btn btn-accent btn-sm" disabled={!editing.title.trim()} onClick={() => void saveEdit()}>{w.save}</button>
+                          <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" disabled={!editing.title.trim()} onClick={() => void saveEdit()}>{w.save}</button>
                           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(null)}>{w.cancel}</button>
                         </div>
                       </div>
@@ -292,14 +292,14 @@ export function ContestView() {
               ) : (
                 <>
                   <p className="mt-1 text-sm text-zinc-600">{w.enterHelp}</p>
-                  <button type="button" className="btn btn-accent mt-3" onClick={() => go('create', 'contest')}>{w.uploadNew}</button>
+                  <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 mt-3" onClick={() => go('create', 'contest')}>{w.uploadNew}</button>
                   {mine !== null && mine.length > 0 && <p className="mt-4 text-sm font-medium">{w.orPick}</p>}
                   {mine === null || mine.length === 0 ? null : (
                     <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                       {mine.map((p) => (
                         <li key={p.id} className="overflow-hidden rounded-xl border border-zinc-200">
                           <div className="aspect-[4/5] bg-zinc-200"><Thumb kind={p.kind} path={p.media_path} title={p.title} /></div>
-                          <button type="button" disabled={busy} className="btn btn-accent btn-sm w-full rounded-none" onClick={() => void enter(p.id)}>{busy ? w.entering : w.pick}</button>
+                          <button type="button" disabled={busy} className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm w-full rounded-none" onClick={() => void enter(p.id)}>{busy ? w.entering : w.pick}</button>
                         </li>
                       ))}
                     </ul>
@@ -321,7 +321,7 @@ export function ContestView() {
               {board.length === 0 ? <Empty text={w.empty} /> : posts.slice(0, shown).map((p) => {
                 const e = board.find((x) => x.post_id === p.id);
                 return (
-                  <div key={p.id} className="overflow-hidden rounded-2xl border-2 border-accent bg-orange-50">
+                  <div key={p.id} className="overflow-hidden rounded-2xl border-2 border-zinc-900 bg-white">
                     {e && (
                       <div className="flex flex-wrap items-center gap-2 px-3 py-2 text-xs text-zinc-800">
                         <ContestBadge info={{ rank: e.rank, score: e.score, winner: phase === 'ended' && e.rank === 1 }} link={false} />
@@ -333,7 +333,7 @@ export function ContestView() {
                     <PostCard post={p}
                       onChange={(next) => setPosts((l) => l.map((x) => (x.id === next.id ? next : x)))}
                       onDelete={(id) => { setPosts((l) => l.filter((x) => x.id !== id)); void load(); }} />
-                    {phase === 'open' && <p className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-zinc-800"><Heart className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />{w.voteHint}</p>}
+                    {phase === 'open' && <p className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-zinc-800"><Heart className="h-4 w-4 shrink-0 text-zinc-900" aria-hidden="true" />{w.voteHint}</p>}
                   </div>
                 );
               })}
@@ -346,7 +346,7 @@ export function ContestView() {
             {board.length === 0 ? <Empty text={w.empty} /> : (
               <ol className="space-y-3">
                 {board.map((e) => (
-                  <li key={e.post_id} className={`flex items-center gap-3 rounded-2xl border bg-white p-2 text-zinc-900 ${e.author_id === user?.id ? 'border-accent' : 'border-zinc-200'}`}>
+                  <li key={e.post_id} className={`flex items-center gap-3 rounded-2xl border bg-white p-2 text-zinc-900 ${e.author_id === user?.id ? 'border-zinc-900' : 'border-zinc-200'}`}>
                     <span className="w-8 shrink-0 text-center text-lg font-bold">{e.rank}</span>
                     <div className="h-16 w-14 shrink-0 overflow-hidden rounded-lg bg-zinc-200"><Thumb kind={e.kind} path={e.media_path} title={e.title} /></div>
                     <div className="min-w-0 flex-1">
@@ -384,7 +384,7 @@ export function ContestView() {
             <label className="text-xs sm:col-span-2">{A.ru}<textarea className={field} rows={5} value={form.rules} maxLength={3000} onChange={(e) => setForm({ ...form, rules: e.target.value })} /></label>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            {contest && !creating && <button type="button" className="btn btn-accent btn-sm" disabled={!form.title || !form.starts || !form.ends} onClick={() => void save(false)}>{A.save}</button>}
+            {contest && !creating && <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" disabled={!form.title || !form.starts || !form.ends} onClick={() => void save(false)}>{A.save}</button>}
             <button type="button" className="btn btn-ghost btn-sm" disabled={creating && (!form.title || !form.starts || !form.ends)}
               onClick={() => { if (!creating && contest) { setCreating(true); setForm({ id: '', title: '', theme: '', prize: '', rules: '', starts: '', ends: '' }); } else void save(true); }}>
               {creating || !contest ? A.save : A.create}
