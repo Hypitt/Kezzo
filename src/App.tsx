@@ -37,6 +37,7 @@ const MediaView = page(() => import('./views/MediaView').then((m) => ({ default:
 const MessagesView = page(() => import('./views/MessagesView').then((m) => ({ default: m.MessagesView })));
 const ProfileView = page(() => import('./views/ProfileView').then((m) => ({ default: m.ProfileView })));
 const PostView = page(() => import('./views/PostView').then((m) => ({ default: m.PostView })));
+const ContestView = page(() => import('./views/ContestView').then((m) => ({ default: m.ContestView })));
 const CommunityView = page(() => import('./views/CommunityView').then((m) => ({ default: m.CommunityView })));
 const FOOT: Record<Lang, { terms: string; privacy: string }> = {
   en: { terms: 'Terms', privacy: 'Privacy' }, fr: { terms: 'Conditions', privacy: 'Confidentialité' },
@@ -61,6 +62,7 @@ function View() {
     case 'admin': return <AdminView />;
     case 'community': return <CommunityView focus={route.id} />;
     case 'post': return <PostView id={route.id} />;
+    case 'contest': return <ContestView />;
     case 'legal': return <LegalView id={route.id} />;
     case 'join': return <JoinGroupView code={route.id} />;
     case 'search':

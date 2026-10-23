@@ -9,6 +9,7 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { BattleCard } from '../components/BattleCard';
+import { ContestBanner } from '../components/ContestBanner';
 import { PostCard } from '../components/PostCard';
 import { Avatar, Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
 
@@ -102,6 +103,7 @@ export function SearchView() {
 
   return (
     <div className="mx-auto max-w-3xl">
+      <div className="mb-4"><ContestBanner onOpen={() => go('contest')} /></div>
       <PageHeader title={t('nav_search')} sub={t('search_sub')} />
       <div className="relative mb-3">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" aria-hidden="true" />

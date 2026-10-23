@@ -184,3 +184,7 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 130. Landing: tiles with 0 comments show no comment button; the note under the wall reads 'Log in to see more or to add yours.'; the hero shows 'Do you have any talent? Share it with the world and let it be seen.' under the tagline (in all five languages).
 131. Home, Search (posts) and Media show posts in a random order that changes on every visit; pressing Load more continues the same order with no repeats or gaps. Filters (photo/video/audio, free/paid, search words, blocked users) still apply. Profile pages and a single post stay newest first.
 132. If update-18.sql has not been run yet, those pages still work and simply show newest first.
+133. Contest (after update-19.sql): as an admin open #/contest, fill title, prize, rules, start and end and save. A banner appears on the landing page, Home and Search for everyone; visitors who press it get the sign-up window and land on the contest page after signing in.
+134. Signed in, press Enter on one of your own free public photos or videos: it appears in the ranking. Entering a second time, a paid post, a text post, or after the end date is refused with a clear message.
+135. Another account likes and comments on the entry: Score = people who liked + people who commented (never the author, never visitor likes). The ranking updates on Refresh and every minute.
+136. After the end date the page shows the winner (highest score; ties go to the earlier entry). Admins can press Remove on an entry to disqualify it.
