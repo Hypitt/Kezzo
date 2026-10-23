@@ -188,3 +188,6 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 134. Signed in, press Enter on one of your own free public photos or videos: it appears in the ranking. Entering a second time, a paid post, a text post, or after the end date is refused with a clear message.
 135. Another account likes and comments on the entry: Score = people who liked + people who commented (never the author, never visitor likes). The ranking updates on Refresh and every minute.
 136. After the end date the page shows the winner (highest score; ties go to the earlier entry). Admins can press Remove on an entry to disqualify it.
+137. Contest (after update-20.sql): press "Upload a new photo or video" on the contest page: the form only offers Photo and Video, has no price, and after publishing the post is entered automatically and the contest page opens. "Or choose one you already posted" lists your own free public photos and videos.
+138. Your entry card: edit title and description, Share, Open, Withdraw from the contest (then enter another), Delete the post (it also leaves the contest). Withdraw, edit and delete are for while the contest is open.
+139. Admin on the contest page: entry count, likes and commenters; +1 day, +7 days, End now; the list of all entries with Remove and Restore; Delete this contest.

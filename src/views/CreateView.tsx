@@ -40,7 +40,7 @@ export function CreateView({ initial }: { initial?: string }) {
         <Chip active={mode === 'event'} onClick={() => setMode('event')}>{t('create_event')}</Chip>
         <Chip active={mode === 'poll'} onClick={() => setMode('poll')}>{t('create_poll')}</Chip>
       </div>
-      <div className="card">{mode === 'post' ? <PostForm /> : mode === 'battle' ? <BattleForm /> : mode === 'event' ? <EventForm onCreated={(id) => go('community', id)} /> : mode === 'poll' ? <PollForm onCreated={(id) => go('community', id)} /> : <StatusForm />}</div>
+      <div className="card">{mode === 'post' ? <PostForm contest={initial === 'contest'} /> : mode === 'battle' ? <BattleForm /> : mode === 'event' ? <EventForm onCreated={(id) => go('community', id)} /> : mode === 'poll' ? <PollForm onCreated={(id) => go('community', id)} /> : <StatusForm />}</div>
     </div>
   );
 }
@@ -55,12 +55,12 @@ interface PostJob {
 
 const MAX_PHOTOS = 10;
 
-function PostForm() {
+function PostForm({ contest = false }: { contest?: boolean }) {
   const { user, ensureAuth } = useAuth();
   const { t } = useI18n();
   const { toast } = useToast();
   const { go } = useRouter();
-  const [kind, setKind] = useState<PostKind>('text');
+  const [kind, setKind] = useState<PostKind>(contest ? 'video' : 'text');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [price, setPrice] = useState(0);
@@ -102,16 +102,26 @@ function PostForm() {
       if (kind === 'photo' && first?.bucket === 'media-public' && thumb.current) {
         try { await startUpload({ bucket: 'media-public', path: thumbPath(first.path), file: thumb.current }).done; } catch { /* the grid falls back to the full photo */ }
       }
-      const { error: insErr } = await supabase.from('posts').insert({
+      const { data: created, error: insErr } = await supabase.from('posts').insert({
         author_id: user.id, kind, title: title.trim(), body: body.trim(),
         media_bucket: first?.bucket ?? null, media_path: first?.path ?? null, media_extra: list.slice(1).map((j) => j.path),
         duration_seconds: first?.duration ?? null,
-        download_price: kind === 'text' ? 0 : price,
-      });
+        download_price: kind === 'text' || contest ? 0 : price,
+      }).select('id').single();
       if (insErr) throw new Error(t('error_generic'));
       jobs.current = [];
       setUpload(null);
       toast(t('post_published'));
+      if (contest && created) {
+        // Entering the running contest straight away; the contest page shows the result.
+        try {
+          const { data: cur } = await supabase.rpc('contest_current');
+          const c = Array.isArray(cur) ? (cur[0] as { id: string } | undefined) : undefined;
+          if (c) await supabase.rpc('enter_contest', { p_contest: c.id, p_post: (created as { id: string }).id });
+        } catch { /* the contest page lets the person enter this post by hand */ }
+        go('contest');
+        return;
+      }
       go('search');
     } catch (err) {
       const reason = (err as { reason?: UploadFailure }).reason;
@@ -208,7 +218,7 @@ function PostForm() {
       <div>
         <span className="label">{t('post_type')}</span>
         <div className="flex flex-wrap gap-2">
-          {(['text', 'photo', 'audio', 'video'] as PostKind[]).map((k) => (
+          {((contest ? ['photo', 'video'] : ['text', 'photo', 'audio', 'video']) as PostKind[]).map((k) => (
             <Chip key={k} active={kind === k} onClick={() => { if (busy) return; setKind(k); setFiles([]); jobs.current = []; if (k === 'text') setPrice(0); }}>
               {t(`kind_${k}` as Key)}
             </Chip>
@@ -252,11 +262,11 @@ function PostForm() {
             )}
             {kind === 'photo' && files.length > 0 && <p className="mt-1 text-xs text-zinc-500">{t('photos_count', { n: files.length, max: MAX_PHOTOS })}</p>}
           </div>
-          <div>
+          {!contest && <div>
             <label className="label" htmlFor="pf-price">{t('price_label')}</label>
             <input id="pf-price" type="number" min={0} max={100} className="input" value={price} disabled={busy} onChange={(e) => setPrice(Math.max(0, Math.min(100, Number(e.target.value) || 0)))} />
             <p className="mt-1 text-xs text-zinc-500">{t('price_hint')}</p>
-          </div>
+          </div>}
         </>
       )}
       {upload && <UploadBar state={upload} onCancel={cancelUpload} onRetry={() => void run()} />}

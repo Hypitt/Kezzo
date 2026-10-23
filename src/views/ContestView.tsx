@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ExternalLink, RefreshCw, Trophy, Heart, MessageCircle, Play } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ExternalLink, Pencil, RefreshCw, Trash2, Trophy, Heart, MessageCircle, Play } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { thumbPath } from '../lib/media';
-import { isR2Path, publicUrl } from '../lib/storage';
+import { isR2Path, publicUrl, removePublic } from '../lib/storage';
 import { CONTEST, phaseOf, type Contest, type Entry } from '../lib/contest';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
@@ -11,6 +11,7 @@ import { useToast } from '../state/Toast';
 import { ShareButton } from '../components/ShareButton';
 import { Avatar, Empty, Loading, PageHeader } from '../components/ui';
 
+interface AdminEntry { post_id: string; title: string; author_name: string; likes: number; commenters: number; score: number; disqualified: boolean }
 interface MyPost { id: string; kind: 'photo' | 'video'; title: string; media_path: string }
 
 function Thumb({ kind, path, title }: { kind: 'photo' | 'video'; path: string; title: string }) {
@@ -30,8 +31,8 @@ const toLocalInput = (iso: string) => {
 };
 
 const ADMIN = {
-  en: { title: 'Contest (admin)', save: 'Save contest', create: 'New contest', t: 'Title', th: 'Theme', pr: 'Prize (e.g. $100 cash)', ru: 'Rules', st: 'Starts', en: 'Ends', dq: 'Remove', saved: 'Saved', hint: 'Saving with an existing contest changes it; “New contest” starts a separate one.' },
-  fr: { title: 'Concours (admin)', save: 'Enregistrer', create: 'Nouveau concours', t: 'Titre', th: 'Thème', pr: 'Prix (ex. 100 $ comptant)', ru: 'Règlement', st: 'Début', en: 'Fin', dq: 'Retirer', saved: 'Enregistré', hint: 'Enregistrer modifie le concours actuel ; « Nouveau concours » en démarre un autre.' },
+  en: { title: 'Contest (admin)', save: 'Save contest', create: 'New contest', t: 'Title', th: 'Theme', pr: 'Prize (e.g. $100 cash)', ru: 'Rules', st: 'Starts', en: 'Ends', dq: 'Remove', saved: 'Saved', restore: 'Restore', removedTag: 'Removed', entriesTitle: 'All entries', endNow: 'End now', plus1: '+1 day', plus7: '+7 days', del: 'Delete this contest', delAsk: 'Delete this contest and its entries? The posts stay on Kezzo.', stats: (n: number, l: number, c: number) => `${n} entries · ${l} likes · ${c} commenters`, hint: 'Saving with an existing contest changes it; “New contest” starts a separate one.' },
+  fr: { title: 'Concours (admin)', save: 'Enregistrer', create: 'Nouveau concours', t: 'Titre', th: 'Thème', pr: 'Prix (ex. 100 $ comptant)', ru: 'Règlement', st: 'Début', en: 'Fin', dq: 'Retirer', saved: 'Enregistré', restore: 'Rétablir', removedTag: 'Retirée', entriesTitle: 'Toutes les participations', endNow: 'Terminer maintenant', plus1: '+1 jour', plus7: '+7 jours', del: 'Supprimer ce concours', delAsk: 'Supprimer ce concours et ses participations ? Les publications restent sur Kezzo.', stats: (n: number, l: number, c: number) => `${n} participations · ${l} j’aime · ${c} commentateurs`, hint: 'Enregistrer modifie le concours actuel ; « Nouveau concours » en démarre un autre.' },
 } as const;
 
 /** One contest at a time: people enter a photo or video, the audience likes and comments, and the live ranking shows the winner. */
@@ -51,6 +52,10 @@ export function ContestView() {
   const [admin, setAdmin] = useState(false);
   const [form, setForm] = useState({ id: '', title: '', theme: '', prize: '', rules: '', starts: '', ends: '' });
   const [creating, setCreating] = useState(false);
+  const [mineDetail, setMineDetail] = useState<{ title: string; body: string } | null>(null);
+  const [editing, setEditing] = useState<{ title: string; body: string } | null>(null);
+  const [allEntries, setAllEntries] = useState<AdminEntry[]>([]);
+  const isAdmin = useRef(false);
 
   const load = useCallback(async () => {
     const { data } = await supabase.rpc('contest_current');
@@ -59,6 +64,10 @@ export function ContestView() {
     if (c) {
       const { data: rows } = await supabase.rpc('contest_board', { p_contest: c.id });
       setBoard(Array.isArray(rows) ? (rows as Entry[]) : []);
+      if (isAdmin.current) {
+        const adm = await supabase.rpc('admin_contest_entries', { p_contest: c.id });
+        setAllEntries(!adm.error && Array.isArray(adm.data) ? (adm.data as AdminEntry[]) : []);
+      }
       setForm({ id: c.id, title: c.title, theme: c.theme, prize: c.prize, rules: c.rules, starts: toLocalInput(c.starts_at), ends: toLocalInput(c.ends_at) });
     }
     setLoading(false);
@@ -72,11 +81,17 @@ export function ContestView() {
 
   useEffect(() => {
     if (!user) { setAdmin(false); return; }
-    void supabase.rpc('is_admin').then(({ data }) => setAdmin(data === true));
-  }, [user]);
+    void supabase.rpc('is_admin').then(({ data }) => { isAdmin.current = data === true; setAdmin(data === true); if (data === true) void load(); });
+  }, [user, load]);
 
   const entry = user ? board.find((e) => e.author_id === user.id) : undefined;
   const phase = contest ? phaseOf(contest) : 'soon';
+
+  useEffect(() => {
+    if (!entry) { setMineDetail(null); return; }
+    void supabase.from('posts').select('title,body').eq('id', entry.post_id).single()
+      .then(({ data }) => setMineDetail(data ? { title: (data.title as string) ?? '', body: (data.body as string) ?? '' } : null));
+  }, [entry?.post_id]);
 
   useEffect(() => {
     if (!user || !contest || phase !== 'open' || entry) return;
@@ -109,6 +124,65 @@ export function ContestView() {
     toast(A.saved, 'info');
     setCreating(false);
     void load();
+  };
+
+  const saveEdit = async () => {
+    if (!entry || !editing || !editing.title.trim()) return;
+    const { error } = await supabase.from('posts').update({ title: editing.title.trim(), body: editing.body.trim() }).eq('id', entry.post_id);
+    if (error) { toast(w.errGeneric, 'error'); return; }
+    setMineDetail({ title: editing.title.trim(), body: editing.body.trim() });
+    setEditing(null);
+    toast(w.updated);
+    void load();
+  };
+
+  const withdraw = async () => {
+    if (!contest || !window.confirm(w.withdrawAsk)) return;
+    const { error } = await supabase.rpc('withdraw_contest_entry', { p_contest: contest.id });
+    if (error) { toast(w.errClosed, 'error'); return; }
+    toast(w.removed);
+    setMine(null);
+    void load();
+  };
+
+  const deletePost = async () => {
+    if (!entry || !window.confirm(w.deleteAsk)) return;
+    const { data: row } = await supabase.from('posts').select('media_bucket,media_path,media_extra').eq('id', entry.post_id).single();
+    const { error } = await supabase.from('posts').delete().eq('id', entry.post_id);
+    if (error) { toast(w.errGeneric, 'error'); return; }
+    if (row?.media_bucket === 'media-public' && row.media_path) {
+      const files = [row.media_path as string, ...((row.media_extra as string[] | null) ?? []), thumbPath(row.media_path as string)];
+      await removePublic('media-public', files);
+    }
+    toast(w.removed);
+    setMine(null);
+    void load();
+  };
+
+  const setEnd = async (iso: string) => {
+    if (!contest) return;
+    const { error } = await supabase.rpc('admin_save_contest', {
+      p_id: contest.id, p_title: contest.title, p_theme: contest.theme, p_prize: contest.prize, p_rules: contest.rules,
+      p_starts: contest.starts_at, p_ends: iso,
+    });
+    if (error) { toast(error.message, 'error'); return; }
+    toast(A.saved);
+    void load();
+  };
+  const plusDays = (d: number) => void setEnd(new Date(Math.max(Date.now(), Date.parse(contest?.ends_at ?? '')) + d * 86400000).toISOString());
+
+  const restore = async (postId: string) => {
+    if (!contest) return;
+    await supabase.rpc('admin_disqualify_entry', { p_contest: contest.id, p_post: postId, p_flag: false });
+    void load();
+  };
+
+  const deleteContest = async () => {
+    if (!contest || !window.confirm(A.delAsk)) return;
+    const { error } = await supabase.rpc('admin_delete_contest', { p_id: contest.id });
+    if (error) { toast(error.message, 'error'); return; }
+    setContest(null); setBoard([]); setAllEntries([]);
+    toast(A.saved);
   };
 
   const disqualify = async (postId: string) => {
@@ -169,13 +243,42 @@ export function ContestView() {
               {!user ? (
                 <button type="button" className="btn btn-accent mt-3" onClick={() => openAuth('signup')}>{w.signup}</button>
               ) : entry ? (
-                <p className="mt-2 text-sm text-zinc-700">{w.entered}</p>
+                <div className="mt-2 space-y-3">
+                  <p className="text-sm text-zinc-700">{w.entered}</p>
+                  <div className="flex gap-3">
+                    <div className="h-24 w-20 shrink-0 overflow-hidden rounded-lg bg-zinc-200"><Thumb kind={entry.kind} path={entry.media_path} title={entry.title} /></div>
+                    {editing ? (
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <input className={field} maxLength={120} value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} aria-label={w.myEntry} />
+                        <textarea className={field} rows={3} maxLength={2000} placeholder={w.desc} value={editing.body} onChange={(e) => setEditing({ ...editing, body: e.target.value })} />
+                        <div className="flex gap-2">
+                          <button type="button" className="btn btn-accent btn-sm" disabled={!editing.title.trim()} onClick={() => void saveEdit()}>{w.save}</button>
+                          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(null)}>{w.cancel}</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold">{mineDetail?.title || entry.title}</p>
+                        {mineDetail?.body && <p className="mt-1 line-clamp-3 whitespace-pre-line text-sm text-zinc-600">{mineDetail.body}</p>}
+                        <p className="mt-1 text-xs text-zinc-600">{w.score}: {entry.score} · #{entry.rank}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <ShareButton type="post" id={entry.post_id} title={mineDetail?.title || entry.title} />
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('post', entry.post_id)}><ExternalLink className="h-4 w-4" aria-hidden="true" />{w.view}</button>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing({ title: mineDetail?.title ?? entry.title, body: mineDetail?.body ?? '' })}><Pencil className="h-4 w-4" aria-hidden="true" />{w.edit}</button>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => void withdraw()}>{w.withdraw}</button>
+                    <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void deletePost()}><Trash2 className="h-4 w-4" aria-hidden="true" />{w.deletePost}</button>
+                  </div>
+                </div>
               ) : (
                 <>
                   <p className="mt-1 text-sm text-zinc-600">{w.enterHelp}</p>
+                  <button type="button" className="btn btn-accent mt-3" onClick={() => go('create', 'contest')}>{w.uploadNew}</button>
+                  {mine !== null && mine.length > 0 && <p className="mt-4 text-sm font-medium">{w.orPick}</p>}
                   {mine === null ? <Loading /> : mine.length === 0 ? (
-                    <div className="mt-3 space-y-3"><p className="text-sm text-zinc-600">{w.noPosts}</p>
-                      <button type="button" className="btn btn-accent" onClick={() => go('create')}>{w.upload}</button></div>
+                    <p className="mt-3 text-sm text-zinc-600">{w.noPosts}</p>
                   ) : (
                     <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                       {mine.map((p) => (
@@ -241,6 +344,29 @@ export function ContestView() {
               {creating || !contest ? A.save : A.create}
             </button>
           </div>
+          {contest && (
+            <div className="mt-5 border-t border-zinc-200 pt-4">
+              <p className="text-xs text-zinc-600">{A.stats(allEntries.length, allEntries.reduce((n, e) => n + e.likes, 0), allEntries.reduce((n, e) => n + e.commenters, 0))}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => plusDays(1)}>{A.plus1}</button>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => plusDays(7)}>{A.plus7}</button>
+                <button type="button" className="btn btn-ghost btn-sm" disabled={phase === 'ended'} onClick={() => void setEnd(new Date().toISOString())}>{A.endNow}</button>
+                <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void deleteContest()}>{A.del}</button>
+              </div>
+              <h3 className="mt-4 text-sm font-semibold">{A.entriesTitle}</h3>
+              <ul className="mt-2 divide-y divide-zinc-100 text-sm">
+                {allEntries.map((e) => (
+                  <li key={e.post_id} className="flex items-center gap-2 py-2">
+                    <span className="min-w-0 flex-1 truncate">{e.author_name} · {e.title} · {e.score}{e.disqualified && <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700">{A.removedTag}</span>}</span>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('post', e.post_id)}>{w.view}</button>
+                    {e.disqualified
+                      ? <button type="button" className="btn btn-ghost btn-sm" onClick={() => void restore(e.post_id)}>{A.restore}</button>
+                      : <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void disqualify(e.post_id)}>{A.dq}</button>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
       )}
     </div>

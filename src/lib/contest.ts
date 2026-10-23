@@ -18,6 +18,7 @@ export interface ContestWords {
   enter: string; enterHelp: string; pick: string; noPosts: string; upload: string; signup: string; entered: string; entering: string;
   board: string; empty: string; likes: string; commenters: string; score: string; view: string; share: string; refresh: string;
   winner: string; winnerNote: string; none: string; closed: string;
+  uploadNew: string; orPick: string; myEntry: string; edit: string; save: string; cancel: string; desc: string; withdraw: string; withdrawAsk: string; deletePost: string; deleteAsk: string; changeEntry: string; updated: string; removed: string;
   errAlready: string; errClosed: string; errGeneric: string; thanks: string;
 }
 
@@ -33,6 +34,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     entered: 'You are in! Share your entry to climb the ranking.', entering: 'Entering…',
     board: 'Ranking', empty: 'No entries yet. Be the first!', likes: 'Likes', commenters: 'Commenters', score: 'Score', view: 'Open', share: 'Share', refresh: 'Refresh',
     winner: 'Winner', winnerNote: 'The contest is over. Congratulations!', none: 'No contest right now.', closed: 'Entries are closed.',
+    uploadNew: 'Upload a new photo or video', orPick: 'Or choose one you already posted', myEntry: 'Your entry', edit: 'Edit title and description', save: 'Save', cancel: 'Cancel', desc: 'Description', withdraw: 'Withdraw from the contest', withdrawAsk: 'Withdraw this entry? Your post stays on Kezzo and you can enter another one.', deletePost: 'Delete the post', deleteAsk: 'Delete this post for good? It is also removed from the contest.', changeEntry: 'Enter a different one', updated: 'Saved', removed: 'Done',
     errAlready: 'You have already entered this contest.', errClosed: 'This contest is not open.', errGeneric: 'Something went wrong. Try again.', thanks: 'Entry received!',
   },
   fr: {
@@ -46,6 +48,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     entered: 'C’est fait ! Partagez votre participation pour monter au classement.', entering: 'Inscription…',
     board: 'Classement', empty: 'Aucune participation. Soyez le premier !', likes: 'J’aime', commenters: 'Commentateurs', score: 'Score', view: 'Ouvrir', share: 'Partager', refresh: 'Actualiser',
     winner: 'Gagnant', winnerNote: 'Le concours est terminé. Félicitations !', none: 'Aucun concours pour le moment.', closed: 'Les inscriptions sont closes.',
+    uploadNew: 'Publier une nouvelle photo ou vidéo', orPick: 'Ou choisir une publication existante', myEntry: 'Votre participation', edit: 'Modifier le titre et la description', save: 'Enregistrer', cancel: 'Annuler', desc: 'Description', withdraw: 'Retirer du concours', withdrawAsk: 'Retirer cette participation ? La publication reste sur Kezzo et vous pourrez en inscrire une autre.', deletePost: 'Supprimer la publication', deleteAsk: 'Supprimer définitivement cette publication ? Elle sera aussi retirée du concours.', changeEntry: 'En inscrire une autre', updated: 'Enregistré', removed: 'C’est fait',
     errAlready: 'Vous participez déjà à ce concours.', errClosed: 'Ce concours n’est pas ouvert.', errGeneric: 'Une erreur est survenue. Réessayez.', thanks: 'Participation reçue !',
   },
   es: {
@@ -59,6 +62,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     entered: '¡Estás dentro! Comparte tu participación para subir en la clasificación.', entering: 'Inscribiendo…',
     board: 'Clasificación', empty: 'Aún no hay participaciones. ¡Sé el primero!', likes: 'Me gusta', commenters: 'Comentaristas', score: 'Puntos', view: 'Abrir', share: 'Compartir', refresh: 'Actualizar',
     winner: 'Ganador', winnerNote: 'El concurso terminó. ¡Felicidades!', none: 'No hay concurso por ahora.', closed: 'Las inscripciones están cerradas.',
+    uploadNew: 'Subir una nueva foto o video', orPick: 'O elige una que ya publicaste', myEntry: 'Tu participación', edit: 'Editar título y descripción', save: 'Guardar', cancel: 'Cancelar', desc: 'Descripción', withdraw: 'Retirarme del concurso', withdrawAsk: '¿Retirar esta participación? Tu publicación sigue en Kezzo y podrás inscribir otra.', deletePost: 'Eliminar la publicación', deleteAsk: '¿Eliminar esta publicación para siempre? También se quita del concurso.', changeEntry: 'Inscribir otra', updated: 'Guardado', removed: 'Listo',
     errAlready: 'Ya participas en este concurso.', errClosed: 'Este concurso no está abierto.', errGeneric: 'Algo salió mal. Inténtalo de nuevo.', thanks: '¡Participación recibida!',
   },
   pt: {
@@ -72,6 +76,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     entered: 'Você está dentro! Compartilhe sua inscrição para subir na classificação.', entering: 'Inscrevendo…',
     board: 'Classificação', empty: 'Nenhuma inscrição ainda. Seja o primeiro!', likes: 'Curtidas', commenters: 'Comentaristas', score: 'Pontos', view: 'Abrir', share: 'Compartilhar', refresh: 'Atualizar',
     winner: 'Vencedor', winnerNote: 'O concurso terminou. Parabéns!', none: 'Nenhum concurso no momento.', closed: 'As inscrições estão encerradas.',
+    uploadNew: 'Enviar uma nova foto ou vídeo', orPick: 'Ou escolha uma que você já publicou', myEntry: 'Sua inscrição', edit: 'Editar título e descrição', save: 'Salvar', cancel: 'Cancelar', desc: 'Descrição', withdraw: 'Retirar do concurso', withdrawAsk: 'Retirar esta inscrição? Sua publicação continua no Kezzo e você poderá inscrever outra.', deletePost: 'Excluir a publicação', deleteAsk: 'Excluir esta publicação de vez? Ela também sai do concurso.', changeEntry: 'Inscrever outra', updated: 'Salvo', removed: 'Pronto',
     errAlready: 'Você já participa deste concurso.', errClosed: 'Este concurso não está aberto.', errGeneric: 'Algo deu errado. Tente novamente.', thanks: 'Inscrição recebida!',
   },
   hi: {
@@ -85,6 +90,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     entered: 'आप शामिल हैं! रैंकिंग में ऊपर आने के लिए अपनी एंट्री साझा करें।', entering: 'जमा हो रही है…',
     board: 'रैंकिंग', empty: 'अभी कोई एंट्री नहीं। पहले बनें!', likes: 'लाइक', commenters: 'कमेंट करने वाले', score: 'स्कोर', view: 'खोलें', share: 'साझा करें', refresh: 'ताज़ा करें',
     winner: 'विजेता', winnerNote: 'प्रतियोगिता समाप्त हुई। बधाई!', none: 'अभी कोई प्रतियोगिता नहीं है।', closed: 'एंट्री बंद है।',
+    uploadNew: 'नई फ़ोटो या वीडियो अपलोड करें', orPick: 'या पहले से पोस्ट की गई कोई चुनें', myEntry: 'आपकी एंट्री', edit: 'शीर्षक और विवरण बदलें', save: 'सहेजें', cancel: 'रद्द करें', desc: 'विवरण', withdraw: 'प्रतियोगिता से हटें', withdrawAsk: 'यह एंट्री हटाएँ? आपकी पोस्ट Kezzo पर रहेगी और आप दूसरी जमा कर सकते हैं।', deletePost: 'पोस्ट हटाएँ', deleteAsk: 'यह पोस्ट हमेशा के लिए हटाएँ? यह प्रतियोगिता से भी हट जाएगी।', changeEntry: 'दूसरी जमा करें', updated: 'सहेजा गया', removed: 'हो गया',
     errAlready: 'आप इस प्रतियोगिता में पहले से हैं।', errClosed: 'यह प्रतियोगिता खुली नहीं है।', errGeneric: 'कुछ गड़बड़ हुई। फिर कोशिश करें।', thanks: 'एंट्री मिल गई!',
   },
 };
