@@ -121,7 +121,7 @@ export function ContestView() {
     if (!user || !contest || phase !== 'open' || entry) return;
     void supabase.from('posts').select('id,kind,title,media_path')
       .eq('author_id', user.id).in('kind', ['photo', 'video']).eq('media_bucket', 'media-public').eq('download_price', 0)
-      .order('created_at', { ascending: false }).limit(30)
+      .gte('created_at', contest.starts_at).order('created_at', { ascending: false }).limit(30)
       .then(({ data }) => setMine((data ?? []) as MyPost[]));
   }, [user, contest, phase, entry]);
 
@@ -303,9 +303,7 @@ export function ContestView() {
                   <p className="mt-1 text-sm text-zinc-600">{w.enterHelp}</p>
                   <button type="button" className="btn btn-accent mt-3" onClick={() => go('create', 'contest')}>{w.uploadNew}</button>
                   {mine !== null && mine.length > 0 && <p className="mt-4 text-sm font-medium">{w.orPick}</p>}
-                  {mine === null ? <Loading /> : mine.length === 0 ? (
-                    <p className="mt-3 text-sm text-zinc-600">{w.noPosts}</p>
-                  ) : (
+                  {mine === null || mine.length === 0 ? null : (
                     <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                       {mine.map((p) => (
                         <li key={p.id} className="overflow-hidden rounded-xl border border-zinc-200">
