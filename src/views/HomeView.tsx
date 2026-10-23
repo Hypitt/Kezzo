@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StatusViewer } from '../components/StatusViewer';
-import { loadActiveStatuses, loadBattles, loadPosts, type PersonRow } from '../lib/data';
+import { loadActiveStatuses, loadBattles, loadPosts, newSeed, type PersonRow } from '../lib/data';
 import type { Battle, Post } from '../lib/types';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
@@ -13,6 +13,7 @@ export function HomeView() {
   const { user, profile, blocked } = useAuth();
   const { t } = useI18n();
   const { go } = useRouter();
+  const seed = useRef(newSeed());
   const [statuses, setStatuses] = useState<PersonRow[]>([]);
   const [battles, setBattles] = useState<Battle[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -24,7 +25,7 @@ export function HomeView() {
     Promise.all([
       loadActiveStatuses(),
       loadBattles({ status: ['live'], limit: 4 }),
-      loadPosts(user?.id ?? null, { limit: 6, excludeAuthors: blocked }),
+      loadPosts(user?.id ?? null, { limit: 6, excludeAuthors: blocked, shuffleSeed: seed.current }),
     ])
       .then(([s, b, p]) => {
         if (off) return;

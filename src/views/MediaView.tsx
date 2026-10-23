@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { loadPosts } from '../lib/data';
+import { loadPosts, newSeed } from '../lib/data';
 import type { Post, PostKind } from '../lib/types';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
@@ -24,12 +24,14 @@ export function MediaView() {
   const [busy, setBusy] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const request = useRef(0);
+  const seed = useRef(newSeed());
 
   const fetchPage = useCallback(
     (offset: number) =>
       loadPosts(user?.id ?? null, {
         from: offset,
         limit: PAGE,
+        shuffleSeed: seed.current,
         excludeAuthors: blocked,
         kinds: kind === 'all' ? (['photo', 'audio', 'video'] as PostKind[]) : [kind],
         paid: price === 'all' ? null : price === 'paid',

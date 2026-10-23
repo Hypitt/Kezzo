@@ -182,3 +182,5 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 128. Profile: untick "Show my public photos and videos on Kezzo's home page": your media no longer appears on the landing wall.
 129. After the first sign-in on a phone or in Chrome/Edge (not yet installed), a small card offers to install Kezzo once; Install opens the browser install window, Not now hides it for good. Nothing installs without the tap (browsers do not allow it).
 130. Landing: tiles with 0 comments show no comment button; the note under the wall reads 'Log in to see more or to add yours.'; the hero shows 'Do you have any talent? Share it with the world and let it be seen.' under the tagline (in all five languages).
+131. Home, Search (posts) and Media show posts in a random order that changes on every visit; pressing Load more continues the same order with no repeats or gaps. Filters (photo/video/audio, free/paid, search words, blocked users) still apply. Profile pages and a single post stay newest first.
+132. If update-18.sql has not been run yet, those pages still work and simply show newest first.

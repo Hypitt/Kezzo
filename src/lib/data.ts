@@ -25,26 +25,54 @@ export interface PostQuery {
   paid?: boolean | null;
   from?: number;
   limit?: number;
+  /** When set, posts come in a random order that stays the same for the same seed (so Load more never repeats). */
+  shuffleSeed?: string;
 }
+
+export const newSeed = () => Math.random().toString(36).slice(2, 10);
 
 export async function loadPosts(me: string | null, o: PostQuery = {}): Promise<Post[]> {
   if (o.authorIds && o.authorIds.length === 0) return [];
   const from = o.from ?? 0;
   const limit = o.limit ?? 12;
-  let q = supabase.from('posts').select(POST_SELECT).order('created_at', { ascending: false }).range(from, from + limit - 1);
-  if (o.id) q = q.eq('id', o.id);
-  if (o.authorId) q = q.eq('author_id', o.authorId);
-  if (o.authorIds) q = q.in('author_id', o.authorIds);
-  if (o.excludeAuthors?.length) q = q.not('author_id', 'in', `(${o.excludeAuthors.join(',')})`);
-  if (o.kinds?.length) q = q.in('kind', o.kinds);
-  if (o.paid === true) q = q.gt('download_price', 0);
-  if (o.paid === false) q = q.eq('download_price', 0);
-  const term = cleanTerm(o.q);
-  if (term) q = q.or(`title.ilike.%${term}%,body.ilike.%${term}%`);
+  // Random order: ask the database for a stable shuffled page of ids. If that is not available yet, fall back to newest first.
+  let order: string[] | null = null;
+  if (o.shuffleSeed && !o.id && !o.authorId) {
+    const { data: picked, error: pickErr } = await supabase.rpc('shuffled_post_ids', {
+      p_seed: o.shuffleSeed, p_from: from, p_limit: limit,
+      p_q: cleanTerm(o.q) || null,
+      p_author_ids: o.authorIds ?? null,
+      p_exclude: o.excludeAuthors?.length ? o.excludeAuthors : null,
+      p_kinds: o.kinds?.length ? o.kinds : null,
+      p_paid: o.paid === true ? true : o.paid === false ? false : null,
+    });
+    if (!pickErr && Array.isArray(picked)) {
+      if (picked.length === 0) return [];
+      order = picked as string[];
+    }
+  }
+  let q = order
+    ? supabase.from('posts').select(POST_SELECT).in('id', order)
+    : supabase.from('posts').select(POST_SELECT).order('created_at', { ascending: false }).range(from, from + limit - 1);
+  if (!order) {
+    if (o.id) q = q.eq('id', o.id);
+    if (o.authorId) q = q.eq('author_id', o.authorId);
+    if (o.authorIds) q = q.in('author_id', o.authorIds);
+    if (o.excludeAuthors?.length) q = q.not('author_id', 'in', `(${o.excludeAuthors.join(',')})`);
+    if (o.kinds?.length) q = q.in('kind', o.kinds);
+    if (o.paid === true) q = q.gt('download_price', 0);
+    if (o.paid === false) q = q.eq('download_price', 0);
+    const term = cleanTerm(o.q);
+    if (term) q = q.or(`title.ilike.%${term}%,body.ilike.%${term}%`);
+  }
 
   const { data, error } = await q;
   if (error) throw error;
-  const rows = (data ?? []) as unknown as Array<Record<string, unknown> & { id: string }>;
+  let rows = (data ?? []) as unknown as Array<Record<string, unknown> & { id: string }>;
+  if (order) {
+    const rank = new Map(order.map((id, i) => [id, i]));
+    rows = [...rows].sort((x, y) => (rank.get(x.id) ?? 0) - (rank.get(y.id) ?? 0));
+  }
   const ids = rows.map((r) => r.id);
 
   const liked = new Set<string>();

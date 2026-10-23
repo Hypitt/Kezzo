@@ -74,6 +74,7 @@ supabase/update-14.sql Cleanup of forgotten battles and live streams
 supabase/update-15.sql Re-applies the battle functions (fixes Cancel battle after schema.sql was run again)
 supabase/update-16.sql Lets profiles use Spanish, Portuguese and Hindi (run it before using the new languages)
 supabase/update-17.sql Public media wall on the landing page: random public photos/videos, likes without an account, opt-out setting
+supabase/update-18.sql Random order for posts on Home, Search and Media (stable while you press Load more)
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers

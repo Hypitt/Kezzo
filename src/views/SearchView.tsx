@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Search } from 'lucide-react';
-import { loadBattles, loadPeople, loadPosts, type PersonRow } from '../lib/data';
+import { loadBattles, loadPeople, loadPosts, newSeed, type PersonRow } from '../lib/data';
 import { supabase } from '../lib/supabase';
 import { isActiveStatus } from '../lib/format';
 import type { Battle, Post } from '../lib/types';
@@ -33,6 +33,7 @@ export function SearchView() {
   const [moreBusy, setMoreBusy] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const request = useRef(0);
+  const seed = useRef(newSeed());
   const userId = user?.id ?? null;
   // The people-you-follow list only matters on the "Following" tab. Keeping it out of the "All" tab's
   // dependencies stops the first page from being requested twice when that list finishes loading.
@@ -58,7 +59,7 @@ export function SearchView() {
       if (tab === 'feed') {
         if (scope === 'following' && followingRef.current === null) return 0;
         const rows = await loadPosts(userId, {
-          q: term, from: offset, limit: PAGE, excludeAuthors: blocked,
+          q: term, from: offset, limit: PAGE, excludeAuthors: blocked, shuffleSeed: seed.current,
           authorIds: scope === 'following' ? (followingRef.current ?? []) : undefined,
         });
         setPosts((p) => (offset ? [...p, ...rows] : rows));
