@@ -21,6 +21,7 @@ export interface ContestWords {
   uploadNew: string; orPick: string; myEntry: string; edit: string; save: string; cancel: string; desc: string; withdraw: string; withdrawAsk: string; deletePost: string; deleteAsk: string; changeEntry: string; updated: string; removed: string;
   tabVote: string; tabRank: string; voteHelp: string; rankLabel: string; more: string;
   entryBadge: string; winnerBadge: string; voteHint: string; left: (d: number, h: number) => string; entriesN: (n: number) => string; lastHours: string;
+  forEnter: string; forEnterText: string; forVote: string; forVoteText: string; ctaSign: string; ctaGo: string;
   errAlready: string; errClosed: string; errGeneric: string; thanks: string;
 }
 
@@ -39,6 +40,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     uploadNew: 'Upload a new photo or video', orPick: 'Finish entering your new upload', myEntry: 'Your entry', edit: 'Edit title and description', save: 'Save', cancel: 'Cancel', desc: 'Description', withdraw: 'Withdraw from the contest', withdrawAsk: 'Withdraw this entry? Your post stays on Kezzo and you can enter another one.', deletePost: 'Delete the post', deleteAsk: 'Delete this post for good? It is also removed from the contest.', changeEntry: 'Enter a different one', updated: 'Saved', removed: 'Done',
     tabVote: 'Watch and vote', tabRank: 'Ranking', voteHelp: 'Watch the entries, like the ones you love and leave a comment. Entries are shown in a different random order each visit.', rankLabel: 'Rank', more: 'Show more',
     entryBadge: 'Contest entry', winnerBadge: 'Contest winner', voteHint: 'Vote: tap the heart to like it, and leave a comment to support it.', left: (d, h) => d > 0 ? `${d}d ${h}h left` : `${h}h left`, entriesN: (n) => `${n} ${n === 1 ? 'entry' : 'entries'}`, lastHours: 'Last hours!',
+    forEnter: 'Want to compete?', forEnterText: 'Sign in, upload a new photo or video made for the contest, then share it so your friends and followers vote for you.', forVote: 'Want to vote?', forVoteText: 'Sign in, watch the entries, then like your favorites and leave a comment. Every person who likes or comments adds a point.', ctaSign: 'Sign in to enter or vote', ctaGo: 'Enter or vote',
     errAlready: 'You have already entered this contest.', errClosed: 'This contest is not open.', errGeneric: 'Something went wrong. Try again.', thanks: 'Entry received!',
   },
   fr: {
@@ -55,6 +57,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     uploadNew: 'Publier une nouvelle photo ou vidéo', orPick: 'Terminer l’inscription de votre nouvelle publication', myEntry: 'Votre participation', edit: 'Modifier le titre et la description', save: 'Enregistrer', cancel: 'Annuler', desc: 'Description', withdraw: 'Retirer du concours', withdrawAsk: 'Retirer cette participation ? La publication reste sur Kezzo et vous pourrez en inscrire une autre.', deletePost: 'Supprimer la publication', deleteAsk: 'Supprimer définitivement cette publication ? Elle sera aussi retirée du concours.', changeEntry: 'En inscrire une autre', updated: 'Enregistré', removed: 'C’est fait',
     tabVote: 'Regarder et voter', tabRank: 'Classement', voteHelp: 'Regardez les participations, aimez celles que vous adorez et laissez un commentaire. L’ordre est aléatoire à chaque visite.', rankLabel: 'Rang', more: 'Voir plus',
     entryBadge: 'Participation au concours', winnerBadge: 'Gagnant du concours', voteHint: 'Votez : touchez le cœur pour aimer et laissez un commentaire pour la soutenir.', left: (d, h) => d > 0 ? `${d} j ${h} h restants` : `${h} h restantes`, entriesN: (n) => `${n} participation${n > 1 ? 's' : ''}`, lastHours: 'Dernières heures !',
+    forEnter: 'Envie de participer ?', forEnterText: 'Connectez-vous, publiez une nouvelle photo ou vidéo pour le concours, puis partagez-la pour que vos amis et abonnés votent pour vous.', forVote: 'Envie de voter ?', forVoteText: 'Connectez-vous, regardez les participations, puis aimez vos préférées et laissez un commentaire. Chaque personne qui aime ou commente ajoute un point.', ctaSign: 'Se connecter pour participer ou voter', ctaGo: 'Participer ou voter',
     errAlready: 'Vous participez déjà à ce concours.', errClosed: 'Ce concours n’est pas ouvert.', errGeneric: 'Une erreur est survenue. Réessayez.', thanks: 'Participation reçue !',
   },
   es: {
@@ -71,6 +74,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     uploadNew: 'Subir una nueva foto o video', orPick: 'Termina de inscribir tu nueva publicación', myEntry: 'Tu participación', edit: 'Editar título y descripción', save: 'Guardar', cancel: 'Cancelar', desc: 'Descripción', withdraw: 'Retirarme del concurso', withdrawAsk: '¿Retirar esta participación? Tu publicación sigue en Kezzo y podrás inscribir otra.', deletePost: 'Eliminar la publicación', deleteAsk: '¿Eliminar esta publicación para siempre? También se quita del concurso.', changeEntry: 'Inscribir otra', updated: 'Guardado', removed: 'Listo',
     tabVote: 'Ver y votar', tabRank: 'Clasificación', voteHelp: 'Mira las participaciones, da me gusta a las que más te gusten y deja un comentario. El orden es aleatorio en cada visita.', rankLabel: 'Puesto', more: 'Ver más',
     entryBadge: 'Participación del concurso', winnerBadge: 'Ganador del concurso', voteHint: 'Vota: toca el corazón para dar me gusta y deja un comentario para apoyarla.', left: (d, h) => d > 0 ? `${d} d ${h} h restantes` : `${h} h restantes`, entriesN: (n) => `${n} participaci${n === 1 ? 'ón' : 'ones'}`, lastHours: '¡Últimas horas!',
+    forEnter: '¿Quieres participar?', forEnterText: 'Inicia sesión, sube una nueva foto o video para el concurso y compártelo para que tus amigos y seguidores voten por ti.', forVote: '¿Quieres votar?', forVoteText: 'Inicia sesión, mira las participaciones y da me gusta a tus favoritas y deja un comentario. Cada persona que da me gusta o comenta suma un punto.', ctaSign: 'Inicia sesión para participar o votar', ctaGo: 'Participar o votar',
     errAlready: 'Ya participas en este concurso.', errClosed: 'Este concurso no está abierto.', errGeneric: 'Algo salió mal. Inténtalo de nuevo.', thanks: '¡Participación recibida!',
   },
   pt: {
@@ -87,6 +91,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     uploadNew: 'Enviar uma nova foto ou vídeo', orPick: 'Conclua a inscrição da sua nova publicação', myEntry: 'Sua inscrição', edit: 'Editar título e descrição', save: 'Salvar', cancel: 'Cancelar', desc: 'Descrição', withdraw: 'Retirar do concurso', withdrawAsk: 'Retirar esta inscrição? Sua publicação continua no Kezzo e você poderá inscrever outra.', deletePost: 'Excluir a publicação', deleteAsk: 'Excluir esta publicação de vez? Ela também sai do concurso.', changeEntry: 'Inscrever outra', updated: 'Salvo', removed: 'Pronto',
     tabVote: 'Assistir e votar', tabRank: 'Classificação', voteHelp: 'Assista às inscrições, curta as que você ama e deixe um comentário. A ordem é aleatória a cada visita.', rankLabel: 'Posição', more: 'Ver mais',
     entryBadge: 'Inscrição do concurso', winnerBadge: 'Vencedor do concurso', voteHint: 'Vote: toque no coração para curtir e deixe um comentário para apoiar.', left: (d, h) => d > 0 ? `${d} d ${h} h restantes` : `${h} h restantes`, entriesN: (n) => `${n} inscri${n === 1 ? 'ção' : 'ções'}`, lastHours: 'Últimas horas!',
+    forEnter: 'Quer participar?', forEnterText: 'Entre, envie uma nova foto ou vídeo para o concurso e compartilhe para que amigos e seguidores votem em você.', forVote: 'Quer votar?', forVoteText: 'Entre, assista às inscrições, curta as suas favoritas e deixe um comentário. Cada pessoa que curte ou comenta soma um ponto.', ctaSign: 'Entre para participar ou votar', ctaGo: 'Participar ou votar',
     errAlready: 'Você já participa deste concurso.', errClosed: 'Este concurso não está aberto.', errGeneric: 'Algo deu errado. Tente novamente.', thanks: 'Inscrição recebida!',
   },
   hi: {
@@ -103,6 +108,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     uploadNew: 'नई फ़ोटो या वीडियो अपलोड करें', orPick: 'अपनी नई अपलोड की गई एंट्री पूरी करें', myEntry: 'आपकी एंट्री', edit: 'शीर्षक और विवरण बदलें', save: 'सहेजें', cancel: 'रद्द करें', desc: 'विवरण', withdraw: 'प्रतियोगिता से हटें', withdrawAsk: 'यह एंट्री हटाएँ? आपकी पोस्ट Kezzo पर रहेगी और आप दूसरी जमा कर सकते हैं।', deletePost: 'पोस्ट हटाएँ', deleteAsk: 'यह पोस्ट हमेशा के लिए हटाएँ? यह प्रतियोगिता से भी हट जाएगी।', changeEntry: 'दूसरी जमा करें', updated: 'सहेजा गया', removed: 'हो गया',
     tabVote: 'देखें और वोट करें', tabRank: 'रैंकिंग', voteHelp: 'एंट्रियाँ देखें, जो पसंद आएँ उन्हें लाइक करें और कमेंट लिखें। हर बार क्रम अलग-अलग रहता है।', rankLabel: 'रैंक', more: 'और दिखाएँ',
     entryBadge: 'प्रतियोगिता एंट्री', winnerBadge: 'प्रतियोगिता विजेता', voteHint: 'वोट करें: दिल पर टैप करके लाइक करें और समर्थन में कमेंट लिखें।', left: (d, h) => d > 0 ? `${d} दिन ${h} घंटे बचे` : `${h} घंटे बचे`, entriesN: (n) => `${n} एंट्री`, lastHours: 'आख़िरी घंटे!',
+    forEnter: 'भाग लेना चाहते हैं?', forEnterText: 'साइन इन करें, प्रतियोगिता के लिए नई फ़ोटो या वीडियो अपलोड करें, फिर उसे साझा करें ताकि दोस्त और फ़ॉलोअर्स आपको वोट दें।', forVote: 'वोट करना चाहते हैं?', forVoteText: 'साइन इन करें, एंट्रियाँ देखें, पसंदीदा को लाइक करें और कमेंट लिखें। हर लाइक या कमेंट करने वाला व्यक्ति एक अंक जोड़ता है।', ctaSign: 'भाग लेने या वोट करने के लिए साइन इन करें', ctaGo: 'भाग लें या वोट करें',
     errAlready: 'आप इस प्रतियोगिता में पहले से हैं।', errClosed: 'यह प्रतियोगिता खुली नहीं है।', errGeneric: 'कुछ गड़बड़ हुई। फिर कोशिश करें।', thanks: 'एंट्री मिल गई!',
   },
 };

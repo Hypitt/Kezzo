@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ContestBanner } from '../components/ContestBanner';
+import { ContestSection } from '../components/ContestSection';
 import { StatusViewer } from '../components/StatusViewer';
 import { loadActiveStatuses, loadBattles, loadPosts, newSeed, type PersonRow } from '../lib/data';
 import type { Battle, Post } from '../lib/types';
@@ -44,7 +44,7 @@ export function HomeView() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
-      <ContestBanner onOpen={() => go('contest')} />
+      <ContestSection signedIn onJoin={() => go('contest')} />
       <section aria-label={t('statuses')}>
         <h2 className="mb-3 text-lg font-semibold">{t('statuses')}</h2>
         <div className="flex gap-4 overflow-x-auto pb-2">
