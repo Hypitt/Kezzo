@@ -14,6 +14,7 @@ import { useToast } from '../state/Toast';
 import { Avatar, Spinner } from './ui';
 import { FeedVideo } from './FeedVideo';
 import { PhotoCarousel } from './PhotoCarousel';
+import { ContestBadge, useContestEntry } from './ContestBadge';
 import { ReportButton } from './ReportButton';
 import { ShareButton } from './ShareButton';
 import { publicUrl, removePublic } from '../lib/storage';
@@ -30,12 +31,13 @@ export function PostCard({ post, onChange, onDelete }: Props) {
   const { user, ensureAuth, refreshWallet } = useAuth();
   const { t, lang } = useI18n();
   const { toast } = useToast();
-  const { go } = useRouter();
+  const { go, route } = useRouter();
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [extraUrls, setExtraUrls] = useState<string[]>([]);
   const extraKey = (post.media_extra ?? []).join('|');
   const [showComments, setShowComments] = useState(false);
   const [editing, setEditing] = useState(false);
+  const contestInfo = useContestEntry(post.id, post.kind === 'photo' || post.kind === 'video');
   const [title, setTitle] = useState(post.title);
   const [body, setBody] = useState(post.body);
   const mine = user?.id === post.author_id;
@@ -121,6 +123,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
             <span className="block truncate text-xs text-zinc-500">@{post.author.handle} · {timeAgo(post.created_at, lang)}</span>
           </span>
         </button>
+        {contestInfo && <ContestBadge info={contestInfo} link={route.tab !== 'contest'} />}
         {post.download_price > 0 && (
           <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
             {t('price_coins', { n: post.download_price })}

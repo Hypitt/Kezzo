@@ -6,6 +6,7 @@ import { isR2Path, publicUrl, removePublic } from '../lib/storage';
 import { loadPosts, newSeed } from '../lib/data';
 import type { Post } from '../lib/types';
 import { PostCard } from '../components/PostCard';
+import { ContestBadge } from '../components/ContestBadge';
 import { CONTEST, phaseOf, type Contest, type Entry } from '../lib/contest';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
@@ -107,6 +108,8 @@ export function ContestView() {
 
   const entry = user ? board.find((e) => e.author_id === user.id) : undefined;
   const phase = contest ? phaseOf(contest) : 'soon';
+  const ms = contest ? Math.max(0, Date.parse(contest.ends_at) - Date.now()) : 0;
+  const left = { d: Math.floor(ms / 86400000), h: Math.floor((ms % 86400000) / 3600000) };
 
   useEffect(() => {
     if (!entry) { setMineDetail(null); return; }
@@ -231,6 +234,8 @@ export function ContestView() {
               <span className="inline-flex items-center gap-2 font-semibold"><Trophy className="h-5 w-5 text-accent" aria-hidden="true" />{contest.prize || w.nav}</span>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold">{phase === 'soon' ? w.soon : phase === 'open' ? w.open : w.ended}</span>
               <span className="text-zinc-600">{phase === 'soon' ? `${w.startsOn} ${fmt(contest.starts_at)}` : `${w.endsOn} ${fmt(contest.ends_at)}`}</span>
+              <span className="text-zinc-600">{w.entriesN(board.length)}</span>
+              {phase === 'open' && <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white">{left.d === 0 && left.h < 6 ? w.lastHours : w.left(left.d, left.h)}</span>}
             </div>
             <h2 className="mt-4 text-sm font-semibold">{w.how}</h2>
             <ol className="mt-1 list-decimal space-y-1 pl-5 text-sm text-zinc-700">
@@ -327,11 +332,19 @@ export function ContestView() {
               {board.length === 0 ? <Empty text={w.empty} /> : posts.slice(0, shown).map((p) => {
                 const e = board.find((x) => x.post_id === p.id);
                 return (
-                  <div key={p.id}>
-                    {e && <p className="mb-1 px-1 text-xs text-zinc-600">{w.rankLabel} #{e.rank} · {w.score}: {e.score}</p>}
+                  <div key={p.id} className="overflow-hidden rounded-2xl border-2 border-accent bg-orange-50">
+                    {e && (
+                      <div className="flex flex-wrap items-center gap-2 px-3 py-2 text-xs text-zinc-800">
+                        <ContestBadge info={{ rank: e.rank, score: e.score, winner: phase === 'ended' && e.rank === 1 }} link={false} />
+                        <span className="inline-flex items-center gap-1"><Heart className="h-3.5 w-3.5" aria-hidden="true" />{e.likes}</span>
+                        <span className="inline-flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />{e.commenters}</span>
+                        <span className="font-semibold">{w.score}: {e.score}</span>
+                      </div>
+                    )}
                     <PostCard post={p}
                       onChange={(next) => setPosts((l) => l.map((x) => (x.id === next.id ? next : x)))}
                       onDelete={(id) => { setPosts((l) => l.filter((x) => x.id !== id)); void load(); }} />
+                    {phase === 'open' && <p className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-zinc-800"><Heart className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />{w.voteHint}</p>}
                   </div>
                 );
               })}
