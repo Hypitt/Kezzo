@@ -7,7 +7,7 @@ import { useRouter } from '../state/Router';
 import { PENDING_GROUP, PENDING_JOIN } from '../lib/invite';
 import { InstallButton } from '../components/InstallButton';
 import { LanguageSwitch } from '../components/LanguageSwitch';
-import { ContestBanner } from '../components/ContestBanner';
+import { ContestSection } from '../components/ContestSection';
 import { LandingMedia } from '../components/LandingMedia';
 
 /**
@@ -365,7 +365,7 @@ export function Landing({ invite }: { invite?: string }) {
       </section>
 
       {/* Photos and videos from the community, random order, visible before sign-in (likes work for everyone, comments need an account) */}
-      <div className="mx-auto w-full max-w-4xl px-3 pt-4 sm:px-4"><ContestBanner onOpen={() => { window.location.hash = '/contest'; openAuth('signup'); }} /></div>
+      <ContestSection onJoin={() => { window.location.hash = '/contest'; openAuth('signup'); }} />
       <LandingMedia words={c.media} />
 
       {/* Groups: real featured groups when a group admin chose to feature one, otherwise clearly labelled examples */}

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ExternalLink, Pencil, RefreshCw, Trash2, Trophy, Heart, MessageCircle, Play } from 'lucide-react';
+import { ExternalLink, Pencil, RefreshCw, Trash2, Trophy, Heart, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { thumbPath } from '../lib/media';
-import { isR2Path, publicUrl, removePublic } from '../lib/storage';
+import { removePublic } from '../lib/storage';
 import { loadPosts, newSeed } from '../lib/data';
 import type { Post } from '../lib/types';
+import { Thumb } from '../components/ContestThumb';
 import { PostCard } from '../components/PostCard';
 import { ContestBadge } from '../components/ContestBadge';
 import { CONTEST, phaseOf, type Contest, type Entry } from '../lib/contest';
@@ -17,16 +18,6 @@ import { Avatar, Chip, Empty, Loading, LoadMore, PageHeader } from '../component
 
 interface AdminEntry { post_id: string; title: string; author_name: string; likes: number; commenters: number; score: number; disqualified: boolean }
 interface MyPost { id: string; kind: 'photo' | 'video'; title: string; media_path: string }
-
-function Thumb({ kind, path, title }: { kind: 'photo' | 'video'; path: string; title: string }) {
-  const full = publicUrl('media-public', path);
-  const [src, setSrc] = useState(() => publicUrl('media-public', kind === 'photo' ? thumbPath(path) : path));
-  if (kind === 'photo') {
-    return <img src={src} alt={title} loading="lazy" className="h-full w-full object-cover" onError={() => { if (src !== full) setSrc(full); }} />;
-  }
-  if (isR2Path(path)) return <video src={`${full}#t=0.5`} muted playsInline preload="metadata" aria-label={title} className="h-full w-full object-cover" />;
-  return <span className="flex h-full w-full items-center justify-center bg-zinc-800 text-white"><Play className="h-5 w-5 fill-white" aria-hidden="true" /></span>;
-}
 
 const toLocalInput = (iso: string) => {
   const d = new Date(iso);
