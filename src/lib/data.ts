@@ -20,6 +20,7 @@ export interface PostQuery {
   q?: string;
   authorId?: string;
   authorIds?: string[];
+  ids?: string[];
   excludeAuthors?: string[];
   kinds?: PostKind[];
   paid?: boolean | null;
@@ -32,7 +33,7 @@ export interface PostQuery {
 export const newSeed = () => Math.random().toString(36).slice(2, 10);
 
 export async function loadPosts(me: string | null, o: PostQuery = {}): Promise<Post[]> {
-  if (o.authorIds && o.authorIds.length === 0) return [];
+  if ((o.authorIds && o.authorIds.length === 0) || (o.ids && o.ids.length === 0)) return [];
   const from = o.from ?? 0;
   const limit = o.limit ?? 12;
   // Random order: ask the database for a stable shuffled page of ids. If that is not available yet, fall back to newest first.
@@ -56,6 +57,7 @@ export async function loadPosts(me: string | null, o: PostQuery = {}): Promise<P
     : supabase.from('posts').select(POST_SELECT).order('created_at', { ascending: false }).range(from, from + limit - 1);
   if (!order) {
     if (o.id) q = q.eq('id', o.id);
+    if (o.ids) q = q.in('id', o.ids);
     if (o.authorId) q = q.eq('author_id', o.authorId);
     if (o.authorIds) q = q.in('author_id', o.authorIds);
     if (o.excludeAuthors?.length) q = q.not('author_id', 'in', `(${o.excludeAuthors.join(',')})`);

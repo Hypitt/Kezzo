@@ -3,13 +3,16 @@ import { ExternalLink, Pencil, RefreshCw, Trash2, Trophy, Heart, MessageCircle, 
 import { supabase } from '../lib/supabase';
 import { thumbPath } from '../lib/media';
 import { isR2Path, publicUrl, removePublic } from '../lib/storage';
+import { loadPosts, newSeed } from '../lib/data';
+import type { Post } from '../lib/types';
+import { PostCard } from '../components/PostCard';
 import { CONTEST, phaseOf, type Contest, type Entry } from '../lib/contest';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { ShareButton } from '../components/ShareButton';
-import { Avatar, Empty, Loading, PageHeader } from '../components/ui';
+import { Avatar, Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
 
 interface AdminEntry { post_id: string; title: string; author_name: string; likes: number; commenters: number; score: number; disqualified: boolean }
 interface MyPost { id: string; kind: 'photo' | 'video'; title: string; media_path: string }
@@ -56,6 +59,10 @@ export function ContestView() {
   const [editing, setEditing] = useState<{ title: string; body: string } | null>(null);
   const [allEntries, setAllEntries] = useState<AdminEntry[]>([]);
   const isAdmin = useRef(false);
+  const [tab, setTab] = useState<'vote' | 'rank'>('vote');
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [shown, setShown] = useState(6);
+  const seed = useRef(newSeed());
 
   const load = useCallback(async () => {
     const { data } = await supabase.rpc('contest_current');
@@ -83,6 +90,20 @@ export function ContestView() {
     if (!user) { setAdmin(false); return; }
     void supabase.rpc('is_admin').then(({ data }) => { isAdmin.current = data === true; setAdmin(data === true); if (data === true) void load(); });
   }, [user, load]);
+
+  // The entries as full posts (video player, like, comments), in a random order that stays the same during the visit.
+  const boardKey = board.map((e) => e.post_id).join(',');
+  useEffect(() => {
+    if (!board.length) { setPosts([]); return; }
+    let off = false;
+    void loadPosts(user?.id ?? null, { ids: board.map((e) => e.post_id), limit: 50 }).then((rows) => {
+      if (off) return;
+      const key = (id: string) => { let h = 0; for (const ch of id + seed.current) h = (h * 31 + ch.charCodeAt(0)) | 0; return h; };
+      setPosts([...rows].sort((a, b) => key(a.id) - key(b.id)));
+    }).catch(() => undefined);
+    return () => { off = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boardKey, user?.id]);
 
   const entry = user ? board.find((e) => e.author_id === user.id) : undefined;
   const phase = contest ? phaseOf(contest) : 'soon';
@@ -295,7 +316,30 @@ export function ContestView() {
           )}
           {phase === 'soon' && <p className="text-sm text-zinc-600">{w.closed}</p>}
 
-          <section aria-label={w.board}>
+          <div className="flex gap-2">
+            <Chip active={tab === 'vote'} onClick={() => setTab('vote')}>{w.tabVote}</Chip>
+            <Chip active={tab === 'rank'} onClick={() => setTab('rank')}>{w.tabRank}</Chip>
+          </div>
+
+          {tab === 'vote' && (
+            <section aria-label={w.tabVote} className="space-y-4">
+              <p className="text-sm text-zinc-600">{w.voteHelp}</p>
+              {board.length === 0 ? <Empty text={w.empty} /> : posts.slice(0, shown).map((p) => {
+                const e = board.find((x) => x.post_id === p.id);
+                return (
+                  <div key={p.id}>
+                    {e && <p className="mb-1 px-1 text-xs text-zinc-600">{w.rankLabel} #{e.rank} · {w.score}: {e.score}</p>}
+                    <PostCard post={p}
+                      onChange={(next) => setPosts((l) => l.map((x) => (x.id === next.id ? next : x)))}
+                      onDelete={(id) => { setPosts((l) => l.filter((x) => x.id !== id)); void load(); }} />
+                  </div>
+                );
+              })}
+              <LoadMore show={posts.length > shown} busy={false} onClick={() => setShown((n) => n + 6)} label={w.more} />
+            </section>
+          )}
+
+          {tab === 'rank' && <section aria-label={w.board}>
             <h2 className="mb-3 text-lg font-semibold">{w.board}</h2>
             {board.length === 0 ? <Empty text={w.empty} /> : (
               <ol className="space-y-3">
@@ -321,7 +365,7 @@ export function ContestView() {
                 ))}
               </ol>
             )}
-          </section>
+          </section>}
         </>
       )}
 
