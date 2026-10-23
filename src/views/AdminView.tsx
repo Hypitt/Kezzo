@@ -494,6 +494,7 @@ export function AdminView() {
           </table>
         )}
       </Panel>
+      <button type="button" className="btn btn-accent" onClick={() => go('contest')}>{lang === 'fr' ? 'Gérer le concours' : 'Manage the contest'}</button>
       {r2Enabled && <MoveToR2 fr={lang === 'fr'} />}
     </div>
   );
