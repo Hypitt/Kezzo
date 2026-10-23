@@ -334,7 +334,7 @@ export function Landing({ invite }: { invite?: string }) {
               </h1>
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-zinc-700 sm:text-base">{c.lead}</p>
               <p className="mt-4 max-w-xl text-base font-semibold leading-snug text-zinc-900 sm:text-lg">{c.leadTag}</p>
-              <p className="mt-3 max-w-xl text-sm font-semibold leading-snug text-black sm:text-base">{c.talent}</p>
+              <p className="mt-3 max-w-xl text-xs font-medium leading-snug text-black sm:text-sm">{c.talent}</p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <InstallButton className="btn btn-accent px-6 py-3 text-base" label={t('download_kezzo')} />
                 <button type="button" className={`${outline} px-6 py-3 text-base`} onClick={() => openAuth('signin')}>{c.login}</button>
