@@ -319,28 +319,28 @@ export function Landing({ invite }: { invite?: string }) {
   return (
     <PublicFrame>
       {/* Hero: warm light card with a group photo that fades into it */}
-      <section className="bg-white px-3 pb-3 pt-4 sm:px-4 sm:pb-4 sm:pt-6">
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#fff8f4] via-[#fdeee6] to-[#f8d9cb] text-zinc-900">
+      <section className="bg-white px-3 pb-2 pt-3 sm:px-4 sm:pb-3 sm:pt-4">
+        <div className="relative mx-auto max-w-4xl overflow-hidden rounded-2xl bg-gradient-to-br from-[#fff8f4] via-[#fdeee6] to-[#f8d9cb] text-zinc-900">
           <div className="relative grid gap-0 lg:grid-cols-[1fr_1.15fr]">
-            <div className="px-5 pb-6 pt-10 sm:px-10 sm:pb-12 sm:pt-12 lg:self-center">
+            <div className="px-4 pb-5 pt-6 sm:px-7 sm:pb-7 sm:pt-7 lg:self-center">
               {liveBattles > 0 && (
                 <span className="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white/70 px-3 py-1 text-xs font-medium text-zinc-800 backdrop-blur">
                   <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
                   {c.live(liveBattles)}
                 </span>
               )}
-              <h1 className="mt-5 text-4xl font-bold leading-[1.08] text-zinc-900 sm:text-5xl">
+              <h1 className="mt-3 text-2xl font-bold leading-[1.1] text-zinc-900 sm:text-3xl">
                 {c.h1a}<br /><span className="text-accent">{c.h1b}</span>
               </h1>
-              <p className="mt-5 max-w-xl text-sm leading-relaxed text-zinc-700 sm:text-base">{c.lead}</p>
-              <p className="mt-4 max-w-xl text-base font-semibold leading-snug text-zinc-900 sm:text-lg">{c.leadTag}</p>
-              <p className="mt-3 max-w-xl text-xs font-medium leading-snug text-black sm:text-sm">{c.talent}</p>
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <InstallButton className="btn btn-accent px-6 py-3 text-base" label={t('download_kezzo')} />
-                <button type="button" className={`${outline} px-6 py-3 text-base`} onClick={() => openAuth('signin')}>{c.login}</button>
+              <p className="mt-3 max-w-xl text-xs leading-relaxed text-zinc-700 sm:text-sm">{c.lead}</p>
+              <p className="mt-2 max-w-xl text-sm font-semibold leading-snug text-zinc-900 sm:text-base">{c.leadTag}</p>
+              <p className="mt-2 max-w-xl text-xs font-medium leading-snug text-black">{c.talent}</p>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <InstallButton className="btn btn-accent px-4 py-2 text-sm" label={t('download_kezzo')} />
+                <button type="button" className={`${outline} px-4 py-2 text-sm`} onClick={() => openAuth('signin')}>{c.login}</button>
               </div>
             </div>
-            <div className="relative min-h-64 sm:min-h-80 lg:min-h-[26rem]">
+            <div className="relative min-h-40 sm:min-h-52 lg:min-h-[17rem]">
               {/* the photo melts into the card: faded on its left edge (on phones: on its top edge) */}
               <img
                 src="/landing/hero-photo.jpg"
