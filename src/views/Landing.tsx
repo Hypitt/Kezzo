@@ -23,8 +23,9 @@ const COPY = {
     h1a: 'Get to know the world', h1b: 'through its people.',
     lead: 'Show the world what makes your culture unique. Share your traditions, celebrate your heritage, exchange stories, and discover music, food, languages, and lifestyles from around the world.',
     leadTag: 'Share your culture. Discover the world.',
+    talent: 'Do you have any talent? Share it with the world and let it be seen.',
     cta: 'Create your free account', ctaNote: 'Free to join · 16+ · Takes less than a minute',
-    media: { kicker: 'From the community', title: 'See what people are sharing', note: 'Like what you see? Log in to read and write comments.', cta: 'Log in to comment', like: 'Like', comments: 'Comments' },
+    media: { kicker: 'From the community', title: 'See what people are sharing', note: 'Like what you see? Log in to see more or to add yours.', cta: 'Log in to comment', like: 'Like', comments: 'Comments' },
     lines: ['Don’t just watch. Be part of it.', 'Your people. Your moments. Your stage.'],
     pillars: [
       ['02 · Social participation', 'Don’t just scroll. Get involved.', 'Join conversations, react to live moments, meet new people, and become part of experiences that bring communities together.'],
@@ -59,8 +60,9 @@ const COPY = {
     h1a: 'Découvrez le monde', h1b: 'à travers ses gens.',
     lead: 'Montrez au monde ce qui rend votre culture unique. Partagez vos traditions, célébrez votre héritage, échangez des histoires et découvrez la musique, la cuisine, les langues et les modes de vie du monde entier.',
     leadTag: 'Partagez votre culture. Découvrez le monde.',
+    talent: 'Avez-vous du talent? Partagez-le avec le monde pour qu’il soit vu.',
     cta: 'Créer mon compte gratuit', ctaNote: 'Gratuit · 16 ans et plus · Moins d’une minute',
-    media: { kicker: 'De la communauté', title: 'Découvrez ce que les gens partagent', note: 'Ça vous plaît? Connectez-vous pour lire et écrire des commentaires.', cta: 'Se connecter pour commenter', like: 'J’aime', comments: 'Commentaires' },
+    media: { kicker: 'De la communauté', title: 'Découvrez ce que les gens partagent', note: 'Ça vous plaît? Connectez-vous pour en voir plus ou ajouter le vôtre.', cta: 'Se connecter pour commenter', like: 'J’aime', comments: 'Commentaires' },
     lines: ['Ne faites pas que regarder. Faites-en partie.', 'Vos gens. Vos moments. Votre scène.'],
     pillars: [
       ['02 · Participation sociale', 'Ne faites pas que défiler. Participez.', 'Joignez des conversations, réagissez aux moments en direct, rencontrez de nouvelles personnes et faites partie d’expériences qui rassemblent les communautés.'],
@@ -95,8 +97,9 @@ const COPY = {
     h1a: 'Conoce el mundo', h1b: 'a través de su gente.',
     lead: 'Muestra al mundo lo que hace única a tu cultura. Comparte tus tradiciones, celebra tu herencia, intercambia historias y descubre la música, la comida, los idiomas y los estilos de vida de todo el mundo.',
     leadTag: 'Comparte tu cultura. Descubre el mundo.',
+    talent: '¿Tienes algún talento? Compártelo con el mundo para que lo vean.',
     cta: 'Crea tu cuenta gratis', ctaNote: 'Gratis · 16+ · Menos de un minuto',
-    media: { kicker: 'De la comunidad', title: 'Mira lo que comparte la gente', note: '¿Te gusta lo que ves? Inicia sesión para leer y escribir comentarios.', cta: 'Inicia sesión para comentar', like: 'Me gusta', comments: 'Comentarios' },
+    media: { kicker: 'De la comunidad', title: 'Mira lo que comparte la gente', note: '¿Te gusta lo que ves? Inicia sesión para ver más o añadir el tuyo.', cta: 'Inicia sesión para comentar', like: 'Me gusta', comments: 'Comentarios' },
     lines: ['No te limites a mirar. Sé parte de ello.', 'Tu gente. Tus momentos. Tu escenario.'],
     pillars: [
       ['02 · Participación social', 'No te limites a desplazarte. Participa.', 'Únete a conversaciones, reacciona a los momentos en vivo, conoce gente nueva y forma parte de experiencias que unen a las comunidades.'],
@@ -131,8 +134,9 @@ const COPY = {
     h1a: 'Conheça o mundo', h1b: 'por meio das pessoas.',
     lead: 'Mostre ao mundo o que torna a sua cultura única. Compartilhe suas tradições, celebre sua herança, troque histórias e descubra música, comida, idiomas e estilos de vida do mundo inteiro.',
     leadTag: 'Compartilhe sua cultura. Descubra o mundo.',
+    talent: 'Você tem algum talento? Compartilhe com o mundo para que todos vejam.',
     cta: 'Crie sua conta grátis', ctaNote: 'Grátis · 16+ · Leva menos de um minuto',
-    media: { kicker: 'Da comunidade', title: 'Veja o que as pessoas estão compartilhando', note: 'Gostou do que viu? Entre para ler e escrever comentários.', cta: 'Entre para comentar', like: 'Curtir', comments: 'Comentários' },
+    media: { kicker: 'Da comunidade', title: 'Veja o que as pessoas estão compartilhando', note: 'Gostou do que viu? Entre para ver mais ou adicionar o seu.', cta: 'Entre para comentar', like: 'Curtir', comments: 'Comentários' },
     lines: ['Não fique só assistindo. Faça parte.', 'Suas pessoas. Seus momentos. Seu palco.'],
     pillars: [
       ['02 · Participação social', 'Não fique só rolando a tela. Participe.', 'Entre em conversas, reaja a momentos ao vivo, conheça gente nova e faça parte de experiências que unem comunidades.'],
@@ -167,8 +171,9 @@ const COPY = {
     h1a: 'दुनिया को जानिए', h1b: 'उसके लोगों के ज़रिए।',
     lead: 'दुनिया को दिखाइए कि आपकी संस्कृति को क्या खास बनाता है। अपनी परंपराएँ साझा करें, अपनी विरासत का जश्न मनाएँ, कहानियों का आदान-प्रदान करें, और दुनिया भर का संगीत, खान-पान, भाषाएँ और जीवनशैली जानें।',
     leadTag: 'अपनी संस्कृति साझा करें। दुनिया को जानें।',
+    talent: 'क्या आपके पास कोई प्रतिभा है? उसे दुनिया के साथ साझा करें ताकि सब उसे देख सकें।',
     cta: 'अपना मुफ़्त खाता बनाएँ', ctaNote: 'जुड़ना मुफ़्त · 16+ · एक मिनट से भी कम',
-    media: { kicker: 'समुदाय से', title: 'देखिए लोग क्या साझा कर रहे हैं', note: 'पसंद आया? टिप्पणियाँ पढ़ने और लिखने के लिए लॉग इन करें।', cta: 'टिप्पणी के लिए लॉग इन करें', like: 'लाइक', comments: 'टिप्पणियाँ' },
+    media: { kicker: 'समुदाय से', title: 'देखिए लोग क्या साझा कर रहे हैं', note: 'पसंद आया? और देखने या अपना जोड़ने के लिए लॉग इन करें।', cta: 'टिप्पणी के लिए लॉग इन करें', like: 'लाइक', comments: 'टिप्पणियाँ' },
     lines: ['सिर्फ़ देखिए मत। हिस्सा बनिए।', 'आपके अपने लोग। आपके पल। आपका मंच।'],
     pillars: [
       ['02 · सामाजिक भागीदारी', 'सिर्फ़ स्क्रॉल मत कीजिए। जुड़िए।', 'बातचीत में शामिल हों, लाइव पलों पर प्रतिक्रिया दें, नए लोगों से मिलें और ऐसे अनुभवों का हिस्सा बनें जो समुदायों को जोड़ते हैं।'],
@@ -329,6 +334,7 @@ export function Landing({ invite }: { invite?: string }) {
               </h1>
               <p className="mt-5 max-w-xl text-sm leading-relaxed text-zinc-700 sm:text-base">{c.lead}</p>
               <p className="mt-4 max-w-xl text-base font-semibold leading-snug text-zinc-900 sm:text-lg">{c.leadTag}</p>
+              <p className="mt-3 max-w-xl text-sm font-semibold leading-snug text-accent sm:text-base">{c.talent}</p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <InstallButton className="btn btn-accent px-6 py-3 text-base" label={t('download_kezzo')} />
                 <button type="button" className={`${outline} px-6 py-3 text-base`} onClick={() => openAuth('signin')}>{c.login}</button>

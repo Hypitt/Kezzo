@@ -78,10 +78,12 @@ function Tile({ item, liked, onLike, onComment, words }: { item: Item; liked: bo
           className="inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-xs hover:bg-black/65 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
           <Heart className={`h-3.5 w-3.5 ${liked ? 'fill-accent text-accent' : ''}`} aria-hidden="true" />{item.likes}
         </button>
-        <button type="button" onClick={onComment} aria-label={`${words.comments}: ${item.title}`}
-          className="inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-xs hover:bg-black/65 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
-          <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />{item.comments}
-        </button>
+        {item.comments > 0 && (
+          <button type="button" onClick={onComment} aria-label={`${words.comments}: ${item.title}`}
+            className="inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-xs hover:bg-black/65 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+            <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />{item.comments}
+          </button>
+        )}
       </div>
     </div>
   );

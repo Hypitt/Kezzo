@@ -181,3 +181,4 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 127. Sign up or sign in on the same browser: the hearts you gave as a visitor now appear as your real likes on those posts (and the guest likes are gone).
 128. Profile: untick "Show my public photos and videos on Kezzo's home page": your media no longer appears on the landing wall.
 129. After the first sign-in on a phone or in Chrome/Edge (not yet installed), a small card offers to install Kezzo once; Install opens the browser install window, Not now hides it for good. Nothing installs without the tap (browsers do not allow it).
+130. Landing: tiles with 0 comments show no comment button; the note under the wall reads 'Log in to see more or to add yours.'; the hero shows 'Do you have any talent? Share it with the world and let it be seen.' under the tagline (in all five languages).
