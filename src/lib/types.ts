@@ -25,6 +25,7 @@ export interface Profile extends PublicProfile {
   language: Lang;
   dm_policy: 'everyone' | 'followers' | 'nobody';
   email_messages: boolean;
+  show_on_home: boolean;
   created_at: string;
 }
 

@@ -13,6 +13,8 @@ import { PENDING_GROUP, pendingGroup, pendingInvite } from './lib/invite';
 import { startMonitoring, trackPage } from './lib/analytics';
 import { isStaleChunkError, reloadOnce } from './lib/reload';
 import type { Lang } from './lib/types';
+import { InstallOffer } from './components/InstallOffer';
+import { claimGuestLikes } from './components/LandingMedia';
 
 // Every page is its own downloadable chunk, so the first screen only loads the code it needs.
 const page = <P extends object>(load: () => Promise<{ default: ComponentType<P> }>) =>
@@ -78,6 +80,11 @@ function Shell() {
     window.addEventListener('kezzo:session-expired', onExpired);
     return () => window.removeEventListener('kezzo:session-expired', onExpired);
   }, [toast, t]);
+
+  // Likes given as a visitor on the landing page become real likes once the person has an account.
+  useEffect(() => {
+    if (profile) void claimGuestLikes();
+  }, [profile?.id]);
 
   // Adopt the saved language of the signed-in profile once it loads.
   useEffect(() => {
@@ -151,6 +158,7 @@ function Shell() {
         <button type="button" className="underline" onClick={() => go('legal', 'privacy')}>{FOOT[lang].privacy}</button>
       </footer>
       <AuthDialog />
+      <InstallOffer />
     </div>
   );
 }

@@ -216,6 +216,7 @@ export const pt: Record<Key, string> = {
   photo_n: 'Foto {i} de {n}', prev_photo: 'Foto anterior', next_photo: 'Próxima foto', open_post: 'Abrir publicação',
   feature_group: 'Mostrar este grupo na página inicial pública do Kezzo', feature_group_hint: 'Os visitantes veem o nome, a descrição e o número de membros. Eles precisam se cadastrar ou entrar para participar.', feature_group_invite: 'Só grupos abertos podem aparecer na página inicial pública.',
   email_messages: 'Enviar e-mail sobre novas mensagens diretas e de grupo',
+  show_on_home: 'Mostrar minhas fotos e vídeos públicos na página inicial do Kezzo', not_now: 'Agora não',
   notif_title: 'Notificações', notif_empty: 'Nada de novo. Mensagens, curtidas, novos seguidores, lives e novas publicações, eventos e enquetes de quem você segue aparecem aqui e somem depois que você vê.', notif_mark_all: 'Marcar tudo como lido',
   notif_unread: '{n} não lidas', notif_message: '{name} enviou uma mensagem para você', notif_messages: '{name} enviou {n} mensagens para você',
   notif_like: '{name} curtiu sua publicação', notif_follow: '{name} começou a seguir você', notif_live: '{name} está ao vivo agora', notif_battle: '{name} iniciou uma batalha ao vivo',

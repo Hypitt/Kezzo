@@ -7,7 +7,7 @@ import { useI18n } from '../state/I18n';
  * "Install app" button. Hidden when Kezzo is already installed. Opens the browser's install window when there is one;
  * otherwise (iPhone/iPad Safari, Firefox, ...) it shows a short how-to.
  */
-export function InstallButton({ className = '', compact = false, label }: { className?: string; compact?: boolean; label?: string }) {
+export function InstallButton({ className = '', compact = false, label, onPress }: { className?: string; compact?: boolean; label?: string; onPress?: () => void }) {
   const { t } = useI18n();
   const { installed, ios, install } = useInstall();
   const [help, setHelp] = useState(false);
@@ -22,6 +22,7 @@ export function InstallButton({ className = '', compact = false, label }: { clas
   if (installed) return null;
 
   const press = async () => {
+    onPress?.();
     if (!(await install())) setHelp(true);
   };
 

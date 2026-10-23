@@ -282,6 +282,15 @@ function OwnSettings({ profile }: { profile: Profile }) {
           />
           {t('email_messages')}
         </label>
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-black"
+            checked={profile.show_on_home}
+            onChange={(e) => updateProfile({ show_on_home: e.target.checked }).then(() => toast(t('profile_saved'))).catch(() => toast(t('error_generic'), 'error'))}
+          />
+          {t('show_on_home')}
+        </label>
         {editing && (
           <form onSubmit={save} className="space-y-3">
             <div>
