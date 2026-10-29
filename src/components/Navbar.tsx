@@ -1,4 +1,4 @@
-import { CalendarDays, Coins, Home, Image as ImageIcon, LogIn, MessageCircle, PlusCircle, Radio, Search, Swords, User, Users, type LucideIcon } from 'lucide-react';
+import { Briefcase, CalendarDays, Coins, Home, Image as ImageIcon, LogIn, MessageCircle, PlusCircle, Radio, Search, Swords, User, Users, type LucideIcon } from 'lucide-react';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter, type Tab } from '../state/Router';
@@ -21,6 +21,7 @@ const NAV: { tab: Exclude<Tab, 'legal'>; icon: LucideIcon; label: Key }[] = [
   { tab: 'media', icon: ImageIcon, label: 'nav_media' },
   { tab: 'groups', icon: Users, label: 'nav_groups' },
   { tab: 'community', icon: CalendarDays, label: 'nav_community' },
+  { tab: 'opportunities', icon: Briefcase, label: 'nav_opportunities' },
   { tab: 'messages', icon: MessageCircle, label: 'nav_messages' },
   { tab: 'profile', icon: User, label: 'nav_profile' },
 ];
@@ -53,7 +54,7 @@ export function Navbar() {
             <img src="/logo-white.svg" alt="" width="20" height="28" className="h-7 w-auto" decoding="async" />
             Kezzo
           </button>
-          <nav className="hidden items-center gap-4 text-sm font-medium text-white lg:flex" aria-label="Main">
+          <nav className="hidden items-center gap-3 text-[13px] font-medium text-white lg:flex xl:gap-4 xl:text-sm" aria-label="Main">
             {NAV.map(({ tab, label }) => (
               <button
                 key={tab}
@@ -97,7 +98,7 @@ export function Navbar() {
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-10 border-t border-zinc-800 bg-black lg:hidden" aria-label="Main">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-11 border-t border-zinc-800 bg-black lg:hidden" aria-label="Main">
         {NAV.map(({ tab, icon: Icon, label }) => (
           <button
             key={tab}

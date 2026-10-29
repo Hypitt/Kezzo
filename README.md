@@ -79,6 +79,7 @@ supabase/update-19.sql Contests: members enter one photo or video, the audience 
 supabase/update-20.sql More contest options: withdraw an entry, admin sees all entries, restore and delete a contest
 supabase/update-21.sql Contest entries must be new uploads made after the contest starts
 supabase/update-22.sql AI translation: saved translations, subtitles (speech text) for videos and audio, a daily limit per person
+supabase/update-23.sql Opportunities: scholarships, jobs, training and events shared by members, found by place
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers
@@ -257,3 +258,14 @@ Posts, comments and what is said in free videos and audio posts are shown in the
 - Every translation is saved once per language, and each person has a daily limit, so the cost stays small. Cloudflare Workers AI has a free daily allowance (10,000 "neurons"; about 3 hours of speech or a very large amount of text).
 - Setup: run `supabase/update-22.sql`; in Cloudflare open AI > Workers AI > "Use REST API" > Create a Workers AI API Token; in Vercel add `CF_AI_TOKEN` (and `CF_ACCOUNT_ID` if you do not already have `R2_ACCOUNT_ID`), then redeploy.
 - Paid videos and audio are never transcribed or translated.
+
+
+## Opportunities
+
+A page (Opportunities in the menu) where signed-in members share scholarships, jobs, training and events, and find the ones near them.
+
+- Each post has a type, title, organization, details, a country and city (or "Online / anywhere"), an optional deadline, apply link and contact. Posts after their deadline disappear from the list.
+- People save their country and city once (on their device); "Near me" shows their city first, then their country, then online ones. Filters: type, Near me / Online / Everywhere, and a title search.
+- Anyone signed in can post (5 per day). Authors edit or delete their own posts. Everyone can Share or Report a post; admins see a Hide button (hidden posts are listed at the bottom for admins, with Show again).
+- Texts are translated into the viewer's language by the AI translation feature when it is set up.
+- Kezzo does not verify opportunities; the page says never to pay to apply or share passwords or ID numbers.

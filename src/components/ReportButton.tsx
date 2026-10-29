@@ -8,7 +8,7 @@ import type { Key } from '../lib/i18n';
 
 const REASONS = ['spam', 'harassment', 'sexual', 'violence', 'other'] as const;
 
-export function ReportButton({ targetType, targetId }: { targetType: 'post' | 'profile' | 'battle' | 'group'; targetId: string }) {
+export function ReportButton({ targetType, targetId }: { targetType: 'post' | 'profile' | 'battle' | 'group' | 'opportunity'; targetId: string }) {
   const { user, ensureAuth } = useAuth();
   const { t } = useI18n();
   const { toast } = useToast();

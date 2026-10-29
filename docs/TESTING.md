@@ -202,4 +202,10 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 148. Upload a free video with speech: after publishing, wait a short moment; the video shows a CC button and a headphones button. CC shows subtitles in your language; the headphones button mutes the video and reads the translation aloud. Audio posts show the same buttons under the player.
 149. An older own video or audio post shows "Add subtitles"; pressing it creates them. Paid media never gets subtitles. A post in the viewer's own language shows no translation note.
 150. Without the Cloudflare key, nothing breaks: texts simply stay in their original language and no CC button appears.
+151. Opportunities (after update-23.sql): the menu has an Opportunities item. "Share an opportunity" opens a form; a post needs a title and either a country or "Online". A link must start with https://. Posting a sixth one in a day is refused with a clear message.
+152. Save your country and city under "Your place". With "Near me" the posts in your city come first, then your country, then online posts. "Online" shows only online posts, "Everywhere" shows all. Type chips and the search box narrow the list.
+153. A post with a deadline in the past is not listed; one closing within 7 days shows "Closing soon".
+154. On your own post: Edit, Delete (asks first), Share. On someone else's: Share and Report. The Share link opens that opportunity first.
+155. As an admin: each post has a Hide button; hidden posts disappear for everyone and are listed at the bottom (admins only) with Show again.
+156. Posts written in another language are translated into the viewer's language (needs the AI translation setup), with "Show original".
 

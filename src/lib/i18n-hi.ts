@@ -190,6 +190,7 @@ export const hi: Record<Key, string> = {
   err_weights_locked: 'वोट का वज़न सिर्फ़ बैटल शुरू होने से पहले बदला जा सकता है।', err_invalid_weight: '0 से 100 के बीच कोई प्रतिशत चुनें।',
   err_invalid_timer: '10 सेकंड से 1 घंटे के बीच टाइमर चुनें।', err_host_only: 'आप सिर्फ़ होस्ट हैं, इसलिए स्टेज पर नहीं आ सकते।',
   // सूचनाएँ
+  nav_opportunities: 'अवसर',
   nav_community: 'इवेंट और पोल', community_sub: 'किसी इवेंट का प्रचार करें या लोगों को ऑनलाइन वोट करने दें।', events_title: 'आने वाले इवेंट', events_empty: 'अभी कोई आने वाला इवेंट नहीं है। प्रचार करने वाले पहले व्यक्ति बनें।',
   event_create: 'इवेंट का प्रचार करें', create_event: 'इवेंट', create_poll: 'पोल', polls_title: 'पोल', polls_empty: 'अभी कोई पोल नहीं है। एक शुरू करें और लोगों को वोट करने दें।', poll_create: 'पोल बनाएँ',
   poll_open: 'खुला', poll_closed: 'बंद', poll_your_vote: '✓ आपका वोट', poll_votes_n: '{n} वोट', poll_closes: '{when} बंद होगा',
@@ -200,7 +201,7 @@ export const hi: Record<Key, string> = {
   event_going: '✓ मैं आ रहा/रही हूँ', event_im_going: 'मैं आ रहा/रही हूँ', event_going_n: '{n} आ रहे हैं', event_join_online: 'ऑनलाइन जुड़ें', event_past: 'बीता हुआ इवेंट',
   event_starts: 'शुरू', event_ends: 'खत्म (वैकल्पिक)', event_place: 'जगह (पता या शहर)', event_link: 'ऑनलाइन लिंक (वैकल्पिक)', event_link_hint: 'https:// से शुरू होने वाला वेब पता, जैसे मीटिंग या टिकट का पेज।',
   event_cover: 'कवर फ़ोटो (वैकल्पिक)', event_publish: 'इवेंट प्रकाशित करें', event_created: 'इवेंट प्रकाशित हो गया।', event_err_date: 'शुरू होने की तारीख और समय चुनें।', event_err_end: 'खत्म होने का समय शुरू होने के बाद का होना चाहिए।', event_err_link: 'लिंक https:// से शुरू होना चाहिए',
-  share_text_event: 'Kezzo पर “{title}” से जुड़ें', share_text_poll: 'वोट दें: Kezzo पर “{title}”',
+  share_text_opportunity: 'Kezzo पर अवसर: “{title}”', share_text_event: 'Kezzo पर “{title}” से जुड़ें', share_text_poll: 'वोट दें: Kezzo पर “{title}”',
   err_invalid_question: 'सवाल लिखें।', err_invalid_options: 'पोल में 2 से 6 जवाब चाहिए, हर जवाब 80 अक्षर तक।', err_invalid_close: 'बंद होने का समय भविष्य में होना चाहिए।', err_not_live_host: 'लाइव स्ट्रीम में पोल सिर्फ़ उसका होस्ट जोड़ सकता है।',
   err_too_many_polls: 'आपने आज बहुत सारे पोल बनाए हैं। कल फिर कोशिश करें।', err_poll_closed: 'यह पोल बंद है।', err_invalid_option: 'यह जवाब मौजूद नहीं है।',
   setup_title: 'Kezzo अभी सेट नहीं है', setup_text: 'Supabase URL और anon कुंजी (VITE_SUPABASE_URL और VITE_SUPABASE_ANON_KEY) को .env.local में या अपने Vercel एनवायरनमेंट वेरिएबल में जोड़ें, फिर दोबारा शुरू करें। पूरी सेटिंग के लिए README देखें।',

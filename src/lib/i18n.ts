@@ -188,6 +188,7 @@ export const en = {
   err_weights_locked: 'Voting weights can only change before the battle starts.', err_invalid_weight: 'Choose a percentage from 0 to 100.',
   err_invalid_timer: 'Choose a timer between 10 seconds and 1 hour.', err_host_only: 'You are hosting only, so you cannot join the stage.',
   // notifications
+  nav_opportunities: 'Opportunities',
   nav_community: 'Events & polls', community_sub: 'Promote an event or let people vote online.', events_title: 'Upcoming events', events_empty: 'No upcoming events yet. Be the first to promote one.',
   event_create: 'Promote an event', create_event: 'Event', create_poll: 'Poll', polls_title: 'Polls', polls_empty: 'No polls yet. Start one and let people vote.', poll_create: 'Create a poll',
   poll_open: 'Open', poll_closed: 'Closed', poll_your_vote: '✓ your vote', poll_votes_n: '{n} votes', poll_closes: 'closes {when}',
@@ -198,7 +199,7 @@ export const en = {
   event_going: '✓ I’m going', event_im_going: 'I’m going', event_going_n: '{n} going', event_join_online: 'Join online', event_past: 'Past event',
   event_starts: 'Starts', event_ends: 'Ends (optional)', event_place: 'Place (address or city)', event_link: 'Online link (optional)', event_link_hint: 'A web address starting with https://, for example a meeting or ticket page.',
   event_cover: 'Cover photo (optional)', event_publish: 'Publish event', event_created: 'Event published.', event_err_date: 'Choose a start date and time.', event_err_end: 'The end must be after the start.', event_err_link: 'The link must start with https://',
-  share_text_event: 'Join “{title}” on Kezzo', share_text_poll: 'Vote: “{title}” on Kezzo',
+  share_text_opportunity: 'Opportunity on Kezzo: “{title}”', share_text_event: 'Join “{title}” on Kezzo', share_text_poll: 'Vote: “{title}” on Kezzo',
   err_invalid_question: 'Write a question.', err_invalid_options: 'A poll needs 2 to 6 answers of up to 80 characters.', err_invalid_close: 'The closing time must be in the future.', err_not_live_host: 'Only the host of a live stream can add a poll to it.',
   err_too_many_polls: 'You have created many polls today. Try again tomorrow.', err_poll_closed: 'This poll is closed.', err_invalid_option: 'That answer does not exist.',
   setup_title: 'Kezzo is not configured yet', setup_text: 'Add the Supabase URL and anon key (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY) to .env.local or to your Vercel environment variables, then restart. See the README for the full setup.',
@@ -424,6 +425,7 @@ export const fr: Record<Key, string> = {
   err_weights_locked: 'La pondération ne peut changer qu’avant le début du battle.', err_invalid_weight: 'Choisissez un pourcentage de 0 à 100.',
   err_invalid_timer: 'Choisissez un chrono entre 10 secondes et 1 heure.', err_host_only: 'Vous animez seulement, vous ne pouvez donc pas monter sur scène.',
   // notifications
+  nav_opportunities: 'Opportunités',
   nav_community: 'Événements et sondages', community_sub: 'Faites la promotion d’un événement ou laissez les gens voter en ligne.', events_title: 'Événements à venir', events_empty: 'Aucun événement à venir. Soyez le premier à en promouvoir un.',
   event_create: 'Promouvoir un événement', create_event: 'Événement', create_poll: 'Sondage', polls_title: 'Sondages', polls_empty: 'Aucun sondage. Lancez-en un et laissez les gens voter.', poll_create: 'Créer un sondage',
   poll_open: 'Ouvert', poll_closed: 'Fermé', poll_your_vote: '✓ votre vote', poll_votes_n: '{n} votes', poll_closes: 'ferme le {when}',
@@ -434,7 +436,7 @@ export const fr: Record<Key, string> = {
   event_going: '✓ J’y vais', event_im_going: 'J’y vais', event_going_n: '{n} y vont', event_join_online: 'Rejoindre en ligne', event_past: 'Événement passé',
   event_starts: 'Début', event_ends: 'Fin (facultatif)', event_place: 'Lieu (adresse ou ville)', event_link: 'Lien en ligne (facultatif)', event_link_hint: 'Une adresse web commençant par https://, par exemple une réunion ou une billetterie.',
   event_cover: 'Photo de couverture (facultatif)', event_publish: 'Publier l’événement', event_created: 'Événement publié.', event_err_date: 'Choisissez une date et une heure de début.', event_err_end: 'La fin doit être après le début.', event_err_link: 'Le lien doit commencer par https://',
-  share_text_event: 'Rejoignez « {title} » sur Kezzo', share_text_poll: 'Votez : « {title} » sur Kezzo',
+  share_text_opportunity: 'Opportunité sur Kezzo : « {title} »', share_text_event: 'Rejoignez « {title} » sur Kezzo', share_text_poll: 'Votez : « {title} » sur Kezzo',
   err_invalid_question: 'Écrivez une question.', err_invalid_options: 'Un sondage a besoin de 2 à 6 réponses de 80 caractères maximum.', err_invalid_close: 'L’heure de fermeture doit être dans le futur.', err_not_live_host: 'Seul l’animateur d’un direct peut y ajouter un sondage.',
   err_too_many_polls: 'Vous avez créé beaucoup de sondages aujourd’hui. Réessayez demain.', err_poll_closed: 'Ce sondage est fermé.', err_invalid_option: 'Cette réponse n’existe pas.',
   setup_title: 'Kezzo n’est pas encore configuré', setup_text: 'Ajoutez l’URL Supabase et la clé anon (VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY) à .env.local ou aux variables d’environnement de Vercel, puis redémarrez. Consultez le README pour la configuration complète.',

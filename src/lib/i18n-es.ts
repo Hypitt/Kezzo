@@ -190,6 +190,7 @@ export const es: Record<Key, string> = {
   err_weights_locked: 'Los pesos de votación solo se pueden cambiar antes de que empiece la batalla.', err_invalid_weight: 'Elige un porcentaje de 0 a 100.',
   err_invalid_timer: 'Elige un temporizador entre 10 segundos y 1 hora.', err_host_only: 'Solo eres anfitrión, así que no puedes subir al escenario.',
   // notificaciones
+  nav_opportunities: 'Oportunidades',
   nav_community: 'Eventos y encuestas', community_sub: 'Promociona un evento o deja que la gente vote en línea.', events_title: 'Próximos eventos', events_empty: 'Aún no hay próximos eventos. Sé el primero en promocionar uno.',
   event_create: 'Promocionar un evento', create_event: 'Evento', create_poll: 'Encuesta', polls_title: 'Encuestas', polls_empty: 'Aún no hay encuestas. Crea una y deja que la gente vote.', poll_create: 'Crear una encuesta',
   poll_open: 'Abierta', poll_closed: 'Cerrada', poll_your_vote: '✓ tu voto', poll_votes_n: '{n} votos', poll_closes: 'cierra {when}',
@@ -200,7 +201,7 @@ export const es: Record<Key, string> = {
   event_going: '✓ Voy', event_im_going: 'Voy', event_going_n: '{n} asistirán', event_join_online: 'Unirse en línea', event_past: 'Evento pasado',
   event_starts: 'Empieza', event_ends: 'Termina (opcional)', event_place: 'Lugar (dirección o ciudad)', event_link: 'Enlace en línea (opcional)', event_link_hint: 'Una dirección web que empiece por https://, por ejemplo una reunión o una página de entradas.',
   event_cover: 'Foto de portada (opcional)', event_publish: 'Publicar evento', event_created: 'Evento publicado.', event_err_date: 'Elige una fecha y hora de inicio.', event_err_end: 'El final debe ser posterior al inicio.', event_err_link: 'El enlace debe empezar por https://',
-  share_text_event: 'Únete a “{title}” en Kezzo', share_text_poll: 'Vota: “{title}” en Kezzo',
+  share_text_opportunity: 'Oportunidad en Kezzo: “{title}”', share_text_event: 'Únete a “{title}” en Kezzo', share_text_poll: 'Vota: “{title}” en Kezzo',
   err_invalid_question: 'Escribe una pregunta.', err_invalid_options: 'Una encuesta necesita de 2 a 6 respuestas de hasta 80 caracteres.', err_invalid_close: 'La hora de cierre debe ser en el futuro.', err_not_live_host: 'Solo el anfitrión de una transmisión en vivo puede añadirle una encuesta.',
   err_too_many_polls: 'Has creado muchas encuestas hoy. Inténtalo de nuevo mañana.', err_poll_closed: 'Esta encuesta está cerrada.', err_invalid_option: 'Esa respuesta no existe.',
   setup_title: 'Kezzo aún no está configurado', setup_text: 'Añade la URL de Supabase y la clave anon (VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY) a .env.local o a las variables de entorno de Vercel y reinicia. Consulta el README para ver la configuración completa.',

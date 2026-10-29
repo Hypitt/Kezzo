@@ -7,7 +7,7 @@ import { adminClient, UUID_RE } from './_lib/server';
  * (title, picture, Kezzo name) from this page; real visitors are sent straight on to the app.
  * Only public details are used: a post's title, its photo when the post is free, a profile's name and picture.
  */
-const TARGET: Record<string, string> = { post: 'post', profile: 'profile', battle: 'battles', live: 'live', group: 'groups', event: 'community', poll: 'community' };
+const TARGET: Record<string, string> = { post: 'post', profile: 'profile', battle: 'battles', live: 'live', group: 'groups', event: 'community', poll: 'community', opportunity: 'opportunities' };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' })[c] as string);
 const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
@@ -57,6 +57,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       if (data) {
         title = clip(String(data.title), 90);
         description = `Event on Kezzo · ${new Date(String(data.starts_at)).toUTCString().slice(0, 16)}`;
+      }
+    } else if (type === 'opportunity') {
+      const { data } = await db.from('opportunities').select('title,org,kind,city,country,hidden').eq('id', id).maybeSingle();
+      if (data && !data.hidden) {
+        title = clip(String(data.title), 90);
+        description = `Opportunity on Kezzo · ${clip([data.org, data.city, data.country].filter(Boolean).join(' · '), 100)}`;
       }
     } else if (type === 'poll') {
       const { data } = await db.from('polls').select('question').eq('id', id).maybeSingle();
