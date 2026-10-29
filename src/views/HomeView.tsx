@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSections } from '../lib/sections';
 import { ContestSection } from '../components/ContestSection';
 import { StatusViewer } from '../components/StatusViewer';
 import { loadActiveStatuses, loadBattles, loadPosts, newSeed, type PersonRow } from '../lib/data';
@@ -15,6 +16,7 @@ export function HomeView() {
   const { t } = useI18n();
   const { go } = useRouter();
   const seed = useRef(newSeed());
+  const on = useSections('home');
   const [statuses, setStatuses] = useState<PersonRow[]>([]);
   const [battles, setBattles] = useState<Battle[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -44,8 +46,8 @@ export function HomeView() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
-      <ContestSection signedIn onJoin={() => go('contest')} />
-      <section aria-label={t('statuses')}>
+      {on('contest') && <ContestSection signedIn onJoin={() => go('contest')} />}
+      {on('statuses') && <section aria-label={t('statuses')}>
         <h2 className="mb-3 text-lg font-semibold">{t('statuses')}</h2>
         <div className="flex gap-4 overflow-x-auto pb-2">
           {profile && (
@@ -66,9 +68,9 @@ export function HomeView() {
           ))}
           {!profile && statuses.length === 0 && <p className="text-sm text-zinc-500">{t('statuses_empty')}</p>}
         </div>
-      </section>
+      </section>}
 
-      {battles.length > 0 && (
+      {on('live') && battles.length > 0 && (
         <section aria-label={t('live_now')}>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-semibold">{t('live_now')}</h2>
@@ -78,7 +80,7 @@ export function HomeView() {
         </section>
       )}
 
-      <section aria-label={t('latest_posts')}>
+      {on('latest') && <section aria-label={t('latest_posts')}>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">{t('latest_posts')}</h2>
           <button type="button" className="text-sm text-zinc-500 underline" onClick={() => go('search')}>{t('see_all')}</button>
@@ -97,7 +99,7 @@ export function HomeView() {
             ))}
           </div>
         )}
-      </section>
+      </section>}
       {viewing && <StatusViewer person={viewing} onClose={() => setViewing(null)} />}
     </div>
   );

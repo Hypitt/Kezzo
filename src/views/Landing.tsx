@@ -7,6 +7,7 @@ import { useRouter } from '../state/Router';
 import { PENDING_GROUP, PENDING_JOIN } from '../lib/invite';
 import { InstallButton } from '../components/InstallButton';
 import { LanguageSwitch } from '../components/LanguageSwitch';
+import { useSections } from '../lib/sections';
 import { ContestSection } from '../components/ContestSection';
 import { LandingMedia } from '../components/LandingMedia';
 
@@ -284,6 +285,7 @@ export function Landing({ invite }: { invite?: string }) {
   const { openAuth } = useAuth();
   const { lang, t } = useI18n();
   const c = COPY[lang];
+  const on = useSections('landing');
   const [groups, setGroups] = useState<LandingGroup[]>([]);
   const [liveBattles, setLiveBattles] = useState(0);
 
@@ -358,17 +360,20 @@ export function Landing({ invite }: { invite?: string }) {
       </section>
 
       {/* Two lines that sum Kezzo up */}
+      {on('tagline') && (
       <section className="border-y border-stone-200 bg-stone-50 px-4 py-3" aria-label="Kezzo">
         <ul className="mx-auto grid max-w-3xl gap-x-6 gap-y-2 text-center sm:grid-cols-2">
           {c.lines.map((line) => <li key={line} className="font-display text-sm font-semibold leading-snug text-zinc-900 sm:text-base">{line}</li>)}
         </ul>
       </section>
+      )}
 
       {/* Photos and videos from the community, random order, visible before sign-in (likes work for everyone, comments need an account) */}
-      <ContestSection onJoin={() => { window.location.hash = '/contest'; openAuth('signup'); }} />
-      <LandingMedia words={c.media} />
+      {on('contest') && <ContestSection onJoin={() => { window.location.hash = '/contest'; openAuth('signup'); }} />}
+      {on('media') && <LandingMedia words={c.media} />}
 
       {/* Groups: real featured groups when a group admin chose to feature one, otherwise clearly labelled examples */}
+      {on('groups') && (
       <section className="bg-white px-4 py-6 text-zinc-900">
         <div className="mx-auto max-w-6xl">
           <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.groupsKicker}</p>
@@ -401,8 +406,10 @@ export function Landing({ invite }: { invite?: string }) {
           </ul>
         </div>
       </section>
+      )}
 
       {/* Five things Kezzo is about */}
+      {on('about') && (
       <section className="bg-white px-4 py-10 text-zinc-900" aria-label="Kezzo">
         <ul className="mx-auto max-w-6xl divide-y divide-stone-200 border-y border-stone-200">
           {c.pillars.map(([kicker, title, text]) => (
@@ -416,8 +423,10 @@ export function Landing({ invite }: { invite?: string }) {
           ))}
         </ul>
       </section>
+      )}
 
       {/* Solo, group, battle */}
+      {on('modes') && (
       <section className="bg-stone-50 px-4 py-12 text-zinc-900">
         <div className="mx-auto max-w-6xl">
           <div className="max-w-2xl">
@@ -443,8 +452,10 @@ export function Landing({ invite }: { invite?: string }) {
           </ul>
         </div>
       </section>
+      )}
 
       {/* Participation */}
+      {on('join') && (
       <section className="bg-white px-4 py-12 text-zinc-900">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-2">
           <div>
@@ -455,8 +466,10 @@ export function Landing({ invite }: { invite?: string }) {
           <img src="/landing/feed.jpg" alt="" className="h-56 w-full rounded-xl object-cover sm:h-64" loading="lazy" decoding="async" />
         </div>
       </section>
+      )}
 
       {/* Final call to action */}
+      {on('cta') && (
       <section className="bg-zinc-900 px-4 py-16 text-center text-white">
         <h2 className="text-3xl font-bold sm:text-4xl">{c.finalTitle}</h2>
         <p className="mx-auto mt-3 max-w-xl text-zinc-300">{c.finalSub}</p>
@@ -466,6 +479,7 @@ export function Landing({ invite }: { invite?: string }) {
         </div>
         <p className="mx-auto mt-6 max-w-xl text-xs text-zinc-400">{c.members}</p>
       </section>
+      )}
     </PublicFrame>
   );
 }

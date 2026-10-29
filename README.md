@@ -80,6 +80,7 @@ supabase/update-20.sql More contest options: withdraw an entry, admin sees all e
 supabase/update-21.sql Contest entries must be new uploads made after the contest starts
 supabase/update-22.sql AI translation: saved translations, subtitles (speech text) for videos and audio, a daily limit per person
 supabase/update-23.sql Opportunities: scholarships, jobs, training and events shared by members, found by place
+supabase/update-24.sql Admin choice of which sections show on the public landing page and on Home
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers
@@ -269,3 +270,8 @@ A page (Opportunities in the menu) where signed-in members share scholarships, j
 - Anyone signed in can post (5 per day). Authors edit or delete their own posts. Everyone can Share or Report a post; admins see a Hide button (hidden posts are listed at the bottom for admins, with Show again).
 - Texts are translated into the viewer's language by the AI translation feature when it is set up.
 - The page reminds people never to pay to apply.
+
+
+## Choosing home page sections (admin)
+
+On the Admin page, "Home page sections" lists the sections of the public landing page (tagline strip, contest box, community photos and videos, groups, five things, solo/group/battle, participation, final sign-up call) and of Home after sign-in (contest box, statuses, live now, latest posts). Untick a section and press Save: it disappears for everyone. The top banner and photo of the landing page always stay. Everything is shown until an admin changes it.

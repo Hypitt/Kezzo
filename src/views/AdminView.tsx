@@ -7,6 +7,7 @@ import { useRouter } from '../state/Router';
 import { Chip, Loading, PageHeader, Spinner } from '../components/ui';
 import { api } from '../lib/api';
 import { r2Enabled } from '../lib/storage';
+import { HomeSections } from '../components/HomeSections';
 
 /** Admin statistics. Only people listed in the `admins` table can load data (checked in the database, not here). */
 
@@ -495,6 +496,7 @@ export function AdminView() {
         )}
       </Panel>
       <button type="button" className="btn btn-accent" onClick={() => go('contest')}>{lang === 'fr' ? 'Gérer le concours' : 'Manage the contest'}</button>
+      <HomeSections fr={lang === 'fr'} />
       {r2Enabled && <MoveToR2 fr={lang === 'fr'} />}
     </div>
   );

@@ -208,4 +208,6 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 154. On your own post: Edit, Delete (asks first), Share. On someone else's: Share and Report. The Share link opens that opportunity first.
 155. As an admin: each post has a Hide button; hidden posts disappear for everyone and are listed at the bottom (admins only) with Show again.
 156. Posts written in another language are translated into the viewer's language (needs the AI translation setup), with "Show original".
+157. Admin page > Home page sections (after update-24.sql): untick "Community photos and videos" and "Latest posts", press Save. A visitor's landing page no longer shows the photo wall, and Home no longer shows Latest posts (a reload may be needed on a device that already loaded the page). Tick them again to bring them back.
+158. A non-admin cannot change the choice (the save is refused). With nothing saved, every section shows.
 
