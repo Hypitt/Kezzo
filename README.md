@@ -268,4 +268,4 @@ A page (Opportunities in the menu) where signed-in members share scholarships, j
 - People save their country and city once (on their device); "Near me" shows their city first, then their country, then online ones. Filters: type, Near me / Online / Everywhere, and a title search.
 - Anyone signed in can post (5 per day). Authors edit or delete their own posts. Everyone can Share or Report a post; admins see a Hide button (hidden posts are listed at the bottom for admins, with Show again).
 - Texts are translated into the viewer's language by the AI translation feature when it is set up.
-- Kezzo does not verify opportunities; the page says never to pay to apply or share passwords or ID numbers.
+- The page reminds people never to pay to apply.
