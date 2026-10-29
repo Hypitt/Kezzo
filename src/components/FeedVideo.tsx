@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pause, Play, Volume2, VolumeX } from 'lucide-react';
+import { Headphones, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { useI18n } from '../state/I18n';
 import { R2_URL, r2Enabled } from '../lib/storage';
+import { canSpeak, cueAt, speak, stopSpeaking, useCaptions } from '../lib/captions';
+import { TR } from '../lib/translate';
 
 /** Only one feed video plays at a time. */
 let active: HTMLVideoElement | null = null;
@@ -24,8 +26,9 @@ const reducedMotion = (): boolean => window.matchMedia?.('(prefers-reduced-motio
  * Play/Pause and sound buttons stay visible. If the person pauses it, it stays paused until they press Play again.
  * The file is only requested when the video is close to the screen.
  */
-export function FeedVideo({ src }: { src: string }) {
-  const { t } = useI18n();
+export function FeedVideo({ src, postId, version = 0 }: { src: string; postId?: string; version?: number }) {
+  const { t, lang } = useI18n();
+  const w = TR[lang];
   const AUTOPLAY = FORCE_AUTOPLAY || (r2Enabled && src.startsWith(`${R2_URL}/`));
   const box = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
@@ -36,6 +39,13 @@ export function FeedVideo({ src }: { src: string }) {
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(() => !canHaveSound());
   const [progress, setProgress] = useState(0);
+  // Subtitles and "Listen" (the translation read aloud) when the post has speech text
+  const caps = useCaptions(postId ?? '', Boolean(postId) && near, version);
+  const [cc, setCc] = useState<boolean | null>(null);
+  const [dub, setDub] = useState(false);
+  const dubRef = useRef(false);
+  const [cue, setCue] = useState('');
+  const showCc = cc ?? caps.translated;
 
   // Start loading shortly before the video scrolls into view.
   useEffect(() => {
@@ -52,7 +62,7 @@ export function FeedVideo({ src }: { src: string }) {
     if (active && active !== v) active.pause();
     active = v;
     // Sound is on when the browser allows it (after the person has tapped or clicked on the page); otherwise muted.
-    const wantMuted = !canHaveSound();
+    const wantMuted = dubRef.current || !canHaveSound();
     v.muted = wantMuted;
     setMuted(wantMuted);
     v.play().catch(() => {
@@ -104,6 +114,17 @@ export function FeedVideo({ src }: { src: string }) {
     }
   };
 
+  useEffect(() => {
+    dubRef.current = dub;
+    if (dub && video.current) { video.current.muted = true; setMuted(true); }
+    if (!dub) stopSpeaking();
+    return () => stopSpeaking();
+  }, [dub]);
+  useEffect(() => {
+    if (dub && playing && cue) speak(cue, lang);
+    if (!playing) stopSpeaking();
+  }, [dub, playing, cue, lang]);
+
   const v_sync = (next: boolean) => {
     if (video.current) video.current.muted = next;
     setMuted(next);
@@ -129,6 +150,7 @@ export function FeedVideo({ src }: { src: string }) {
         onTimeUpdate={(e) => {
           const v = e.currentTarget;
           if (v.duration) setProgress((v.currentTime / v.duration) * 100);
+          if (caps.cues) setCue(cueAt(caps.cues, v.currentTime));
         }}
         onClick={toggle}
       />
@@ -136,6 +158,11 @@ export function FeedVideo({ src }: { src: string }) {
         <button type="button" onClick={toggle} aria-label={t('play')} className="absolute inset-0 flex items-center justify-center bg-black/30">
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 text-white"><Play className="h-6 w-6 fill-white" aria-hidden="true" /></span>
         </button>
+      )}
+      {showCc && cue && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-12 flex justify-center px-3">
+          <span className="rounded bg-black/75 px-2 py-1 text-center text-sm text-white">{cue}</span>
+        </div>
       )}
       <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-6">
         <button type="button" onClick={toggle} aria-label={playing ? t('pause') : t('play')} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
@@ -145,7 +172,17 @@ export function FeedVideo({ src }: { src: string }) {
           type="range" min={0} max={100} step={0.1} value={progress} onChange={(e) => seek(Number(e.target.value))}
           aria-label={t('seek')} className="h-1 min-w-0 flex-1 accent-white"
         />
-        <button type="button" onClick={() => { const next = !muted; wantSound = !next; v_sync(next); }} aria-label={muted ? t('sound_on') : t('sound_off')} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
+        {caps.cues && (
+          <button type="button" onClick={() => setCc(!showCc)} aria-pressed={showCc} aria-label={w.captions} title={w.captions}
+            className={`flex h-8 shrink-0 items-center justify-center rounded-full px-2 text-xs font-bold text-white hover:bg-black/80 ${showCc ? 'bg-white/30' : 'bg-black/60'}`}>CC</button>
+        )}
+        {caps.cues && canSpeak() && (
+          <button type="button" onClick={() => setDub(!dub)} aria-pressed={dub} aria-label={dub ? w.stopListen : w.listen} title={dub ? w.stopListen : w.listen}
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white hover:bg-black/80 ${dub ? 'bg-white/30' : 'bg-black/60'}`}>
+            <Headphones className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
+        <button type="button" onClick={() => { if (dub) { setDub(false); dubRef.current = false; } const next = !muted; wantSound = !next; v_sync(next); }} aria-label={muted ? t('sound_on') : t('sound_off')} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
           {muted ? <VolumeX className="h-4 w-4" aria-hidden="true" /> : <Volume2 className="h-4 w-4" aria-hidden="true" />}
         </button>
       </div>

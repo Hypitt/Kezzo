@@ -78,6 +78,7 @@ supabase/update-18.sql Random order for posts on Home, Search and Media (stable 
 supabase/update-19.sql Contests: members enter one photo or video, the audience likes and comments, live ranking, highest score wins
 supabase/update-20.sql More contest options: withdraw an entry, admin sees all entries, restore and delete a contest
 supabase/update-21.sql Contest entries must be new uploads made after the contest starts
+supabase/update-22.sql AI translation: saved translations, subtitles (speech text) for videos and audio, a daily limit per person
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers
@@ -245,3 +246,14 @@ Setup: run `supabase/update-6.sql`, then add three variables in Vercel → Setti
 
 ## Cloudflare R2 for public media (optional)
 Set `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_URL` and `VITE_R2_PUBLIC_URL` in Vercel and redeploy. New public photos, videos and avatars are then stored in R2 (no download fees); files named `<user id>/r-…` are R2 files. Paid media and chat files stay in Supabase. Without these variables nothing changes.
+
+
+## AI translation (Cloudflare Workers AI)
+
+Posts, comments and what is said in free videos and audio posts are shown in the language each person chose (English, Français, Español, Português, हिन्दी).
+
+- Text posts and comments are translated automatically when they are in another language; a line under the text offers "Show original" and "Stop auto-translating".
+- When someone uploads a free video or audio post, the speech is turned into text in their browser and saved. Viewers get subtitles (CC) in their language and a Listen button that reads the translation aloud with the device's own voice (free). Authors can add subtitles to older posts with "Add subtitles".
+- Every translation is saved once per language, and each person has a daily limit, so the cost stays small. Cloudflare Workers AI has a free daily allowance (10,000 "neurons"; about 3 hours of speech or a very large amount of text).
+- Setup: run `supabase/update-22.sql`; in Cloudflare open AI > Workers AI > "Use REST API" > Create a Workers AI API Token; in Vercel add `CF_AI_TOKEN` (and `CF_ACCOUNT_ID` if you do not already have `R2_ACCOUNT_ID`), then redeploy.
+- Paid videos and audio are never transcribed or translated.

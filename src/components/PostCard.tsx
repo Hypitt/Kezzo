@@ -15,6 +15,10 @@ import { Avatar, Spinner } from './ui';
 import { FeedVideo } from './FeedVideo';
 import { PhotoCarousel } from './PhotoCarousel';
 import { ContestBadge, useContestEntry } from './ContestBadge';
+import { CaptionedAudio } from './CaptionedAudio';
+import { TranslationNote } from './TranslationNote';
+import { TR, useTranslated } from '../lib/translate';
+import { transcribePost } from '../lib/transcribe';
 import { ReportButton } from './ReportButton';
 import { ShareButton } from './ShareButton';
 import { publicUrl, removePublic } from '../lib/storage';
@@ -42,6 +46,33 @@ export function PostCard({ post, onChange, onDelete }: Props) {
   const [body, setBody] = useState(post.body);
   const mine = user?.id === post.author_id;
   const locked = post.download_price > 0 && !post.unlocked && !mine;
+  const tx = useTranslated([post.title, post.body ?? ''], !mine && !editing);
+
+  // The author can add subtitles to an older free video or audio post that has none yet.
+  const [capVersion, setCapVersion] = useState(0);
+  const [needsSubs, setNeedsSubs] = useState(false);
+  const [subsBusy, setSubsBusy] = useState(false);
+  const canSubs = mine && (post.kind === 'video' || post.kind === 'audio') && post.download_price === 0 && post.media_bucket === 'media-public';
+  useEffect(() => {
+    if (!canSubs) return;
+    let off = false;
+    void supabase.from('post_transcripts').select('post_id', { head: true, count: 'exact' }).eq('post_id', post.id)
+      .then(({ count }) => { if (!off) setNeedsSubs((count ?? 0) === 0); });
+    return () => { off = true; };
+  }, [canSubs, post.id, capVersion]);
+  const addSubtitles = async () => {
+    if (!mediaUrl || subsBusy) return;
+    const w = TR[lang];
+    setSubsBusy(true);
+    toast(w.working);
+    try {
+      const blob = await (await fetch(mediaUrl)).blob();
+      const r = await transcribePost(post.id, blob);
+      toast(r === 'ok' ? w.subsDone : r === 'no_speech' ? w.noSpeech : w.subsFail, r === 'ok' ? 'info' : 'error');
+      if (r === 'ok') setCapVersion((v) => v + 1);
+    } catch { toast(w.subsFail, 'error'); }
+    setSubsBusy(false);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -142,8 +173,9 @@ export function PostCard({ post, onChange, onDelete }: Props) {
         </form>
       ) : (
         <div>
-          <h3 className="text-base font-semibold">{post.title}</h3>
-          {post.body && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-zinc-700">{post.body}</p>}
+          <h3 className="text-base font-semibold">{tx.out[0]}</h3>
+          {post.body && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-zinc-700">{tx.out[1]}</p>}
+          <TranslationNote tx={tx} />
         </div>
       )}
 
@@ -160,8 +192,9 @@ export function PostCard({ post, onChange, onDelete }: Props) {
           ) : mediaUrl ? (
             <>
               {post.kind === 'photo' && <PhotoCarousel urls={[mediaUrl, ...extraUrls]} alt={post.title} />}
-              {post.kind === 'video' && <FeedVideo src={mediaUrl} />}
-              {post.kind === 'audio' && <audio src={mediaUrl} controls preload="none" className="w-full" />}
+              {post.kind === 'video' && <FeedVideo src={mediaUrl} postId={post.download_price === 0 ? post.id : undefined} version={capVersion} />}
+              {post.kind === 'audio' && (post.download_price === 0 ? <CaptionedAudio src={mediaUrl} postId={post.id} version={capVersion} /> : <audio src={mediaUrl} controls preload="none" className="w-full" />)}
+              {needsSubs && <button type="button" className="btn btn-ghost btn-sm mt-2" disabled={subsBusy} onClick={() => void addSubtitles()}>{subsBusy ? TR[lang].working : TR[lang].addSubs}</button>}
               <a className="mt-2 inline-flex items-center gap-1 text-xs text-zinc-500 underline" href={mediaUrl} target="_blank" rel="noreferrer">
                 <Download className="h-3.5 w-3.5" aria-hidden="true" />
                 {t('open_file')}
@@ -205,6 +238,7 @@ function Comments({ post, onCount }: { post: Post; onCount: (n: number) => void 
   const { toast } = useToast();
   const [rows, setRows] = useState<CommentRow[] | null>(null);
   const [text, setText] = useState('');
+  const ctx = useTranslated((rows ?? []).map((c) => c.body), true);
 
   useEffect(() => {
     let off = false;
@@ -245,11 +279,11 @@ function Comments({ post, onCount }: { post: Post; onCount: (n: number) => void 
     <div className="space-y-3 border-t border-zinc-100 pt-3">
       {rows === null ? <Spinner /> : rows.length === 0 ? <p className="text-sm text-zinc-500">{t('no_comments')}</p> : (
         <ul className="space-y-2">
-          {rows.map((c) => (
+          {rows.map((c, i) => (
             <li key={c.id} className="flex items-start gap-2 text-sm">
               {c.author && <Avatar p={c.author} size={24} />}
               <p className="min-w-0 flex-1 break-words">
-                <span className="font-semibold">{c.author?.display_name ?? '…'}</span> {c.body}
+                <span className="font-semibold">{c.author?.display_name ?? '…'}</span> {ctx.out[i] ?? c.body}
               </p>
               {(c.author_id === user?.id || post.author_id === user?.id) && (
                 <button type="button" className="text-zinc-400 hover:text-red-600" onClick={() => remove(c.id)} aria-label={t('delete')}>
@@ -260,6 +294,7 @@ function Comments({ post, onCount }: { post: Post; onCount: (n: number) => void 
           ))}
         </ul>
       )}
+      {rows !== null && rows.length > 0 && <TranslationNote tx={ctx} />}
       <form onSubmit={send} className="flex gap-2">
         <input className="input" value={text} maxLength={500} onChange={(e) => setText(e.target.value)} placeholder={t('add_comment')} aria-label={t('add_comment')} />
         <button className="btn btn-primary" disabled={!text.trim()}>{t('send')}</button>

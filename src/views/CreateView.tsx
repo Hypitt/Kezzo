@@ -13,6 +13,7 @@ import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
+import { transcribePost } from '../lib/transcribe';
 import { UploadBar, failureKey, type UploadState } from '../components/UploadBar';
 import { Chip, PageHeader, Spinner } from '../components/ui';
 import { EventForm } from '../components/EventForm';
@@ -109,6 +110,9 @@ function PostForm({ contest = false }: { contest?: boolean }) {
         download_price: kind === 'text' || contest ? 0 : price,
       }).select('id').single();
       if (insErr) throw new Error(t('error_generic'));
+      // Free videos and audio get subtitles: the speech is turned into text in the background (best effort, never blocks publishing).
+      const spoken = (kind === 'video' || kind === 'audio') && first?.bucket === 'media-public' && created ? first.file : null;
+      if (spoken && created) void transcribePost((created as { id: string }).id, spoken);
       jobs.current = [];
       setUpload(null);
       toast(t('post_published'));
