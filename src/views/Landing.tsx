@@ -262,7 +262,7 @@ export function PublicFrame({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <Header />
-      <main className="flex-1">{children}</main>
+      <main className="landing-copy flex-1">{children}</main>
       <Footer />
     </div>
   );
@@ -354,7 +354,7 @@ export function Landing({ invite }: { invite?: string }) {
             </div>
             <div className="relative min-h-40 sm:min-h-52 lg:min-h-[17rem]">
               {/* the photo melts into the card: faded on its left edge (on phones: on its top edge) */}
-              <img
+              {!site.hidden.includes('hero') && <img
                 src={site.images.hero ?? '/landing/hero-photo.jpg'}
                 alt=""
                 width="1400"
@@ -362,7 +362,7 @@ export function Landing({ invite }: { invite?: string }) {
                 className="absolute inset-0 h-full w-full object-cover object-[60%_35%] [mask-image:linear-gradient(to_right,transparent,black_32%)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_32%)] max-lg:[mask-image:linear-gradient(to_bottom,transparent,black_30%)] max-lg:[-webkit-mask-image:linear-gradient(to_bottom,transparent,black_30%)]"
                 fetchPriority="high"
                 decoding="async"
-              />
+              />}
             </div>
           </div>
         </div>
@@ -481,7 +481,7 @@ export function Landing({ invite }: { invite?: string }) {
             <h2 className="mt-2 text-3xl font-bold">{c.feedTitle}</h2>
             <p className="mt-3 leading-relaxed text-zinc-600">{c.feedText}</p>
           </div>
-          <img src={site.images.feed ?? '/landing/feed.jpg'} alt="" className="h-56 w-full rounded-xl object-cover sm:h-64" loading="lazy" decoding="async" />
+          {!site.hidden.includes('feed') && <img src={site.images.feed ?? '/landing/feed.jpg'} alt="" className="h-56 w-full rounded-xl object-cover sm:h-64" loading="lazy" decoding="async" />}
         </div>
       </section>
       )}

@@ -82,6 +82,7 @@ supabase/update-22.sql AI translation: saved translations, subtitles (speech tex
 supabase/update-23.sql Opportunities: scholarships, jobs, training and events shared by members, found by place
 supabase/update-24.sql Admin choice of which sections show on the public landing page and on Home
 supabase/update-25.sql Admin editing of the public landing page (texts, pictures, video, order of sections)
+supabase/update-27.sql Admins can delete a landing-page picture without replacing it
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers

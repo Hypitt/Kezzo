@@ -215,3 +215,6 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 160. Opportunity posts in another language show translated title, details and organization in the viewer's language, with "Show original".
 161. Admin > Edit the public homepage (after update-25.sql): change the big title in English, press Save, open the site signed out (or in a private window): the new title shows. Reset it with the arrow; the original returns.
 162. Same page: replace the top banner photo, add a featured video, and move "Groups" above "Community photos". Save and check the public page. A non-admin cannot save (refused).
+163. Scroll a profile grid, the Search & Feed page or the contest vote tab: videos start by themselves (muted) when mostly on screen and pause when they leave.
+164. Search & Feed (Feed tab, no search word): a "Contest" card shows only the title and an Enter button. Pressing Enter opens the rules, dates, prize and how it works, with a button to go to the contest. Home no longer shows the contest box.
+165. Admin > Edit the public homepage (after update-27.sql): press Delete on a text, Delete the picture, or Delete the video, then Save. The public page shows nothing in its place, with no replacement needed. Original / Use the original brings it back.

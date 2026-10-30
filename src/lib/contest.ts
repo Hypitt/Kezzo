@@ -14,6 +14,7 @@ export const phaseOf = (c: Contest, now = Date.now()): Phase =>
 export interface ContestWords {
   nav: string; banner: (prize: string) => string; join: string; see: string;
   soon: string; open: string; ended: string; endsOn: string; startsOn: string; prize: string; theme: string;
+  details: string; hide: string; dates: string;
   how: string; step1: string; step2: string; step3: string; rulesTitle: string;
   enter: string; enterHelp: string; pick: string; noPosts: string; upload: string; signup: string; entered: string; entering: string;
   board: string; empty: string; likes: string; commenters: string; score: string; view: string; share: string; refresh: string;
@@ -27,6 +28,7 @@ export interface ContestWords {
 
 export const CONTEST: Record<Lang, ContestWords> = {
   en: {
+    details: 'Details', hide: 'Hide details', dates: 'Dates',
     nav: 'Contest', banner: (p) => `Contest: share your best photo or video${p ? ` and win ${p}` : ''}`, join: 'Enter', see: 'See the ranking',
     soon: 'Starts soon', open: 'Open now', ended: 'Finished', endsOn: 'Ends', startsOn: 'Starts', prize: 'Prize', theme: 'Theme',
     how: 'How it works', step1: 'Create a free account and enter one photo or video.',
@@ -44,6 +46,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     errAlready: 'You have already entered this contest.', errClosed: 'This contest is not open.', errGeneric: 'Something went wrong. Try again.', thanks: 'Entry received!',
   },
   fr: {
+    details: 'Détails', hide: 'Masquer les détails', dates: 'Dates',
     nav: 'Concours', banner: (p) => `Concours : partagez votre meilleure photo ou vidéo${p ? ` et gagnez ${p}` : ''}`, join: 'Participer', see: 'Voir le classement',
     soon: 'Bientôt', open: 'En cours', ended: 'Terminé', endsOn: 'Se termine le', startsOn: 'Commence le', prize: 'Prix', theme: 'Thème',
     how: 'Comment ça marche', step1: 'Créez un compte gratuit et inscrivez une photo ou une vidéo.',
@@ -61,6 +64,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     errAlready: 'Vous participez déjà à ce concours.', errClosed: 'Ce concours n’est pas ouvert.', errGeneric: 'Une erreur est survenue. Réessayez.', thanks: 'Participation reçue !',
   },
   es: {
+    details: 'Detalles', hide: 'Ocultar detalles', dates: 'Fechas',
     nav: 'Concurso', banner: (p) => `Concurso: comparte tu mejor foto o video${p ? ` y gana ${p}` : ''}`, join: 'Participar', see: 'Ver la clasificación',
     soon: 'Pronto', open: 'Abierto', ended: 'Terminado', endsOn: 'Termina el', startsOn: 'Empieza el', prize: 'Premio', theme: 'Tema',
     how: 'Cómo funciona', step1: 'Crea una cuenta gratis e inscribe una foto o un video.',
@@ -78,6 +82,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     errAlready: 'Ya participas en este concurso.', errClosed: 'Este concurso no está abierto.', errGeneric: 'Algo salió mal. Inténtalo de nuevo.', thanks: '¡Participación recibida!',
   },
   pt: {
+    details: 'Detalhes', hide: 'Ocultar detalhes', dates: 'Datas',
     nav: 'Concurso', banner: (p) => `Concurso: compartilhe sua melhor foto ou vídeo${p ? ` e ganhe ${p}` : ''}`, join: 'Participar', see: 'Ver a classificação',
     soon: 'Em breve', open: 'Aberto', ended: 'Encerrado', endsOn: 'Termina em', startsOn: 'Começa em', prize: 'Prêmio', theme: 'Tema',
     how: 'Como funciona', step1: 'Crie uma conta grátis e inscreva uma foto ou um vídeo.',
@@ -95,6 +100,7 @@ export const CONTEST: Record<Lang, ContestWords> = {
     errAlready: 'Você já participa deste concurso.', errClosed: 'Este concurso não está aberto.', errGeneric: 'Algo deu errado. Tente novamente.', thanks: 'Inscrição recebida!',
   },
   hi: {
+    details: 'विवरण', hide: 'विवरण छिपाएँ', dates: 'तारीखें',
     nav: 'प्रतियोगिता', banner: (p) => `प्रतियोगिता: अपनी सबसे अच्छी फ़ोटो या वीडियो साझा करें${p ? ` और ${p} जीतें` : ''}`, join: 'भाग लें', see: 'रैंकिंग देखें',
     soon: 'जल्द शुरू', open: 'अभी खुली है', ended: 'समाप्त', endsOn: 'समाप्ति', startsOn: 'शुरुआत', prize: 'इनाम', theme: 'विषय',
     how: 'यह कैसे काम करता है', step1: 'मुफ़्त खाता बनाएँ और एक फ़ोटो या वीडियो जमा करें।',

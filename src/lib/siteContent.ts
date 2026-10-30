@@ -8,8 +8,10 @@ export interface SiteContent {
   images: Record<string, string>;
   video: { url?: string; poster?: string };
   order: string[];
+  /** Picture slots an admin deleted without replacing them. */
+  hidden: string[];
 }
-export const EMPTY_CONTENT: SiteContent = { texts: {}, images: {}, video: {}, order: [] };
+export const EMPTY_CONTENT: SiteContent = { texts: {}, images: {}, video: {}, order: [], hidden: [] };
 /** Default top-to-bottom order of the sections under the top banner. */
 export const DEFAULT_ORDER = ['tagline', 'video', 'contest', 'media', 'groups', 'about', 'modes', 'join', 'cta'] as const;
 /** Pictures an admin can replace. */
@@ -18,7 +20,7 @@ export const IMAGE_SLOTS = ['hero', 'feed'] as const;
 const KEY = 'kezzo_site_content';
 const norm = (d: unknown): SiteContent => {
   const o = (d && typeof d === 'object' ? d : {}) as Partial<SiteContent>;
-  return { texts: o.texts ?? {}, images: o.images ?? {}, video: o.video ?? {}, order: Array.isArray(o.order) ? o.order : [] };
+  return { texts: o.texts ?? {}, images: o.images ?? {}, video: o.video ?? {}, order: Array.isArray(o.order) ? o.order : [], hidden: Array.isArray(o.hidden) ? o.hidden : [] };
 };
 const read = (): SiteContent => { try { return norm(JSON.parse(localStorage.getItem(KEY) ?? '{}')); } catch { return EMPTY_CONTENT; } };
 
@@ -56,7 +58,7 @@ export function flatten(v: unknown, prefix = '', out: Record<string, string> = {
 export function applyTexts<T>(base: T, over: Record<string, string> | undefined): T {
   if (!over || Object.keys(over).length === 0) return base;
   const walk = (v: unknown, prefix: string): unknown => {
-    if (typeof v === 'string') return prefix && over[prefix] !== undefined && over[prefix].trim() !== '' ? over[prefix] : v;
+    if (typeof v === 'string') return prefix && over[prefix] !== undefined ? over[prefix] : v; // an empty text means the admin deleted it
     if (Array.isArray(v)) return v.map((x, i) => walk(x, prefix ? `${prefix}.${i}` : String(i)));
     if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, walk(x, prefix ? `${prefix}.${k}` : k)]));
     return v;

@@ -103,7 +103,6 @@ export function SearchView() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-4"><ContestSection signedIn onJoin={() => go('contest')} /></div>
       <PageHeader title={t('nav_search')} sub={t('search_sub')} />
       <div className="relative mb-3">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" aria-hidden="true" />
@@ -128,6 +127,8 @@ export function SearchView() {
           </>
         )}
       </div>
+
+      {tab === 'feed' && !term && <div className="mb-5"><ContestSection signedIn onJoin={() => go('contest')} /></div>}
 
       {loading ? (
         <Loading />

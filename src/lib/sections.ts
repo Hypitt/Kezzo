@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 
 /** Sections an admin can switch on or off. The first group is the public landing page, the second is Home after sign-in. */
 export const LANDING_SECTIONS = ['tagline', 'video', 'contest', 'media', 'groups', 'about', 'modes', 'join', 'cta'] as const;
-export const HOME_SECTIONS = ['contest', 'statuses', 'live', 'latest'] as const;
+export const HOME_SECTIONS = ['statuses', 'live', 'latest'] as const;
 export type Area = 'landing' | 'home';
 export type Switches = Record<string, boolean>;
 export interface Sections { landing: Switches; home: Switches }

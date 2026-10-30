@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AutoVideo } from './AutoVideo';
 import { Images, Lock, Music, Play, Type, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { thumbPath } from '../lib/media';
@@ -6,7 +7,7 @@ import type { Post } from '../lib/types';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { PostCard } from './PostCard';
-import { isR2Path, publicUrl } from '../lib/storage';
+import { publicUrl } from '../lib/storage';
 
 /** Profile posts, three tiles per row. Pressing a tile opens the full post (with its swipeable photos) in a window. */
 export function PostGrid({ posts, onChange, onDelete }: { posts: Post[]; onChange: (p: Post) => void; onDelete: (id: string) => void }) {
@@ -71,7 +72,7 @@ function Tile({ post, onOpen, label }: { post: Post; onOpen: () => void; label: 
   }, [post.media_path, post.media_bucket, post.kind, locked]);
 
   const extra = post.media_extra?.length ?? 0;
-  const videoFrame = post.kind === 'video' && !locked && post.media_bucket === 'media-public' && post.media_path && isR2Path(post.media_path)
+  const videoFrame = post.kind === 'video' && !locked && post.media_bucket === 'media-public' && post.media_path
     ? publicUrl('media-public', post.media_path) : null;
   return (
     <button type="button" onClick={onOpen} aria-label={label} className="relative block aspect-square w-full overflow-hidden rounded-md bg-zinc-100 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">
@@ -86,11 +87,10 @@ function Tile({ post, onOpen, label }: { post: Post; onOpen: () => void; label: 
         />
       ) : post.kind === 'video' ? (
         <span className="relative flex h-full w-full items-center justify-center bg-zinc-800 text-white">
-          {/* Videos stored in R2 (free downloads) show a real frame; others stay a plain dark tile so no video bytes are downloaded. */}
-          {videoFrame && (
-            <video src={`${videoFrame}#t=0.5`} muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
-          )}
-          <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-black/45"><Play className="h-5 w-5 fill-white" aria-hidden="true" /></span>
+          {/* Videos play by themselves (muted) while on screen */}
+          {videoFrame
+            ? <AutoVideo src={videoFrame} label={post.title} className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+            : <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-black/45"><Play className="h-5 w-5 fill-white" aria-hidden="true" /></span>}
         </span>
       ) : post.kind === 'audio' ? (
         <span className="flex h-full w-full flex-col items-center justify-center gap-1 p-2 text-zinc-500"><Music className="h-6 w-6" aria-hidden="true" /><span className="line-clamp-2 text-center text-[11px]">{post.title}</span></span>

@@ -9,7 +9,7 @@ const TEXT = {
     landing: 'Public landing page (before sign-in)', home: 'Home (after sign-in)', save: 'Save', saved: 'Saved',
     names: {
       landing: { tagline: 'Two taglines strip', video: 'Featured video', contest: 'Contest box', media: 'Community photos and videos', groups: 'Groups', about: 'Five things Kezzo is about', modes: 'Solo, group, battle', join: 'Participation', cta: 'Final sign-up call' },
-      home: { contest: 'Contest box', statuses: 'Statuses', live: 'Live now', latest: 'Latest posts' },
+      home: { statuses: 'Statuses', live: 'Live now', latest: 'Latest posts' },
     },
   },
   fr: {
@@ -17,7 +17,7 @@ const TEXT = {
     landing: 'Page publique (avant la connexion)', home: 'Accueil (après la connexion)', save: 'Enregistrer', saved: 'Enregistré',
     names: {
       landing: { tagline: 'Bandeau des deux phrases', video: 'Vidéo à la une', contest: 'Encadré du concours', media: 'Photos et vidéos de la communauté', groups: 'Groupes', about: 'Les cinq choses de Kezzo', modes: 'Solo, groupe, battle', join: 'Participation', cta: 'Appel final à s’inscrire' },
-      home: { contest: 'Encadré du concours', statuses: 'Statuts', live: 'En direct', latest: 'Dernières publications' },
+      home: { statuses: 'Statuts', live: 'En direct', latest: 'Dernières publications' },
     },
   },
 } as const;

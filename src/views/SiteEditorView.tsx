@@ -22,7 +22,7 @@ const W = {
     video: 'Featured video', videoSub: 'Shown as its own section. It starts playing by itself (muted, looping); visitors can unmute with the controls. Show or hide it in “Home page sections”.', videoTitle: 'Title above the video',
     videoPick: 'Choose a video', videoNone: 'No video yet', videoRemove: 'Remove video', order: 'Order of sections', orderSub: 'The top banner always stays first. Use the arrows to move a section.',
     names: { tagline: 'Two taglines strip', video: 'Featured video', contest: 'Contest box', media: 'Community photos and videos', groups: 'Groups', about: 'Five things Kezzo is about', modes: 'Solo, group, battle', join: 'Participation', cta: 'Final sign-up call' } as Record<string, string>,
-    uploading: 'Uploading…', tooBig: (n: number) => `That file is too big (max ${n} MB).`, fail: 'Upload failed. Try again.', changed: 'changed', reset: 'Original',
+    removedPic: 'Picture deleted (nothing shown)', uploading: 'Uploading…', tooBig: (n: number) => `That file is too big (max ${n} MB).`, fail: 'Upload failed. Try again.', changed: 'changed', deleted: 'deleted', del: 'Delete', delPic: 'Delete the picture', delVid: 'Delete the video', reset: 'Original',
   },
   fr: {
     title: 'Modifier la page d’accueil publique', sub: 'C’est la page que voient les gens avant de se connecter. Changez les textes, les images, la vidéo et l’ordre des sections, puis enregistrez. Ce que vous ne touchez pas garde son texte ou son image d’origine.',
@@ -31,7 +31,7 @@ const W = {
     video: 'Vidéo à la une', videoSub: 'Affichée dans sa propre section, lue automatiquement (sans son, en boucle) ; les visiteurs peuvent activer le son. Affichez ou masquez-la dans « Sections de la page d’accueil ».', videoTitle: 'Titre au-dessus de la vidéo',
     videoPick: 'Choisir une vidéo', videoNone: 'Pas encore de vidéo', videoRemove: 'Retirer la vidéo', order: 'Ordre des sections', orderSub: 'La bannière du haut reste toujours en premier. Utilisez les flèches pour déplacer une section.',
     names: { tagline: 'Bandeau des deux phrases', video: 'Vidéo à la une', contest: 'Encadré du concours', media: 'Photos et vidéos de la communauté', groups: 'Groupes', about: 'Les cinq choses de Kezzo', modes: 'Solo, groupe, battle', join: 'Participation', cta: 'Appel final à s’inscrire' } as Record<string, string>,
-    uploading: 'Envoi…', tooBig: (n: number) => `Ce fichier est trop gros (max ${n} Mo).`, fail: 'Échec de l’envoi. Réessayez.', changed: 'modifié', reset: 'Original',
+    removedPic: 'Image supprimée (rien d’affiché)', uploading: 'Envoi…', tooBig: (n: number) => `Ce fichier est trop gros (max ${n} Mo).`, fail: 'Échec de l’envoi. Réessayez.', changed: 'modifié', deleted: 'supprimé', del: 'Supprimer', delPic: 'Supprimer l’image', delVid: 'Supprimer la vidéo', reset: 'Original',
   },
 };
 
@@ -55,7 +55,7 @@ export function SiteEditorView() {
   const over = c.texts[tl] ?? {};
   const setText = (path: string, v: string) => {
     const next = { ...over };
-    if (v === defaults[path] || v === '') delete next[path]; else next[path] = v;
+    if (v === defaults[path]) delete next[path]; else next[path] = v; // an empty box means: deleted, show nothing
     setC({ ...c, texts: { ...c.texts, [tl]: next } });
   };
 
@@ -76,7 +76,7 @@ export function SiteEditorView() {
     setBusy(key);
     const url = await upload(file, 'image');
     setBusy(null);
-    if (url) setC((p) => ({ ...p, images: { ...p.images, [key]: url } }));
+    if (url) setC((p) => ({ ...p, images: { ...p.images, [key]: url }, hidden: p.hidden.filter((x) => x !== key) }));
   };
   const pickVideo = async (file: File | undefined) => {
     if (!file) return;
@@ -121,15 +121,20 @@ export function SiteEditorView() {
             <div key={s} className="space-y-2">
               <p className="text-sm font-medium">{w[s]}</p>
               <div className="flex h-32 items-center justify-center overflow-hidden rounded-lg bg-zinc-100 text-xs text-zinc-500">
-                <img src={c.images[s] ?? (s === 'hero' ? '/landing/hero-photo.jpg' : '/landing/feed.jpg')} alt="" className="h-full w-full object-cover" />
+                {c.hidden.includes(s) ? w.removedPic : <img src={c.images[s] ?? (s === 'hero' ? '/landing/hero-photo.jpg' : '/landing/feed.jpg')} alt="" className="h-full w-full object-cover" />}
               </div>
               <div className="flex flex-wrap gap-2">
                 <button type="button" className="btn btn-sm border border-zinc-300" disabled={busy !== null} onClick={() => { slot.current = s; imgRef.current?.click(); }}>
                   <ImagePlus className="h-4 w-4" aria-hidden="true" />{busy === s ? w.uploading : w.replace}
                 </button>
-                {c.images[s] && (
-                  <button type="button" className="btn btn-sm border border-zinc-300" onClick={() => { const { [s]: _drop, ...rest } = c.images; void _drop; setC({ ...c, images: rest }); }}>
+                {(c.images[s] || c.hidden.includes(s)) && (
+                  <button type="button" className="btn btn-sm border border-zinc-300" onClick={() => { const { [s]: _drop, ...rest } = c.images; void _drop; setC({ ...c, images: rest, hidden: c.hidden.filter((x) => x !== s) }); }}>
                     <RotateCcw className="h-4 w-4" aria-hidden="true" />{w.restore}
+                  </button>
+                )}
+                {!c.hidden.includes(s) && (
+                  <button type="button" className="btn btn-sm border border-zinc-300" onClick={() => { const { [s]: _drop, ...rest } = c.images; void _drop; setC({ ...c, images: rest, hidden: [...c.hidden, s] }); }}>
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />{w.delPic}
                   </button>
                 )}
               </div>
@@ -151,7 +156,7 @@ export function SiteEditorView() {
           </button>
           {c.video.url && (
             <button type="button" className="btn btn-sm border border-zinc-300" onClick={() => setC({ ...c, video: {} })}>
-              <Trash2 className="h-4 w-4" aria-hidden="true" />{w.videoRemove}
+              <Trash2 className="h-4 w-4" aria-hidden="true" />{w.delVid}
             </button>
           )}
         </div>
@@ -193,8 +198,11 @@ export function SiteEditorView() {
             return (
               <label key={p} className="block">
                 <span className="mb-0.5 flex items-center gap-2 text-xs text-zinc-500">
-                  <code>{p}</code>{edited && <span className="rounded bg-zinc-900 px-1.5 text-[10px] text-white">{w.changed}</span>}
-                  {edited && <button type="button" className="ml-auto flex items-center gap-1 underline" onClick={() => setText(p, defaults[p] ?? '')}><RotateCcw className="h-3 w-3" aria-hidden="true" />{w.reset}</button>}
+                  <code>{p}</code>{edited && <span className="rounded bg-zinc-900 px-1.5 text-[10px] text-white">{over[p] === '' ? w.deleted : w.changed}</span>}
+                  <span className="ml-auto flex items-center gap-3">
+                    {val !== '' && <button type="button" className="flex items-center gap-1 underline" onClick={() => setText(p, '')}><Trash2 className="h-3 w-3" aria-hidden="true" />{w.del}</button>}
+                    {edited && <button type="button" className="flex items-center gap-1 underline" onClick={() => setText(p, defaults[p] ?? '')}><RotateCcw className="h-3 w-3" aria-hidden="true" />{w.reset}</button>}
+                  </span>
                 </span>
                 {long
                   ? <textarea className="input w-full" rows={3} maxLength={2000} value={val} onChange={(e) => setText(p, e.target.value)} />
