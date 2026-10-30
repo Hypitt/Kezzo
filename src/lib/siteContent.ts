@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from './supabase';
+import { api } from './api';
 import type { Lang } from './types';
 
 /** What an admin changed on the public landing page. Anything not changed keeps the built-in text and picture. */
@@ -10,8 +11,12 @@ export interface SiteContent {
   order: string[];
   /** Picture slots an admin deleted without replacing them. */
   hidden: string[];
+  /** Texts that were translated by the machine from another language: which paths, per language. */
+  auto: Partial<Record<Lang, string[]>>;
+  /** What the admin really wrote, by path, so visitors can read the original. */
+  originals: Record<string, { lang: Lang; text: string }>;
 }
-export const EMPTY_CONTENT: SiteContent = { texts: {}, images: {}, video: {}, order: [], hidden: [] };
+export const EMPTY_CONTENT: SiteContent = { texts: {}, images: {}, video: {}, order: [], hidden: [], auto: {}, originals: {} };
 /** Default top-to-bottom order of the sections under the top banner. */
 export const DEFAULT_ORDER = ['tagline', 'video', 'contest', 'media', 'groups', 'about', 'modes', 'join', 'cta'] as const;
 /** Pictures an admin can replace. */
@@ -20,7 +25,7 @@ export const IMAGE_SLOTS = ['hero', 'feed'] as const;
 const KEY = 'kezzo_site_content';
 const norm = (d: unknown): SiteContent => {
   const o = (d && typeof d === 'object' ? d : {}) as Partial<SiteContent>;
-  return { texts: o.texts ?? {}, images: o.images ?? {}, video: o.video ?? {}, order: Array.isArray(o.order) ? o.order : [], hidden: Array.isArray(o.hidden) ? o.hidden : [] };
+  return { texts: o.texts ?? {}, images: o.images ?? {}, video: o.video ?? {}, order: Array.isArray(o.order) ? o.order : [], hidden: Array.isArray(o.hidden) ? o.hidden : [], auto: o.auto ?? {}, originals: o.originals ?? {} };
 };
 const read = (): SiteContent => { try { return norm(JSON.parse(localStorage.getItem(KEY) ?? '{}')); } catch { return EMPTY_CONTENT; } };
 
@@ -66,9 +71,26 @@ export function applyTexts<T>(base: T, over: Record<string, string> | undefined)
   return walk(base, '') as T;
 }
 
+// "Show original": visitors can read the admin's own words instead of the machine translation.
+let showOrig = false;
+const origListeners = new Set<(v: boolean) => void>();
+export const setShowOriginal = (v: boolean): void => { showOrig = v; origListeners.forEach((l) => l(v)); };
+export function useShowOriginal(): boolean {
+  const [v, setV] = useState(showOrig);
+  useEffect(() => { origListeners.add(setV); return () => { origListeners.delete(setV); }; }, []);
+  return v;
+}
+/** Paths whose text on this language is a machine translation. */
+export const autoPaths = (c: SiteContent, lang: Lang): string[] => c.auto[lang] ?? [];
+
 export function useCopy<T>(base: T, lang: Lang): T {
   const c = useSiteContent();
-  return useMemo(() => applyTexts(base, c.texts[lang]), [base, c.texts, lang]);
+  const orig = useShowOriginal();
+  return useMemo(() => {
+    const texts = { ...(c.texts[lang] ?? {}) };
+    if (orig) for (const p of autoPaths(c, lang)) if (c.originals[p]) texts[p] = c.originals[p].text;
+    return applyTexts(base, texts);
+  }, [base, c, lang, orig]);
 }
 
 /** Section ids in display order: the admin's order first, then any section it does not mention, in the default order. */
@@ -77,4 +99,50 @@ export function orderOf(saved: string[]): string[] {
   const out = saved.filter((x) => known.has(x));
   for (const d of DEFAULT_ORDER) if (!out.includes(d)) out.push(d);
   return out;
+}
+
+const ALL: Lang[] = ['en', 'fr', 'es', 'pt', 'hi'];
+
+/**
+ * Fills in the other languages for every text an admin wrote by hand. The admin writes once, in any language;
+ * the other four are translated by the server (and cached) and marked as automatic, so visitors can still read the original.
+ * A text the admin wrote by hand in a language is never replaced. Throws if the translation service is not available.
+ */
+export async function withTranslations(c: SiteContent): Promise<SiteContent> {
+  const texts: Record<string, Record<string, string>> = {};
+  const auto: Record<string, Set<string>> = {};
+  for (const l of ALL) { texts[l] = { ...(c.texts[l] ?? {}) }; auto[l] = new Set(c.auto[l] ?? []); }
+  const originals: SiteContent['originals'] = {};
+  const paths = new Set<string>();
+  for (const l of ALL) for (const p of Object.keys(texts[l])) paths.add(p);
+
+  const todo: Record<string, { p: string; t: string; s: Lang }[]> = {};
+  for (const p of paths) {
+    const manual = ALL.filter((l) => texts[l][p] !== undefined && !auto[l].has(p));
+    if (manual.length === 0) { for (const l of ALL) { delete texts[l][p]; auto[l].delete(p); } continue; }
+    const prev = c.originals[p];
+    const src = (prev && manual.includes(prev.lang) && texts[prev.lang][p] === prev.text ? prev.lang : manual[0]) as Lang;
+    const text = texts[src][p];
+    originals[p] = { lang: src, text };
+    for (const l of ALL) {
+      if (manual.includes(l)) continue;
+      if (text.trim() === '') { texts[l][p] = ''; auto[l].add(p); continue; }
+      const fresh = prev && prev.lang === src && prev.text === text && auto[l].has(p) && texts[l][p] !== undefined;
+      if (!fresh) (todo[l] ??= []).push({ p, t: text, s: src });
+    }
+  }
+  for (const [l, items] of Object.entries(todo)) {
+    for (let i = 0; i < items.length; i += 20) {
+      const group = items.slice(i, i + 20);
+      const res = await api<{ out: string[] }>('translate', { action: 'text', target: l, items: group.map((g) => ({ t: g.t, s: g.s })) });
+      group.forEach((g, k) => { texts[l][g.p] = res.out[k] || g.t; auto[l].add(g.p); });
+    }
+  }
+  const outTexts: SiteContent['texts'] = {};
+  const outAuto: SiteContent['auto'] = {};
+  for (const l of ALL) {
+    if (Object.keys(texts[l]).length) outTexts[l] = texts[l];
+    if (auto[l].size) outAuto[l] = [...auto[l]];
+  }
+  return { ...c, texts: outTexts, auto: outAuto, originals };
 }

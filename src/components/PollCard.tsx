@@ -10,6 +10,8 @@ import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
 import { Avatar, Spinner } from './ui';
 import { ShareButton } from './ShareButton';
+import { useTranslated } from '../lib/translate';
+import { TranslationNote } from './TranslationNote';
 
 /** One poll: vote while it is open, see the results after voting or once it is closed. */
 export function PollCard({ poll, onChange, showShare = true }: { poll: PollView; onChange: () => void; showShare?: boolean }) {
@@ -19,6 +21,7 @@ export function PollCard({ poll, onChange, showShare = true }: { poll: PollView;
   const [busy, setBusy] = useState<string | null>(null);
   const showResults = !poll.open || poll.myOption !== null;
   const mine = user?.id === poll.author_id;
+  const tx = useTranslated([poll.question, ...poll.options.map((o) => o.label)], !mine, true);
 
   const vote = async (optionId: string) => {
     if (!ensureAuth() || busy || optionId === poll.myOption) return;
@@ -42,9 +45,9 @@ export function PollCard({ poll, onChange, showShare = true }: { poll: PollView;
         <p className="min-w-0 flex-1 truncate text-xs text-zinc-500"><span className="font-semibold text-zinc-800">{poll.author.display_name}</span> · {timeAgo(poll.created_at, lang)}</p>
         <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${poll.open ? 'bg-green-100 text-green-800' : 'bg-zinc-100 text-zinc-600'}`}>{t(poll.open ? 'poll_open' : 'poll_closed')}</span>
       </header>
-      <h3 className="text-base font-semibold">{poll.question}</h3>
+      <h3 className="text-base font-semibold">{tx.out[0]}</h3>
       <ul className="space-y-2">
-        {poll.options.map((o) => {
+        {poll.options.map((o, oi) => {
           const pct = poll.total > 0 ? Math.round((o.votes / poll.total) * 100) : 0;
           const mineOpt = poll.myOption === o.id;
           return (
@@ -55,7 +58,7 @@ export function PollCard({ poll, onChange, showShare = true }: { poll: PollView;
               >
                 {showResults && <span className="absolute inset-y-0 left-0 bg-zinc-100" style={{ width: `${pct}%` }} aria-hidden="true" />}
                 <span className="relative flex items-center justify-between gap-3">
-                  <span className="min-w-0 break-words">{o.label}{mineOpt && <span className="ml-1.5 text-xs font-semibold text-accent">{t('poll_your_vote')}</span>}</span>
+                  <span className="min-w-0 break-words">{tx.out[oi + 1]}{mineOpt && <span className="ml-1.5 text-xs font-semibold text-accent">{t('poll_your_vote')}</span>}</span>
                   {busy === o.id ? <Spinner /> : showResults && <span className="shrink-0 text-xs tabular-nums text-zinc-600">{pct}% · {o.votes}</span>}
                 </span>
               </button>
@@ -63,6 +66,7 @@ export function PollCard({ poll, onChange, showShare = true }: { poll: PollView;
           );
         })}
       </ul>
+      <TranslationNote tx={tx} />
       <footer className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
         <span>{t('poll_votes_n', { n: poll.total })}{poll.closes_at && poll.open ? ` · ${t('poll_closes', { when: new Date(poll.closes_at).toLocaleString(lang) })}` : ''}</span>
         <span className="flex-1" />

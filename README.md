@@ -83,6 +83,7 @@ supabase/update-23.sql Opportunities: scholarships, jobs, training and events sh
 supabase/update-24.sql Admin choice of which sections show on the public landing page and on Home
 supabase/update-25.sql Admin editing of the public landing page (texts, pictures, video, order of sections)
 supabase/update-27.sql Admins can delete a landing-page picture without replacing it
+supabase/update-28.sql Homepage texts written by an admin are translated automatically into the other languages
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers

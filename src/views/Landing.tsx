@@ -8,7 +8,8 @@ import { PENDING_GROUP, PENDING_JOIN } from '../lib/invite';
 import { InstallButton } from '../components/InstallButton';
 import { LanguageSwitch } from '../components/LanguageSwitch';
 import { useSections } from '../lib/sections';
-import { orderOf, useCopy, useSiteContent } from '../lib/siteContent';
+import { autoPaths, orderOf, setShowOriginal, useCopy, useShowOriginal, useSiteContent } from '../lib/siteContent';
+import { TR } from '../lib/translate';
 import { ContestSection } from '../components/ContestSection';
 import { LandingMedia } from '../components/LandingMedia';
 
@@ -293,6 +294,8 @@ export function Landing({ invite }: { invite?: string }) {
   const c = useCopy(COPY[lang], lang);
   const site = useSiteContent();
   const ord = orderOf(site.order);
+  const showOrig = useShowOriginal();
+  const hasAuto = autoPaths(site, lang).some((p) => site.originals[p]);
   const at = (id: string) => ({ order: ord.indexOf(id) + 1 });
   const on = useSections('landing');
   const [groups, setGroups] = useState<LandingGroup[]>([]);
@@ -499,6 +502,11 @@ export function Landing({ invite }: { invite?: string }) {
       </section>
       )}
       </div>
+      {hasAuto && (
+        <p className="bg-white px-4 py-2 text-center text-xs text-zinc-500">
+          <button type="button" className="underline hover:text-zinc-900" onClick={() => setShowOriginal(!showOrig)}>{showOrig ? TR[lang].translated : TR[lang].original}</button>
+        </p>
+      )}
     </PublicFrame>
   );
 }
