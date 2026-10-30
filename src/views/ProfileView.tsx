@@ -22,6 +22,7 @@ import { useLegal } from '../state/Legal';
 import { AccountFooter } from '../components/AccountFooter';
 import { Avatar, Empty, Loading, LoadMore, Spinner } from '../components/ui';
 import { isR2Path, publicFilePath, publicUrl } from '../lib/storage';
+import { Tx } from '../components/Tx';
 
 const PAGE = 8;
 
@@ -138,7 +139,7 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
               {profile.status_text && <p className="text-sm text-accent">{profile.status_text}</p>}
             </div>
           )}
-          {profile.bio && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-zinc-700">{profile.bio}</p>}
+          {profile.bio && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-zinc-700"><Tx text={profile.bio} enabled={!own} /></p>}
           <p className="mt-2 text-xs text-zinc-500">{t('followers_n', { n: followers })} · {t('following_n', { n: followingCount })}</p>
           <div className="mt-3"><ShareButton type="profile" id={targetId} title={profile.display_name} /></div>
         </div>

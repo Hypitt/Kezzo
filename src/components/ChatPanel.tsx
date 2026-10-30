@@ -13,6 +13,7 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { UploadBar, failureKey, type UploadState } from './UploadBar';
+import { Tx } from './Tx';
 
 interface Props {
   roomType: 'battle' | 'group' | 'live';
@@ -169,7 +170,7 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
               <button type="button" className="font-semibold hover:underline" onClick={() => m.author && go('profile', m.author.id)}>
                 {m.author?.display_name ?? '…'}
               </button>{' '}
-              {m.body && <span className="text-zinc-700">{m.body}</span>}
+              {m.body && <span className="text-zinc-700"><Tx text={m.body} enabled={m.author_id !== user?.id} /></span>}
               {(m.author_id === user?.id || canModerate) && roomType === 'group' && (
                 <button type="button" className="ml-2 inline-flex align-middle text-zinc-400 hover:text-red-600" onClick={() => remove(m)} aria-label={t('delete')}>
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />

@@ -1,4 +1,5 @@
 import { ShareButton } from '../components/ShareButton';
+import { Tx } from '../components/Tx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Coins, Crown, Flame, Heart, Scale, Sparkles, Timer, UserMinus, Volume2, VolumeX } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -178,7 +179,7 @@ export function BattleRoom({ id }: { id: string }) {
           <RoundTimer endsAt={live ? battle.timer_ends_at : null} offsetMs={offsetMs} />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="text-2xl font-bold">{battle.title}</h1>
+          <h1 className="text-2xl font-bold"><Tx text={battle.title} /></h1>
           <ShareButton type="battle" id={battle.id} title={battle.title} />
         </div>
         {battle.topic && <p className="text-sm text-zinc-600">{battle.topic}</p>}

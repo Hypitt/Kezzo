@@ -15,6 +15,7 @@ import { ChatPanel } from '../components/ChatPanel';
 import { LivePolls } from '../components/LivePolls';
 import { LiveControls, MediaTile, RemoteAudio } from '../components/LiveParts';
 import { Avatar, Chip, Empty, Loading, PageHeader, Spinner } from '../components/ui';
+import { Tx } from '../components/Tx';
 
 const asProfile = (v: unknown): PublicProfile => (Array.isArray(v) ? v[0] : v) as PublicProfile;
 const STREAM_SELECT = `id,host_id,title,kind,mode,max_guests,status,created_at,host:profiles!host_id(${PUBLIC_PROFILE})`;
@@ -138,7 +139,7 @@ export function LiveView() {
                 <button type="button" className="card flex w-full items-center gap-3 text-left transition hover:border-zinc-400" onClick={() => go('live', s.id)}>
                   <span className="rounded-full border-2 border-accent p-0.5"><Avatar p={s.host} size={44} /></span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-semibold">{s.title}</span>
+                    <span className="block truncate font-semibold"><Tx text={s.title} note={false} /></span>
                     <span className="block truncate text-xs text-zinc-500">{s.host.display_name}</span>
                     <span className="mt-1 flex items-center gap-2 text-[11px] text-zinc-500">
                       <span className="inline-flex items-center gap-1 font-semibold text-accent"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" aria-hidden="true" />{t('status_live')}</span>
@@ -271,7 +272,7 @@ export function LiveStreamRoom({ id }: { id: string }) {
           <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 font-medium">{t(stream.kind === 'solo' ? 'live_kind_solo' : 'live_kind_group')}</span>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="text-2xl font-bold">{stream.title}</h1>
+          <h1 className="text-2xl font-bold"><Tx text={stream.title} /></h1>
           <ShareButton type="live" id={stream.id} title={stream.title} />
         </div>
         <p className="text-xs text-zinc-500">{t('hosted_by')} <button type="button" className="underline" onClick={() => go('profile', stream.host_id)}>{stream.host.display_name}</button></p>

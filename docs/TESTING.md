@@ -224,3 +224,4 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 169. Admin > Edit the public homepage > "Test translation": says "Translation works" with a French sample, or tells exactly what is missing (for example CF_AI_TOKEN not set in Vercel, or the translations table missing: run update-22.sql).
 170. Delete a text in one language and Save: it is gone in all five languages.
 171. When a post cannot be translated, the line under it now says "Translation unavailable" and why.
+172. Text written by other people shows in your language (with a small "Show original" link): direct messages, group chat lines, profile bios, battle and live titles (the link appears inside the battle or live room; the lists translate without the link). Your own text is never translated for you.

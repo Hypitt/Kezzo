@@ -9,6 +9,7 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { Avatar } from './ui';
+import { Tx } from './Tx';
 
 export function BattleCard({ battle }: { battle: Battle }) {
   const { t } = useI18n();
@@ -43,7 +44,7 @@ export function BattleCard({ battle }: { battle: Battle }) {
           {t(`status_${battle.status}` as Key)}
         </span>
       </div>
-      <h3 className="text-base font-semibold leading-snug">{battle.title}</h3>
+      <h3 className="text-base font-semibold leading-snug"><Tx text={battle.title} note={false} /></h3>
       {battle.topic && <p className="line-clamp-2 text-sm text-zinc-500">{battle.topic}</p>}
       <div className="flex items-center justify-between">
         <div className="flex -space-x-2">
