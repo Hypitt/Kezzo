@@ -1,10 +1,9 @@
 export type ShareType = 'post' | 'profile' | 'battle' | 'live' | 'group' | 'event' | 'poll' | 'opportunity';
 
-/** The link people paste elsewhere. It shows the Kezzo name and a preview picture, then opens the right page in Kezzo. */
-export function shareUrl(type: ShareType, id: string, title = ''): string {
-  // A readable ending (…/my-dance-battle) makes the link look trustworthy; only the id decides what opens.
-  const slug = title.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50);
-  return `${window.location.origin}/s/${type}/${id}${slug ? `/${slug}` : ''}`;
+/** The link people paste elsewhere, made of words only: /s/post/my-dance-battle. It shows the Kezzo name and a preview, then opens the right page. */
+export function shareUrl(type: ShareType, id: string, slug?: string): string {
+  // Until the readable name is ready (or if it cannot be made), the link carries the id; it works the same.
+  return `${window.location.origin}/s/${type}/${slug || id}`;
 }
 
 export interface ShareTarget { key: 'whatsapp' | 'facebook' | 'x'; href: (url: string, text: string) => string }

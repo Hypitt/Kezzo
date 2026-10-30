@@ -30,10 +30,25 @@ interface Preview { label: string; title: string; text: string; lines: string[];
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   const q = (k: string) => String(Array.isArray(req.query[k]) ? req.query[k]?.[0] : req.query[k] ?? '');
   const type = q('type');
-  const id = q('id');
+  let id = q('id');
+  const given = id;
   const host = String(req.headers['x-forwarded-host'] ?? req.headers.host ?? '').split(',')[0].trim();
   const base = (process.env.SITE_URL?.trim().replace(/\/+$/, '')) || (host ? `https://${host}` : '');
   const target = TARGET[type];
+
+  const TABLE: Record<string, string> = { post: 'posts', profile: 'profiles', battle: 'battles', live: 'live_streams', group: 'groups', event: 'events', poll: 'polls', opportunity: 'opportunities' };
+  // Links are made of words (/s/post/my-dance-battle). Older links carry the first characters of the id, or the whole id.
+  if (target && !UUID_RE.test(id)) {
+    try {
+      const db = adminClient();
+      const named = await db.rpc('share_resolve', { p_type: type, p_slug: id });
+      if (typeof named.data === 'string') id = named.data;
+      else if (/^[0-9a-f]{8,32}$/i.test(id)) {
+        const { data } = await db.rpc('short_id', { p_table: TABLE[type], p_code: id.toLowerCase() });
+        if (typeof data === 'string') id = data;
+      }
+    } catch { /* not found: handled below */ }
+  }
 
   if (!target || !UUID_RE.test(id)) {
     res.redirect(302, base ? `${base}/` : '/');
@@ -120,7 +135,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   const dest = `${base}/#/${target}/${id}`;
   const signup = `${base}/?auth=signup#/${target}/${id}`;
   const login = `${base}/?auth=signin#/${target}/${id}`;
-  const self = `${base}/s/${type}/${id}`;
+  const self = `${base}/s/${type}/${UUID_RE.test(given) ? id : given}`;
   const ogTitle = `${p.title} · Kezzo`;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');

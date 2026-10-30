@@ -229,3 +229,4 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 174. Share a post, copy the link (it ends with a readable name, e.g. /s/post/<id>/my-dance). Open it in a private window (not signed in): you see a preview page with the post's first lines and its picture, or a short looping glimpse of the video, plus "Create a free account" and "Log in". Pressing either opens Kezzo with the sign-up or login box; after signing in you land on the full post.
 175. Open the same link while signed in: it goes straight to the post in the app.
 176. Same for shared profiles, events, opportunities, polls, battles, live streams and groups (text glimpse only; paid posts show a "paid content" note and no media; invite-only groups show only the name).
+177. Share links are words only: /s/post/my-dance-battle (a second item with the same title gets -2). Run update-29.sql and update-30.sql first. Older links with codes or long ids still open.

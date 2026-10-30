@@ -84,6 +84,8 @@ supabase/update-24.sql Admin choice of which sections show on the public landing
 supabase/update-25.sql Admin editing of the public landing page (texts, pictures, video, order of sections)
 supabase/update-27.sql Admins can delete a landing-page picture without replacing it
 supabase/update-28.sql Homepage texts written by an admin are translated automatically into the other languages
+supabase/update-29.sql Short share links (the server finds the item from the first 10 characters of its id)
+supabase/update-30.sql Share links made of words only (no numbers)
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers

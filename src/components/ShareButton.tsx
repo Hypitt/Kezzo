@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Download, Link2, Share2, X } from 'lucide-react';
 import { watermarkPhoto, watermarkVideo, WATERMARK_MAX_VIDEO_SECONDS } from '../lib/watermark';
 import { copyText, shareUrl, WEB_TARGETS, type ShareType } from '../lib/share';
+import { supabase } from '../lib/supabase';
 import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
 
@@ -22,9 +23,18 @@ export function ShareButton({ type, id, title, media, className = 'btn btn-ghost
   const [open, setOpen] = useState(false);
   const [prep, setPrep] = useState<{ state: 'idle' | 'working' | 'ready' | 'error'; ratio: number; files: File[]; message?: string }>({ state: 'idle', ratio: 0, files: [] });
   const stop = useRef(false);
-  const url = shareUrl(type, id, title);
+  const [slug, setSlug] = useState('');
+  const url = shareUrl(type, id, slug);
   const text = t(`share_text_${type}` as never, { title }) as string;
   const canNative = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+  // The readable name of this link (made on the server from the item's title the first time it is shared).
+  useEffect(() => {
+    if (!open || slug) return;
+    let off = false;
+    void supabase.rpc('share_slug', { p_type: type, p_id: id }).then(({ data, error }) => { if (!off && !error && typeof data === 'string') setSlug(data); });
+    return () => { off = true; };
+  }, [open, slug, type, id]);
 
   useEffect(() => {
     if (!open) return;
