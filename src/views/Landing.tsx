@@ -385,7 +385,7 @@ export function Landing({ invite }: { invite?: string }) {
         <section className="bg-black px-4 py-6" style={at('video')}>
           <div className="mx-auto max-w-3xl">
             {c.videoTitle && <h2 className="mb-3 text-center text-xl font-bold text-white sm:text-2xl">{c.videoTitle}</h2>}
-            <video className="w-full rounded-xl" src={site.video.url} poster={site.video.poster} controls playsInline preload="metadata" />
+            <video className="w-full rounded-xl" src={site.video.url} poster={site.video.poster} autoPlay muted loop controls playsInline preload="auto" />
           </div>
         </section>
       )}
