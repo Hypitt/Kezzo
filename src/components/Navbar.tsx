@@ -1,7 +1,9 @@
-import { Briefcase, CalendarDays, Coins, Home, Image as ImageIcon, LogIn, MessageCircle, PlusCircle, Radio, Search, Swords, User, Users, type LucideIcon } from 'lucide-react';
+import { useEffect } from 'react';
+import { Coins, LogIn } from 'lucide-react';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
-import { useRouter, type Tab } from '../state/Router';
+import { useRouter } from '../state/Router';
+import { GROUPS, groupName, groupOf, groupTarget, rememberTab } from '../lib/nav';
 import { useToast } from '../state/Toast';
 import { supabase } from '../lib/supabase';
 import { explain } from '../lib/errors';
@@ -12,24 +14,12 @@ import { NotificationBell } from './NotificationBell';
 import { LanguageSwitch } from './LanguageSwitch';
 import type { Lang } from '../lib/types';
 
-const NAV: { tab: Exclude<Tab, 'legal'>; icon: LucideIcon; label: Key }[] = [
-  { tab: 'home', icon: Home, label: 'nav_home' },
-  { tab: 'battles', icon: Swords, label: 'nav_battles' },
-  { tab: 'live', icon: Radio, label: 'nav_live' },
-  { tab: 'search', icon: Search, label: 'nav_search' },
-  { tab: 'create', icon: PlusCircle, label: 'nav_create' },
-  { tab: 'media', icon: ImageIcon, label: 'nav_media' },
-  { tab: 'groups', icon: Users, label: 'nav_groups' },
-  { tab: 'community', icon: CalendarDays, label: 'nav_community' },
-  { tab: 'opportunities', icon: Briefcase, label: 'nav_opportunities' },
-  { tab: 'messages', icon: MessageCircle, label: 'nav_messages' },
-  { tab: 'profile', icon: User, label: 'nav_profile' },
-];
-
 export function Navbar() {
   const { user, profile, wallet, openAuth, updateProfile, refreshWallet } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { route, go } = useRouter();
+  const active = groupOf(route.tab)?.id;
+  useEffect(() => { rememberTab(route.tab); }, [route.tab]);
   const { toast } = useToast();
 
   const thisMonth = new Date().toISOString().slice(0, 7);
@@ -54,16 +44,16 @@ export function Navbar() {
             <img src="/logo-white.svg" alt="" width="20" height="28" className="h-7 w-auto" decoding="async" />
             Kezzo
           </button>
-          <nav className="hidden items-center gap-3 text-[13px] font-medium text-white lg:flex xl:gap-4 xl:text-sm" aria-label="Main">
-            {NAV.map(({ tab, label }) => (
+          <nav className="hidden items-center gap-5 text-sm font-medium text-white lg:flex" aria-label="Main">
+            {GROUPS.map((g) => (
               <button
-                key={tab}
+                key={g.id}
                 type="button"
-                onClick={() => go(tab)}
-                aria-current={route.tab === tab ? 'page' : undefined}
-                className={`whitespace-nowrap border-b-2 py-1 text-white transition hover:opacity-80 ${route.tab === tab ? 'border-accent font-semibold' : 'border-transparent'}`}
+                onClick={() => go(groupTarget(g))}
+                aria-current={active === g.id ? 'page' : undefined}
+                className={`whitespace-nowrap border-b-2 py-1 text-white transition hover:opacity-80 ${active === g.id ? 'border-accent font-semibold' : 'border-transparent'}`}
               >
-                {t(label)}
+                {groupName(g, lang, t)}
               </button>
             ))}
           </nav>
@@ -98,17 +88,18 @@ export function Navbar() {
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-11 border-t border-zinc-800 bg-black lg:hidden" aria-label="Main">
-        {NAV.map(({ tab, icon: Icon, label }) => (
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-zinc-800 bg-black lg:hidden" aria-label="Main">
+        {GROUPS.map((g) => (
           <button
-            key={tab}
+            key={g.id}
             type="button"
-            onClick={() => go(tab)}
-            aria-label={t(label)}
-            aria-current={route.tab === tab ? 'page' : undefined}
-            className={`flex flex-col items-center gap-0.5 border-t-2 py-2 text-[10px] text-white ${route.tab === tab ? 'border-accent' : 'border-transparent'}`}
+            onClick={() => go(groupTarget(g))}
+            aria-label={groupName(g, lang, t)}
+            aria-current={active === g.id ? 'page' : undefined}
+            className={`flex flex-col items-center gap-0.5 border-t-2 py-1.5 text-[10px] text-white ${active === g.id ? 'border-accent' : 'border-transparent'}`}
           >
-            <Icon className="h-5 w-5" aria-hidden="true" />
+            <g.icon className="h-5 w-5" aria-hidden="true" />
+            <span className="max-w-full truncate px-0.5">{groupName(g, lang, t)}</span>
           </button>
         ))}
       </nav>

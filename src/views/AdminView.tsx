@@ -496,6 +496,7 @@ export function AdminView() {
         )}
       </Panel>
       <button type="button" className="btn btn-accent" onClick={() => go('contest')}>{lang === 'fr' ? 'Gérer le concours' : 'Manage the contest'}</button>
+      <button type="button" className="btn btn-accent" onClick={() => go('site')}>{lang === 'fr' ? 'Modifier la page d’accueil publique' : 'Edit the public homepage'}</button>
       <HomeSections fr={lang === 'fr'} />
       {r2Enabled && <MoveToR2 fr={lang === 'fr'} />}
     </div>

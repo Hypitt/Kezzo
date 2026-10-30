@@ -24,7 +24,7 @@ type Scope = 'near' | 'online' | 'all';
 function Card({ o, mine, admin, onEdit, onDeleted, onHide }: { o: Opportunity; mine: boolean; admin: boolean; onEdit: () => void; onDeleted: () => void; onHide: () => void }) {
   const { lang } = useI18n();
   const w = OPP[lang];
-  const tx = useTranslated([o.title, o.body], !mine);
+  const tx = useTranslated([o.title, o.body, o.org], !mine, true);
   const author = Array.isArray(o.author) ? o.author[0] : o.author;
   const days = o.deadline ? Math.ceil((Date.parse(o.deadline) - Date.parse(today())) / 86400000) : null;
   const place = o.online ? w.online : [o.city, o.country].filter(Boolean).join(', ');
@@ -42,7 +42,7 @@ function Card({ o, mine, admin, onEdit, onDeleted, onHide }: { o: Opportunity; m
         {o.hidden && <span className="rounded bg-red-100 px-1.5 py-0.5 text-red-700">{w.hide}</span>}
       </div>
       <h3 className="text-base font-semibold">{tx.out[0]}</h3>
-      {o.org && <p className="text-sm text-zinc-600">{o.org}</p>}
+      {o.org && <p className="text-sm text-zinc-600">{tx.out[2]}</p>}
       {o.body && <p className="whitespace-pre-wrap break-words text-sm text-zinc-700">{tx.out[1]}</p>}
       <TranslationNote tx={tx} />
       <div className="flex flex-wrap items-center gap-2 pt-1">

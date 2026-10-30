@@ -8,7 +8,7 @@ const TEXT = {
     title: 'Home page sections', sub: 'Choose which sections people see. The top banner and photo of the landing page always stay.',
     landing: 'Public landing page (before sign-in)', home: 'Home (after sign-in)', save: 'Save', saved: 'Saved',
     names: {
-      landing: { tagline: 'Two taglines strip', contest: 'Contest box', media: 'Community photos and videos', groups: 'Groups', about: 'Five things Kezzo is about', modes: 'Solo, group, battle', join: 'Participation', cta: 'Final sign-up call' },
+      landing: { tagline: 'Two taglines strip', video: 'Featured video', contest: 'Contest box', media: 'Community photos and videos', groups: 'Groups', about: 'Five things Kezzo is about', modes: 'Solo, group, battle', join: 'Participation', cta: 'Final sign-up call' },
       home: { contest: 'Contest box', statuses: 'Statuses', live: 'Live now', latest: 'Latest posts' },
     },
   },
@@ -16,7 +16,7 @@ const TEXT = {
     title: 'Sections de la page d’accueil', sub: 'Choisissez les sections que les gens voient. La bannière du haut et la photo de la page publique restent toujours.',
     landing: 'Page publique (avant la connexion)', home: 'Accueil (après la connexion)', save: 'Enregistrer', saved: 'Enregistré',
     names: {
-      landing: { tagline: 'Bandeau des deux phrases', contest: 'Encadré du concours', media: 'Photos et vidéos de la communauté', groups: 'Groupes', about: 'Les cinq choses de Kezzo', modes: 'Solo, groupe, battle', join: 'Participation', cta: 'Appel final à s’inscrire' },
+      landing: { tagline: 'Bandeau des deux phrases', video: 'Vidéo à la une', contest: 'Encadré du concours', media: 'Photos et vidéos de la communauté', groups: 'Groupes', about: 'Les cinq choses de Kezzo', modes: 'Solo, groupe, battle', join: 'Participation', cta: 'Appel final à s’inscrire' },
       home: { contest: 'Encadré du concours', statuses: 'Statuts', live: 'En direct', latest: 'Dernières publications' },
     },
   },

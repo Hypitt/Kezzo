@@ -77,12 +77,16 @@ export interface Translated {
 }
 
 /** Shows texts in the person's language. Texts already in it (or of unknown language) stay as they are. */
-export function useTranslated(texts: string[], enabled = true): Translated {
+export function useTranslated(texts: string[], enabled = true, joint = false): Translated {
   const { lang } = useI18n();
   const { user } = useAuth();
   const [auto] = useAutoTranslate();
   const key = texts.join('\u0001');
-  const items = useMemo(() => texts.map((t) => ({ t, s: detectLang(t) })), [key]); // eslint-disable-line react-hooks/exhaustive-deps
+  // `joint`: the texts belong together (a title with its details), so a short one takes the language of the whole.
+  const items = useMemo(() => {
+    const whole = joint ? detectLang(texts.join('. ')) : null;
+    return texts.map((t) => ({ t, s: detectLang(t) ?? (joint && t.trim().length >= 2 ? whole : null) }));
+  }, [key, joint]); // eslint-disable-line react-hooks/exhaustive-deps
   const foreign = enabled && !!user && items.some((i) => i.s && i.s !== lang);
   const [result, setResult] = useState<string[] | null>(null);
   const [showOriginal, setShowOriginal] = useState(false);

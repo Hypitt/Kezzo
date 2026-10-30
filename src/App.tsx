@@ -8,6 +8,7 @@ import { CallsProvider } from './state/Calls';
 import { ToastProvider, useToast } from './state/Toast';
 import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScreens';
 import { Navbar } from './components/Navbar';
+import { SectionTabs } from './components/SectionTabs';
 import { Loading } from './components/ui';
 import { PENDING_GROUP, pendingGroup, pendingInvite } from './lib/invite';
 import { startMonitoring, trackPage } from './lib/analytics';
@@ -37,6 +38,7 @@ const MediaView = page(() => import('./views/MediaView').then((m) => ({ default:
 const MessagesView = page(() => import('./views/MessagesView').then((m) => ({ default: m.MessagesView })));
 const ProfileView = page(() => import('./views/ProfileView').then((m) => ({ default: m.ProfileView })));
 const PostView = page(() => import('./views/PostView').then((m) => ({ default: m.PostView })));
+const SiteEditorView = page(() => import('./views/SiteEditorView').then((m) => ({ default: m.SiteEditorView })));
 const ContestView = page(() => import('./views/ContestView').then((m) => ({ default: m.ContestView })));
 const OpportunitiesView = page(() => import('./views/OpportunitiesView').then((m) => ({ default: m.OpportunitiesView })));
 const CommunityView = page(() => import('./views/CommunityView').then((m) => ({ default: m.CommunityView })));
@@ -64,6 +66,7 @@ function View() {
     case 'community': return <CommunityView focus={route.id} />;
     case 'post': return <PostView id={route.id} />;
     case 'contest': return <ContestView />;
+    case 'site': return <Gate><SiteEditorView /></Gate>;
     case 'opportunities': return <OpportunitiesView focus={route.id} />;
     case 'legal': return <LegalView id={route.id} />;
     case 'join': return <JoinGroupView code={route.id} />;
@@ -152,6 +155,7 @@ function Shell() {
     <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
       <Navbar />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+        <SectionTabs />
         <Suspense fallback={<Loading />}>
           <View />
         </Suspense>

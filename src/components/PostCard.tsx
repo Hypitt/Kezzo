@@ -46,7 +46,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
   const [body, setBody] = useState(post.body);
   const mine = user?.id === post.author_id;
   const locked = post.download_price > 0 && !post.unlocked && !mine;
-  const tx = useTranslated([post.title, post.body ?? ''], !mine && !editing);
+  const tx = useTranslated([post.title, post.body ?? ''], !mine && !editing, true);
 
   // The author can add subtitles to an older free video or audio post that has none yet.
   const [capVersion, setCapVersion] = useState(0);

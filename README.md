@@ -81,6 +81,7 @@ supabase/update-21.sql Contest entries must be new uploads made after the contes
 supabase/update-22.sql AI translation: saved translations, subtitles (speech text) for videos and audio, a daily limit per person
 supabase/update-23.sql Opportunities: scholarships, jobs, training and events shared by members, found by place
 supabase/update-24.sql Admin choice of which sections show on the public landing page and on Home
+supabase/update-25.sql Admin editing of the public landing page (texts, pictures, video, order of sections)
 src/
   state/             Auth, i18n, toast and router providers
   lib/               Supabase client, data loaders, translations, helpers

@@ -8,6 +8,7 @@ import { PENDING_GROUP, PENDING_JOIN } from '../lib/invite';
 import { InstallButton } from '../components/InstallButton';
 import { LanguageSwitch } from '../components/LanguageSwitch';
 import { useSections } from '../lib/sections';
+import { orderOf, useCopy, useSiteContent } from '../lib/siteContent';
 import { ContestSection } from '../components/ContestSection';
 import { LandingMedia } from '../components/LandingMedia';
 
@@ -17,7 +18,7 @@ import { LandingMedia } from '../components/LandingMedia';
  * Palette: white and warm stone surfaces, near-black text, one brand red used only for the main buttons and small accents.
  */
 
-const COPY = {
+export const COPY = {
   en: {
     login: 'Log in', signup: 'Sign up', language: 'Language',
     eyebrow: 'Live battles · Live streams · Groups',
@@ -53,6 +54,7 @@ const COPY = {
     cats: { dance: 'Dance crew', roasting: 'Roasting', singing: 'Singing', debate: 'Debate', comedy: 'Comedy', other: 'Community' } as Record<string, string>,
     members: 'Kezzo is for members. Sign up or log in to see the feed, videos, live streams, battles and profiles.',
     finalTitle: 'Don’t just scroll. Get involved.', finalSub: 'Join Kezzo today and be part of the next moment.',
+    videoTitle: '',
     terms: 'Terms', privacy: 'Privacy', contact: 'Contact',
   },
   fr: {
@@ -90,6 +92,7 @@ const COPY = {
     cats: { dance: 'Équipe de danse', roasting: 'Roasting', singing: 'Chant', debate: 'Débat', comedy: 'Humour', other: 'Communauté' } as Record<string, string>,
     members: 'Kezzo est réservé aux membres. Inscrivez-vous ou connectez-vous pour voir le fil, les vidéos, les directs, les battles et les profils.',
     finalTitle: 'Ne faites pas que défiler. Participez.', finalSub: 'Joignez Kezzo aujourd’hui et faites partie du prochain moment.',
+    videoTitle: '',
     terms: 'Conditions', privacy: 'Confidentialité', contact: 'Contact',
   },
   es: {
@@ -127,6 +130,7 @@ const COPY = {
     cats: { dance: 'Crew de baile', roasting: 'Roast', singing: 'Canto', debate: 'Debate', comedy: 'Comedia', other: 'Comunidad' } as Record<string, string>,
     members: 'Kezzo es para miembros. Regístrate o inicia sesión para ver el feed, los vídeos, las transmisiones en vivo, las batallas y los perfiles.',
     finalTitle: 'No te limites a desplazarte. Participa.', finalSub: 'Únete hoy a Kezzo y sé parte del próximo momento.',
+    videoTitle: '',
     terms: 'Términos', privacy: 'Privacidad', contact: 'Contacto',
   },
   pt: {
@@ -164,6 +168,7 @@ const COPY = {
     cats: { dance: 'Crew de dança', roasting: 'Roast', singing: 'Canto', debate: 'Debate', comedy: 'Comédia', other: 'Comunidade' } as Record<string, string>,
     members: 'O Kezzo é para membros. Cadastre-se ou entre para ver o feed, os vídeos, as lives, as batalhas e os perfis.',
     finalTitle: 'Não fique só rolando a tela. Participe.', finalSub: 'Entre hoje no Kezzo e faça parte do próximo momento.',
+    videoTitle: '',
     terms: 'Termos', privacy: 'Privacidade', contact: 'Contato',
   },
   hi: {
@@ -201,6 +206,7 @@ const COPY = {
     cats: { dance: 'डांस क्रू', roasting: 'रोस्टिंग', singing: 'गायन', debate: 'बहस', comedy: 'कॉमेडी', other: 'समुदाय' } as Record<string, string>,
     members: 'Kezzo सदस्यों के लिए है। फ़ीड, वीडियो, लाइव स्ट्रीम, बैटल और प्रोफ़ाइल देखने के लिए साइन अप या लॉग इन करें।',
     finalTitle: 'सिर्फ़ स्क्रॉल मत कीजिए। जुड़िए।', finalSub: 'आज ही Kezzo से जुड़ें और अगले पल का हिस्सा बनें।',
+    videoTitle: '',
     terms: 'नियम', privacy: 'गोपनीयता', contact: 'संपर्क',
   },
 } as const;
@@ -284,7 +290,10 @@ function LoopVideo({ name, className }: { name: string; className: string }) {
 export function Landing({ invite }: { invite?: string }) {
   const { openAuth } = useAuth();
   const { lang, t } = useI18n();
-  const c = COPY[lang];
+  const c = useCopy(COPY[lang], lang);
+  const site = useSiteContent();
+  const ord = orderOf(site.order);
+  const at = (id: string) => ({ order: ord.indexOf(id) + 1 });
   const on = useSections('landing');
   const [groups, setGroups] = useState<LandingGroup[]>([]);
   const [liveBattles, setLiveBattles] = useState(0);
@@ -346,7 +355,7 @@ export function Landing({ invite }: { invite?: string }) {
             <div className="relative min-h-40 sm:min-h-52 lg:min-h-[17rem]">
               {/* the photo melts into the card: faded on its left edge (on phones: on its top edge) */}
               <img
-                src="/landing/hero-photo.jpg"
+                src={site.images.hero ?? '/landing/hero-photo.jpg'}
                 alt=""
                 width="1400"
                 height="905"
@@ -359,9 +368,10 @@ export function Landing({ invite }: { invite?: string }) {
         </div>
       </section>
 
+      <div className="flex flex-col">
       {/* Two lines that sum Kezzo up */}
       {on('tagline') && (
-      <section className="border-y border-stone-200 bg-stone-50 px-4 py-3" aria-label="Kezzo">
+      <section className="border-y border-stone-200 bg-stone-50 px-4 py-3" aria-label="Kezzo" style={at('tagline')}>
         <ul className="mx-auto grid max-w-3xl gap-x-6 gap-y-2 text-center sm:grid-cols-2">
           {c.lines.map((line) => <li key={line} className="font-display text-sm font-semibold leading-snug text-zinc-900 sm:text-base">{line}</li>)}
         </ul>
@@ -369,12 +379,20 @@ export function Landing({ invite }: { invite?: string }) {
       )}
 
       {/* Photos and videos from the community, random order, visible before sign-in (likes work for everyone, comments need an account) */}
-      {on('contest') && <ContestSection onJoin={() => { window.location.hash = '/contest'; openAuth('signup'); }} />}
-      {on('media') && <LandingMedia words={c.media} />}
+      {on('contest') && <div style={at('contest')}><ContestSection onJoin={() => { window.location.hash = '/contest'; openAuth('signup'); }} /></div>}
+      {on('media') && <div style={at('media')}><LandingMedia words={c.media} /></div>}
+      {on('video') && site.video.url && (
+        <section className="bg-black px-4 py-6" style={at('video')}>
+          <div className="mx-auto max-w-3xl">
+            {c.videoTitle && <h2 className="mb-3 text-center text-xl font-bold text-white sm:text-2xl">{c.videoTitle}</h2>}
+            <video className="w-full rounded-xl" src={site.video.url} poster={site.video.poster} controls playsInline preload="metadata" />
+          </div>
+        </section>
+      )}
 
       {/* Groups: real featured groups when a group admin chose to feature one, otherwise clearly labelled examples */}
       {on('groups') && (
-      <section className="bg-white px-4 py-6 text-zinc-900">
+      <section className="bg-white px-4 py-6 text-zinc-900" style={at('groups')}>
         <div className="mx-auto max-w-6xl">
           <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.groupsKicker}</p>
           <h2 className="mt-1 text-2xl font-bold sm:text-3xl">{c.groupsTitle}</h2>
@@ -410,7 +428,7 @@ export function Landing({ invite }: { invite?: string }) {
 
       {/* Five things Kezzo is about */}
       {on('about') && (
-      <section className="bg-white px-4 py-10 text-zinc-900" aria-label="Kezzo">
+      <section className="bg-white px-4 py-10 text-zinc-900" aria-label="Kezzo" style={at('about')}>
         <ul className="mx-auto max-w-6xl divide-y divide-stone-200 border-y border-stone-200">
           {c.pillars.map(([kicker, title, text]) => (
             <li key={kicker} className="grid gap-2 py-6 lg:grid-cols-[1fr_1.4fr] lg:gap-10">
@@ -427,7 +445,7 @@ export function Landing({ invite }: { invite?: string }) {
 
       {/* Solo, group, battle */}
       {on('modes') && (
-      <section className="bg-stone-50 px-4 py-12 text-zinc-900">
+      <section className="bg-stone-50 px-4 py-12 text-zinc-900" style={at('modes')}>
         <div className="mx-auto max-w-6xl">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.liveKicker}</p>
@@ -456,21 +474,21 @@ export function Landing({ invite }: { invite?: string }) {
 
       {/* Participation */}
       {on('join') && (
-      <section className="bg-white px-4 py-12 text-zinc-900">
+      <section className="bg-white px-4 py-12 text-zinc-900" style={at('join')}>
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-2">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.feedKicker}</p>
             <h2 className="mt-2 text-3xl font-bold">{c.feedTitle}</h2>
             <p className="mt-3 leading-relaxed text-zinc-600">{c.feedText}</p>
           </div>
-          <img src="/landing/feed.jpg" alt="" className="h-56 w-full rounded-xl object-cover sm:h-64" loading="lazy" decoding="async" />
+          <img src={site.images.feed ?? '/landing/feed.jpg'} alt="" className="h-56 w-full rounded-xl object-cover sm:h-64" loading="lazy" decoding="async" />
         </div>
       </section>
       )}
 
       {/* Final call to action */}
       {on('cta') && (
-      <section className="bg-zinc-900 px-4 py-16 text-center text-white">
+      <section className="bg-zinc-900 px-4 py-16 text-center text-white" style={at('cta')}>
         <h2 className="text-3xl font-bold sm:text-4xl">{c.finalTitle}</h2>
         <p className="mx-auto mt-3 max-w-xl text-zinc-300">{c.finalSub}</p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
@@ -480,6 +498,7 @@ export function Landing({ invite }: { invite?: string }) {
         <p className="mx-auto mt-6 max-w-xl text-xs text-zinc-400">{c.members}</p>
       </section>
       )}
+      </div>
     </PublicFrame>
   );
 }
