@@ -288,7 +288,7 @@ function LoopVideo({ name, className }: { name: string; className: string }) {
     : <img src={`/landing/${name}.jpg`} alt="" className={className} loading="lazy" decoding="async" />;
 }
 
-export function Landing({ invite }: { invite?: string }) {
+export function Landing({ invite, gate = false }: { invite?: string; gate?: boolean }) {
   const { openAuth } = useAuth();
   const { lang, t } = useI18n();
   const c = useCopy(COPY[lang], lang);
@@ -308,6 +308,13 @@ export function Landing({ invite }: { invite?: string }) {
     openAuth('signup');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [invite]);
+
+  // Someone opened a shared link without being signed in: ask them to log in or sign up to see it.
+  useEffect(() => {
+    if (!gate) return;
+    openAuth(new URLSearchParams(window.location.search).get('auth') === 'signin' ? 'signin' : 'signup');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gate]);
 
   useEffect(() => {
     document.title = 'Kezzo';

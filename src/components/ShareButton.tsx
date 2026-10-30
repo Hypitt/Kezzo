@@ -22,7 +22,7 @@ export function ShareButton({ type, id, title, media, className = 'btn btn-ghost
   const [open, setOpen] = useState(false);
   const [prep, setPrep] = useState<{ state: 'idle' | 'working' | 'ready' | 'error'; ratio: number; files: File[]; message?: string }>({ state: 'idle', ratio: 0, files: [] });
   const stop = useRef(false);
-  const url = shareUrl(type, id);
+  const url = shareUrl(type, id, title);
   const text = t(`share_text_${type}` as never, { title }) as string;
   const canNative = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 

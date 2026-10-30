@@ -18,8 +18,6 @@ const canHaveSound = (): boolean => wantSound && ((navigator as Navigator & { us
  */
 const FORCE_AUTOPLAY = true;
 
-const dataSaver = (): boolean => (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
-const reducedMotion = (): boolean => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
 /**
  * A feed video that plays by itself (muted, as browsers require) when most of it is on screen and pauses when it scrolls away.
@@ -33,6 +31,7 @@ export function FeedVideo({ src, postId, version = 0 }: { src: string; postId?: 
   const box = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const manualPause = useRef(false);
+  const visible = useRef(false);
   const [near, setNear] = useState(false);
   const [armed, setArmed] = useState(false); // pressed Play at least once
   const live = AUTOPLAY ? near : armed;
@@ -81,8 +80,9 @@ export function FeedVideo({ src, postId, version = 0 }: { src: string; postId?: 
     if (!el || !v || !live) return;
     const io = new IntersectionObserver(
       ([entry]) => {
+        visible.current = entry.isIntersecting;
         if (entry.isIntersecting) {
-          if (AUTOPLAY && !manualPause.current && !dataSaver() && !reducedMotion()) start();
+          if (AUTOPLAY && !manualPause.current) start();
         } else v.pause();
       },
       { threshold: 0.6 },
@@ -97,6 +97,15 @@ export function FeedVideo({ src, postId, version = 0 }: { src: string; postId?: 
       if (active === v) active = null;
     };
   }, [live, start, AUTOPLAY]);
+
+  // Browsers only autoplay muted video: make sure the element itself is muted (React alone does not always set it) before any play().
+  useEffect(() => {
+    const v = video.current;
+    if (!v) return;
+    v.defaultMuted = true;
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
+  }, [live]);
 
   // First press on Play: the file is requested now, then plays.
   useEffect(() => { if (armed) start(); }, [armed, start]);
@@ -145,6 +154,7 @@ export function FeedVideo({ src, postId, version = 0 }: { src: string; postId?: 
         loop
         preload={live ? 'metadata' : 'none'}
         className="max-h-[32rem] min-h-40 w-full bg-black"
+        onLoadedData={() => { const v = video.current; if (AUTOPLAY && v && v.paused && visible.current && !manualPause.current) start(); }}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onTimeUpdate={(e) => {

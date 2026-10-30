@@ -142,7 +142,7 @@ function Shell() {
             <div className="mx-auto w-full max-w-6xl px-4 py-6"><LegalView id={route.id} /></div>
           </PublicFrame>
         ) : (
-          <Landing invite={route.tab === 'join' ? route.id : undefined} />
+          <Landing invite={route.tab === 'join' ? route.id : undefined} gate={Boolean(route.id) && ['post', 'profile', 'battles', 'live', 'groups', 'community', 'opportunities'].includes(route.tab)} />
         )}
         <AuthDialog />
       </Suspense>

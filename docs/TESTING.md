@@ -225,3 +225,7 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 170. Delete a text in one language and Save: it is gone in all five languages.
 171. When a post cannot be translated, the line under it now says "Translation unavailable" and why.
 172. Text written by other people shows in your language (with a small "Show original" link): direct messages, group chat lines, profile bios, battle and live titles (the link appears inside the battle or live room; the lists translate without the link). Your own text is never translated for you.
+173. Videos in the feed, profile grids, Search & Feed and the contest start playing by themselves (muted) when mostly on screen, even when the device has "reduce motion" or data saver on; they pause when they scroll away.
+174. Share a post, copy the link (it ends with a readable name, e.g. /s/post/<id>/my-dance). Open it in a private window (not signed in): you see a preview page with the post's first lines and its picture, or a short looping glimpse of the video, plus "Create a free account" and "Log in". Pressing either opens Kezzo with the sign-up or login box; after signing in you land on the full post.
+175. Open the same link while signed in: it goes straight to the post in the app.
+176. Same for shared profiles, events, opportunities, polls, battles, live streams and groups (text glimpse only; paid posts show a "paid content" note and no media; invite-only groups show only the name).
