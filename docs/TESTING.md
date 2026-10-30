@@ -221,3 +221,6 @@ Use two different Google accounts in two browser profiles (call them **A** and *
 166. Admin > Edit the public homepage (after update-28.sql, with AI translation set up): in English change the big title and press Save. Switch the site to French, Spanish, Portuguese and Hindi: the title shows in each, translated. At the bottom of the public page, "Show original" shows what the admin wrote.
 167. Type your own French title in the French tab and Save: French keeps your text; the other languages still translate from the English one. Reset (Original) removes the change everywhere.
 168. Community > Events and polls written in another language show translated in your language with "Show original" (Opportunities already did).
+169. Admin > Edit the public homepage > "Test translation": says "Translation works" with a French sample, or tells exactly what is missing (for example CF_AI_TOKEN not set in Vercel, or the translations table missing: run update-22.sql).
+170. Delete a text in one language and Save: it is gone in all five languages.
+171. When a post cannot be translated, the line under it now says "Translation unavailable" and why.

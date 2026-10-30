@@ -120,6 +120,12 @@ export async function withTranslations(c: SiteContent): Promise<SiteContent> {
   for (const p of paths) {
     const manual = ALL.filter((l) => texts[l][p] !== undefined && !auto[l].has(p));
     if (manual.length === 0) { for (const l of ALL) { delete texts[l][p]; auto[l].delete(p); } continue; }
+    // Deleting a text in one language deletes it in every language.
+    if (manual.some((l) => texts[l][p] === '')) {
+      for (const l of ALL) { texts[l][p] = ''; if (!manual.includes(l)) auto[l].add(p); }
+      originals[p] = { lang: manual.find((l) => texts[l][p] === '') as Lang, text: '' };
+      continue;
+    }
     const prev = c.originals[p];
     const src = (prev && manual.includes(prev.lang) && texts[prev.lang][p] === prev.text ? prev.lang : manual[0]) as Lang;
     const text = texts[src][p];

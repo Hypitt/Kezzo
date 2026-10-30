@@ -7,20 +7,20 @@ import { useI18n } from '../state/I18n';
 
 export interface TrWords {
   from: (lang: string) => string; original: string; translated: string; translate: string; stopAuto: string; auto: string;
-  captions: string; listen: string; stopListen: string; addSubs: string; working: string; subsDone: string; subsFail: string; noSpeech: string; cc: string;
+  captions: string; listen: string; stopListen: string; addSubs: string; working: string; subsDone: string; subsFail: string; noSpeech: string; cc: string; unavailable: string;
 }
 
 export const TR: Record<Lang, TrWords> = {
   en: { from: (l) => `Translated from ${l}`, original: 'Show original', translated: 'Show translation', translate: 'Translate', stopAuto: 'Stop auto-translating', auto: 'Translate automatically',
-    captions: 'Subtitles', listen: 'Listen', stopListen: 'Stop listening', addSubs: 'Add subtitles', working: 'Creating subtitles…', subsDone: 'Subtitles added', subsFail: 'Could not create subtitles for this file.', noSpeech: 'No speech found.', cc: 'Subtitles' },
+    captions: 'Subtitles', listen: 'Listen', stopListen: 'Stop listening', addSubs: 'Add subtitles', working: 'Creating subtitles…', subsDone: 'Subtitles added', subsFail: 'Could not create subtitles for this file.', noSpeech: 'No speech found.', cc: 'Subtitles', unavailable: 'Translation unavailable' },
   fr: { from: (l) => `Traduit du ${l}`, original: 'Voir l’original', translated: 'Voir la traduction', translate: 'Traduire', stopAuto: 'Arrêter la traduction automatique', auto: 'Traduire automatiquement',
-    captions: 'Sous-titres', listen: 'Écouter', stopListen: 'Arrêter l’écoute', addSubs: 'Ajouter des sous-titres', working: 'Création des sous-titres…', subsDone: 'Sous-titres ajoutés', subsFail: 'Impossible de créer des sous-titres pour ce fichier.', noSpeech: 'Aucune parole détectée.', cc: 'Sous-titres' },
+    captions: 'Sous-titres', listen: 'Écouter', stopListen: 'Arrêter l’écoute', addSubs: 'Ajouter des sous-titres', working: 'Création des sous-titres…', subsDone: 'Sous-titres ajoutés', subsFail: 'Impossible de créer des sous-titres pour ce fichier.', noSpeech: 'Aucune parole détectée.', cc: 'Sous-titres', unavailable: 'Traduction indisponible' },
   es: { from: (l) => `Traducido del ${l}`, original: 'Ver original', translated: 'Ver traducción', translate: 'Traducir', stopAuto: 'Dejar de traducir automáticamente', auto: 'Traducir automáticamente',
-    captions: 'Subtítulos', listen: 'Escuchar', stopListen: 'Dejar de escuchar', addSubs: 'Añadir subtítulos', working: 'Creando subtítulos…', subsDone: 'Subtítulos añadidos', subsFail: 'No se pudieron crear subtítulos para este archivo.', noSpeech: 'No se encontró voz.', cc: 'Subtítulos' },
+    captions: 'Subtítulos', listen: 'Escuchar', stopListen: 'Dejar de escuchar', addSubs: 'Añadir subtítulos', working: 'Creando subtítulos…', subsDone: 'Subtítulos añadidos', subsFail: 'No se pudieron crear subtítulos para este archivo.', noSpeech: 'No se encontró voz.', cc: 'Subtítulos', unavailable: 'Traducción no disponible' },
   pt: { from: (l) => `Traduzido do ${l}`, original: 'Ver original', translated: 'Ver tradução', translate: 'Traduzir', stopAuto: 'Parar de traduzir automaticamente', auto: 'Traduzir automaticamente',
-    captions: 'Legendas', listen: 'Ouvir', stopListen: 'Parar de ouvir', addSubs: 'Adicionar legendas', working: 'Criando legendas…', subsDone: 'Legendas adicionadas', subsFail: 'Não foi possível criar legendas para este arquivo.', noSpeech: 'Nenhuma fala encontrada.', cc: 'Legendas' },
+    captions: 'Legendas', listen: 'Ouvir', stopListen: 'Parar de ouvir', addSubs: 'Adicionar legendas', working: 'Criando legendas…', subsDone: 'Legendas adicionadas', subsFail: 'Não foi possível criar legendas para este arquivo.', noSpeech: 'Nenhuma fala encontrada.', cc: 'Legendas', unavailable: 'Tradução indisponível' },
   hi: { from: (l) => `${l} से अनुवादित`, original: 'मूल देखें', translated: 'अनुवाद देखें', translate: 'अनुवाद करें', stopAuto: 'अपने-आप अनुवाद बंद करें', auto: 'अपने-आप अनुवाद करें',
-    captions: 'उपशीर्षक', listen: 'सुनें', stopListen: 'सुनना बंद करें', addSubs: 'उपशीर्षक जोड़ें', working: 'उपशीर्षक बन रहे हैं…', subsDone: 'उपशीर्षक जुड़ गए', subsFail: 'इस फ़ाइल के उपशीर्षक नहीं बन सके।', noSpeech: 'कोई आवाज़ नहीं मिली।', cc: 'उपशीर्षक' },
+    captions: 'उपशीर्षक', listen: 'सुनें', stopListen: 'सुनना बंद करें', addSubs: 'उपशीर्षक जोड़ें', working: 'उपशीर्षक बन रहे हैं…', subsDone: 'उपशीर्षक जुड़ गए', subsFail: 'इस फ़ाइल के उपशीर्षक नहीं बन सके।', noSpeech: 'कोई आवाज़ नहीं मिली।', cc: 'उपशीर्षक', unavailable: 'अनुवाद उपलब्ध नहीं' },
 };
 
 export const langName = (code: string): string => LANGS.find((l) => l.code === code)?.label ?? code.toUpperCase();
@@ -72,6 +72,7 @@ export interface Translated {
   translated: boolean;      // currently showing the translation
   canTranslate: boolean;    // a foreign text is here but nothing was translated yet (auto-translate is off)
   busy: boolean;
+  failed: string | null;    // why translating did not work (shown so it can be fixed)
   toggle: () => void;       // original <-> translation
   run: () => void;          // translate now (when auto-translate is off)
 }
@@ -92,8 +93,9 @@ export function useTranslated(texts: string[], enabled = true, joint = false): T
   const [showOriginal, setShowOriginal] = useState(false);
   const [busy, setBusy] = useState(false);
   const [asked, setAsked] = useState(false);
+  const [failed, setFailed] = useState<string | null>(null);
 
-  useEffect(() => { setResult(null); setShowOriginal(false); setAsked(false); }, [key, lang]);
+  useEffect(() => { setResult(null); setShowOriginal(false); setAsked(false); setFailed(null); }, [key, lang]);
 
   const go = auto || asked;
   useEffect(() => {
@@ -108,7 +110,7 @@ export function useTranslated(texts: string[], enabled = true, joint = false): T
         let k = 0;
         setResult(items.map((i, idx) => (need[idx] ? res[k++] : i.t)));
       })
-      .catch(() => undefined)
+      .catch((err: unknown) => { if (!off) setFailed(err instanceof Error && err.message && err.message !== 'paused' ? err.message : 'unavailable'); })
       .finally(() => !off && setBusy(false));
     return () => { off = true; };
   }, [foreign, go, items, lang]);
@@ -121,6 +123,7 @@ export function useTranslated(texts: string[], enabled = true, joint = false): T
     translated: done && !showOriginal,
     canTranslate: foreign && !go,
     busy,
+    failed,
     toggle: () => setShowOriginal((v) => !v),
     run: () => setAsked(true),
   };

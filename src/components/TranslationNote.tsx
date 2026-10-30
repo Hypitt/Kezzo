@@ -18,6 +18,7 @@ export function TranslationNote({ tx }: { tx: Translated }) {
       </p>
     );
   }
+  if (tx.failed && !tx.from) return <p className="mt-1 flex items-center gap-1 text-xs text-zinc-400"><Languages className="h-3 w-3" aria-hidden="true" />{w.unavailable}: {tx.failed}</p>;
   if (!tx.from) return null;
   return (
     <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-zinc-500">

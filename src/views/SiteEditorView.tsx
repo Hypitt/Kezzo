@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, ImagePlus, RotateCcw, Trash2, Video } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { api } from '../lib/api';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
@@ -17,7 +18,7 @@ const LANGS: Lang[] = ['en', 'fr', 'es', 'pt', 'hi'];
 const W = {
   en: {
     title: 'Edit the public homepage', sub: 'This is the page people see before they sign in. Change texts, pictures, the video and the order of sections, then press Save. Anything you leave alone keeps its original text or picture.',
-    back: 'Back to Admin', save: 'Save changes', saved: 'Saved. The other languages were translated automatically.', savedNoTr: 'Saved, but the other languages could not be translated right now. Save again later.', auto: 'automatic translation', texts: 'Texts', textsSub: 'Write in any one language: the other four are translated automatically when you save, and visitors can still read your original. Pick a language, then change any text. Leave a box as it is to keep the original. Use the arrow to go back to the original.',
+    back: 'Back to Admin', save: 'Save changes', saved: 'Saved. The other languages were translated automatically.', savedNoTr: 'Saved, but the other languages could not be translated right now. Save again later.', auto: 'automatic translation', test: 'Test translation', testOk: 'Translation works', testBad: 'Translation is not working', texts: 'Texts', textsSub: 'Write in any one language: the other four are translated automatically when you save, and visitors can still read your original. Pick a language, then change any text. Leave a box as it is to keep the original. Use the arrow to go back to the original.',
     pictures: 'Pictures', hero: 'Top banner photo', feed: 'Participation section photo', replace: 'Choose a picture', original: 'Original picture in use', restore: 'Use the original',
     video: 'Featured video', videoSub: 'Shown as its own section. It starts playing by itself (muted, looping); visitors can unmute with the controls. Show or hide it in “Home page sections”.', videoTitle: 'Title above the video',
     videoPick: 'Choose a video', videoNone: 'No video yet', videoRemove: 'Remove video', order: 'Order of sections', orderSub: 'The top banner always stays first. Use the arrows to move a section.',
@@ -26,7 +27,7 @@ const W = {
   },
   fr: {
     title: 'Modifier la page d’accueil publique', sub: 'C’est la page que voient les gens avant de se connecter. Changez les textes, les images, la vidéo et l’ordre des sections, puis enregistrez. Ce que vous ne touchez pas garde son texte ou son image d’origine.',
-    back: 'Retour à l’admin', save: 'Enregistrer', saved: 'Enregistré. Les autres langues ont été traduites automatiquement.', savedNoTr: 'Enregistré, mais les autres langues n’ont pas pu être traduites pour le moment. Enregistrez de nouveau plus tard.', auto: 'traduction automatique', texts: 'Textes', textsSub: 'Écrivez dans une seule langue : les quatre autres sont traduites automatiquement à l’enregistrement, et les visiteurs peuvent lire votre original. Choisissez une langue, puis modifiez un texte. Laissez une case telle quelle pour garder l’original. La flèche rétablit l’original.',
+    back: 'Retour à l’admin', save: 'Enregistrer', saved: 'Enregistré. Les autres langues ont été traduites automatiquement.', savedNoTr: 'Enregistré, mais les autres langues n’ont pas pu être traduites pour le moment. Enregistrez de nouveau plus tard.', auto: 'traduction automatique', test: 'Tester la traduction', testOk: 'La traduction fonctionne', testBad: 'La traduction ne fonctionne pas', texts: 'Textes', textsSub: 'Écrivez dans une seule langue : les quatre autres sont traduites automatiquement à l’enregistrement, et les visiteurs peuvent lire votre original. Choisissez une langue, puis modifiez un texte. Laissez une case telle quelle pour garder l’original. La flèche rétablit l’original.',
     pictures: 'Images', hero: 'Photo de la bannière du haut', feed: 'Photo de la section participation', replace: 'Choisir une image', original: 'Image d’origine utilisée', restore: 'Reprendre l’original',
     video: 'Vidéo à la une', videoSub: 'Affichée dans sa propre section, lue automatiquement (sans son, en boucle) ; les visiteurs peuvent activer le son. Affichez ou masquez-la dans « Sections de la page d’accueil ».', videoTitle: 'Titre au-dessus de la vidéo',
     videoPick: 'Choisir une vidéo', videoNone: 'Pas encore de vidéo', videoRemove: 'Retirer la vidéo', order: 'Ordre des sections', orderSub: 'La bannière du haut reste toujours en premier. Utilisez les flèches pour déplacer une section.',
@@ -96,17 +97,27 @@ export function SiteEditorView() {
     setC({ ...c, order: next });
   };
 
+  const test = async () => {
+    setBusy('test');
+    try {
+      const r = await api<{ ok: boolean; error: string | null; sample: string; saved: boolean; tableError: string | null }>('translate', { action: 'check' });
+      toast(r.ok ? `${w.testOk}: “${r.sample}”${r.saved ? '' : ` — ${r.tableError ?? ''} (update-22.sql?)`}` : `${w.testBad}: ${r.error ?? ''}`, r.ok ? 'info' : 'error');
+    } catch (err) { toast(`${w.testBad}: ${err instanceof Error ? err.message : ''}`, 'error'); }
+    setBusy(null);
+  };
+
   const save = async () => {
     setBusy('save');
     let out = c;
     let warn = false;
-    try { out = await withTranslations(c); } catch { warn = true; } // saved without new translations when the service is not available
+    let why = '';
+    try { out = await withTranslations(c); } catch (err) { warn = true; why = err instanceof Error ? err.message : ''; } // saved without new translations when the service is not available
     const { error } = await supabase.rpc('admin_set_content', { p_content: out });
     setBusy(null);
     if (error) { toast(error.message, 'error'); return; }
     setC(out);
     await loadContent(true);
-    toast(warn ? w.savedNoTr : w.saved);
+    toast(warn ? `${w.savedNoTr}${why ? ` (${why})` : ''}` : w.saved, warn ? 'error' : 'info');
   };
 
   const paths = Object.keys(defaults);
@@ -219,6 +230,7 @@ export function SiteEditorView() {
       </section>
 
       <div className="sticky bottom-16 z-10 flex justify-end lg:bottom-3">
+        <button type="button" className="btn mr-2 border border-zinc-300 bg-white shadow-lg" disabled={busy !== null} onClick={() => void test()}>{w.test}</button>
         <button type="button" className="btn bg-zinc-900 px-6 text-white shadow-lg hover:bg-zinc-700" disabled={busy !== null || !loaded} onClick={() => void save()}>{busy === 'save' ? w.uploading : w.save}</button>
       </div>
     </div>

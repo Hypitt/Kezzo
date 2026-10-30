@@ -119,6 +119,18 @@ export default route(async (req, res) => {
   const action = String(body.action ?? '');
   const target = String(body.target ?? 'en');
 
+  if (action === 'check') {
+    const configured = { account: Boolean(process.env.CF_ACCOUNT_ID || process.env.R2_ACCOUNT_ID), token: Boolean(process.env.CF_AI_TOKEN) };
+    let error: string | null = null;
+    let sample = '';
+    if (configured.account && configured.token) {
+      try { sample = await translatePiece('Hello, how are you?', 'en', 'fr'); } catch (err) { error = err instanceof Error ? err.message : 'failed'; }
+    } else error = 'Missing server settings: ' + [!configured.account && 'CF_ACCOUNT_ID', !configured.token && 'CF_AI_TOKEN'].filter(Boolean).join(', ');
+    const { error: tableError } = await db.from('translations').select('h').limit(1);
+    res.status(200).json({ configured, ok: !error, error, sample, saved: !tableError, tableError: tableError?.message ?? null });
+    return;
+  }
+
   if (action === 'text') {
     if (!(LANGS as readonly string[]).includes(target)) throw new HttpError(400, 'Unsupported language');
     const raw = Array.isArray(body.items) ? body.items : [];
