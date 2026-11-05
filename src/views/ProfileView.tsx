@@ -257,8 +257,9 @@ function OwnSettings({ profile }: { profile: Profile }) {
     try {
       const url = isR2Path(path) ? publicUrl('avatars', path) : supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
       await updateProfile(kind === 'cover' ? { cover_url: url } : { avatar_url: url });
-    } catch {
-      toast(t('error_generic'), 'error');
+    } catch (err) {
+      // The picture is stored but the profile could not point to it: almost always because supabase/update-31.sql was not run yet.
+      toast(kind === 'cover' ? `${t('error_generic')} (cover_url: ${(err as { message?: string }).message ?? ''})` : t('error_generic'), 'error');
     }
     setUploading(null);
   };

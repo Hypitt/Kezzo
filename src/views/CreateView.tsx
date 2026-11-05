@@ -231,7 +231,7 @@ function PostForm({ contest = false }: { contest?: boolean }) {
         </div>
       </div>
       <div>
-        <label className="label" htmlFor="pf-title">{t('title')} ({t('optional')})</label>
+        <label className="label" htmlFor="pf-title">{t('title')}</label>
         <input id="pf-title" className="input" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} />
       </div>
       <div>
