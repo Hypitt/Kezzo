@@ -21,8 +21,9 @@ const field = 'input';
 
 type Scope = 'near' | 'online' | 'all';
 
-function Card({ o, mine, admin, onEdit, onDeleted, onHide }: { o: Opportunity; mine: boolean; admin: boolean; onEdit: () => void; onDeleted: () => void; onHide: () => void }) {
-  const { lang } = useI18n();
+function Card({ o, mine, admin, startOpen = false, onEdit, onDeleted, onHide }: { o: Opportunity; mine: boolean; admin: boolean; startOpen?: boolean; onEdit: () => void; onDeleted: () => void; onHide: () => void }) {
+  const { lang, t } = useI18n();
+  const [open, setOpen] = useState(startOpen);
   const w = OPP[lang];
   const tx = useTranslated([o.title, o.body, o.org], !mine, true);
   const author = Array.isArray(o.author) ? o.author[0] : o.author;
@@ -30,7 +31,7 @@ function Card({ o, mine, admin, onEdit, onDeleted, onHide }: { o: Opportunity; m
   const place = o.online ? w.online : [o.city, o.country].filter(Boolean).join(', ');
   const closed = days !== null && days < 0;
   return (
-    <article className="card space-y-2 text-zinc-900">
+    <article className="card space-y-1.5 !p-3 text-zinc-900">
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="rounded-full bg-zinc-900 px-2.5 py-0.5 font-semibold text-white">{w.kinds[o.kind]}</span>
         <span className="inline-flex items-center gap-1 text-zinc-600"><MapPin className="h-3.5 w-3.5" aria-hidden="true" />{place}</span>
@@ -41,9 +42,11 @@ function Card({ o, mine, admin, onEdit, onDeleted, onHide }: { o: Opportunity; m
         )}
         {o.hidden && <span className="rounded bg-red-100 px-1.5 py-0.5 text-red-700">{w.hide}</span>}
       </div>
-      <h3 className="text-base font-semibold">{tx.out[0]}</h3>
-      {o.org && <p className="text-sm text-zinc-600">{tx.out[2]}</p>}
-      {o.body && <p className="whitespace-pre-wrap break-words text-sm text-zinc-700">{tx.out[1]}</p>}
+      <h3 className="text-sm font-semibold">{tx.out[0]}</h3>
+      {o.org && <p className="text-xs text-zinc-600">{tx.out[2]}</p>}
+      {o.body && <p className={`whitespace-pre-wrap break-words text-xs text-zinc-700 ${open ? '' : 'line-clamp-2'}`}>{tx.out[1]}</p>}
+      <button type="button" className="text-xs font-semibold text-accent hover:underline" aria-expanded={open} onClick={() => setOpen((v) => !v)}>{open ? t('show_less') : t('read_more')}</button>
+      {open && <>
       <TranslationNote tx={tx} />
       <div className="flex flex-wrap items-center gap-2 pt-1">
         {o.link && <a className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" href={o.link} target="_blank" rel="noopener noreferrer nofollow"><ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />{w.apply}</a>}
@@ -65,6 +68,7 @@ function Card({ o, mine, admin, onEdit, onDeleted, onHide }: { o: Opportunity; m
         ) : <ReportButton targetType="opportunity" targetId={o.id} />}
         {admin && <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={onHide}>{o.hidden ? w.unhide : w.hide}</button>}
       </div>
+      </>}
     </article>
   );
 }
@@ -212,30 +216,30 @@ export function OpportunitiesView({ focus }: { focus?: string }) {
   };
 
   const card = (o: Opportunity) => (
-    <Card key={o.id} o={o} mine={o.author_id === user?.id} admin={admin}
+    <Card key={o.id} o={o} startOpen={o.id === focus} mine={o.author_id === user?.id} admin={admin}
       onEdit={() => { setForm({ open: true, editing: o }); window.scrollTo(0, 0); }}
       onDeleted={() => { load(); setFirst(null); }} onHide={() => void hide(o)} />
   );
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
+    <div className="mx-auto max-w-3xl space-y-3">
       <PageHeader title={w.title} sub={w.sub}
         action={<button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700" onClick={() => setForm({ open: true, editing: null })}><Plus className="h-4 w-4" aria-hidden="true" />{w.share}</button>} />
 
       {form.open && <Form editing={form.editing} place={place} onCancel={() => setForm({ open: false, editing: null })}
         onDone={() => { setForm({ open: false, editing: null }); load(); }} />}
 
-      <p className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-600">{w.warn}</p>
+      <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] text-zinc-600">{w.warn}</p>
 
-      <section className="card space-y-2 text-zinc-900" aria-label={w.yourPlace}>
-        <p className="flex items-center gap-1.5 text-sm font-semibold"><MapPin className="h-4 w-4" aria-hidden="true" />{w.yourPlace}</p>
+      <details className="card space-y-2 !p-2 text-zinc-900" aria-label={w.yourPlace}>
+        <summary className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold"><MapPin className="h-3.5 w-3.5" aria-hidden="true" />{w.yourPlace}{place.country ? `: ${[place.city, place.country].filter(Boolean).join(', ')}` : ''}</summary>
         {!place.country && <p className="text-xs text-zinc-500">{w.placeHint}</p>}
         <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); savePlace(placeDraft); setPlace(placeDraft); }}>
           <input className="input w-40" placeholder={w.country} aria-label={w.country} value={placeDraft.country} maxLength={60} onChange={(e) => setPlaceDraft({ ...placeDraft, country: e.target.value })} />
           <input className="input w-40" placeholder={w.city} aria-label={w.city} value={placeDraft.city} maxLength={80} onChange={(e) => setPlaceDraft({ ...placeDraft, city: e.target.value })} />
           <button className="btn btn-ghost">{w.savePlace}</button>
         </form>
-      </section>
+      </details>
 
       <div className="space-y-2">
         <input className="input" placeholder={w.search} aria-label={w.search} value={input} onChange={(e) => setInput(e.target.value)} />
@@ -251,7 +255,7 @@ export function OpportunitiesView({ focus }: { focus?: string }) {
 
       {first && !rows.some((r) => r.id === first.id) && card(first)}
       {loading ? <Loading /> : rows.length === 0 && !first ? <Empty text={w.empty}><Briefcase className="mx-auto mt-3 h-6 w-6 text-zinc-400" aria-hidden="true" /></Empty> : (
-        <div className="space-y-4">{rows.map(card)}</div>
+        <div className="space-y-2">{rows.map(card)}</div>
       )}
       <LoadMore show={!loading && more} busy={busy} onClick={() => void showMore()} label={w.more} />
 

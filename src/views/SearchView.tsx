@@ -9,7 +9,6 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { BattleCard } from '../components/BattleCard';
-import { ContestSection } from '../components/ContestSection';
 import { PostCard } from '../components/PostCard';
 import { Avatar, Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
 
@@ -128,7 +127,6 @@ export function SearchView() {
         )}
       </div>
 
-      {tab === 'feed' && !term && <div className="mb-5"><ContestSection signedIn onJoin={() => go('contest')} /></div>}
 
       {loading ? (
         <Loading />

@@ -49,20 +49,20 @@ export function CommunityView({ focus }: { focus?: string }) {
   const shownPolls = [...pinned.polls, ...(polls ?? []).filter((p) => !pinnedIds.has(p.id))];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-3xl space-y-5">
       <PageHeader title={t('nav_community')} sub={t('community_sub')} />
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">{t('events_title')}</h2>
+          <h2 className="text-sm font-semibold">{t('events_title')}</h2>
           {user && <button type="button" className="btn btn-primary btn-sm" onClick={() => go('create', 'event')}>{t('event_create')}</button>}
         </div>
         {events === null ? <Loading /> : shownEvents.length === 0 ? <Empty text={t('events_empty')} /> : (
-          <div className="grid gap-4 sm:grid-cols-2">{shownEvents.map((e) => <EventCard key={e.id} event={e} onChange={load} />)}</div>
+          <div className="grid gap-3 sm:grid-cols-2">{shownEvents.map((e) => <EventCard key={e.id} event={e} onChange={load} />)}</div>
         )}
       </section>
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">{t('polls_title')}</h2>
+          <h2 className="text-sm font-semibold">{t('polls_title')}</h2>
           {user && <button type="button" className="btn btn-primary btn-sm" onClick={() => go('create', 'poll')}>{t('poll_create')}</button>}
         </div>
         {polls === null ? <Loading /> : shownPolls.length === 0 ? <Empty text={t('polls_empty')} /> : (

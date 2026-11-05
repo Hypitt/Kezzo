@@ -7,8 +7,7 @@ import { compressImage } from '../lib/media';
 import { CACHE_SECONDS, startUpload } from '../lib/upload';
 import { fileExt, isActiveStatus } from '../lib/format';
 import { isSafe } from '../lib/moderation';
-import type { LedgerEntry, Post, Profile } from '../lib/types';
-import type { Key } from '../lib/i18n';
+import type { Post, Profile } from '../lib/types';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
@@ -125,14 +124,14 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <header className="card overflow-hidden !p-0">
-        <div className="h-28 w-full bg-gradient-to-br from-[#fff1ea] via-[#fbd9ca] to-[#f4b9a3] sm:h-40">
+        <div className="h-20 w-full bg-gradient-to-br from-[#fff1ea] via-[#fbd9ca] to-[#f4b9a3] sm:h-28">
           {profile.cover_url && <img src={profile.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
         </div>
-        <div className="flex flex-wrap items-start gap-4 px-4 pb-4 sm:px-5 sm:pb-5">
-        <div className="-mt-10 shrink-0 rounded-full bg-white p-1 sm:-mt-12"><Avatar p={profile} size={80} /></div>
+        <div className="flex flex-wrap items-start gap-3 px-3 pb-3 sm:px-4">
+        <div className="-mt-8 shrink-0 rounded-full bg-white p-0.5"><Avatar p={profile} size={64} /></div>
         <div className="min-w-0 flex-1 pt-2">
           <h1 className="text-lg font-bold">{profile.display_name}</h1>
-          <p className="text-sm text-zinc-500">@{profile.handle}{profile.generation ? ` · ${profile.generation}` : ''}</p>
+          <p className="text-xs text-zinc-500">@{profile.handle}{profile.generation ? ` · ${profile.generation}` : ''}</p>
           {isActiveStatus(profile) && (
             <div className="mt-2 flex items-center gap-3">
               {profile.status_image_url && (
@@ -144,8 +143,10 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
             </div>
           )}
           {profile.bio && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-zinc-700"><Tx text={profile.bio} enabled={!own} /></p>}
-          <p className="mt-2 text-xs text-zinc-500">{t('followers_n', { n: followers })} · {t('following_n', { n: followingCount })}</p>
-          <div className="mt-3"><ShareButton type="profile" id={targetId} title={profile.display_name} /></div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <p className="whitespace-nowrap text-[11px] text-zinc-500">{t('followers_n', { n: followers })} · {t('following_n', { n: followingCount })}</p>
+            <ShareButton type="profile" id={targetId} title={profile.display_name} />
+          </div>
         </div>
         {!own && (
           <div className="flex flex-wrap gap-2 pt-2">
@@ -186,14 +187,8 @@ function OwnWallet() {
   const { wallet, refreshWallet } = useAuth();
   const { t } = useI18n();
   const { toast } = useToast();
-  const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const thisMonth = new Date().toISOString().slice(0, 7);
   const canClaim = Boolean(wallet && wallet.last_claim_month.slice(0, 7) < thisMonth);
-
-  useEffect(() => {
-    supabase.from('coin_ledger').select('id,delta,balance_type,reason,created_at').order('created_at', { ascending: false }).limit(12)
-      .then(({ data }) => setLedger((data ?? []) as LedgerEntry[]));
-  }, [wallet?.voting_coins, wallet?.reward_coins]);
 
   const claim = async () => {
     const { error } = await supabase.rpc('claim_monthly_coins');
@@ -204,24 +199,11 @@ function OwnWallet() {
 
   return (
     <>
-      <section className="card space-y-2 !p-3" aria-label={t('wallet')}>
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold"><Coins className="h-4 w-4 text-amber-600" aria-hidden="true" />{t('wallet')}</h2>
-        <div className="grid grid-cols-2 gap-2 text-center">
-          <div className="rounded-lg bg-zinc-50 p-2"><p className="text-base font-bold tabular-nums">{wallet?.voting_coins ?? 0}</p><p className="text-xs text-zinc-500">{t('voting_coins')}</p></div>
-          <div className="rounded-lg bg-zinc-50 p-2"><p className="text-base font-bold tabular-nums">{wallet?.reward_coins ?? 0}</p><p className="text-xs text-zinc-500">{t('reward_coins')}</p></div>
-        </div>
-        <p className="text-xs text-zinc-500">{t('coins_note')}</p>
+      <section className="card flex flex-wrap items-center gap-x-3 gap-y-1 !p-2" aria-label={t('wallet')}>
+        <Coins className="h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
+        <span className="text-sm font-bold tabular-nums" title={`${t('voting_coins')} / ${t('reward_coins')}`}>{wallet?.voting_coins ?? 0} · {wallet?.reward_coins ?? 0}</span>
         {canClaim && <button type="button" className="btn btn-accent btn-sm" onClick={claim}>{t('claim_monthly')}</button>}
-        {ledger.length > 0 && (
-          <ul className="divide-y divide-zinc-100 text-sm">
-            {ledger.map((l) => (
-              <li key={l.id} className="flex justify-between py-1.5">
-                <span>{t(`ledger_${l.reason}` as Key)}</span>
-                <span className={`tabular-nums ${l.delta > 0 ? 'text-emerald-700' : 'text-zinc-500'}`}>{l.delta > 0 ? '+' : ''}{l.delta}</span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <p className="min-w-0 flex-1 basis-48 text-[10px] leading-tight text-zinc-400">{t('coins_note')}</p>
       </section>
 
     </>

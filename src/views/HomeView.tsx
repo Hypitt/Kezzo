@@ -46,7 +46,6 @@ export function HomeView() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       {on('statuses') && <section aria-label={t('statuses')}>
-        <h2 className="mb-3 text-lg font-semibold">{t('statuses')}</h2>
         <div className="flex gap-4 overflow-x-auto pb-2">
           {profile && (
             <button type="button" className="flex w-16 shrink-0 flex-col items-center gap-1 text-xs" onClick={() => go('create', 'status')}>
