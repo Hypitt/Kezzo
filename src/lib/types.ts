@@ -26,6 +26,7 @@ export interface Profile extends PublicProfile {
   dm_policy: 'everyone' | 'followers' | 'nobody';
   email_messages: boolean;
   show_on_home: boolean;
+  cover_url: string | null;
   created_at: string;
 }
 

@@ -133,7 +133,7 @@ export const en = {
   attach_file: 'Attach a file', download: 'Download', uploading: 'Uploading', upload_failed: 'Upload paused', retry: 'Retry',
   // profile
   profile_not_found: 'This profile does not exist.', followers_n: '{n} followers', following_n: '{n} following', no_posts_yet: 'No posts yet.',
-  edit_profile: 'Edit profile', change_avatar: 'Change photo', bio: 'Bio', dm_policy: 'Who can message you', dm_everyone: 'Everyone', dm_followers: 'People who follow me', dm_nobody: 'Nobody',
+  edit_profile: 'Edit profile', change_avatar: 'Change photo', change_cover: 'Change cover', bio: 'Bio', dm_policy: 'Who can message you', dm_everyone: 'Everyone', dm_followers: 'People who follow me', dm_nobody: 'Nobody',
   profile_saved: 'Profile saved.', err_avatar_big: 'Profile photos can be at most 2 MB.', blocked_toast: 'User blocked.', unblocked_toast: 'User unblocked.',
   delete_account: 'Delete account', confirm_delete_account: 'Type your handle ({handle}) to permanently delete your account and everything you posted.',
   account_deleted: 'Your account was deleted.',
@@ -372,7 +372,7 @@ export const fr: Record<Key, string> = {
   call_intro_audio: 'Rejoignez l’appel vocal. Votre micro s’active à l’arrivée; vous pouvez le couper à tout moment.',
   attach_file: 'Joindre un fichier', download: 'Télécharger', uploading: 'Téléversement', upload_failed: 'Téléversement interrompu', retry: 'Réessayer',
   profile_not_found: 'Ce profil n’existe pas.', followers_n: '{n} abonnés', following_n: '{n} abonnements', no_posts_yet: 'Aucune publication pour l’instant.',
-  edit_profile: 'Modifier le profil', change_avatar: 'Changer la photo', bio: 'Bio', dm_policy: 'Qui peut vous écrire', dm_everyone: 'Tout le monde', dm_followers: 'Mes abonnés', dm_nobody: 'Personne',
+  edit_profile: 'Modifier le profil', change_avatar: 'Changer la photo', change_cover: 'Changer la couverture', bio: 'Bio', dm_policy: 'Qui peut vous écrire', dm_everyone: 'Tout le monde', dm_followers: 'Mes abonnés', dm_nobody: 'Personne',
   profile_saved: 'Profil enregistré.', err_avatar_big: 'Les photos de profil font 2 Mo au maximum.', blocked_toast: 'Utilisateur bloqué.', unblocked_toast: 'Utilisateur débloqué.',
   delete_account: 'Supprimer le compte', confirm_delete_account: 'Tapez votre identifiant ({handle}) pour supprimer définitivement votre compte et tout ce que vous avez publié.',
   account_deleted: 'Votre compte a été supprimé.',

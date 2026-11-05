@@ -135,7 +135,7 @@ export const hi: Record<Key, string> = {
   attach_file: 'फ़ाइल जोड़ें', download: 'डाउनलोड करें', uploading: 'अपलोड हो रहा है', upload_failed: 'अपलोड रुक गया', retry: 'फिर कोशिश करें',
   // प्रोफ़ाइल
   profile_not_found: 'यह प्रोफ़ाइल मौजूद नहीं है।', followers_n: '{n} फ़ॉलोअर', following_n: '{n} को फ़ॉलो कर रहे हैं', no_posts_yet: 'अभी कोई पोस्ट नहीं है।',
-  edit_profile: 'प्रोफ़ाइल संपादित करें', change_avatar: 'फ़ोटो बदलें', bio: 'परिचय', dm_policy: 'आपको कौन संदेश भेज सकता है', dm_everyone: 'सब', dm_followers: 'मुझे फ़ॉलो करने वाले', dm_nobody: 'कोई नहीं',
+  edit_profile: 'प्रोफ़ाइल संपादित करें', change_avatar: 'फ़ोटो बदलें', change_cover: 'कवर बदलें', bio: 'परिचय', dm_policy: 'आपको कौन संदेश भेज सकता है', dm_everyone: 'सब', dm_followers: 'मुझे फ़ॉलो करने वाले', dm_nobody: 'कोई नहीं',
   profile_saved: 'प्रोफ़ाइल सहेज ली गई।', err_avatar_big: 'प्रोफ़ाइल फ़ोटो अधिकतम 2 MB की हो सकती है।', blocked_toast: 'यूज़र ब्लॉक हो गया।', unblocked_toast: 'यूज़र अनब्लॉक हो गया।',
   delete_account: 'खाता हटाएँ', confirm_delete_account: 'अपना खाता और आपकी सारी पोस्ट हमेशा के लिए हटाने के लिए अपना यूज़रनेम ({handle}) लिखें।',
   account_deleted: 'आपका खाता हटा दिया गया।',

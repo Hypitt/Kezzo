@@ -124,9 +124,13 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <header className="card flex flex-wrap items-start gap-4">
-        <Avatar p={profile} size={72} />
-        <div className="min-w-0 flex-1">
+      <header className="card overflow-hidden !p-0">
+        <div className="h-28 w-full bg-gradient-to-br from-[#fff1ea] via-[#fbd9ca] to-[#f4b9a3] sm:h-40">
+          {profile.cover_url && <img src={profile.cover_url} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+        </div>
+        <div className="flex flex-wrap items-start gap-4 px-4 pb-4 sm:px-5 sm:pb-5">
+        <div className="-mt-10 shrink-0 rounded-full bg-white p-1 sm:-mt-12"><Avatar p={profile} size={80} /></div>
+        <div className="min-w-0 flex-1 pt-2">
           <h1 className="text-xl font-bold">{profile.display_name}</h1>
           <p className="text-sm text-zinc-500">@{profile.handle}{profile.generation ? ` · ${profile.generation}` : ''}</p>
           {isActiveStatus(profile) && (
@@ -144,16 +148,17 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
           <div className="mt-3"><ShareButton type="profile" id={targetId} title={profile.display_name} /></div>
         </div>
         {!own && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pt-2">
             <button type="button" className={`btn btn-sm ${isFollowing ? 'btn-ghost' : 'btn-primary'}`} onClick={toggleFollow}>{isFollowing ? t('unfollow') : t('follow')}</button>
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => (ensureAuth() ? go('messages', targetId) : undefined)}>{t('message')}</button>
             <button type="button" className="btn btn-ghost btn-sm" onClick={toggleBlock}>{isBlocked ? t('unblock') : t('block')}</button>
             <ReportButton targetType="profile" targetId={targetId} />
           </div>
         )}
+        </div>
       </header>
 
-      {own && <OwnSettings profile={profile} />}
+      {own && <OwnWallet />}
 
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">{t('posts')}</h2>
@@ -171,23 +176,16 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
         <LoadMore show={hasMore} busy={moreBusy} onClick={more} label={t('load_more')} />
       </section>
       {viewStatus && <StatusViewer person={profile} onClose={() => setViewStatus(false)} />}
+      {own && <OwnSettings profile={profile} />}
       {own && <div className="border-t border-zinc-200 pt-2"><AccountFooter /></div>}
     </div>
   );
 }
 
-function OwnSettings({ profile }: { profile: Profile }) {
-  const { user, wallet, updateProfile, refreshWallet } = useAuth();
+function OwnWallet() {
+  const { wallet, refreshWallet } = useAuth();
   const { t } = useI18n();
   const { toast } = useToast();
-  const { openLegal } = useLegal();
-  const [editing, setEditing] = useState(false);
-  const [displayName, setDisplayName] = useState(profile.display_name);
-  const [bio, setBio] = useState(profile.bio);
-  const [generation, setGeneration] = useState(profile.generation);
-  const [dmPolicy, setDmPolicy] = useState(profile.dm_policy);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const thisMonth = new Date().toISOString().slice(0, 7);
   const canClaim = Boolean(wallet && wallet.last_claim_month.slice(0, 7) < thisMonth);
@@ -196,44 +194,6 @@ function OwnSettings({ profile }: { profile: Profile }) {
     supabase.from('coin_ledger').select('id,delta,balance_type,reason,created_at').order('created_at', { ascending: false }).limit(12)
       .then(({ data }) => setLedger((data ?? []) as LedgerEntry[]));
   }, [wallet?.voting_coins, wallet?.reward_coins]);
-
-  const save = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!isSafe(displayName) || !isSafe(bio)) return toast(t('blocked_content'), 'error');
-    setSaving(true);
-    try {
-      await updateProfile({ display_name: displayName.trim(), bio: bio.trim(), generation, dm_policy: dmPolicy });
-      toast(t('profile_saved'));
-      setEditing(false);
-    } catch {
-      toast(t('error_generic'), 'error');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const uploadAvatar = async (file: File | undefined) => {
-    if (!file || !user) return;
-    setUploading(true);
-    const small = await compressImage(file, 256, 0.8); // shown at 30-72 px everywhere: keep it tiny
-    if (small.size > 2 * 1024 * 1024) { setUploading(false); return toast(t('err_avatar_big'), 'error'); }
-    const path = publicFilePath(user.id, `avatar-${Date.now()}.${fileExt(small.name)}`);
-    if (isR2Path(path)) {
-      try { await startUpload({ bucket: 'avatars', path, file: small }).done; } catch { setUploading(false); return toast(t('err_upload'), 'error'); }
-    } else {
-      const { error } = await supabase.storage.from('avatars').upload(path, small, { contentType: small.type, upsert: false, cacheControl: CACHE_SECONDS });
-      if (error) {
-        setUploading(false);
-        return toast(t('err_upload'), 'error');
-      }
-    }
-    try {
-      await updateProfile({ avatar_url: isR2Path(path) ? publicUrl('avatars', path) : supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl });
-    } catch {
-      toast(t('error_generic'), 'error');
-    }
-    setUploading(false);
-  };
 
   const claim = async () => {
     const { error } = await supabase.rpc('claim_monthly_coins');
@@ -264,17 +224,82 @@ function OwnSettings({ profile }: { profile: Profile }) {
         )}
       </section>
 
-      <section className="card space-y-4" aria-label={t('settings')}>
+    </>
+  );
+}
+
+function OwnSettings({ profile }: { profile: Profile }) {
+  const { user, updateProfile } = useAuth();
+  const { t } = useI18n();
+  const { toast } = useToast();
+  const { openLegal } = useLegal();
+  const [editing, setEditing] = useState(false);
+  const [displayName, setDisplayName] = useState(profile.display_name);
+  const [bio, setBio] = useState(profile.bio);
+  const [generation, setGeneration] = useState(profile.generation);
+  const [dmPolicy, setDmPolicy] = useState(profile.dm_policy);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<null | 'avatar' | 'cover'>(null);
+
+  const save = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!isSafe(displayName) || !isSafe(bio)) return toast(t('blocked_content'), 'error');
+    setSaving(true);
+    try {
+      await updateProfile({ display_name: displayName.trim(), bio: bio.trim(), generation, dm_policy: dmPolicy });
+      toast(t('profile_saved'));
+      setEditing(false);
+    } catch {
+      toast(t('error_generic'), 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const uploadImage = async (file: File | undefined, kind: 'avatar' | 'cover') => {
+    if (!file || !user) return;
+    setUploading(kind);
+    const small = await compressImage(file, kind === 'cover' ? 1280 : 256, kind === 'cover' ? 0.82 : 0.8); // avatars show at 30-80 px: keep them tiny
+    if (small.size > 2 * 1024 * 1024) { setUploading(null); return toast(t('err_avatar_big'), 'error'); }
+    const path = publicFilePath(user.id, `${kind}-${Date.now()}.${fileExt(small.name)}`);
+    if (isR2Path(path)) {
+      try { await startUpload({ bucket: 'avatars', path, file: small }).done; } catch { setUploading(null); return toast(t('err_upload'), 'error'); }
+    } else {
+      const { error } = await supabase.storage.from('avatars').upload(path, small, { contentType: small.type, upsert: false, cacheControl: CACHE_SECONDS });
+      if (error) {
+        setUploading(null);
+        return toast(t('err_upload'), 'error');
+      }
+    }
+    try {
+      const url = isR2Path(path) ? publicUrl('avatars', path) : supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+      await updateProfile(kind === 'cover' ? { cover_url: url } : { avatar_url: url });
+    } catch {
+      toast(t('error_generic'), 'error');
+    }
+    setUploading(null);
+  };
+
+
+  return (
+      <section className="card space-y-3 !p-3 text-sm sm:!p-4" aria-label={t('settings')}>
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{t('settings')}</h2>
+          <h2 className="text-base font-semibold">{t('settings')}</h2>
           {!editing && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}><Pencil className="h-3.5 w-3.5" aria-hidden="true" />{t('edit_profile')}</button>}
         </div>
-        <label className="btn btn-ghost btn-sm w-fit cursor-pointer">
-          {uploading && <Spinner />}
-          {t('change_avatar')}
-          <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => uploadAvatar(e.target.files?.[0])} />
-        </label>
-        <label className="flex cursor-pointer items-center gap-2 text-sm">
+        <div className="flex flex-wrap gap-2">
+          <label className="btn btn-ghost btn-sm cursor-pointer">
+            {uploading === 'avatar' && <Spinner />}
+            {t('change_avatar')}
+            <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => { void uploadImage(e.target.files?.[0], 'avatar'); e.target.value = ''; }} />
+          </label>
+          <label className="btn btn-ghost btn-sm cursor-pointer">
+            {uploading === 'cover' && <Spinner />}
+            {t('change_cover')}
+            <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => { void uploadImage(e.target.files?.[0], 'cover'); e.target.value = ''; }} />
+          </label>
+        </div>
+        <label className="flex cursor-pointer items-center gap-2 text-xs sm:text-sm">
           <input
             type="checkbox"
             className="h-4 w-4 accent-black"
@@ -283,7 +308,7 @@ function OwnSettings({ profile }: { profile: Profile }) {
           />
           {t('email_messages')}
         </label>
-        <label className="flex cursor-pointer items-center gap-2 text-sm">
+        <label className="flex cursor-pointer items-center gap-2 text-xs sm:text-sm">
           <input
             type="checkbox"
             className="h-4 w-4 accent-black"
@@ -333,6 +358,5 @@ function OwnSettings({ profile }: { profile: Profile }) {
         </div>
 
       </section>
-    </>
   );
 }
