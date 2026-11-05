@@ -57,6 +57,30 @@ export async function compressImage(file: File, maxSide = 1600, quality = 0.8): 
   }
 }
 
+/** A wide profile cover: any picture is cropped to fit 3:1 and shrunk (about 1200 x 400 px), so it always uploads. */
+export async function resizeCover(file: File): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  const W = 1200, H = 400;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('canvas');
+  const scale = Math.max(W / bitmap.width, H / bitmap.height);
+  const w = bitmap.width * scale, h = bitmap.height * scale;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+  ctx.drawImage(bitmap, (W - w) / 2, (H - h) / 2, w, h);
+  bitmap.close();
+  let blob: Blob | null = null;
+  for (const q of [0.85, 0.7, 0.55]) {
+    blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', q));
+    if (blob && blob.size < 1.5 * 1024 * 1024) break;
+  }
+  if (!blob) throw new Error('canvas');
+  return new File([blob], 'cover.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+}
+
 /** A small square-ish preview (about 480 px, 30-60 KB) used in grids so the full photo is only loaded when opened. */
 export async function makeThumbnail(file: File, maxSide = 480): Promise<File | null> {
   if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return null;

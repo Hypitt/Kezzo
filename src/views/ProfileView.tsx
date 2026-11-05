@@ -3,7 +3,7 @@ import { Coins, Pencil } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { explain } from '../lib/errors';
 import { loadPosts } from '../lib/data';
-import { compressImage } from '../lib/media';
+import { compressImage, resizeCover } from '../lib/media';
 import { CACHE_SECONDS, startUpload } from '../lib/upload';
 import { fileExt, isActiveStatus } from '../lib/format';
 import { isSafe } from '../lib/moderation';
@@ -241,7 +241,8 @@ function OwnSettings({ profile }: { profile: Profile }) {
   const uploadImage = async (file: File | undefined, kind: 'avatar' | 'cover') => {
     if (!file || !user) return;
     setUploading(kind);
-    const small = await compressImage(file, kind === 'cover' ? 1280 : 256, kind === 'cover' ? 0.82 : 0.8); // avatars show at 30-80 px: keep them tiny
+    let small: File;
+    try { small = kind === 'cover' ? await resizeCover(file) : await compressImage(file, 256, 0.8); } catch { setUploading(null); return toast(t('err_file_unreadable'), 'error'); } // covers are cropped to 3:1; avatars show at 30-80 px: keep them tiny
     if (small.size > 2 * 1024 * 1024) { setUploading(null); return toast(t('err_avatar_big'), 'error'); }
     const path = publicFilePath(user.id, `${kind}-${Date.now()}.${fileExt(small.name)}`);
     if (isR2Path(path)) {
@@ -278,7 +279,7 @@ function OwnSettings({ profile }: { profile: Profile }) {
           <label className="btn btn-ghost btn-sm cursor-pointer">
             {uploading === 'cover' && <Spinner />}
             {t('change_cover')}
-            <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => { void uploadImage(e.target.files?.[0], 'cover'); e.target.value = ''; }} />
+            <input type="file" accept="image/*" className="sr-only" onChange={(e) => { void uploadImage(e.target.files?.[0], 'cover'); e.target.value = ''; }} />
           </label>
         </div>
         <label className="flex cursor-pointer items-center gap-2 text-xs sm:text-sm">

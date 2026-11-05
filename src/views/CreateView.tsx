@@ -103,8 +103,10 @@ function PostForm({ contest = false }: { contest?: boolean }) {
       if (kind === 'photo' && first?.bucket === 'media-public' && thumb.current) {
         try { await startUpload({ bucket: 'media-public', path: thumbPath(first.path), file: thumb.current }).done; } catch { /* the grid falls back to the full photo */ }
       }
+      // The title is optional: without one, the start of the text (or the kind of post) is used.
+      const finalTitle = (title.trim() || body.trim().split('\n')[0].slice(0, 120) || t(`kind_${kind}` as Key)).slice(0, 120);
       const { data: created, error: insErr } = await supabase.from('posts').insert({
-        author_id: user.id, kind, title: title.trim(), body: body.trim(),
+        author_id: user.id, kind, title: finalTitle, body: body.trim(),
         media_bucket: first?.bucket ?? null, media_path: first?.path ?? null, media_extra: list.slice(1).map((j) => j.path),
         duration_seconds: first?.duration ?? null,
         download_price: kind === 'text' || contest ? 0 : price,
@@ -160,7 +162,6 @@ function PostForm({ contest = false }: { contest?: boolean }) {
     e.preventDefault();
     if (!ensureAuth() || !user) return;
     setError(null);
-    if (!title.trim()) return setError(t('err_title_required'));
     if (!isSafe(title) || !isSafe(body)) return setError(t('blocked_content'));
 
     if (kind === 'text') {
@@ -230,8 +231,8 @@ function PostForm({ contest = false }: { contest?: boolean }) {
         </div>
       </div>
       <div>
-        <label className="label" htmlFor="pf-title">{t('title')}</label>
-        <input id="pf-title" className="input" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} required />
+        <label className="label" htmlFor="pf-title">{t('title')} ({t('optional')})</label>
+        <input id="pf-title" className="input" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} />
       </div>
       <div>
         <label className="label" htmlFor="pf-body">{t('body')}</label>

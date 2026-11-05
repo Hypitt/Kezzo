@@ -135,7 +135,7 @@ export const pt: Record<Key, string> = {
   attach_file: 'Anexar um arquivo', download: 'Baixar', uploading: 'Enviando', upload_failed: 'Envio pausado', retry: 'Tentar novamente',
   // perfil
   profile_not_found: 'Este perfil não existe.', followers_n: '{n} seguidores', following_n: '{n} seguindo', no_posts_yet: 'Ainda não há publicações.',
-  edit_profile: 'Editar perfil', change_avatar: 'Alterar foto', change_cover: 'Alterar capa', read_more: 'Ler mais', show_less: 'Mostrar menos', bio: 'Bio', dm_policy: 'Quem pode enviar mensagem para você', dm_everyone: 'Todos', dm_followers: 'Quem me segue', dm_nobody: 'Ninguém',
+  edit_profile: 'Editar perfil', change_avatar: 'Alterar foto', change_cover: 'Alterar capa', optional: 'opcional', read_more: 'Ler mais', show_less: 'Mostrar menos', bio: 'Bio', dm_policy: 'Quem pode enviar mensagem para você', dm_everyone: 'Todos', dm_followers: 'Quem me segue', dm_nobody: 'Ninguém',
   profile_saved: 'Perfil salvo.', err_avatar_big: 'As fotos de perfil podem ter no máximo 2 MB.', blocked_toast: 'Usuário bloqueado.', unblocked_toast: 'Usuário desbloqueado.',
   delete_account: 'Excluir conta', confirm_delete_account: 'Digite seu nome de usuário ({handle}) para excluir permanentemente sua conta e tudo o que você publicou.',
   account_deleted: 'Sua conta foi excluída.',
