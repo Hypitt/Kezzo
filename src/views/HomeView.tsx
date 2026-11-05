@@ -44,9 +44,9 @@ export function HomeView() {
   if (loading) return <Loading />;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-3xl space-y-2">
       {on('statuses') && <section aria-label={t('statuses')}>
-        <div className="flex gap-4 overflow-x-auto pb-2">
+        <div className="flex gap-4 overflow-x-auto pb-0">
           {profile && (
             <button type="button" className="flex w-16 shrink-0 flex-col items-center gap-1 text-xs" onClick={() => go('create', 'status')}>
               <span className="rounded-full border-2 border-dashed border-zinc-300 p-0.5"><Avatar p={profile} size={52} /></span>
@@ -69,8 +69,8 @@ export function HomeView() {
 
       {on('live') && battles.length > 0 && (
         <section aria-label={t('live_now')}>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">{t('live_now')}</h2>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold">{t('live_now')}</h2>
             <button type="button" className="text-sm text-zinc-500 underline" onClick={() => go('battles')}>{t('see_all')}</button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">{battles.map((b) => <BattleCard key={b.id} battle={b} />)}</div>
@@ -78,8 +78,8 @@ export function HomeView() {
       )}
 
       {on('latest') && <section aria-label={t('latest_posts')}>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{t('latest_posts')}</h2>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-sm font-semibold">{t('latest_posts')}</h2>
           <button type="button" className="text-sm text-zinc-500 underline" onClick={() => go('search')}>{t('see_all')}</button>
         </div>
         {posts.length === 0 ? (
