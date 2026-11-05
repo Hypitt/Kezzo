@@ -212,7 +212,7 @@ export function ContestView() {
   if (loading) return <Loading />;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-4">
       <PageHeader title={contest?.title ?? w.nav} sub={contest?.theme || undefined}
         action={<button type="button" className="btn btn-ghost btn-sm" onClick={() => void load()}><RefreshCw className="h-4 w-4" aria-hidden="true" />{w.refresh}</button>} />
 
@@ -220,8 +220,8 @@ export function ContestView() {
 
       {contest && (
         <>
-          <section className="rounded-2xl border border-zinc-200 bg-white p-4 text-zinc-900">
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+          <section className="rounded-xl border border-zinc-200 bg-white p-3 text-zinc-900">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
               <span className="inline-flex items-center gap-2 font-semibold"><Trophy className="h-5 w-5 text-accent" aria-hidden="true" />{contest.prize || w.nav}</span>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold">{phase === 'soon' ? w.soon : phase === 'open' ? w.open : w.ended}</span>
               <span className="text-zinc-600">{phase === 'soon' ? `${w.startsOn} ${fmt(contest.starts_at)}` : `${w.endsOn} ${fmt(contest.ends_at)}`}</span>
@@ -342,7 +342,7 @@ export function ContestView() {
           )}
 
           {tab === 'rank' && <section aria-label={w.board}>
-            <h2 className="mb-3 text-lg font-semibold">{w.board}</h2>
+            <h2 className="mb-2 text-sm font-semibold">{w.board}</h2>
             {board.length === 0 ? <Empty text={w.empty} /> : (
               <ol className="space-y-3">
                 {board.map((e) => (

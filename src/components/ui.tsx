@@ -48,10 +48,10 @@ export function Empty({ text, children }: { text: string; children?: ReactNode }
 
 export function PageHeader({ title, sub, action }: { title: string; sub?: string; action?: ReactNode }) {
   return (
-    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-        {sub && <p className="mt-1 max-w-2xl text-sm text-zinc-500">{sub}</p>}
+        <h1 className="text-lg font-bold tracking-tight">{title}</h1>
+        {sub && <p className="mt-0.5 max-w-2xl text-xs text-zinc-500">{sub}</p>}
       </div>
       {action}
     </div>

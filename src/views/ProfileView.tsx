@@ -131,7 +131,7 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
         <div className="flex flex-wrap items-start gap-4 px-4 pb-4 sm:px-5 sm:pb-5">
         <div className="-mt-10 shrink-0 rounded-full bg-white p-1 sm:-mt-12"><Avatar p={profile} size={80} /></div>
         <div className="min-w-0 flex-1 pt-2">
-          <h1 className="text-xl font-bold">{profile.display_name}</h1>
+          <h1 className="text-lg font-bold">{profile.display_name}</h1>
           <p className="text-sm text-zinc-500">@{profile.handle}{profile.generation ? ` · ${profile.generation}` : ''}</p>
           {isActiveStatus(profile) && (
             <div className="mt-2 flex items-center gap-3">
@@ -161,7 +161,7 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
       {own && <OwnWallet />}
 
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold">{t('posts')}</h2>
+        <h2 className="text-base font-semibold">{t('posts')}</h2>
         {loadingPosts ? <Loading /> : posts.length === 0 ? (
           <Empty text={t('no_posts_yet')}>
             {own && <button type="button" className="btn btn-primary" onClick={() => go('create', 'post')}>{t('create_post')}</button>}
@@ -204,11 +204,11 @@ function OwnWallet() {
 
   return (
     <>
-      <section className="card space-y-4" aria-label={t('wallet')}>
-        <h2 className="flex items-center gap-2 text-lg font-semibold"><Coins className="h-5 w-5 text-amber-600" aria-hidden="true" />{t('wallet')}</h2>
-        <div className="grid grid-cols-2 gap-3 text-center">
-          <div className="rounded-xl bg-zinc-50 p-3"><p className="text-2xl font-bold tabular-nums">{wallet?.voting_coins ?? 0}</p><p className="text-xs text-zinc-500">{t('voting_coins')}</p></div>
-          <div className="rounded-xl bg-zinc-50 p-3"><p className="text-2xl font-bold tabular-nums">{wallet?.reward_coins ?? 0}</p><p className="text-xs text-zinc-500">{t('reward_coins')}</p></div>
+      <section className="card space-y-2 !p-3" aria-label={t('wallet')}>
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold"><Coins className="h-4 w-4 text-amber-600" aria-hidden="true" />{t('wallet')}</h2>
+        <div className="grid grid-cols-2 gap-2 text-center">
+          <div className="rounded-lg bg-zinc-50 p-2"><p className="text-base font-bold tabular-nums">{wallet?.voting_coins ?? 0}</p><p className="text-xs text-zinc-500">{t('voting_coins')}</p></div>
+          <div className="rounded-lg bg-zinc-50 p-2"><p className="text-base font-bold tabular-nums">{wallet?.reward_coins ?? 0}</p><p className="text-xs text-zinc-500">{t('reward_coins')}</p></div>
         </div>
         <p className="text-xs text-zinc-500">{t('coins_note')}</p>
         {canClaim && <button type="button" className="btn btn-accent btn-sm" onClick={claim}>{t('claim_monthly')}</button>}

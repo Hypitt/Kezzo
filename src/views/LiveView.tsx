@@ -127,7 +127,7 @@ export function LiveView() {
       )}
 
       <section aria-label={t('live_now')}>
-        <h2 className="mb-3 text-lg font-semibold">{t('live_now')}</h2>
+        <h2 className="mb-2 text-sm font-semibold">{t('live_now')}</h2>
         {streams === null ? (
           <Loading />
         ) : streams.length === 0 ? (
