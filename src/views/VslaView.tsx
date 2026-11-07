@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { ArrowLeft, Copy, Crown, PiggyBank, Plus, UserMinus, UserPlus } from 'lucide-react';
+import { ArrowLeft, Copy, Crown, PiggyBank, Plus, UserCog, UserMinus, UserPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
@@ -8,6 +8,7 @@ import { useToast } from '../state/Toast';
 import { VslaPanel, type VslaMember } from '../components/VslaPanel';
 import { Empty, Loading, PageHeader, Spinner } from '../components/ui';
 
+interface Details { id: string; phone: string; email: string; address: string; guarantor_name: string; guarantor_phone: string }
 interface VslaGroup { id: string; name: string; description: string; owner_id: string; code: string }
 
 // ---------------------------------------------------------------------------------------------- list
@@ -100,6 +101,8 @@ export function VslaRoom({ id }: { id: string }) {
   const [missing, setMissing] = useState(false);
   const [guest, setGuest] = useState('');
   const [busy, setBusy] = useState(false);
+  const [details, setDetails] = useState<Map<string, Details>>(new Map());
+  const [editing, setEditing] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const [g, m] = await Promise.all([
@@ -110,6 +113,8 @@ export function VslaRoom({ id }: { id: string }) {
     if (!g.data) return setMissing(true);
     setGroup(g.data as VslaGroup);
     setMembers((m.data ?? []) as VslaMember[]);
+    const d = await supabase.rpc('vsla_member_details', { p_group: id });
+    setDetails(new Map(((d.data ?? []) as Details[]).map((x) => [x.id, x])));
   }, [id]);
   useEffect(() => { void load(); }, [load]);
 
@@ -155,9 +160,17 @@ export function VslaRoom({ id }: { id: string }) {
                 </button>
               )}
               {(admin || m.user_id === user?.id) && (
+                <button type="button" className="btn btn-ghost btn-sm" aria-label={t('vsla_details')} aria-expanded={editing === m.id} onClick={() => setEditing(editing === m.id ? null : m.id)}><UserCog className="h-3.5 w-3.5" aria-hidden="true" /></button>
+              )}
+              {(admin || m.user_id === user?.id) && (
                 <button type="button" className="btn btn-ghost btn-sm" disabled={busy} aria-label={t('vsla_remove')} onClick={() => window.confirm(t('vsla_remove_confirm')) && act(() => supabase.rpc('vsla_remove_member', { p_group: id, p_member: m.id }).then((r) => { if (!r.error && m.user_id === user?.id) go('vsla'); return r; }))}>
                   <UserMinus className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
+              )}
+              {editing === m.id && (
+                <div className="basis-full">
+                  <MemberDetails groupId={id} member={m} initial={details.get(m.id)} onSaved={() => { setEditing(null); void load(); }} />
+                </div>
               )}
             </li>
           ))}
@@ -179,5 +192,37 @@ export function VslaRoom({ id }: { id: string }) {
         {owner && <button type="button" className="btn btn-danger btn-sm" onClick={() => window.confirm(t('vsla_delete_confirm')) && act(() => supabase.rpc('vsla_delete_group', { p_group: id }).then((r) => { if (!r.error) go('vsla'); return r; }))}>{t('delete')}</button>}
       </section>
     </div>
+  );
+}
+
+/** Optional contact details and guarantor for one member. Only treasurers and the member can see or change them. */
+function MemberDetails({ groupId, member, initial, onSaved }: { groupId: string; member: VslaMember; initial?: Details; onSaved: () => void }) {
+  const { t } = useI18n();
+  const { toast } = useToast();
+  const [f, setF] = useState({
+    name: member.display_name, phone: initial?.phone ?? '', email: initial?.email ?? '', address: initial?.address ?? '',
+    gname: initial?.guarantor_name ?? '', gphone: initial?.guarantor_phone ?? '',
+  });
+  const [busy, setBusy] = useState(false);
+  const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((x) => ({ ...x, [k]: e.target.value }));
+  const save = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.rpc('vsla_update_member', { p_group: groupId, p_member: member.id, p_name: f.name, p_phone: f.phone, p_email: f.email, p_address: f.address, p_gname: f.gname, p_gphone: f.gphone });
+    setBusy(false);
+    if (error) return toast(t('vs_error', { why: error.message }), 'error');
+    onSaved();
+  };
+  return (
+    <form className="grid gap-3 rounded-xl bg-zinc-50 p-3 sm:grid-cols-2" onSubmit={save}>
+      <div><label className="label" htmlFor={`md-n-${member.id}`}>{t('vsla_guest_name')}</label><input id={`md-n-${member.id}`} className="input" value={f.name} maxLength={60} onChange={set('name')} required /></div>
+      <div><label className="label" htmlFor={`md-p-${member.id}`}>{t('vsla_phone')}</label><input id={`md-p-${member.id}`} className="input" type="tel" value={f.phone} maxLength={40} onChange={set('phone')} /></div>
+      <div><label className="label" htmlFor={`md-e-${member.id}`}>{t('vsla_email')}</label><input id={`md-e-${member.id}`} className="input" type="email" value={f.email} maxLength={120} onChange={set('email')} /></div>
+      <div><label className="label" htmlFor={`md-a-${member.id}`}>{t('vsla_address')}</label><input id={`md-a-${member.id}`} className="input" value={f.address} maxLength={200} onChange={set('address')} /></div>
+      <div><label className="label" htmlFor={`md-gn-${member.id}`}>{t('vsla_gname')}</label><input id={`md-gn-${member.id}`} className="input" value={f.gname} maxLength={60} onChange={set('gname')} /></div>
+      <div><label className="label" htmlFor={`md-gp-${member.id}`}>{t('vsla_gphone')}</label><input id={`md-gp-${member.id}`} className="input" type="tel" value={f.gphone} maxLength={40} onChange={set('gphone')} /></div>
+      <p className="text-xs text-zinc-500 sm:col-span-2">{t('vsla_details_private')}</p>
+      <div className="sm:col-span-2"><button className="btn btn-accent btn-sm" disabled={busy}>{busy && <Spinner />}{t('vsla_save_details')}</button></div>
+    </form>
   );
 }

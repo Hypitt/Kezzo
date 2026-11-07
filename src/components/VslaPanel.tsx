@@ -6,8 +6,8 @@ import { useToast } from '../state/Toast';
 import { Spinner } from './ui';
 export interface VslaMember { id: string; user_id: string | null; display_name: string; role: 'admin' | 'member' }
 
-interface Cycle { id: string; name: string; currency: string; share_price: number; max_shares: number; loan_interest_pct: number; loan_multiple: number; status: 'active' | 'closed' }
-interface Loan { id: string; member_id: string; principal: number; interest_pct: number; due_date: string | null; status: 'open' | 'repaid' }
+interface Cycle { id: string; name: string; currency: string; share_price: number; max_shares: number; loan_interest_pct: number; loan_multiple: number | null; frequency?: 'weekly' | 'biweekly' | 'monthly'; status: 'active' | 'closed' }
+interface Loan { id: string; member_id: string; principal: number; interest_pct: number; due_date: string | null; guarantor_id?: string | null; status: 'open' | 'repaid' }
 interface Entry { id: string; member_id: string; kind: 'shares' | 'social' | 'fine' | 'loan_repay'; amount: number; shares: number; loan_id: string | null; note: string; meeting_date: string; created_at: string }
 interface Book { cycle: Cycle | null; loans: Loan[]; entries: Entry[] }
 type Op = { id: string; type: 'record'; args: Record<string, unknown> } | { id: string; type: 'lend'; args: Record<string, unknown> } | { id: string; type: 'start'; args: Record<string, unknown> };
@@ -43,7 +43,7 @@ export function VslaPanel({ groupId, members, admin }: { groupId: string; member
     let entries: Entry[] = [];
     if (cycle) {
       const [l, e] = await Promise.all([
-        supabase.from('vsla_loans').select('id,member_id,principal,interest_pct,due_date,status').eq('cycle_id', cycle.id).limit(2000),
+        supabase.from('vsla_loans').select('id,member_id,principal,interest_pct,due_date,guarantor_id,status').eq('cycle_id', cycle.id).limit(2000),
         supabase.from('vsla_entries').select('id,member_id,kind,amount,shares,loan_id,note,meeting_date,created_at').eq('cycle_id', cycle.id).order('created_at', { ascending: false }).limit(3000),
       ]);
       loans = ((l.data ?? []) as Loan[]).map((x) => ({ ...x, principal: num(x.principal), interest_pct: num(x.interest_pct) }));
@@ -115,16 +115,18 @@ export function VslaPanel({ groupId, members, admin }: { groupId: string; member
     }
     const paidOn = new Map<string, number>();
     for (const e of book?.entries ?? []) if (e.loan_id) paidOn.set(e.loan_id, (paidOn.get(e.loan_id) ?? 0) + e.amount);
+    const owedByLoan = new Map<string, number>();
     for (const l of book?.loans ?? []) {
       lent += l.principal;
       const total = l.principal * (1 + l.interest_pct / 100);
       accrued += total - l.principal;
+      owedByLoan.set(l.id, Math.max(0, total - (paidOn.get(l.id) ?? 0)));
       row(l.member_id).owes += Math.max(0, total - (paidOn.get(l.id) ?? 0));
     }
     const saved = [...perMember.values()].reduce((s, r) => s + r.saved, 0);
     const cash = saved + social + fines + repaid - lent;
     const pool = saved + fines + accrued; // what the members share out once every loan is repaid
-    return { cycle, perMember, saved, social, cash, lent, pool, outstanding: [...perMember.values()].reduce((s, r) => s + r.owes, 0) };
+    return { cycle, owedByLoan, perMember, saved, social, cash, lent, pool, outstanding: [...perMember.values()].reduce((s, r) => s + r.owes, 0) };
   }, [book]);
 
   if (!book) return <div className="card"><Spinner /></div>;
@@ -153,7 +155,10 @@ export function VslaPanel({ groupId, members, admin }: { groupId: string; member
               <div key={label as string} className="rounded-xl bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{label}</dt><dd className="font-semibold">{fmt(value as number)}</dd></div>
             ))}
           </dl>
-          <p className="text-xs text-zinc-500">{t('vs_rules', { price: fmt(cycle.share_price), max: cycle.max_shares, pct: cycle.loan_interest_pct, mult: cycle.loan_multiple })}</p>
+          <p className="text-xs text-zinc-500">
+            {t('vs_rules2', { freq: t(`vs_freq_${cycle.frequency ?? 'weekly'}` as 'vs_freq_weekly'), price: fmt(cycle.share_price), max: cycle.max_shares, pct: cycle.loan_interest_pct })}
+            {cycle.loan_multiple ? ` ${t('vs_limit_note', { mult: cycle.loan_multiple })}` : ''}
+          </p>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -169,9 +174,24 @@ export function VslaPanel({ groupId, members, admin }: { groupId: string; member
           </div>
           <p className="text-[11px] text-zinc-500">{t('vs_estimate_note')}</p>
 
+          {book.loans.some((l) => l.status === 'open') && (
+            <div className="space-y-1">
+              <h3 className="text-sm font-semibold">{t('vs_open_loans')}</h3>
+              <ul className="divide-y divide-zinc-100 text-sm">
+                {book.loans.filter((l) => l.status === 'open').map((l) => (
+                  <li key={l.id} className="flex flex-wrap items-center gap-x-2 py-1.5">
+                    <span className="mr-auto">{nameOf(l.member_id)}{l.guarantor_id && <span className="text-xs text-zinc-500"> · {t('vs_guarantor_is', { name: nameOf(l.guarantor_id) })}</span>}</span>
+                    <span className="font-medium">{fmt(stats.owedByLoan.get(l.id) ?? 0)}</span>
+                    {l.due_date && <span className="text-xs text-zinc-400">{t('vs_due_on', { date: l.due_date })}</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {admin && cycle.status === 'active' && (
             <>
-              <RecordForm cycle={cycle} members={members} loans={book.loans.filter((l) => l.status === 'open')} nameOf={nameOf} busy={busy} onSubmit={submit} />
+              <RecordForm cycle={cycle} members={members} perMember={stats.perMember} cash={stats.cash} fmt={fmt} loans={book.loans.filter((l) => l.status === 'open')} nameOf={nameOf} busy={busy} onSubmit={submit} />
               <button type="button" className="btn btn-ghost btn-sm" onClick={() => window.confirm(t('vs_close_confirm')) && supabase.rpc('vsla_close', { p_cycle: cycle.id }).then(({ error }) => (error ? toast(t('vs_error', { why: error.message }), 'error') : load()))}>{t('vs_close')}</button>
             </>
           )}
@@ -203,20 +223,29 @@ function StartCycle({ busy, onStart }: { busy: boolean; onStart: (a: Record<stri
   const [currency, setCurrency] = useState('');
   const [price, setPrice] = useState('');
   const [interest, setInterest] = useState('10');
-  const [multiple, setMultiple] = useState('3');
+  const [multiple, setMultiple] = useState('');
+  const [frequency, setFrequency] = useState<'weekly' | 'biweekly' | 'monthly'>('weekly');
   if (!open) return <button type="button" className="btn btn-accent btn-sm" onClick={() => setOpen(true)}>{t('vs_start')}</button>;
   const go = async (e: FormEvent) => {
     e.preventDefault();
-    const ok = await onStart({ p_name: name, p_currency: currency, p_price: Number(price), p_interest: Number(interest), p_multiple: Number(multiple), p_client: crypto.randomUUID() });
+    const ok = await onStart({ p_name: name, p_currency: currency, p_price: Number(price), p_interest: Number(interest), p_multiple: multiple ? Number(multiple) : null, p_frequency: frequency, p_client: crypto.randomUUID() });
     if (ok) setOpen(false);
   };
   return (
     <form className="grid gap-3 rounded-xl bg-zinc-50 p-3 sm:grid-cols-2" onSubmit={go}>
       <div><label className="label" htmlFor="vs-name">{t('vs_cycle_name')}</label><input id="vs-name" className="input" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} required /></div>
+      <div className="sm:col-span-2">
+        <span className="label">{t('vs_freq')}</span>
+        <div className="flex flex-wrap gap-1.5">
+          {(['weekly', 'biweekly', 'monthly'] as const).map((f) => (
+            <button key={f} type="button" aria-pressed={frequency === f} onClick={() => setFrequency(f)} className={`chip ${frequency === f ? 'bg-zinc-900 text-white' : ''}`}>{t(`vs_freq_${f}` as 'vs_freq_weekly')}</button>
+          ))}
+        </div>
+      </div>
       <div><label className="label" htmlFor="vs-cur">{t('vs_currency')}</label><input id="vs-cur" className="input" value={currency} maxLength={6} placeholder="KES, UGX, RWF…" onChange={(e) => setCurrency(e.target.value)} required /></div>
       <div><label className="label" htmlFor="vs-price">{t('vs_share_price')}</label><input id="vs-price" className="input" type="number" min="0.01" step="any" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} required /></div>
       <div><label className="label" htmlFor="vs-int">{t('vs_interest')}</label><input id="vs-int" className="input" type="number" min="0" max="100" step="any" inputMode="decimal" value={interest} onChange={(e) => setInterest(e.target.value)} required /></div>
-      <div><label className="label" htmlFor="vs-mult">{t('vs_multiple')}</label><input id="vs-mult" className="input" type="number" min="1" max="10" step="1" inputMode="numeric" value={multiple} onChange={(e) => setMultiple(e.target.value)} required /></div>
+      <div><label className="label" htmlFor="vs-mult">{t('vs_multiple_opt')}</label><input id="vs-mult" className="input" type="number" min="1" max="10" step="1" inputMode="numeric" value={multiple} onChange={(e) => setMultiple(e.target.value)} /></div>
       <div className="flex items-end gap-2 sm:col-span-2">
         <button className="btn btn-accent btn-sm" disabled={busy}>{busy && <Spinner />}{t('vs_start')}</button>
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpen(false)}>{t('cancel')}</button>
@@ -226,8 +255,8 @@ function StartCycle({ busy, onStart }: { busy: boolean; onStart: (a: Record<stri
 }
 
 type Kind = 'shares' | 'social' | 'fine' | 'loan_repay' | 'loan';
-function RecordForm({ cycle, members, loans, nameOf, busy, onSubmit }: {
-  cycle: Cycle; members: VslaMember[]; loans: Loan[]; nameOf: (id: string) => string; busy: boolean;
+function RecordForm({ cycle, members, perMember, cash, fmt, loans, nameOf, busy, onSubmit }: {
+  cycle: Cycle; members: VslaMember[]; perMember: Map<string, { saved: number; owes: number }>; cash: number; fmt: (n: number) => string; loans: Loan[]; nameOf: (id: string) => string; busy: boolean;
   onSubmit: (type: Op['type'], rpc: 'vsla_record' | 'vsla_lend', args: Record<string, unknown>) => Promise<boolean>;
 }) {
   const { t } = useI18n();
@@ -237,19 +266,25 @@ function RecordForm({ cycle, members, loans, nameOf, busy, onSubmit }: {
   const [amount, setAmount] = useState('');
   const [loan, setLoan] = useState('');
   const [due, setDue] = useState('');
+  const [guarantor, setGuarantor] = useState('');
   const [note, setNote] = useState('');
+  // Soft warnings only: treasurers decide, nothing is blocked.
+  const asked = Number(amount) || 0;
+  const mine = perMember.get(member) ?? { saved: 0, owes: 0 };
+  const overLimit = kind === 'loan' && cycle.loan_multiple !== null && asked + mine.owes > mine.saved * (cycle.loan_multiple ?? 0);
+  const overCash = kind === 'loan' && asked > cash;
   const kinds: Kind[] = ['shares', 'social', 'fine', 'loan', 'loan_repay'];
 
   const save = async (e: FormEvent) => {
     e.preventDefault();
     const client = crypto.randomUUID();
     const ok = kind === 'loan'
-      ? await onSubmit('lend', 'vsla_lend', { p_cycle: cycle.id, p_member: member, p_principal: Number(amount), p_due: due || null, p_client: client })
+      ? await onSubmit('lend', 'vsla_lend', { p_cycle: cycle.id, p_member: member, p_principal: Number(amount), p_due: due || null, p_guarantor: guarantor || null, p_client: client })
       : await onSubmit('record', 'vsla_record', {
         p_cycle: cycle.id, p_member: member, p_kind: kind, p_shares: kind === 'shares' ? Number(shares) : 0,
         p_amount: kind === 'shares' ? null : Number(amount), p_loan: kind === 'loan_repay' ? loan : null, p_note: note, p_date: new Date().toISOString().slice(0, 10), p_client: client,
       });
-    if (ok) { setAmount(''); setNote(''); setShares('1'); }
+    if (ok) { setAmount(''); setNote(''); setShares('1'); setGuarantor(''); }
   };
 
   return (
@@ -277,9 +312,16 @@ function RecordForm({ cycle, members, loans, nameOf, busy, onSubmit }: {
           <div><label className="label" htmlFor="vs-a">{t('vs_amount')}</label>
             <input id="vs-a" className="input" type="number" min="0.01" step="any" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} required /></div>
         )}
+        {kind === 'loan' && (
+          <div><label className="label" htmlFor="vs-g">{t('vs_guarantor')}</label>
+            <select id="vs-g" className="input" value={guarantor} onChange={(e) => setGuarantor(e.target.value)}>
+              <option value="">{t('vs_guarantor_none')}</option>{members.filter((m) => m.id !== member).map((m) => <option key={m.id} value={m.id}>{m.display_name}</option>)}</select></div>
+        )}
         {kind === 'loan' && <div><label className="label" htmlFor="vs-d">{t('vs_due')}</label><input id="vs-d" className="input" type="date" value={due} onChange={(e) => setDue(e.target.value)} /></div>}
         {kind !== 'loan' && <div><label className="label" htmlFor="vs-n">{t('vs_note')}</label><input id="vs-n" className="input" value={note} maxLength={120} onChange={(e) => setNote(e.target.value)} /></div>}
       </div>
+      {overLimit && <p className="text-xs text-amber-700">{t('vs_warn_limit', { max: fmt(mine.saved * (cycle.loan_multiple ?? 0)) })}</p>}
+      {overCash && <p className="text-xs text-amber-700">{t('vs_warn_cash', { cash: fmt(cash) })}</p>}
       <button className="btn btn-accent btn-sm" disabled={busy}>{busy && <Spinner />}{t('vs_save')}</button>
     </form>
   );
