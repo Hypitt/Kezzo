@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
 import { Spinner } from './ui';
-import type { GroupMember } from '../lib/types';
+export interface VslaMember { id: string; user_id: string | null; display_name: string; role: 'admin' | 'member' }
 
 interface Cycle { id: string; name: string; currency: string; share_price: number; max_shares: number; loan_interest_pct: number; loan_multiple: number; status: 'active' | 'closed' }
 interface Loan { id: string; member_id: string; principal: number; interest_pct: number; due_date: string | null; status: 'open' | 'repaid' }
@@ -23,7 +23,7 @@ const isNetwork = (e: { message?: string } | null) => !navigator.onLine || /fetc
  * Village savings and loans (VSLA) books for a group. Everyone in the group can read them; admins record each meeting.
  * Entries are sent with a unique id, so when the phone is offline they wait on the device and are sent later without ever being counted twice.
  */
-export function VslaPanel({ groupId, members, admin }: { groupId: string; members: GroupMember[]; admin: boolean }) {
+export function VslaPanel({ groupId, members, admin }: { groupId: string; members: VslaMember[]; admin: boolean }) {
   const { t } = useI18n();
   const { toast } = useToast();
   const [book, setBook] = useState<Book | null>(null);
@@ -99,7 +99,7 @@ export function VslaPanel({ groupId, members, admin }: { groupId: string; member
     return false;
   };
 
-  const names = useMemo(() => new Map(members.map((m) => [m.user_id, m.profile.display_name])), [members]);
+  const names = useMemo(() => new Map(members.map((m) => [m.id, m.display_name])), [members]);
   const nameOf = (id: string) => names.get(id) ?? '—';
 
   const stats = useMemo(() => {
@@ -160,9 +160,9 @@ export function VslaPanel({ groupId, members, admin }: { groupId: string; member
               <thead><tr className="text-[11px] text-zinc-500"><th className="py-1 font-medium">{t('vs_member')}</th><th className="font-medium">{t('vs_col_shares')}</th><th className="font-medium">{t('vs_col_saved')}</th><th className="font-medium">{t('vs_col_owes')}</th><th className="font-medium">{t('vs_col_payout')}</th></tr></thead>
               <tbody>
                 {members.map((m) => {
-                  const r = stats.perMember.get(m.user_id) ?? { shares: 0, saved: 0, owes: 0 };
+                  const r = stats.perMember.get(m.id) ?? { shares: 0, saved: 0, owes: 0 };
                   const payout = stats.saved > 0 ? (r.saved / stats.saved) * stats.pool : 0;
-                  return <tr key={m.user_id} className="border-t border-zinc-100"><td className="py-1.5 pr-2">{m.profile.display_name}</td><td>{r.shares}</td><td>{fmt(r.saved)}</td><td>{r.owes > 0 ? fmt(r.owes) : '—'}</td><td>{fmt(payout)}</td></tr>;
+                  return <tr key={m.id} className="border-t border-zinc-100"><td className="py-1.5 pr-2">{m.display_name}</td><td>{r.shares}</td><td>{fmt(r.saved)}</td><td>{r.owes > 0 ? fmt(r.owes) : '—'}</td><td>{fmt(payout)}</td></tr>;
                 })}
               </tbody>
             </table>
@@ -207,7 +207,7 @@ function StartCycle({ busy, onStart }: { busy: boolean; onStart: (a: Record<stri
   if (!open) return <button type="button" className="btn btn-accent btn-sm" onClick={() => setOpen(true)}>{t('vs_start')}</button>;
   const go = async (e: FormEvent) => {
     e.preventDefault();
-    const ok = await onStart({ p_name: name, p_currency: currency, p_price: Number(price), p_interest: Number(interest), p_multiple: Number(multiple) });
+    const ok = await onStart({ p_name: name, p_currency: currency, p_price: Number(price), p_interest: Number(interest), p_multiple: Number(multiple), p_client: crypto.randomUUID() });
     if (ok) setOpen(false);
   };
   return (
@@ -227,12 +227,12 @@ function StartCycle({ busy, onStart }: { busy: boolean; onStart: (a: Record<stri
 
 type Kind = 'shares' | 'social' | 'fine' | 'loan_repay' | 'loan';
 function RecordForm({ cycle, members, loans, nameOf, busy, onSubmit }: {
-  cycle: Cycle; members: GroupMember[]; loans: Loan[]; nameOf: (id: string) => string; busy: boolean;
+  cycle: Cycle; members: VslaMember[]; loans: Loan[]; nameOf: (id: string) => string; busy: boolean;
   onSubmit: (type: Op['type'], rpc: 'vsla_record' | 'vsla_lend', args: Record<string, unknown>) => Promise<boolean>;
 }) {
   const { t } = useI18n();
   const [kind, setKind] = useState<Kind>('shares');
-  const [member, setMember] = useState(members[0]?.user_id ?? '');
+  const [member, setMember] = useState(members[0]?.id ?? '');
   const [shares, setShares] = useState('1');
   const [amount, setAmount] = useState('');
   const [loan, setLoan] = useState('');
@@ -263,7 +263,7 @@ function RecordForm({ cycle, members, loans, nameOf, busy, onSubmit }: {
       <div className="grid gap-3 sm:grid-cols-2">
         {kind !== 'loan_repay' && (
           <div><label className="label" htmlFor="vs-m">{t('vs_member')}</label>
-            <select id="vs-m" className="input" value={member} onChange={(e) => setMember(e.target.value)}>{members.map((m) => <option key={m.user_id} value={m.user_id}>{m.profile.display_name}</option>)}</select></div>
+            <select id="vs-m" className="input" value={member} onChange={(e) => setMember(e.target.value)}>{members.map((m) => <option key={m.id} value={m.id}>{m.display_name}</option>)}</select></div>
         )}
         {kind === 'loan_repay' && (
           <div><label className="label" htmlFor="vs-l">{t('vs_loan')}</label>

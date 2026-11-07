@@ -27,6 +27,8 @@ const page = <P extends object>(load: () => Promise<{ default: ComponentType<P> 
 const BattleRoom = page(() => import('./views/BattleRoom').then((m) => ({ default: m.BattleRoom })));
 const BattlesView = page(() => import('./views/BattlesView').then((m) => ({ default: m.BattlesView })));
 const CreateView = page(() => import('./views/CreateView').then((m) => ({ default: m.CreateView })));
+const VslaView = page(() => import('./views/VslaView').then((m) => ({ default: m.VslaView })));
+const VslaRoom = page(() => import('./views/VslaView').then((m) => ({ default: m.VslaRoom })));
 const GroupRoom = page(() => import('./views/GroupsView').then((m) => ({ default: m.GroupRoom })));
 const GroupsView = page(() => import('./views/GroupsView').then((m) => ({ default: m.GroupsView })));
 const JoinGroupView = page(() => import('./views/GroupsView').then((m) => ({ default: m.JoinGroupView })));
@@ -60,6 +62,7 @@ function View() {
     case 'create': return <Gate><CreateView initial={route.id} /></Gate>;
     case 'media': return <MediaView />;
     case 'groups': return route.id ? <GroupRoom key={route.id} id={route.id} /> : <GroupsView />;
+    case 'vsla': return <Gate>{route.id ? <VslaRoom key={route.id} id={route.id} /> : <VslaView />}</Gate>;
     case 'messages': return <Gate><MessagesView otherId={route.id} /></Gate>;
     case 'profile': return <ProfileView id={route.id} />;
     case 'admin': return <AdminView />;

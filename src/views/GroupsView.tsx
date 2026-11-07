@@ -1,5 +1,4 @@
 import { PENDING_JOIN } from '../lib/invite';
-import { VslaPanel } from '../components/VslaPanel';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { ArrowLeft, Copy, Crown, Link2, Lock, Mic, RefreshCw, Shield, UserMinus, UserPlus, Users, Video } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -278,8 +277,6 @@ export function GroupRoom({ id }: { id: string }) {
       {!member ? <Empty text={group.join_policy === 'invite' ? t('invite_only_hint') : t('join_to_see')} /> : (
         <div className="grid gap-5 lg:grid-cols-3">
           <div className="space-y-5 lg:col-span-2">
-            <VslaPanel groupId={id} members={members} admin={admin} />
-
             <section className="card space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="font-semibold">{t('group_call')}</h2>

@@ -8,7 +8,7 @@ export function SectionTabs() {
   const { lang, t } = useI18n();
   const group = groupOf(route.tab);
   // Inside a chat, a battle room or a live room the page needs the whole screen.
-  const immersive = Boolean(route.id) && ['battles', 'live', 'messages', 'groups'].includes(route.tab);
+  const immersive = Boolean(route.id) && ['battles', 'live', 'messages', 'groups', 'vsla'].includes(route.tab);
   if (!group || group.tabs.length < 2 || immersive) return null;
   return (
     <nav className="mb-3 flex gap-1 overflow-x-auto rounded-lg bg-zinc-100 p-0.5" aria-label={group.id}>

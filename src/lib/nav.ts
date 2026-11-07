@@ -1,4 +1,4 @@
-import { Briefcase, CalendarDays, Home, MessageCircle, PlusCircle, Radio, Search, Swords, Image as ImageIcon, User, Users, Trophy, CalendarCheck, type LucideIcon } from 'lucide-react';
+import { Briefcase, CalendarDays, Home, MessageCircle, PlusCircle, Radio, Search, Swords, Image as ImageIcon, User, Users, Trophy, CalendarCheck, PiggyBank, type LucideIcon } from 'lucide-react';
 import type { Key } from './i18n';
 import type { Lang } from './types';
 import type { Tab } from '../state/Router';
@@ -12,18 +12,18 @@ export const GROUPS: NavGroup[] = [
   { id: 'arena', icon: Swords, tabs: ['battles', 'live', 'contest'], name: { en: 'Arena', fr: 'Arène', es: 'Arena', pt: 'Arena', hi: 'अरेना' } },
   { id: 'create', icon: PlusCircle, tabs: ['create'], name: 'nav_create' },
   { id: 'community', icon: CalendarDays, tabs: ['opportunities', 'community'], name: { en: 'Community', fr: 'Communauté', es: 'Comunidad', pt: 'Comunidade', hi: 'समुदाय' } },
-  { id: 'connect', icon: Users, tabs: ['groups', 'messages'], name: { en: 'Connect', fr: 'Échanger', es: 'Conectar', pt: 'Conectar', hi: 'जुड़ें' } },
+  { id: 'connect', icon: Users, tabs: ['groups', 'vsla', 'messages'], name: { en: 'Connect', fr: 'Échanger', es: 'Conectar', pt: 'Conectar', hi: 'जुड़ें' } },
   { id: 'profile', icon: User, tabs: ['profile'], name: 'nav_profile' },
 ];
 
 export const TAB_ICON: Partial<Record<Tab, LucideIcon>> = {
   home: Home, search: Search, media: ImageIcon, battles: Swords, live: Radio, contest: Trophy,
-  community: CalendarCheck, opportunities: Briefcase, groups: Users, messages: MessageCircle,
+  community: CalendarCheck, opportunities: Briefcase, groups: Users, vsla: PiggyBank, messages: MessageCircle,
 };
 
 const TAB_KEY: Partial<Record<Tab, Key>> = {
   home: 'nav_home', search: 'nav_search', media: 'nav_media', battles: 'nav_battles', live: 'nav_live',
-  community: 'nav_community', opportunities: 'nav_opportunities', groups: 'nav_groups', messages: 'nav_messages',
+  community: 'nav_community', opportunities: 'nav_opportunities', groups: 'nav_groups', vsla: 'nav_vsla', messages: 'nav_messages',
   create: 'nav_create', profile: 'nav_profile',
 };
 
