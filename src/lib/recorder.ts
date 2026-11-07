@@ -361,7 +361,7 @@ export class BattleRecorder {
 
 // ------------------------------------------------------------------------------------------------ highlights
 
-export const HIGHLIGHT_SECONDS = 90;
+export const HIGHLIGHT_SECONDS = 600;
 
 /** MediaRecorder files have no length header, so the browser reports "infinite". Asking it to jump far ahead fixes that. */
 async function makeSeekable(v: HTMLVideoElement): Promise<void> {

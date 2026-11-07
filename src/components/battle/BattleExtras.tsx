@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Film, Scissors, Sparkles, Trash2, Upload } from 'lucide-react';
+import { Download, Film, Scissors, Sparkles, Upload } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { explain } from '../../lib/errors';
 import { formatClock } from '../../lib/battle';
 import { formatBytes } from '../../lib/media';
 import {
-  HIGHLIGHT_SECONDS, clipSupported, deleteRecording, downloadBlob, fileExtension, listRecordings, makeClip, onRecordingsChanged,
+  HIGHLIGHT_SECONDS, clipSupported, downloadBlob, fileExtension, listRecordings, makeClip, onRecordingsChanged,
   openForClip, recordingBlob, suggestStart, type RecordingInfo,
 } from '../../lib/recorder';
-import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB, startUpload, type UploadFailure, type UploadHandle } from '../../lib/upload';
+import { MAX_UPLOAD_BYTES, startUpload, type UploadFailure, type UploadHandle } from '../../lib/upload';
 import type { Battle } from '../../lib/types';
 import { useAuth } from '../../state/Auth';
 import { useI18n } from '../../state/I18n';
@@ -16,7 +16,8 @@ import { useToast } from '../../state/Toast';
 import { FeedVideo } from '../FeedVideo';
 import { UploadBar, failureKey, type UploadState } from '../UploadBar';
 import { Spinner } from '../ui';
-import { publicFilePath, publicUrl } from '../../lib/storage';
+import { RecordingRow } from '../RecordingRow';
+import { publicFilePath, publicUrl, r2Enabled } from '../../lib/storage';
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'battle';
 /** Files already saved to the device in this browser session (so the automatic download never runs twice). */
@@ -86,11 +87,6 @@ export function RecordingPanel({ battle, autoDownload, onChanged }: { battle: Ba
     return onRecordingsChanged(() => void refresh());
   }, [refresh]);
 
-  const save = async (r: RecordingInfo) => {
-    const blob = await recordingBlob(r);
-    if (blob) downloadBlob(blob, `${slug(battle.title)}-part${r.part}.${fileExtension(r.mime)}`);
-  };
-
   return (
     <div className="space-y-5">
       {list.length > 0 && (
@@ -98,16 +94,7 @@ export function RecordingPanel({ battle, autoDownload, onChanged }: { battle: Ba
           <h2 className="flex items-center gap-2 font-semibold"><Download className="h-4 w-4" aria-hidden="true" />{t('rec_title')}</h2>
           <p className="text-xs text-zinc-500">{t('rec_saved_note')}</p>
           <ul className="space-y-2">
-            {list.map((r) => (
-              <li key={r.key} className="flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 p-2.5 text-sm">
-                <span className="mr-auto">
-                  {t('rec_part', { n: r.part })} · {formatClock(r.durationMs / 1000)} · {formatBytes(r.size)}
-                  {!r.finished && <span className="ml-2 text-xs text-amber-700">{t('rec_recovered')}</span>}
-                </span>
-                <button type="button" className="btn btn-primary btn-sm" onClick={() => save(r)}><Download className="h-3.5 w-3.5" aria-hidden="true" />{t('rec_download')}</button>
-                <button type="button" className="btn btn-ghost btn-sm" aria-label={t('rec_delete')} onClick={() => window.confirm(t('rec_delete_confirm')) && deleteRecording(r)}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></button>
-              </li>
-            ))}
+            {list.map((r) => <RecordingRow key={r.key} r={r} title={battle.title} onPosted={onChanged} />)}
           </ul>
         </section>
       )}
@@ -220,7 +207,8 @@ function HighlightSection({ battle, recordings, onPosted }: { battle: Battle; re
 
   const post = async (blob: Blob, seconds: number) => {
     if (!user) return;
-    if (blob.size > MAX_UPLOAD_BYTES) return setError(t('err_file_too_big', { n: MAX_UPLOAD_MB }));
+    const limit = r2Enabled ? Math.max(MAX_UPLOAD_BYTES, 1024 * 1024 * 1024) : MAX_UPLOAD_BYTES;
+    if (blob.size > limit) return setError(t('err_file_too_big', { n: Math.round(limit / 1048576) }));
     const ext = fileExtension(blob.type || 'video/webm');
     const file = new File([blob], `highlight.${ext}`, { type: ext === 'mp4' ? 'video/mp4' : 'video/webm' });
     const path = publicFilePath(user.id, `${crypto.randomUUID()}.${ext}`);

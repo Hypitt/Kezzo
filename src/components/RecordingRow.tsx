@@ -5,13 +5,16 @@ import { explain } from '../lib/errors';
 import { formatClock } from '../lib/battle';
 import { formatBytes } from '../lib/media';
 import { deleteRecording, downloadBlob, fileExtension, listRecordings, onRecordingsChanged, recordingBlob, type RecordingInfo } from '../lib/recorder';
-import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB, startUpload, type UploadFailure, type UploadHandle } from '../lib/upload';
-import { publicFilePath } from '../lib/storage';
+import { MAX_UPLOAD_BYTES, startUpload, type UploadFailure, type UploadHandle } from '../lib/upload';
+import { publicFilePath, r2Enabled } from '../lib/storage';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
 import { UploadBar, failureKey, type UploadState } from './UploadBar';
 import { Spinner } from './ui';
+
+/** Recordings go to Cloudflare R2 when it is set up, which has no 50 MB cap, so allow up to 1 GB. */
+const postLimit = (): number => (r2Enabled ? Math.max(MAX_UPLOAD_BYTES, 1024 * 1024 * 1024) : MAX_UPLOAD_BYTES);
 
 export const fileSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'session';
 
@@ -35,7 +38,8 @@ export function RecordingRow({ r, title, onPosted }: { r: RecordingInfo; title: 
 
   const post = async () => {
     if (!user || posting) return;
-    if (r.size > MAX_UPLOAD_BYTES) return toast(t('err_file_too_big', { n: MAX_UPLOAD_MB }), 'error');
+    if (r.video && r.durationMs > 1800_000) return toast(t('rec_post_too_long'), 'error');
+    if (r.size > postLimit()) return toast(t('err_file_too_big', { n: Math.round(postLimit() / 1048576) }), 'error');
     const blob = await recordingBlob(r);
     if (!blob) return toast(t('hl_unreadable'), 'error');
     const ext = fileExtension(r.mime);
@@ -84,7 +88,7 @@ export function RecordingRow({ r, title, onPosted }: { r: RecordingInfo; title: 
         )}
         <button type="button" className="btn btn-ghost btn-sm" aria-label={t('rec_delete')} onClick={() => window.confirm(t('rec_delete_confirm')) && deleteRecording(r)}><Trash2 className="h-3.5 w-3.5" aria-hidden="true" /></button>
       </div>
-      {r.size > MAX_UPLOAD_BYTES && <p className="text-xs text-amber-700">{t('rec_post_too_big', { n: MAX_UPLOAD_MB })}</p>}
+      {r.size > postLimit() && <p className="text-xs text-amber-700">{t('rec_post_too_big', { n: Math.round(postLimit() / 1048576) })}</p>}
       {upload && <UploadBar state={upload} onCancel={() => handle.current?.cancel()} onRetry={post} />}
     </li>
   );

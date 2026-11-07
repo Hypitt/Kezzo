@@ -1,5 +1,5 @@
 import { ShareButton } from '../components/ShareButton';
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { ArrowLeft, Check, Mic, Radio, UserMinus, Users, Video, X, XCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { api } from '../lib/api';
@@ -13,9 +13,12 @@ import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { ChatPanel } from '../components/ChatPanel';
 import { LivePolls } from '../components/LivePolls';
-import { LiveControls, MediaTile, RemoteAudio } from '../components/LiveParts';
+import { LiveControls, MICROPHONE, MediaTile, RemoteAudio } from '../components/LiveParts';
 import { Avatar, Chip, Empty, Loading, PageHeader, Spinner } from '../components/ui';
 import { Tx } from '../components/Tx';
+import { LiveRecordings } from '../components/RecordingRow';
+import { BattleRecorder, activeRecorder, onRecordingsChanged, recordingSupported } from '../lib/recorder';
+import { formatClock } from '../lib/battle';
 
 const asProfile = (v: unknown): PublicProfile => (Array.isArray(v) ? v[0] : v) as PublicProfile;
 const STREAM_SELECT = `id,host_id,title,kind,mode,max_guests,status,created_at,host:profiles!host_id(${PUBLIC_PROFILE})`;
@@ -204,6 +207,42 @@ export function LiveStreamRoom({ id }: { id: string }) {
   const ended = stream?.status === 'ended';
   const video = stream?.mode === 'video';
   const live = useLiveRoom({ roomName: `live:${id}`, video: Boolean(video), autoPublish: onStage });
+  const [wantRecord, setWantRecord] = useState(() => recordingSupported());
+  const [elapsed, setElapsed] = useState(0);
+  const frame = useRef<HTMLDivElement>(null);
+  const liveRef = useRef(live);
+  liveRef.current = live;
+  const recording = wantRecord && Boolean(isHost) && live.phase === 'connected' && !ended;
+
+  // Optional recording of the whole stage, only on the host's device. It reads what is already on screen, so viewers are not affected.
+  useEffect(() => {
+    const container = frame.current;
+    if (!recording || !container || !stream) return;
+    const recorder = new BattleRecorder({
+      battleId: `live:${id}`,
+      title: stream.title,
+      container,
+      video: stream.mode === 'video',
+      audioTracks: () => liveRef.current.participants.flatMap((p) => {
+        const track = p.getTrackPublication(MICROPHONE)?.track?.mediaStreamTrack;
+        return track ? [track] : [];
+      }),
+    });
+    recorder.start().catch(() => { setWantRecord(false); toast(t('rec_failed'), 'error'); });
+    return () => {
+      void recorder.stop();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recording, id]);
+
+  // Running clock next to the record switch.
+  useEffect(() => {
+    const tick = () => setElapsed(activeRecorder()?.battleId === `live:${id}` ? activeRecorder()!.elapsedMs() : 0);
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    const off = onRecordingsChanged(tick);
+    return () => { window.clearInterval(timer); off(); };
+  }, [id]);
 
   // When the stream ends, everyone leaves the room.
   useEffect(() => {
@@ -281,7 +320,10 @@ export function LiveStreamRoom({ id }: { id: string }) {
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           {ended ? (
-            <div className="card text-center text-sm text-zinc-600">{t('live_ended')}</div>
+            <div className="space-y-4">
+              <div className="card text-center text-sm text-zinc-600">{t('live_ended')}</div>
+              {isHost && <LiveRecordings recordingId={`live:${id}`} title={stream.title} />}
+            </div>
           ) : live.phase !== 'connected' ? (
             <div className="flex min-h-56 flex-col items-center justify-center gap-3 rounded-2xl bg-zinc-900 p-6 text-center text-white">
               <Radio className="h-7 w-7 text-accent" aria-hidden="true" />
@@ -294,7 +336,7 @@ export function LiveStreamRoom({ id }: { id: string }) {
             </div>
           ) : (
             <div className="space-y-3">
-              <div className={`grid aspect-[4/5] w-full gap-1.5 overflow-hidden rounded-2xl bg-black p-1.5 sm:aspect-video ${gridClass}`}>
+              <div ref={frame} className={`grid aspect-[4/5] w-full gap-1.5 overflow-hidden rounded-2xl bg-black p-1.5 sm:aspect-video ${gridClass}`}>
                 {people.map((p) => (
                   <MediaTile
                     key={p.id}
@@ -343,6 +385,20 @@ export function LiveStreamRoom({ id }: { id: string }) {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="font-semibold">{t('host_controls')}</h2>
                 <button type="button" className="btn btn-primary" disabled={busy === 'end'} onClick={endStream}>{busy === 'end' && <Spinner />}{t('live_end')}</button>
+              </div>
+              <div className="space-y-1 border-t border-zinc-100 pt-3">
+                {recordingSupported() ? (
+                  <>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={wantRecord} onChange={(e) => setWantRecord(e.target.checked)} />
+                      {t('live_rec_opt_in')}
+                      {recording && <span className="ml-1 inline-flex items-center gap-1 text-xs font-semibold text-accent"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" aria-hidden="true" />{t('rec_recording', { time: formatClock(elapsed / 1000) })}</span>}
+                    </label>
+                    <p className="text-xs text-zinc-500">{t(wantRecord && live.phase !== 'connected' ? 'live_rec_waiting' : 'rec_note_live')}</p>
+                  </>
+                ) : (
+                  <p className="text-xs text-zinc-500">{t('rec_unsupported')}</p>
+                )}
               </div>
               {stream.kind === 'group' && (
                 <>

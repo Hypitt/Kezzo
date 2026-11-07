@@ -40,7 +40,7 @@ export function BattleRoom({ id }: { id: string }) {
   const [scores, setScores] = useState<JudgeScore[]>([]);
   const [liked, setLiked] = useState<Set<string>>(new Set()); // "<contenderId>:<round>"
   const [busy, setBusy] = useState<string | null>(null);
-  const [wantRecord, setWantRecord] = useState(false);
+  const [wantRecord, setWantRecord] = useState(() => recordingSupported());
   const sawLive = useRef(false);
   const timer = useRef<number>(0);
 
