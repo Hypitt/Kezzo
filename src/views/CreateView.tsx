@@ -231,7 +231,7 @@ function PostForm({ contest = false }: { contest?: boolean }) {
         </div>
       </div>
       <div>
-        <label className="label" htmlFor="pf-title">{t('title')}</label>
+        <label className="label" htmlFor="pf-title">{t('title')} ({t('optional')})</label>
         <input id="pf-title" className="input" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} />
       </div>
       <div>
@@ -282,7 +282,7 @@ function PostForm({ contest = false }: { contest?: boolean }) {
 }
 
 function BattleForm() {
-  const { ensureAuth, refreshWallet } = useAuth();
+  const { profile, ensureAuth, refreshWallet } = useAuth();
   const { t } = useI18n();
   const { toast } = useToast();
   const { go } = useRouter();
@@ -308,7 +308,7 @@ function BattleForm() {
     if (![title, topic, theme].every(isSafe)) return setError(t('blocked_content'));
     setBusy(true);
     const { data, error: rpcErr } = await supabase.rpc('create_battle', {
-      p_title: title, p_category: category, p_custom_theme: category === 'custom' ? theme : null,
+      p_title: title.trim() || t('battle_default_title', { name: profile?.display_name ?? '' }).trim(), p_category: category, p_custom_theme: category === 'custom' ? theme : null,
       p_mode: mode, p_topic: topic, p_rounds: rounds, p_max: max, p_fee: fee,
       p_host_competes: hostCompetes, p_public_weight: customWeights ? publicWeight : 100, p_round_seconds: roundSeconds,
     });
@@ -322,8 +322,8 @@ function BattleForm() {
   return (
     <form onSubmit={submit} className="space-y-4">
       <div>
-        <label className="label" htmlFor="bf-title">{t('title')}</label>
-        <input id="bf-title" className="input" value={title} maxLength={100} onChange={(e) => setTitle(e.target.value)} required />
+        <label className="label" htmlFor="bf-title">{t('title')} ({t('optional')})</label>
+        <input id="bf-title" className="input" value={title} maxLength={100} onChange={(e) => setTitle(e.target.value)} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>

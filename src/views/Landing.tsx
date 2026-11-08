@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ArrowRight, Check, Mic, Sparkles, Swords, UserPlus, Users, type LucideIcon } from 'lucide-react';
+import { ArrowRight, Check, Mic, Swords, UserPlus, Users, type LucideIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
@@ -302,8 +302,8 @@ function SectionHead({ kicker, title, text, center = false }: { kicker?: string;
   return (
     <div className={`${center ? 'mx-auto text-center' : ''} max-w-2xl`}>
       {kicker && <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{kicker}</p>}
-      <h2 className="mt-2 font-display text-[1.9rem] font-extrabold leading-[1.1] tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl">{title}</h2>
-      {text && <p className="mt-4 text-base leading-relaxed text-zinc-600 sm:text-lg">{text}</p>}
+      <h2 data-part="section-title" className="mt-2 font-display text-[1.9rem] font-extrabold leading-[1.1] tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl">{title}</h2>
+      {text && <p data-part="section-text" className="mt-4 text-base leading-relaxed text-zinc-600 sm:text-lg">{text}</p>}
     </div>
   );
 }
@@ -404,11 +404,11 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
               {c.live(liveBattles)}
             </span>
           )}
-          <h1 className="max-w-4xl font-display font-extrabold leading-[1.04] tracking-tight" style={{ fontSize: 'clamp(2.35rem, 7.4vw, 5rem)' }}>
+          <h1 data-part="hero-title" className="max-w-4xl font-display font-extrabold leading-[1.04] tracking-tight" style={{ fontSize: 'clamp(2.35rem, 7.4vw, 5rem)' }}>
             {c.h1a}<br /><span className="text-[color-mix(in_srgb,var(--color-accent),white_30%)]">{c.h1b}</span>
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">{c.leadTag}</p>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">{c.talent}</p>
+          <p data-part="hero-text" className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">{c.leadTag}</p>
+          <p data-part="hero-text" className="mt-2 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">{c.talent}</p>
           <div className="mt-8 flex w-full max-w-sm flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:justify-center">
             <button type="button" className="btn btn-accent justify-center rounded-full px-7 py-3 text-base font-semibold " onClick={() => openAuth('signup')}>
               {c.cta}<ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -424,7 +424,7 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
         <div className="marquee-track flex w-max gap-10 whitespace-nowrap font-display text-sm font-semibold uppercase tracking-[0.14em] text-zinc-400 sm:text-base">
           {[0, 1].map((k) => (
             <div key={k} className="flex shrink-0 gap-10">
-              {catNames.map((n) => <span key={`${k}-${n}`} className="flex items-center gap-10">{n}<Sparkles className="h-3.5 w-3.5 text-accent" /></span>)}
+              {catNames.map((n) => <span key={`${k}-${n}`} className="flex items-center gap-10">{n}<span className="h-1.5 w-1.5 rounded-full bg-accent" /></span>)}
             </div>
           ))}
         </div>
@@ -436,7 +436,7 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
       <section className="bg-white px-4 py-14 sm:px-6 sm:py-20" aria-label="Kezzo" style={at('tagline')}>
         <Reveal>
           <ul className="mx-auto grid max-w-4xl gap-4 text-center">
-            {c.lines.map((line, i) => <li key={line} className={`font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl ${i === 1 ? 'text-accent' : 'text-zinc-900'}`}>{line}</li>)}
+            {c.lines.map((line, i) => <li key={line} data-part="tagline" className={`font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl ${i === 1 ? 'text-accent' : 'text-zinc-900'}`}>{line}</li>)}
           </ul>
         </Reveal>
       </section>
@@ -496,7 +496,7 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
           <Reveal><SectionHead kicker={c.groupsKicker} title={c.groupsTitle} text={c.groupsText} /></Reveal>
           <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {groups.length > 0 ? groups.map((g) => (
-              <li key={g.id} className="flex items-center gap-3 rounded-2xl border border-stone-200 bg-white p-4 transition hover:border-stone-300 hover:shadow-sm">
+              <li key={g.id} data-part="card" className="flex items-center gap-3 rounded-2xl border border-stone-200 bg-white p-4 transition hover:border-stone-300 hover:shadow-sm">
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-zinc-900"><Users className="h-5 w-5" aria-hidden="true" /></span>
                 <div className="min-w-0 flex-1">
                   <h3 className="truncate text-sm font-semibold">{g.name}</h3>
@@ -507,7 +507,7 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
                 </button>
               </li>
             )) : c.exGroups.map(([name, text, n], i) => (
-              <li key={name} className="group relative isolate overflow-hidden rounded-3xl bg-zinc-900 text-white">
+              <li key={name} data-part="card" className="group relative isolate overflow-hidden rounded-3xl bg-zinc-900 text-white">
                 <img src={['/landing/group-podcast.jpg', '/landing/group-creators.jpg', '/landing/group-friends.jpg'][i]} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" decoding="async" />
                 <div className="absolute inset-0 -z-10 bg-gradient-to-t from-zinc-950/85 via-zinc-950/25 to-transparent" aria-hidden="true" />
                 <div className="flex min-h-56 flex-col justify-between p-4 sm:min-h-64">
@@ -536,7 +536,7 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
             {c.pillars.map(([kicker, title, text], i) => (
               <li key={kicker} className={`${i < 3 ? 'lg:col-span-2' : 'lg:col-span-3'} ${i === 4 ? 'md:col-span-2 lg:col-span-3' : ''}`}>
                 <Reveal className="h-full">
-                  <article className="flex h-full flex-col rounded-3xl border border-stone-200 bg-white p-6 sm:p-8">
+                  <article data-part="card" className="flex h-full flex-col rounded-3xl border border-stone-200 bg-white p-6 sm:p-8">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{kicker}</p>
                     <h3 className="mt-3 font-display text-xl font-extrabold leading-tight sm:text-2xl">{title}</h3>
                     <p className="mt-3 text-sm leading-relaxed text-zinc-600 sm:text-base">{text}</p>
@@ -565,7 +565,7 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
               <div>
                 <h3 className="text-sm font-semibold">{c.feedSoon}</h3>
                 <ul className="mt-3 space-y-2">
-                  {c.feedSoonItems.map((item) => <li key={item} className="flex gap-2 text-sm text-zinc-500"><Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-zinc-400" aria-hidden="true" />{item}</li>)}
+                  {c.feedSoonItems.map((item) => <li key={item} className="flex gap-2 text-sm text-zinc-500"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-300" aria-hidden="true" />{item}</li>)}
                 </ul>
               </div>
             </div>
@@ -581,8 +581,8 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
       {on('cta') && (
       <section className="bg-stone-50 px-4 py-16 text-center text-zinc-900 sm:px-6 sm:py-24" style={at('cta')}>
         <div className="mx-auto max-w-3xl">
-          <h2 className="font-display font-extrabold leading-[1.1] tracking-tight" style={{ fontSize: 'clamp(2rem, 5.5vw, 3.5rem)' }}>{c.finalTitle}</h2>
-          <p className="mx-auto mt-4 max-w-xl text-base text-zinc-600 sm:text-lg">{c.finalSub}</p>
+          <h2 data-part="section-title" className="font-display font-extrabold leading-[1.1] tracking-tight" style={{ fontSize: 'clamp(2rem, 5.5vw, 3.5rem)' }}>{c.finalTitle}</h2>
+          <p data-part="section-text" className="mx-auto mt-4 max-w-xl text-base text-zinc-600 sm:text-lg">{c.finalSub}</p>
           <div className="mx-auto mt-8 flex w-full max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
             <button type="button" className="btn btn-accent justify-center rounded-full px-8 py-3 text-base font-semibold" onClick={() => openAuth('signup')}>{c.signup}</button>
             <button type="button" className={`${outline} justify-center rounded-full px-8 py-3 text-base font-semibold`} onClick={() => openAuth('signin')}>{c.login}</button>

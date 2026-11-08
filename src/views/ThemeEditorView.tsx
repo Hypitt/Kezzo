@@ -4,7 +4,7 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { Spinner } from '../components/ui';
-import { DEFAULT_THEME, FONTS, applyTheme, contrast, currentTheme, loadTheme, saveTheme, type Theme } from '../lib/theme';
+import { DEFAULT_THEME, FONTS, PARTS, PART_SCALE, applyTheme, contrast, currentTheme, loadTheme, saveTheme, type Theme } from '../lib/theme';
 
 const W = {
   en: {
@@ -12,6 +12,7 @@ const W = {
     colors: 'Colors', accent: 'Main color', accentHelp: 'Buttons, links and highlights.', ink: 'Dark color', inkHelp: 'Headings, text and dark bars.', soft: 'Soft background', softHelp: 'Alternating sections and cards.',
     fonts: 'Fonts', heading: 'Headings', body: 'Body text', sizes: 'Text size', app: 'In the app', landing: 'On the landing page',
     sample: 'Get to know the world through its people.', sampleBody: 'Share your culture, discover music, food and languages from around the world.', btn: 'Create your free account',
+    parts: 'One piece at a time', partsSub: 'Give a single kind of text or card its own font and size. The sample shows the result; it appears on the pages after you save. “Same as the rest” follows the settings above.', same: 'Same as the rest', size: 'Size', resetPart: 'Reset',
     save: 'Save', reset: 'Back to the original look', saved: 'Saved. Everyone sees the new look.', lowContrast: 'White text on this main color is hard to read (contrast {n}:1, aim for 4.5:1 or more). Pick a darker color.',
   },
   fr: {
@@ -19,6 +20,7 @@ const W = {
     colors: 'Couleurs', accent: 'Couleur principale', accentHelp: 'Boutons, liens et mises en avant.', ink: 'Couleur foncée', inkHelp: 'Titres, texte et barres foncées.', soft: 'Fond doux', softHelp: 'Sections en alternance et cartes.',
     fonts: 'Polices', heading: 'Titres', body: 'Texte', sizes: 'Taille du texte', app: 'Dans l’appli', landing: 'Sur la page d’accueil',
     sample: 'Découvrez le monde à travers ses gens.', sampleBody: 'Partagez votre culture, découvrez la musique, la cuisine et les langues du monde entier.', btn: 'Créer mon compte gratuit',
+    parts: 'Un élément à la fois', partsSub: 'Donnez à un seul type de texte ou de carte sa propre police et sa propre taille. L’exemple montre le résultat ; il apparaît sur les pages après l’enregistrement. « Comme le reste » suit les réglages ci-dessus.', same: 'Comme le reste', size: 'Taille', resetPart: 'Réinitialiser',
     save: 'Enregistrer', reset: 'Revenir au look d’origine', saved: 'Enregistré. Tout le monde voit le nouveau look.', lowContrast: 'Le texte blanc sur cette couleur est difficile à lire (contraste {n}:1, visez 4,5:1 ou plus). Choisissez une couleur plus foncée.',
   },
 };
@@ -43,7 +45,7 @@ export function ThemeEditorView() {
   const change = (patch: Partial<Theme>) => {
     const next = { ...draft, ...patch };
     setDraft(next);
-    applyTheme(next); // live preview on this screen
+    applyTheme({ ...next, parts: currentTheme().parts }); // live preview of the general settings on this screen
   };
 
   const save = async () => {
@@ -51,6 +53,13 @@ export function ThemeEditorView() {
     const err = await saveTheme(draft);
     setBusy(false);
     toast(err ?? w.saved, err ? 'error' : 'info');
+  };
+
+  const setPart = (id: string, patch: { font?: string; scale?: number }) => {
+    const merged = { ...(draft.parts[id] ?? {}), ...patch };
+    const parts = { ...draft.parts };
+    if (!merged.font && (!merged.scale || merged.scale === 100)) delete parts[id]; else parts[id] = merged;
+    setDraft({ ...draft, parts });
   };
 
   const ratio = contrast(draft.accent, '#ffffff');
@@ -102,6 +111,36 @@ export function ThemeEditorView() {
         <datalist id="th-steps">{SIZES.map((n) => <option key={n} value={n} />)}</datalist>
         <div className="grid gap-4 sm:grid-cols-2">{sizeRow('appScale', w.app)}{sizeRow('landingScale', w.landing)}</div>
         <p className="text-xs text-zinc-500">{lang === 'fr' ? 'L’aperçu ci-dessous utilise la taille de l’appli. La page d’accueil prend sa propre taille quand on l’ouvre.' : 'The preview below uses the app size. The landing page uses its own size when it opens.'}</p>
+      </section>
+
+      <section className="card space-y-4">
+        <div><h2 className="text-base font-semibold">{w.parts}</h2><p className="text-xs text-zinc-500">{w.partsSub}</p></div>
+        <ul className="divide-y divide-stone-200">
+          {PARTS.map((part) => {
+            const v = draft.parts[part.id] ?? {};
+            const label = lang === 'fr' ? part.fr : part.en;
+            return (
+              <li key={part.id} className="space-y-2 py-3">
+                <p className="text-sm font-semibold">{label}</p>
+                <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                  <div>
+                    <label className="label" htmlFor={`pf-${part.id}`}>{w.fonts}</label>
+                    <select id={`pf-${part.id}`} className="input" value={v.font ?? ''} onChange={(e) => setPart(part.id, { font: e.target.value || undefined })}>
+                      <option value="">{w.same}</option>
+                      {FONTS.map((f) => <option key={f.name} value={f.name}>{f.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label" htmlFor={`ps-${part.id}`}>{w.size}: {v.scale ?? 100}%</label>
+                    <input id={`ps-${part.id}`} className="w-full accent-[var(--color-accent)]" type="range" min={PART_SCALE.min} max={PART_SCALE.max} step={5} value={v.scale ?? 100} onChange={(e) => setPart(part.id, { scale: Number(e.target.value) })} />
+                  </div>
+                  <button type="button" className="btn btn-ghost btn-sm" disabled={!draft.parts[part.id]} onClick={() => setPart(part.id, { font: undefined, scale: 100 })}>{w.resetPart}</button>
+                </div>
+                <p className="overflow-hidden rounded-lg bg-stone-50 px-3 py-2 text-zinc-800" style={{ fontFamily: v.font ? `"${v.font}", sans-serif` : undefined, fontSize: `${(v.scale ?? 100) / 100}rem` }}>{w.sample}</p>
+              </li>
+            );
+          })}
+        </ul>
       </section>
 
       <section className="rounded-2xl border border-stone-200 bg-stone-50 p-5" aria-label="Preview">

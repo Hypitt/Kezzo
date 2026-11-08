@@ -35,7 +35,7 @@ const STALE_HOURS = 12;
 export function LiveView() {
   const { t } = useI18n();
   const { go } = useRouter();
-  const { user, ensureAuth } = useAuth();
+  const { user, profile, ensureAuth } = useAuth();
   const { toast } = useToast();
   const [streams, setStreams] = useState<LiveStream[] | null>(null);
   const [creating, setCreating] = useState(false);
@@ -77,9 +77,9 @@ export function LiveView() {
 
   const start = async (e: FormEvent) => {
     e.preventDefault();
-    if (!ensureAuth() || !title.trim()) return;
+    if (!ensureAuth()) return;
     setBusy(true);
-    const { data, error } = await supabase.rpc('start_live', { p_title: title.trim(), p_kind: kind, p_mode: mode, p_max_guests: guests });
+    const { data, error } = await supabase.rpc('start_live', { p_title: title.trim() || t('live_default_title', { name: profile?.display_name ?? '' }).trim(), p_kind: kind, p_mode: mode, p_max_guests: guests });
     setBusy(false);
     if (error) return toast(explain(error, t), 'error');
     go('live', data as string);
@@ -96,8 +96,8 @@ export function LiveView() {
       {creating && (
         <form className="card space-y-4" onSubmit={start}>
           <div>
-            <label className="label" htmlFor="live-title">{t('live_title_label')}</label>
-            <input id="live-title" className="input" value={title} maxLength={100} onChange={(e) => setTitle(e.target.value)} placeholder={t('live_title_ph')} required />
+            <label className="label" htmlFor="live-title">{t('live_title_label')} ({t('optional')})</label>
+            <input id="live-title" className="input" value={title} maxLength={100} onChange={(e) => setTitle(e.target.value)} placeholder={t('live_title_ph')} />
           </div>
           <div>
             <span className="label">{t('live_kind_label')}</span>
@@ -123,7 +123,7 @@ export function LiveView() {
             </div>
           )}
           <div className="flex gap-2">
-            <button className="btn btn-accent" disabled={busy || !title.trim()}>{busy ? <Spinner /> : <Radio className="h-4 w-4" aria-hidden="true" />}{t('live_start')}</button>
+            <button className="btn btn-accent" disabled={busy}>{busy ? <Spinner /> : <Radio className="h-4 w-4" aria-hidden="true" />}{t('live_start')}</button>
             <button type="button" className="btn btn-ghost" onClick={() => setCreating(false)}>{t('cancel')}</button>
           </div>
         </form>

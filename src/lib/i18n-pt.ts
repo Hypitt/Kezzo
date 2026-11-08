@@ -289,6 +289,8 @@ export const pt: Record<Key, string> = {
   vs_error: 'Não foi possível guardar: {why}',
   vs_synced: '{n} registos sincronizados.',
   vs_offline_queued: 'Guardado neste dispositivo. Sincroniza quando estiver online.',
+  live_default_title: '{name} está ao vivo',
+  battle_default_title: 'Batalha de {name}',
   vs_wait_cycle: 'O tesoureiro ainda não iniciou um ciclo de poupança.',
   vs_my_position: 'A minha situação',
   vs_my_line: '{shares} ações · poupado {saved} · devo {owes} · partilha estimada {payout}',

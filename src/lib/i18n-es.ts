@@ -289,6 +289,8 @@ export const es: Record<Key, string> = {
   vs_error: 'No se pudo guardar: {why}',
   vs_synced: '{n} registros sincronizados.',
   vs_offline_queued: 'Guardado en este dispositivo. Se sincronizará cuando haya conexión.',
+  live_default_title: '{name} está en vivo',
+  battle_default_title: 'Batalla de {name}',
   vs_wait_cycle: 'El tesorero aún no ha iniciado un ciclo de ahorro.',
   vs_my_position: 'Mi situación',
   vs_my_line: '{shares} acciones · ahorrado {saved} · debo {owes} · reparto estimado {payout}',

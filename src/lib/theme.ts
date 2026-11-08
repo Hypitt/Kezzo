@@ -16,9 +16,24 @@ export interface Theme {
   /** Text size in percent of the normal size. */
   appScale: number;
   landingScale: number;
+  /** Own font and/or size for one kind of text or card (see PARTS). Missing = follows the general settings. */
+  parts: Record<string, { font?: string; scale?: number }>;
 }
 
-export const DEFAULT_THEME: Theme = { accent: '#e5432b', ink: '#18181b', soft: '#fafaf9', headingFont: 'Sora', bodyFont: 'DM Sans', appScale: 100, landingScale: 100 };
+/** Pieces of the pages an admin can style on their own. `css` is where the style is applied. */
+export const PARTS: Array<{ id: string; css: string; en: string; fr: string }> = [
+  { id: 'heroTitle', css: '[data-part="hero-title"]', en: 'Landing page: main headline', fr: 'Page d’accueil : titre principal' },
+  { id: 'heroText', css: '[data-part="hero-text"]', en: 'Landing page: text under the headline', fr: 'Page d’accueil : texte sous le titre' },
+  { id: 'tagline', css: '[data-part="tagline"]', en: 'Landing page: the two big sentences', fr: 'Page d’accueil : les deux grandes phrases' },
+  { id: 'sectionTitle', css: '[data-part="section-title"]', en: 'Landing page: section titles', fr: 'Page d’accueil : titres des sections' },
+  { id: 'sectionText', css: '[data-part="section-text"]', en: 'Landing page: section paragraphs', fr: 'Page d’accueil : paragraphes des sections' },
+  { id: 'card', css: '[data-part="card"], .card', en: 'Cards (landing page and app)', fr: 'Cartes (page d’accueil et appli)' },
+  { id: 'button', css: '.btn', en: 'Buttons (landing page and app)', fr: 'Boutons (page d’accueil et appli)' },
+  { id: 'footer', css: 'footer', en: 'Footer', fr: 'Pied de page' },
+];
+export const PART_SCALE = { min: 60, max: 160 };
+
+export const DEFAULT_THEME: Theme = { accent: '#e5432b', ink: '#18181b', soft: '#fafaf9', headingFont: 'Sora', bodyFont: 'DM Sans', appScale: 100, landingScale: 100, parts: {} };
 
 /** Fonts an admin can pick (all free Google Fonts) with the fallback that is used while they load. */
 export const FONTS: Array<{ name: string; fallback: string }> = [
@@ -32,6 +47,21 @@ const KEY = 'kezzo_theme';
 const HEX = /^#[0-9a-f]{6}$/i;
 const clampScale = (n: unknown, d: number) => (typeof n === 'number' && n >= 85 && n <= 125 ? Math.round(n) : d);
 
+function normalizeParts(raw: unknown): Theme['parts'] {
+  const out: Theme['parts'] = {};
+  if (!raw || typeof raw !== 'object') return out;
+  for (const part of PARTS) {
+    const v = (raw as Record<string, unknown>)[part.id];
+    if (!v || typeof v !== 'object') continue;
+    const o = v as { font?: unknown; scale?: unknown };
+    const entry: { font?: string; scale?: number } = {};
+    if (typeof o.font === 'string' && FONTS.some((f) => f.name === o.font)) entry.font = o.font;
+    if (typeof o.scale === 'number' && o.scale >= PART_SCALE.min && o.scale <= PART_SCALE.max && o.scale !== 100) entry.scale = Math.round(o.scale);
+    if (entry.font || entry.scale) out[part.id] = entry;
+  }
+  return out;
+}
+
 export function normalizeTheme(raw: unknown): Theme {
   const o = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
   const hex = (v: unknown, d: string) => (typeof v === 'string' && HEX.test(v) ? v.toLowerCase() : d);
@@ -40,6 +70,7 @@ export function normalizeTheme(raw: unknown): Theme {
     accent: hex(o.accent, DEFAULT_THEME.accent), ink: hex(o.ink, DEFAULT_THEME.ink), soft: hex(o.soft, DEFAULT_THEME.soft),
     headingFont: font(o.headingFont, DEFAULT_THEME.headingFont), bodyFont: font(o.bodyFont, DEFAULT_THEME.bodyFont),
     appScale: clampScale(o.appScale, 100), landingScale: clampScale(o.landingScale, 100),
+    parts: normalizeParts(o.parts),
   };
 }
 
@@ -76,6 +107,23 @@ export function applyTheme(t: Theme): void {
   set('--font-sans', t.bodyFont === DEFAULT_THEME.bodyFont ? null : stack(t.bodyFont));
   const scale = scope === 'landing' ? t.landingScale : t.appScale;
   set('font-size', scale === 100 ? null : `${scale}%`);
+  applyParts(t.parts);
+}
+
+/** One small stylesheet holds the per-part fonts and sizes. `zoom` grows or shrinks the whole piece (text and spacing together). */
+function applyParts(parts: Theme['parts']): void {
+  let el = document.getElementById('kezzo-theme-parts') as HTMLStyleElement | null;
+  const css = PARTS.map((p) => {
+    const v = parts[p.id];
+    if (!v) return '';
+    const sel = p.css.split(',').map((x) => x.trim());
+    const all = sel.map((x) => `${x}, ${x} *`).join(', ');
+    return `${v.font ? `${all} { font-family: ${stack(v.font)} !important; }\n` : ''}${v.scale ? `${sel.join(', ')} { zoom: ${v.scale / 100}; }\n` : ''}`;
+  }).join('');
+  if (!css) { el?.remove(); return; }
+  if (!el) { el = document.createElement('style'); el.id = 'kezzo-theme-parts'; document.head.appendChild(el); }
+  el.textContent = css;
+  Object.values(parts).forEach((v) => v.font && loadFont(v.font));
 }
 
 /** Called once at start-up: shows the last theme straight away, then fetches the current one. */

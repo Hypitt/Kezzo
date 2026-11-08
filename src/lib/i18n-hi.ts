@@ -289,6 +289,8 @@ export const hi: Record<Key, string> = {
   vs_error: 'सेव नहीं हो सका: {why}',
   vs_synced: '{n} प्रविष्टियाँ सिंक हुईं।',
   vs_offline_queued: 'इस डिवाइस पर सेव हुआ। ऑनलाइन होते ही सिंक होगा।',
+  live_default_title: '{name} लाइव है',
+  battle_default_title: '{name} की बैटल',
   vs_wait_cycle: 'कोषाध्यक्ष ने अभी बचत चक्र शुरू नहीं किया है।',
   vs_my_position: 'मेरी स्थिति',
   vs_my_line: '{shares} शेयर · बचत {saved} · बकाया {owes} · अनुमानित बंटवारा {payout}',
