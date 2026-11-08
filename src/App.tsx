@@ -40,6 +40,7 @@ const MediaView = page(() => import('./views/MediaView').then((m) => ({ default:
 const MessagesView = page(() => import('./views/MessagesView').then((m) => ({ default: m.MessagesView })));
 const ProfileView = page(() => import('./views/ProfileView').then((m) => ({ default: m.ProfileView })));
 const PostView = page(() => import('./views/PostView').then((m) => ({ default: m.PostView })));
+const ThemeEditorView = page(() => import('./views/ThemeEditorView').then((m) => ({ default: m.ThemeEditorView })));
 const SiteEditorView = page(() => import('./views/SiteEditorView').then((m) => ({ default: m.SiteEditorView })));
 const ContestView = page(() => import('./views/ContestView').then((m) => ({ default: m.ContestView })));
 const OpportunitiesView = page(() => import('./views/OpportunitiesView').then((m) => ({ default: m.OpportunitiesView })));
@@ -70,6 +71,7 @@ function View() {
     case 'post': return <PostView id={route.id} />;
     case 'contest': return <ContestView />;
     case 'site': return <Gate><SiteEditorView /></Gate>;
+    case 'theme': return <Gate><ThemeEditorView /></Gate>;
     case 'opportunities': return <OpportunitiesView focus={route.id} />;
     case 'legal': return <LegalView id={route.id} />;
     case 'join': return <JoinGroupView code={route.id} />;

@@ -12,6 +12,7 @@ import { autoPaths, orderOf, setShowOriginal, useCopy, useShowOriginal, useSiteC
 import { TR } from '../lib/translate';
 import { ContestSection } from '../components/ContestSection';
 import { LandingMedia } from '../components/LandingMedia';
+import { useThemeScope } from '../lib/theme';
 
 /**
  * The public page every visitor sees first. Everything else in Kezzo needs an account.
@@ -335,6 +336,7 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
   const showOrig = useShowOriginal();
   const hasAuto = autoPaths(site, lang).some((p) => site.originals[p]);
   const at = (id: string) => ({ order: ord.indexOf(id) + 1 });
+  useThemeScope('landing');
   const on = useSections('landing');
   const [groups, setGroups] = useState<LandingGroup[]>([]);
   const [liveBattles, setLiveBattles] = useState(0);
@@ -403,12 +405,12 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
             </span>
           )}
           <h1 className="max-w-4xl font-display font-extrabold leading-[1.04] tracking-tight" style={{ fontSize: 'clamp(2.35rem, 7.4vw, 5rem)' }}>
-            {c.h1a}<br /><span className="text-[#ff7a5c]">{c.h1b}</span>
+            {c.h1a}<br /><span className="text-[color-mix(in_srgb,var(--color-accent),white_30%)]">{c.h1b}</span>
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">{c.leadTag}</p>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">{c.talent}</p>
           <div className="mt-8 flex w-full max-w-sm flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:justify-center">
-            <button type="button" className="btn btn-accent justify-center rounded-full px-7 py-3 text-base font-semibold shadow-lg shadow-black/20" onClick={() => openAuth('signup')}>
+            <button type="button" className="btn btn-accent justify-center rounded-full px-7 py-3 text-base font-semibold " onClick={() => openAuth('signup')}>
               {c.cta}<ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
             <InstallButton className="btn justify-center rounded-full border border-white/40 bg-white/10 px-7 py-3 text-base font-semibold text-white backdrop-blur hover:bg-white/20" label={t('download_kezzo')} />
@@ -575,21 +577,18 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
       </section>
       )}
 
-      {/* Final call to action: one rounded dark panel */}
+      {/* Final call to action: a plain band, no card, no glow */}
       {on('cta') && (
-      <section className="bg-white px-3 pb-10 sm:px-6 sm:pb-16 lg:px-8" style={at('cta')}>
-        <Reveal className="mx-auto max-w-6xl">
-          <div className="relative isolate overflow-hidden rounded-3xl bg-zinc-900 px-5 py-14 text-center text-white sm:px-10 sm:py-20">
-            <div className="absolute -top-24 left-1/2 -z-10 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-accent/30 blur-3xl" aria-hidden="true" />
-            <h2 className="mx-auto max-w-3xl font-display font-extrabold leading-[1.08] tracking-tight" style={{ fontSize: 'clamp(2rem, 5.5vw, 3.75rem)' }}>{c.finalTitle}</h2>
-            <p className="mx-auto mt-4 max-w-xl text-base text-zinc-300 sm:text-lg">{c.finalSub}</p>
-            <div className="mx-auto mt-8 flex w-full max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
-              <button type="button" className="btn btn-accent justify-center rounded-full px-8 py-3 text-base font-semibold" onClick={() => openAuth('signup')}>{c.signup}</button>
-              <button type="button" className="btn justify-center rounded-full border border-white/30 bg-transparent px-8 py-3 text-base font-semibold text-white hover:bg-white/10" onClick={() => openAuth('signin')}>{c.login}</button>
-            </div>
-            <p className="mx-auto mt-6 max-w-xl text-xs text-zinc-400">{c.members}</p>
+      <section className="bg-stone-50 px-4 py-16 text-center text-zinc-900 sm:px-6 sm:py-24" style={at('cta')}>
+        <div className="mx-auto max-w-3xl">
+          <h2 className="font-display font-extrabold leading-[1.1] tracking-tight" style={{ fontSize: 'clamp(2rem, 5.5vw, 3.5rem)' }}>{c.finalTitle}</h2>
+          <p className="mx-auto mt-4 max-w-xl text-base text-zinc-600 sm:text-lg">{c.finalSub}</p>
+          <div className="mx-auto mt-8 flex w-full max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
+            <button type="button" className="btn btn-accent justify-center rounded-full px-8 py-3 text-base font-semibold" onClick={() => openAuth('signup')}>{c.signup}</button>
+            <button type="button" className={`${outline} justify-center rounded-full px-8 py-3 text-base font-semibold`} onClick={() => openAuth('signin')}>{c.login}</button>
           </div>
-        </Reveal>
+          <p className="mx-auto mt-6 max-w-xl text-xs text-zinc-500">{c.members}</p>
+        </div>
       </section>
       )}
       </div>

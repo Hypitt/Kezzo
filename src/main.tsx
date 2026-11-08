@@ -4,8 +4,10 @@ import App from './App';
 import './index.css';
 import { initInstall } from './lib/install';
 import { setupStaleReload } from './lib/reload';
+import { initTheme } from './lib/theme';
 
 initInstall();
+initTheme();
 
 // A new version was deployed while this tab was open: the page files it asks for no longer exist.
 // Reload once to pick up the new version (a flag stops it from looping if something else is wrong).
