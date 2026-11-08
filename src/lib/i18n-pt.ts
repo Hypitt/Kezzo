@@ -240,6 +240,7 @@ export const pt: Record<Key, string> = {
   // gravação
   rec_opt_in: 'Gravar esta batalha no meu dispositivo', rec_note: 'Salva neste dispositivo enquanto você é anfitrião (cerca de 20 MB por minuto) e baixada quando a batalha termina. Mantenha esta aba aberta e visível.',
   rec_waiting: 'A gravação começa assim que a batalha ficar ao vivo.', rec_recording: 'Gravando {time}', rec_unsupported: 'Este navegador não oferece gravação. Experimente o Chrome, o Edge ou o Firefox em um computador.',
+  nav_menu: 'Menu',
   rec_failed: 'Não foi possível iniciar a gravação neste dispositivo.', rec_title: 'Gravação da batalha', rec_saved_note: 'A gravação completa fica neste navegador até você excluí-la. Baixe agora para guardá-la com segurança.',
   live_rec_opt_in: 'Gravar esta sessão no meu dispositivo',
   live_rec_waiting: 'A gravação começa assim que abrir o palco.',

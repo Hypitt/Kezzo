@@ -238,6 +238,7 @@ export const en = {
   // recording
   rec_opt_in: 'Record this battle on my device', rec_note: 'Saved on this device while you host (about 20 MB per minute) and downloaded when the battle ends. Keep this tab open and visible.',
   rec_waiting: 'Recording starts as soon as the battle goes live.', rec_recording: 'Recording {time}', rec_unsupported: 'Recording is not supported in this browser. Try Chrome, Edge or Firefox on a computer.',
+  nav_menu: 'Menu',
   rec_failed: 'Recording could not start on this device.', rec_title: 'Battle recording', rec_saved_note: 'The full recording is kept in this browser until you delete it. Download it now to keep it safely.',
   live_rec_opt_in: 'Record this session on my device',
   live_rec_waiting: 'Recording starts as soon as you open the stage.',
@@ -612,6 +613,7 @@ export const fr: Record<Key, string> = {
   // recording
   rec_opt_in: 'Enregistrer ce battle sur mon appareil', rec_note: 'Enregistré sur cet appareil pendant que vous animez (environ 20 Mo par minute) et téléchargé à la fin du battle. Gardez cet onglet ouvert et visible.',
   rec_waiting: 'L’enregistrement démarre dès que le battle passe en direct.', rec_recording: 'Enregistrement {time}', rec_unsupported: 'L’enregistrement n’est pas pris en charge par ce navigateur. Essayez Chrome, Edge ou Firefox sur ordinateur.',
+  nav_menu: 'Menu',
   rec_failed: 'L’enregistrement n’a pas pu démarrer sur cet appareil.', rec_title: 'Enregistrement du battle', rec_saved_note: 'L’enregistrement complet reste dans ce navigateur jusqu’à sa suppression. Téléchargez-le maintenant pour le conserver.',
   live_rec_opt_in: 'Enregistrer cette session sur mon appareil',
   live_rec_waiting: 'L’enregistrement démarre dès que vous ouvrez la scène.',
