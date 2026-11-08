@@ -21,8 +21,14 @@ export function SearchView() {
   const { t } = useI18n();
   const { toast } = useToast();
   const { go } = useRouter();
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(() => { try { const q = sessionStorage.getItem('kezzo-q') ?? ''; sessionStorage.removeItem('kezzo-q'); return q; } catch { return ''; } });
   const [term, setTerm] = useState('');
+  // Searches typed in the top bar arrive through this event (or sessionStorage when the page was not open yet).
+  useEffect(() => {
+    const on = (e: Event) => setInput(String((e as CustomEvent).detail ?? ''));
+    window.addEventListener('kezzo-search', on);
+    return () => window.removeEventListener('kezzo-search', on);
+  }, []);
   const [tab, setTab] = useState<Tab>('feed');
   const [scope, setScope] = useState<'all' | 'following'>('all');
   const [following, setFollowing] = useState<string[] | null>(null);
