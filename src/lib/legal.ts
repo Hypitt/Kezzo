@@ -1,4 +1,3 @@
-import type { Lang } from './types';
 
 /** A paragraph, a bullet list (array of strings), or a table. */
 export type LegalBlock = string | string[] | { head: string[]; rows: string[][] };

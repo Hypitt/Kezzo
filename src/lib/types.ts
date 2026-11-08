@@ -168,14 +168,6 @@ export interface AiVerdict {
   created_at: string;
 }
 
-export interface LedgerEntry {
-  id: number;
-  delta: number;
-  balance_type: 'voting' | 'reward';
-  reason: string;
-  created_at: string;
-}
-
 export interface LiveStream {
   id: string;
   host_id: string;
