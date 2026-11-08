@@ -35,3 +35,8 @@
 
 /* Landing texts an admin deleted leave nothing behind (no empty gap) */
 main.landing-copy :is(p, h2, h3, li, span, a):empty:not([aria-hidden]) { display: none; }
+
+/* Landing page ticker: scrolls half its width (one copy of the list) and loops; still for reduced motion */
+@keyframes marquee { to { transform: translateX(-50%); } }
+.marquee-track { animation: marquee 38s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }

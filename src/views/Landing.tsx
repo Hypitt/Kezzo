@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Mic, Swords, UserPlus, Users, type LucideIcon } from 'lucide-react';
+import { ArrowRight, Check, Mic, Sparkles, Swords, UserPlus, Users, type LucideIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
@@ -218,24 +218,24 @@ interface LandingGroup { id: string; name: string; tagline: string; category: st
 
 const outline = 'btn border border-zinc-300 bg-white text-zinc-900 hover:bg-stone-100';
 
-/** White top bar with the logo, language switch and the Log in / Sign up buttons. */
+/** Slim top bar: logo on the left, language and the two account buttons on the right. */
 function Header() {
   const { openAuth } = useAuth();
   const { lang } = useI18n();
   const { go } = useRouter();
   const c = COPY[lang];
   return (
-    <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/95 text-zinc-900 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
-        <a href="#/" onClick={(e) => { e.preventDefault(); go('search'); }} className="flex shrink-0 items-center gap-2 font-display text-lg font-bold text-zinc-900">
+    <header className="sticky top-0 z-40 border-b border-stone-200/70 bg-white/85 text-zinc-900 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8">
+        <a href="#/" onClick={(e) => { e.preventDefault(); go('search'); }} className="flex shrink-0 items-center gap-2 font-display text-lg font-bold text-zinc-900 sm:text-xl">
           <img src="/logo.svg" alt="" width="20" height="28" className="h-7 w-auto" decoding="async" />
           Kezzo
         </a>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           <LanguageSwitch className={`${outline} btn-sm`} />
-          <InstallButton compact className={`${outline} btn-sm`} />
-          <button type="button" className={`${outline} btn-sm`} onClick={() => openAuth('signin')}>{c.login}</button>
-          <button type="button" className="btn btn-sm btn-accent" onClick={() => openAuth('signup')}>{c.signup}</button>
+          <InstallButton compact className={`${outline} btn-sm max-md:hidden`} />
+          <button type="button" className="btn btn-sm px-2.5 text-zinc-900 hover:bg-stone-100 sm:px-3" onClick={() => openAuth('signin')}>{c.login}</button>
+          <button type="button" className="btn btn-sm btn-accent rounded-full px-4" onClick={() => openAuth('signup')}>{c.signup}</button>
         </div>
       </div>
     </header>
@@ -243,17 +243,29 @@ function Header() {
 }
 
 function Footer() {
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
   const { go } = useRouter();
+  const { openAuth } = useAuth();
   const c = COPY[lang];
   return (
-    <footer className="border-t border-stone-200 bg-stone-50 px-4 py-8 text-center text-xs text-zinc-500">
-      <div className="mb-2 flex flex-wrap justify-center gap-x-4 gap-y-1">
-        <button type="button" className="underline hover:text-zinc-900" onClick={() => go('legal', 'terms')}>{c.terms}</button>
-        <button type="button" className="underline hover:text-zinc-900" onClick={() => go('legal', 'privacy')}>{c.privacy}</button>
-        <a className="underline hover:text-zinc-900" href="mailto:kezzo.app@gmail.com">{c.contact}</a>
+    <footer className="border-t border-stone-200 bg-stone-50 px-4 pb-8 pt-12 text-zinc-600 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
+        <div className="max-w-sm">
+          <p className="flex items-center gap-2 font-display text-xl font-bold text-zinc-900"><img src="/logo.svg" alt="" width="20" height="28" className="h-7 w-auto" decoding="async" />Kezzo</p>
+          <p className="mt-3 text-sm leading-relaxed">{c.leadTag}</p>
+        </div>
+        <nav aria-label="Kezzo" className="flex flex-col items-start gap-2 text-sm">
+          <button type="button" className="hover:text-zinc-900" onClick={() => openAuth('signup')}>{c.signup}</button>
+          <button type="button" className="hover:text-zinc-900" onClick={() => openAuth('signin')}>{c.login}</button>
+          <button type="button" className="hover:text-zinc-900" onClick={() => go('legal', 'terms')}>{c.terms}</button>
+          <button type="button" className="hover:text-zinc-900" onClick={() => go('legal', 'privacy')}>{c.privacy}</button>
+          <a className="hover:text-zinc-900" href="mailto:kezzo.app@gmail.com">{c.contact}</a>
+        </nav>
+        <div className="flex flex-col items-start gap-3">
+          <InstallButton className={`${outline} px-4 py-2 text-sm font-semibold`} label={t('download_kezzo')} />
+        </div>
       </div>
-      <p>© {new Date().getFullYear()} WeDIL Inc., Montréal, Québec</p>
+      <p className="mx-auto mt-10 max-w-6xl border-t border-stone-200 pt-5 text-xs text-zinc-500">© {new Date().getFullYear()} WeDIL Inc., Montréal, Québec</p>
     </footer>
   );
 }
@@ -265,6 +277,32 @@ export function PublicFrame({ children }: { children: ReactNode }) {
       <Header />
       <main className="landing-copy flex-1">{children}</main>
       <Footer />
+    </div>
+  );
+}
+
+/** Fades and lifts its content in once, when it scrolls into view. Always visible without scripts, with reduced motion, or on very old browsers. */
+function Reveal({ children, className = '' }: { children: ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState<'idle' | 'hidden' | 'shown'>('idle');
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !('IntersectionObserver' in window) || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    setState('hidden');
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setState('shown'); io.disconnect(); } }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return <div ref={ref} className={`${className} ${state === 'hidden' ? 'translate-y-5 opacity-0' : 'translate-y-0 opacity-100'} transition duration-700 ease-out`}>{children}</div>;
+}
+
+/** Small heading block used by most sections: tiny label, large title, optional paragraph. */
+function SectionHead({ kicker, title, text, center = false }: { kicker?: string; title: string; text?: string; center?: boolean }) {
+  return (
+    <div className={`${center ? 'mx-auto text-center' : ''} max-w-2xl`}>
+      {kicker && <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{kicker}</p>}
+      <h2 className="mt-2 font-display text-[1.9rem] font-extrabold leading-[1.1] tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl">{title}</h2>
+      {text && <p className="mt-4 text-base leading-relaxed text-zinc-600 sm:text-lg">{text}</p>}
     </div>
   );
 }
@@ -338,53 +376,67 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
     openAuth('signup');
   };
 
+  const wrap = 'mx-auto max-w-6xl px-4 sm:px-6 lg:px-8';
+  const catNames = Object.values(c.cats);
+
   return (
     <PublicFrame>
-      {/* Hero: warm light card with a group photo that fades into it */}
-      <section className="bg-white px-3 pb-2 pt-2 sm:px-4 sm:pb-3 sm:pt-3">
-        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#fff8f4] via-[#fdeee6] to-[#f8d9cb] text-zinc-900">
-          <div className="relative grid gap-0 lg:grid-cols-[1fr_1.15fr]">
-            <div className="px-5 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-7 lg:self-start lg:pt-8">
-              {liveBattles > 0 && (
-                <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white/70 px-3 py-1 text-xs font-medium text-zinc-800 backdrop-blur">
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-                  {c.live(liveBattles)}
-                </span>
-              )}
-              <h1 className="font-display text-[1.7rem] font-extrabold leading-[1.12] tracking-tight text-zinc-900 sm:text-4xl">
-                {c.h1a}<br /><span className="text-accent">{c.h1b}</span>
-              </h1>
-              <p className="mt-3 max-w-md text-[0.95rem] leading-[1.65] text-zinc-700 sm:text-base">{c.lead}</p>
-              <p className="mt-4 max-w-md border-l-[3px] border-accent pl-3 font-display text-sm font-bold leading-snug text-zinc-900 sm:text-base">{c.leadTag}</p>
-              <p className="mt-3 max-w-md text-sm font-medium leading-snug text-zinc-700">{c.talent}</p>
-              <div className="mt-5 flex flex-wrap items-center gap-2.5">
-                <InstallButton className="btn btn-accent px-5 py-2.5 text-sm font-semibold shadow-sm" label={t('download_kezzo')} />
-                <button type="button" className={`${outline} px-5 py-2.5 text-sm font-semibold`} onClick={() => openAuth('signin')}>{c.login}</button>
-              </div>
-            </div>
-            <div className="relative min-h-44 sm:min-h-56 lg:min-h-[21rem]">
-              {/* the photo melts into the card: faded on its left edge (on phones: on its top edge) */}
-              {!site.hidden.includes('hero') && <img
-                src={site.images.hero ?? '/landing/hero-photo.jpg'}
-                alt=""
-                width="1400"
-                height="905"
-                className="absolute inset-0 h-full w-full object-cover object-[60%_35%] [mask-image:linear-gradient(to_right,transparent,black_32%)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_32%)] max-lg:[mask-image:linear-gradient(to_bottom,transparent,black_30%)] max-lg:[-webkit-mask-image:linear-gradient(to_bottom,transparent,black_30%)]"
-                fetchPriority="high"
-                decoding="async"
-              />}
-            </div>
+      {/* Hero: one big photo, a short headline with the key line in colour, two buttons */}
+      <section className="relative isolate overflow-hidden bg-zinc-900 text-white">
+        {!site.hidden.includes('hero') && (
+          <img
+            src={site.images.hero ?? '/landing/hero-photo.jpg'}
+            alt=""
+            width="1400"
+            height="905"
+            className="absolute inset-0 -z-10 h-full w-full object-cover object-[60%_35%]"
+            fetchPriority="high"
+            decoding="async"
+          />
+        )}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-zinc-950/70 via-zinc-950/45 to-zinc-950/80" aria-hidden="true" />
+        <div className={`${wrap} flex min-h-[32rem] flex-col items-center justify-center py-16 text-center sm:min-h-[36rem] sm:py-20 lg:min-h-[41rem] lg:py-28`}>
+          {liveBattles > 0 && (
+            <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-medium backdrop-blur">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" aria-hidden="true" />
+              {c.live(liveBattles)}
+            </span>
+          )}
+          <h1 className="max-w-4xl font-display font-extrabold leading-[1.04] tracking-tight" style={{ fontSize: 'clamp(2.35rem, 7.4vw, 5rem)' }}>
+            {c.h1a}<br /><span className="text-[#ff7a5c]">{c.h1b}</span>
+          </h1>
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">{c.leadTag}</p>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">{c.talent}</p>
+          <div className="mt-8 flex w-full max-w-sm flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:justify-center">
+            <button type="button" className="btn btn-accent justify-center rounded-full px-7 py-3 text-base font-semibold shadow-lg shadow-black/20" onClick={() => openAuth('signup')}>
+              {c.cta}<ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+            <InstallButton className="btn justify-center rounded-full border border-white/40 bg-white/10 px-7 py-3 text-base font-semibold text-white backdrop-blur hover:bg-white/20" label={t('download_kezzo')} />
           </div>
+          <p className="mt-3 text-xs text-white/60">{c.ctaNote}</p>
         </div>
       </section>
+
+      {/* A slow ticker of the things you can do on Kezzo */}
+      <div className="overflow-hidden border-b border-stone-200 bg-white py-4" aria-hidden="true">
+        <div className="marquee-track flex w-max gap-10 whitespace-nowrap font-display text-sm font-semibold uppercase tracking-[0.14em] text-zinc-400 sm:text-base">
+          {[0, 1].map((k) => (
+            <div key={k} className="flex shrink-0 gap-10">
+              {catNames.map((n) => <span key={`${k}-${n}`} className="flex items-center gap-10">{n}<Sparkles className="h-3.5 w-3.5 text-accent" /></span>)}
+            </div>
+          ))}
+        </div>
+      </div>
 
       <div className="flex flex-col">
       {/* Two lines that sum Kezzo up */}
       {on('tagline') && (
-      <section className="border-y border-stone-200 bg-stone-50 px-4 py-3" aria-label="Kezzo" style={at('tagline')}>
-        <ul className="mx-auto grid max-w-3xl gap-x-6 gap-y-2 text-center sm:grid-cols-2">
-          {c.lines.map((line) => <li key={line} className="font-display text-sm font-semibold leading-snug text-zinc-900 sm:text-base">{line}</li>)}
-        </ul>
+      <section className="bg-white px-4 py-14 sm:px-6 sm:py-20" aria-label="Kezzo" style={at('tagline')}>
+        <Reveal>
+          <ul className="mx-auto grid max-w-4xl gap-4 text-center">
+            {c.lines.map((line, i) => <li key={line} className={`font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl ${i === 1 ? 'text-accent' : 'text-zinc-900'}`}>{line}</li>)}
+          </ul>
+        </Reveal>
       </section>
       )}
 
@@ -392,88 +444,41 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
       {on('contest') && <div style={at('contest')}><ContestSection onJoin={() => { window.location.hash = '/contest'; openAuth('signup'); }} /></div>}
       {on('media') && <div style={at('media')}><LandingMedia words={c.media} /></div>}
       {on('video') && site.video.url && (
-        <section className="bg-black px-4 py-6" style={at('video')}>
-          <div className="mx-auto max-w-3xl">
+        <section className="bg-black px-4 py-8 sm:py-12" style={at('video')}>
+          <div className="mx-auto max-w-4xl">
             {c.videoTitle && <h2 className="mb-3 text-center text-xl font-bold text-white sm:text-2xl">{c.videoTitle}</h2>}
-            <video className="w-full rounded-xl" src={site.video.url} poster={site.video.poster} autoPlay muted loop controls playsInline preload="auto" />
+            <video className="w-full rounded-2xl" src={site.video.url} poster={site.video.poster} autoPlay muted loop controls playsInline preload="auto" />
           </div>
         </section>
       )}
 
-      {/* Groups: real featured groups when a group admin chose to feature one, otherwise clearly labelled examples */}
-      {on('groups') && (
-      <section className="bg-white px-4 py-6 text-zinc-900" style={at('groups')}>
-        <div className="mx-auto max-w-6xl">
-          <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.groupsKicker}</p>
-          <h2 className="mt-1 text-2xl font-bold sm:text-3xl">{c.groupsTitle}</h2>
-          <p className="mt-1 text-sm text-zinc-600">{c.groupsText}</p>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {groups.length > 0 ? groups.map((g) => (
-              <li key={g.id} className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white p-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-stone-100 text-zinc-900"><Users className="h-5 w-5" aria-hidden="true" /></span>
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-sm font-semibold">{g.name}</h3>
-                  <p className="truncate text-xs text-zinc-500">{c.cats[g.category] ?? c.cats.other} · {c.groupMembers(g.member_count)}</p>
-                </div>
-                <button type="button" className={`${outline} btn-sm shrink-0`} onClick={() => joinGroup(g.id)}>
-                  <UserPlus className="h-3.5 w-3.5" aria-hidden="true" />{c.groupJoin}
-                </button>
-              </li>
-            )) : c.exGroups.map(([name, text, n], i) => (
-              <li key={name} className="overflow-hidden rounded-xl border border-stone-200 bg-white">
-                <div className="relative h-24">
-                  <img src={['/landing/group-podcast.jpg', '/landing/group-creators.jpg', '/landing/group-friends.jpg'][i]} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
-                  <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-700">{c.example}</span>
-                </div>
-                <div className="flex items-center justify-between gap-2 p-3">
-                  <div className="min-w-0"><h3 className="truncate text-sm font-semibold">{name}</h3><p className="truncate text-xs text-zinc-500">{text}</p><p className="text-xs font-medium text-zinc-700">{c.groupMembers(n as number)}</p></div>
-                  <button type="button" className={`${outline} btn-sm shrink-0`} onClick={() => openAuth('signup')}>{c.groupJoin}</button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-      )}
-
-      {/* Five things Kezzo is about */}
-      {on('about') && (
-      <section className="bg-white px-4 py-10 text-zinc-900" aria-label="Kezzo" style={at('about')}>
-        <ul className="mx-auto max-w-6xl divide-y divide-stone-200 border-y border-stone-200">
-          {c.pillars.map(([kicker, title, text]) => (
-            <li key={kicker} className="grid gap-2 py-6 lg:grid-cols-[1fr_1.4fr] lg:gap-10">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-accent">{kicker}</p>
-                <h2 className="mt-2 text-2xl font-bold leading-tight sm:text-3xl">{title}</h2>
-              </div>
-              <p className="leading-relaxed text-zinc-600 lg:pt-6">{text}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-      )}
-
-      {/* Solo, group, battle */}
+      {/* Solo, group, battle: three big alternating blocks */}
       {on('modes') && (
-      <section className="bg-stone-50 px-4 py-12 text-zinc-900" style={at('modes')}>
-        <div className="mx-auto max-w-6xl">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.liveKicker}</p>
-            <h2 className="mt-2 text-3xl font-bold">{c.liveTitle}</h2>
-            <p className="mt-3 leading-relaxed text-zinc-600">{c.liveText}</p>
-          </div>
-          <ul className="mt-6 grid gap-3 md:grid-cols-3">
+      <section className="bg-stone-50 py-14 text-zinc-900 sm:py-20 lg:py-24" style={at('modes')}>
+        <div className={wrap}>
+          <Reveal><SectionHead kicker={c.liveKicker} title={c.liveTitle} text={c.liveText} center /></Reveal>
+          <ul className="mt-12 space-y-14 sm:mt-16 sm:space-y-20">
             {c.modes.map(([title, text], i) => {
               const Icon = MODE_ICONS[i];
               return (
-                <li key={title} className="overflow-hidden rounded-xl border border-stone-200 bg-white">
-                  {i < 2
-                    ? <LoopVideo name={['clip-solo', 'clip-group'][i]} className="h-28 w-full object-cover" />
-                    : <img src="/landing/mode-battle.jpg" alt="" className="h-28 w-full object-cover" loading="lazy" decoding="async" />}
-                  <div className="p-4">
-                    <h3 className="flex items-center gap-2 text-base font-semibold"><Icon className="h-4 w-4 text-accent" aria-hidden="true" />{title}</h3>
-                    <p className="mt-1 text-sm leading-relaxed text-zinc-600">{text}</p>
-                  </div>
+                <li key={title}>
+                  <Reveal className="grid items-center gap-6 md:grid-cols-2 md:gap-12 lg:gap-16">
+                    <div className={`overflow-hidden rounded-3xl bg-stone-200 shadow-sm ${i % 2 === 1 ? 'md:order-2' : ''}`}>
+                      <div className="aspect-[4/3] w-full">
+                        {i < 2
+                          ? <LoopVideo name={['clip-solo', 'clip-group'][i]} className="h-full w-full object-cover" />
+                          : <img src="/landing/mode-battle.jpg" alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-accent/10 text-accent"><Icon className="h-5 w-5" aria-hidden="true" /></span>
+                      <h3 className="mt-4 font-display text-2xl font-extrabold leading-tight sm:text-3xl lg:text-4xl">{title}</h3>
+                      <p className="mt-3 max-w-md text-base leading-relaxed text-zinc-600 sm:text-lg">{text}</p>
+                      <button type="button" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline" onClick={() => openAuth('signup')}>
+                        {c.signup}<ArrowRight className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </Reveal>
                 </li>
               );
             })}
@@ -482,30 +487,109 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
       </section>
       )}
 
-      {/* Participation */}
-      {on('join') && (
-      <section className="bg-white px-4 py-12 text-zinc-900" style={at('join')}>
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-2">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-accent">{c.feedKicker}</p>
-            <h2 className="mt-2 text-3xl font-bold">{c.feedTitle}</h2>
-            <p className="mt-3 leading-relaxed text-zinc-600">{c.feedText}</p>
-          </div>
-          {!site.hidden.includes('feed') && <img src={site.images.feed ?? '/landing/feed.jpg'} alt="" className="h-56 w-full rounded-xl object-cover sm:h-64" loading="lazy" decoding="async" />}
+      {/* Groups: real featured groups when a group admin chose to feature one, otherwise clearly labelled examples */}
+      {on('groups') && (
+      <section className="bg-white py-14 text-zinc-900 sm:py-20" style={at('groups')}>
+        <div className={wrap}>
+          <Reveal><SectionHead kicker={c.groupsKicker} title={c.groupsTitle} text={c.groupsText} /></Reveal>
+          <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {groups.length > 0 ? groups.map((g) => (
+              <li key={g.id} className="flex items-center gap-3 rounded-2xl border border-stone-200 bg-white p-4 transition hover:border-stone-300 hover:shadow-sm">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-zinc-900"><Users className="h-5 w-5" aria-hidden="true" /></span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="truncate text-sm font-semibold">{g.name}</h3>
+                  <p className="truncate text-xs text-zinc-500">{c.cats[g.category] ?? c.cats.other} · {c.groupMembers(g.member_count)}</p>
+                </div>
+                <button type="button" className={`${outline} btn-sm shrink-0 rounded-full`} onClick={() => joinGroup(g.id)}>
+                  <UserPlus className="h-3.5 w-3.5" aria-hidden="true" />{c.groupJoin}
+                </button>
+              </li>
+            )) : c.exGroups.map(([name, text, n], i) => (
+              <li key={name} className="group relative isolate overflow-hidden rounded-3xl bg-zinc-900 text-white">
+                <img src={['/landing/group-podcast.jpg', '/landing/group-creators.jpg', '/landing/group-friends.jpg'][i]} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" decoding="async" />
+                <div className="absolute inset-0 -z-10 bg-gradient-to-t from-zinc-950/85 via-zinc-950/25 to-transparent" aria-hidden="true" />
+                <div className="flex min-h-56 flex-col justify-between p-4 sm:min-h-64">
+                  <span className="self-start rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-700">{c.example}</span>
+                  <div>
+                    <h3 className="font-display text-lg font-bold leading-tight">{name}</h3>
+                    <p className="mt-0.5 text-sm text-white/80">{text}</p>
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-white/80">{c.groupMembers(n as number)}</span>
+                      <button type="button" className="btn btn-sm rounded-full bg-white text-zinc-900 hover:bg-stone-100" onClick={() => openAuth('signup')}>{c.groupJoin}</button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
       )}
 
-      {/* Final call to action */}
-      {on('cta') && (
-      <section className="bg-zinc-900 px-4 py-16 text-center text-white" style={at('cta')}>
-        <h2 className="text-3xl font-bold sm:text-4xl">{c.finalTitle}</h2>
-        <p className="mx-auto mt-3 max-w-xl text-zinc-300">{c.finalSub}</p>
-        <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <button type="button" className="btn btn-accent px-6 py-3 text-base" onClick={() => openAuth('signup')}>{c.signup}</button>
-          <button type="button" className="btn border border-zinc-500 bg-transparent px-6 py-3 text-base text-white hover:bg-zinc-800" onClick={() => openAuth('signin')}>{c.login}</button>
+      {/* Five things Kezzo is about: a card grid (2 across on tablets, 6-column mosaic on laptops) */}
+      {on('about') && (
+      <section className="bg-stone-50 py-14 text-zinc-900 sm:py-20 lg:py-24" aria-label="Kezzo" style={at('about')}>
+        <div className={wrap}>
+          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+            {c.pillars.map(([kicker, title, text], i) => (
+              <li key={kicker} className={`${i < 3 ? 'lg:col-span-2' : 'lg:col-span-3'} ${i === 4 ? 'md:col-span-2 lg:col-span-3' : ''}`}>
+                <Reveal className="h-full">
+                  <article className="flex h-full flex-col rounded-3xl border border-stone-200 bg-white p-6 sm:p-8">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{kicker}</p>
+                    <h3 className="mt-3 font-display text-xl font-extrabold leading-tight sm:text-2xl">{title}</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-zinc-600 sm:text-base">{text}</p>
+                  </article>
+                </Reveal>
+              </li>
+            ))}
+          </ul>
         </div>
-        <p className="mx-auto mt-6 max-w-xl text-xs text-zinc-400">{c.members}</p>
+      </section>
+      )}
+
+      {/* Participation: photo, text and what is available now / coming soon */}
+      {on('join') && (
+      <section className="bg-white py-14 text-zinc-900 sm:py-20 lg:py-24" style={at('join')}>
+        <div className={`${wrap} grid items-center gap-10 lg:grid-cols-2 lg:gap-16`}>
+          <Reveal>
+            <SectionHead kicker={c.feedKicker} title={c.feedTitle} text={c.feedText} />
+            <div className="mt-8 grid gap-6 sm:grid-cols-2">
+              <div>
+                <h3 className="text-sm font-semibold">{c.feedNow}</h3>
+                <ul className="mt-3 space-y-2">
+                  {c.feedNowItems.map((item) => <li key={item} className="flex gap-2 text-sm text-zinc-700"><Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden="true" />{item}</li>)}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold">{c.feedSoon}</h3>
+                <ul className="mt-3 space-y-2">
+                  {c.feedSoonItems.map((item) => <li key={item} className="flex gap-2 text-sm text-zinc-500"><Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-zinc-400" aria-hidden="true" />{item}</li>)}
+                </ul>
+              </div>
+            </div>
+          </Reveal>
+          {!site.hidden.includes('feed') && (
+            <Reveal><img src={site.images.feed ?? '/landing/feed.jpg'} alt="" className="aspect-[4/3] w-full rounded-3xl object-cover shadow-sm" loading="lazy" decoding="async" /></Reveal>
+          )}
+        </div>
+      </section>
+      )}
+
+      {/* Final call to action: one rounded dark panel */}
+      {on('cta') && (
+      <section className="bg-white px-3 pb-10 sm:px-6 sm:pb-16 lg:px-8" style={at('cta')}>
+        <Reveal className="mx-auto max-w-6xl">
+          <div className="relative isolate overflow-hidden rounded-3xl bg-zinc-900 px-5 py-14 text-center text-white sm:px-10 sm:py-20">
+            <div className="absolute -top-24 left-1/2 -z-10 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-accent/30 blur-3xl" aria-hidden="true" />
+            <h2 className="mx-auto max-w-3xl font-display font-extrabold leading-[1.08] tracking-tight" style={{ fontSize: 'clamp(2rem, 5.5vw, 3.75rem)' }}>{c.finalTitle}</h2>
+            <p className="mx-auto mt-4 max-w-xl text-base text-zinc-300 sm:text-lg">{c.finalSub}</p>
+            <div className="mx-auto mt-8 flex w-full max-w-sm flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
+              <button type="button" className="btn btn-accent justify-center rounded-full px-8 py-3 text-base font-semibold" onClick={() => openAuth('signup')}>{c.signup}</button>
+              <button type="button" className="btn justify-center rounded-full border border-white/30 bg-transparent px-8 py-3 text-base font-semibold text-white hover:bg-white/10" onClick={() => openAuth('signin')}>{c.login}</button>
+            </div>
+            <p className="mx-auto mt-6 max-w-xl text-xs text-zinc-400">{c.members}</p>
+          </div>
+        </Reveal>
       </section>
       )}
       </div>
