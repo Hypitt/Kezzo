@@ -13,9 +13,11 @@ import { useToast } from '../state/Toast';
 import { useCalls } from '../state/Calls';
 import { Avatar, Empty, Loading } from '../components/ui';
 import { Tx } from '../components/Tx';
+import { VoiceRecorder } from '../components/VoiceRecorder';
+import { startUpload } from '../lib/upload';
 
 interface Conversation { otherId: string; last: DirectMessage; unread: number }
-const COLUMNS = 'id,sender_id,recipient_id,body,read_at,created_at';
+const COLUMNS = 'id,sender_id,recipient_id,body,audio_path,audio_seconds,read_at,created_at';
 
 export function MessagesView({ otherId }: { otherId?: string }) {
   const { user, blocked } = useAuth();
@@ -82,7 +84,7 @@ export function MessagesView({ otherId }: { otherId?: string }) {
                         <span className="truncate text-sm font-semibold">{p?.display_name ?? '…'}</span>
                         <span className="shrink-0 text-[11px] text-zinc-400">{timeAgo(c.last.created_at, lang)}</span>
                       </span>
-                      <span className="block truncate text-xs text-zinc-500">{c.last.body}</span>
+                      <span className="block truncate text-xs text-zinc-500">{c.last.audio_path && !c.last.body ? t('voice_message') : c.last.body}</span>
                     </span>
                     {c.unread > 0 && <span className="rounded-full bg-accent px-1.5 text-[11px] font-medium text-white">{c.unread}</span>}
                   </button>
@@ -137,6 +139,25 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me, otherId, refreshKey]);
 
+  // A voice message goes to private storage (dm/<me>/<them>/...), then the message row points at it.
+  const sendVoice = async (file: File, seconds: number) => {
+    const path = `dm/${me}/${otherId}/${crypto.randomUUID()}.${file.name.split('.').pop()}`;
+    try {
+      await startUpload({ bucket: 'chat-files', path, file }).done;
+    } catch {
+      return toast(t('error_generic'), 'error');
+    }
+    const { data, error } = await supabase.from('direct_messages')
+      .insert({ sender_id: me, recipient_id: otherId, body: '', audio_path: path, audio_seconds: seconds }).select(COLUMNS).single();
+    if (error || !data) {
+      void supabase.storage.from('chat-files').remove([path]);
+      return toast(t('dm_not_allowed'), 'error');
+    }
+    setMessages((m) => [...m, data as DirectMessage]);
+    void api('notify-message', { messageId: (data as DirectMessage).id }).catch(() => undefined);
+    onSent();
+  };
+
   const send = async (e: FormEvent) => {
     e.preventDefault();
     const body = text.trim();
@@ -172,14 +193,29 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
         {messages.length === 0 && <p className="text-sm text-zinc-500">{t('say_hello')}</p>}
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.sender_id === me ? 'justify-end' : ''}`}>
-            <p className={`max-w-[80%] break-words rounded-2xl px-3 py-1.5 text-sm ${m.sender_id === me ? 'bg-zinc-900 text-white' : 'bg-zinc-100'}`}><Tx text={m.body} enabled={m.sender_id !== me} /></p>
+            <div className={`max-w-[80%] break-words rounded-2xl px-3 py-1.5 text-sm ${m.sender_id === me ? 'bg-zinc-900 text-white' : 'bg-zinc-100'}`}>
+              {m.audio_path && <DmAudio path={m.audio_path} />}
+              {m.body && <Tx text={m.body} enabled={m.sender_id !== me} />}
+            </div>
           </div>
         ))}
       </div>
       <form onSubmit={send} className="flex gap-2 border-t border-zinc-100 p-3">
+        <VoiceRecorder onDone={(f, sec) => void sendVoice(f, sec)} />
         <input className="input" value={text} maxLength={1000} onChange={(e) => setText(e.target.value)} placeholder={t('message_placeholder')} aria-label={t('message_placeholder')} />
         <button className="btn btn-primary" disabled={!text.trim()} aria-label={t('send')}><Send className="h-4 w-4" aria-hidden="true" /></button>
       </form>
     </div>
   );
+}
+
+/** A voice message: private, opened through a short-lived link. */
+function DmAudio({ path }: { path: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let off = false;
+    supabase.storage.from('chat-files').createSignedUrl(path, 3600).then(({ data }) => { if (!off && data) setUrl(data.signedUrl); });
+    return () => { off = true; };
+  }, [path]);
+  return url ? <audio src={url} controls preload="none" className="h-9 w-56 max-w-full" /> : <span className="block h-9 w-56 max-w-full" />;
 }

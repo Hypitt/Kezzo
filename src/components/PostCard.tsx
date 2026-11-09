@@ -21,7 +21,9 @@ import { TR, useTranslated } from '../lib/translate';
 import { transcribePost } from '../lib/transcribe';
 import { ReportButton } from './ReportButton';
 import { ShareButton } from './ShareButton';
-import { publicUrl, removePublic } from '../lib/storage';
+import { publicFilePath, publicUrl, removePublic } from '../lib/storage';
+import { startUpload } from '../lib/upload';
+import { VoiceRecorder } from './VoiceRecorder';
 
 interface Props {
   post: Post;
@@ -29,7 +31,8 @@ interface Props {
   onDelete: (id: string) => void;
 }
 
-interface CommentRow { id: string; author_id: string; body: string; created_at: string; author?: PublicProfile }
+interface CommentRow { id: string; author_id: string; body: string; audio_path?: string | null; created_at: string; author?: PublicProfile }
+const COMMENT_COLUMNS = 'id,author_id,body,audio_path,created_at';
 
 export function PostCard({ post, onChange, onDelete }: Props) {
   const { user, ensureAuth, refreshWallet } = useAuth();
@@ -243,7 +246,7 @@ function Comments({ post, onCount }: { post: Post; onCount: (n: number) => void 
   useEffect(() => {
     let off = false;
     (async () => {
-      const { data } = await supabase.from('post_comments').select('id,author_id,body,created_at').eq('post_id', post.id).order('created_at').limit(100);
+      const { data } = await supabase.from('post_comments').select(COMMENT_COLUMNS).eq('post_id', post.id).order('created_at').limit(100);
       const list = (data ?? []) as CommentRow[];
       const ids = [...new Set(list.map((c) => c.author_id))];
       const { data: people } = ids.length ? await supabase.from('profiles').select(PUBLIC_PROFILE).in('id', ids) : { data: [] };
@@ -260,7 +263,7 @@ function Comments({ post, onCount }: { post: Post; onCount: (n: number) => void 
     const body = text.trim();
     if (!body || !ensureAuth() || !user) return;
     if (!isSafe(body)) return toast(t('blocked_content'), 'error');
-    const { data, error } = await supabase.from('post_comments').insert({ post_id: post.id, author_id: user.id, body }).select('id,author_id,body,created_at').single();
+    const { data, error } = await supabase.from('post_comments').insert({ post_id: post.id, author_id: user.id, body }).select(COMMENT_COLUMNS).single();
     if (error || !data) return toast(t('error_generic'), 'error');
     const { data: me } = await supabase.from('profiles').select(PUBLIC_PROFILE).eq('id', user.id).single();
     setRows((r) => [...(r ?? []), { ...(data as CommentRow), author: me as PublicProfile }]);
@@ -268,9 +271,29 @@ function Comments({ post, onCount }: { post: Post; onCount: (n: number) => void 
     setText('');
   };
 
+  const sendVoice = async (file: File, seconds: number) => {
+    if (!ensureAuth() || !user) return;
+    const path = publicFilePath(user.id, `voice-${crypto.randomUUID()}.${file.name.split('.').pop()}`);
+    try {
+      await startUpload({ bucket: 'media-public', path, file }).done;
+    } catch {
+      return toast(t('error_generic'), 'error');
+    }
+    const { data, error } = await supabase.from('post_comments').insert({ post_id: post.id, author_id: user.id, body: '', audio_path: path, audio_seconds: seconds }).select(COMMENT_COLUMNS).single();
+    if (error || !data) {
+      void removePublic('media-public', [path]);
+      return toast(t('error_generic'), 'error');
+    }
+    const { data: me } = await supabase.from('profiles').select(PUBLIC_PROFILE).eq('id', user.id).single();
+    setRows((r) => [...(r ?? []), { ...(data as CommentRow), author: me as PublicProfile }]);
+    onCount(post.comments + 1);
+  };
+
   const remove = async (id: string) => {
+    const gone = rows?.find((c) => c.id === id);
     const { error } = await supabase.from('post_comments').delete().eq('id', id);
     if (error) return toast(t('error_generic'), 'error');
+    if (gone?.audio_path && gone.author_id === user?.id) void removePublic('media-public', [gone.audio_path]);
     setRows((r) => (r ?? []).filter((c) => c.id !== id));
     onCount(Math.max(0, post.comments - 1));
   };
@@ -283,7 +306,8 @@ function Comments({ post, onCount }: { post: Post; onCount: (n: number) => void 
             <li key={c.id} className="flex items-start gap-2 text-sm">
               {c.author && <Avatar p={c.author} size={24} />}
               <p className="min-w-0 flex-1 break-words">
-                <span className="font-semibold">{c.author?.display_name ?? '…'}</span> {ctx.out[i] ?? c.body}
+                <span className="font-semibold">{c.author?.display_name ?? '…'}</span> {c.body && (ctx.out[i] ?? c.body)}
+                {c.audio_path && <audio src={publicUrl('media-public', c.audio_path)} controls preload="none" className="mt-1 h-9 w-full max-w-xs" />}
               </p>
               {(c.author_id === user?.id || post.author_id === user?.id) && (
                 <button type="button" className="text-zinc-400 hover:text-red-600" onClick={() => remove(c.id)} aria-label={t('delete')}>
@@ -297,6 +321,7 @@ function Comments({ post, onCount }: { post: Post; onCount: (n: number) => void 
       {rows !== null && rows.length > 0 && <TranslationNote tx={ctx} />}
       <form onSubmit={send} className="flex gap-2">
         <input className="input" value={text} maxLength={500} onChange={(e) => setText(e.target.value)} placeholder={t('add_comment')} aria-label={t('add_comment')} />
+        <VoiceRecorder onDone={(f, sec) => void sendVoice(f, sec)} maxSeconds={120} />
         <button className="btn btn-primary" disabled={!text.trim()}>{t('send')}</button>
       </form>
     </div>

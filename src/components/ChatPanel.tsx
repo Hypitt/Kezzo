@@ -14,6 +14,7 @@ import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { UploadBar, failureKey, type UploadState } from './UploadBar';
 import { Tx } from './Tx';
+import { VoiceRecorder } from './VoiceRecorder';
 
 interface Props {
   roomType: 'battle' | 'group' | 'live';
@@ -143,6 +144,12 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
     void runUpload();
   };
 
+  const sendVoice = (file: File) => {
+    if (!ensureAuth() || !user) return;
+    pending.current = { file, path: `group/${roomId}/${user.id}/${crypto.randomUUID()}.${fileExt(file.name)}` };
+    void runUpload();
+  };
+
   const cancelUpload = () => {
     handle.current?.cancel();
     pending.current = null;
@@ -190,6 +197,7 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
               <button type="button" className="btn btn-ghost" onClick={() => picker.current?.click()} disabled={Boolean(upload && !upload.failed)} aria-label={t('attach_file')} title={t('attach_file')}>
                 <Paperclip className="h-4 w-4" aria-hidden="true" />
               </button>
+              <VoiceRecorder onDone={(f) => sendVoice(f)} disabled={Boolean(upload && !upload.failed)} />
             </>
           )}
           <input className="input" value={text} maxLength={500} onChange={(e) => setText(e.target.value)} placeholder={t('chat_placeholder')} aria-label={t('chat_placeholder')} />
@@ -210,6 +218,7 @@ function ChatFile({ message }: { message: ChatMessage }) {
   const [url, setUrl] = useState<string | null>(null);
   const type = message.file_type ?? '';
   const inline = /^(image|audio|video)\//.test(type);
+  const isVoice = type.startsWith('audio/') && (message.file_name ?? '').startsWith('voice-');
 
   useEffect(() => {
     if (!inline || !message.file_path) return;
@@ -241,14 +250,14 @@ function ChatFile({ message }: { message: ChatMessage }) {
       )}
       {type.startsWith('video/') && url && <video src={url} controls preload="none" className="max-h-56 rounded-lg" />}
       {type.startsWith('audio/') && url && <audio src={url} controls preload="none" className="w-full max-w-xs" />}
-      <button type="button" onClick={download} className="flex w-full max-w-xs items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-left text-xs hover:bg-zinc-100">
+      {!isVoice && <button type="button" onClick={download} className="flex w-full max-w-xs items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-left text-xs hover:bg-zinc-100">
         <FileText className="h-4 w-4 shrink-0 text-zinc-500" aria-hidden="true" />
         <span className="min-w-0 flex-1">
           <span className="block truncate font-medium">{message.file_name}</span>
           {message.file_size != null && <span className="text-zinc-500">{formatBytes(message.file_size)}</span>}
         </span>
         <Download className="h-4 w-4 shrink-0" aria-label={t('download')} />
-      </button>
+      </button>}
     </div>
   );
 }
