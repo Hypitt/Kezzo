@@ -8,7 +8,7 @@ import { validOptOut } from './_lib/optout';
  */
 const page = (body: string) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kezzo</title></head>
 <body style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:48px auto;padding:0 20px;color:#111">${body}
-<p style="font-size:12px;color:#666;margin-top:32px">Kezzo · WeDIL Inc., Montréal, Québec</p></body></html>`;
+<p style="font-size:12px;color:#666;margin-top:32px">Kezzo · WeDIL Inc., Canada</p></body></html>`;
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   const u = String(req.query.u ?? '');

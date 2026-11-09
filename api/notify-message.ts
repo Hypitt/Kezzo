@@ -52,8 +52,8 @@ function compose(person: Person, link: string, optOut: string) {
 <p style="font-size:16px;line-height:1.5;margin:0">${esc(t.body)}</p>
 <p style="margin:24px 0"><a href="${esc(link)}" style="background:#000;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">${esc(t.cta)}</a></p>
 <p style="font-size:12px;color:#666;line-height:1.5">${esc(t.foot)} <a href="${esc(optOut)}" style="color:#666">${esc(t.off)}</a>. ${esc(t.where)}</p>
-<p style="font-size:12px;color:#666">Kezzo · WeDIL Inc., Montréal, Québec</p></div>`;
-  const text = `${t.head}\n\n${t.hi}\n${t.body}\n\n${t.cta}: ${link}\n\n${t.foot}\n${t.off}: ${optOut}\n${t.where}\nKezzo · WeDIL Inc., Montréal, Québec`;
+<p style="font-size:12px;color:#666">Kezzo · WeDIL Inc., Canada</p></div>`;
+  const text = `${t.head}\n\n${t.hi}\n${t.body}\n\n${t.cta}: ${link}\n\n${t.foot}\n${t.off}: ${optOut}\n${t.where}\nKezzo · WeDIL Inc., Canada`;
   return { subject: t.subject, html, text };
 }
 

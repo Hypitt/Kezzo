@@ -12,7 +12,7 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
       sections: [
         { h: '1. Introduction', body: [
           'Welcome to Kezzo. These Terms of Service (“Terms”) govern your access to and use of the Kezzo website, platform and related services (the “Platform”). Kezzo is a social and creator platform where you can discover and share videos, photos and audio, take part in live battles, host solo or group livestreams, join groups, chat and call other users, and publish video highlights.',
-          'Kezzo is operated by WeDIL Inc., based in Montréal, Québec, Canada (“Kezzo”, “we”, “us”). Contact us at kezzo.app@gmail.com. By creating an account or using Kezzo, you agree to these Terms and to our Privacy Policy. If you do not agree, do not use the Platform.',
+          'Kezzo is operated by WeDIL Inc., based in Canada (“Kezzo”, “we”, “us”). Contact us at kezzo.app@gmail.com. By creating an account or using Kezzo, you agree to these Terms and to our Privacy Policy. If you do not agree, do not use the Platform.',
         ] },
         { h: '2. Eligibility and accounts', body: [
           'You must be at least 16 years old to create an account. We may close accounts we believe belong to someone under 16. You can sign up with Google or with an email and password. You agree to:',
@@ -87,7 +87,7 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
         { h: '16. Language', body: [
           'These Terms are available in English and French. The parties have required that these Terms be drawn up in English and French. Les parties ont exigé que les présentes conditions soient rédigées en anglais et en français.',
         ] },
-        { h: '17. Contact', body: ['WeDIL Inc., Montréal, Québec — kezzo.app@gmail.com'] },
+        { h: '17. Contact', body: ['WeDIL Inc., Canada — kezzo.app@gmail.com'] },
       ],
     },
     privacy: {
@@ -95,7 +95,7 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
       updated: 'Effective October 19, 2026 · Last updated October 20, 2026',
       sections: [
         { h: '1. Introduction and who is responsible', body: [
-          'Kezzo respects your privacy. This Policy explains how we collect, use, share, keep and protect personal information when you use Kezzo, including sign-up, feeds, posts, live battles, solo and group livestreams, recordings, highlights, groups, chat and calls. Kezzo is operated by WeDIL Inc., Montréal, Québec, which is responsible for your personal information. Under Québec law, the person with the highest authority at WeDIL Inc. is in charge of protecting personal information; reach them at kezzo.app@gmail.com. We follow Québec’s Act respecting the protection of personal information in the private sector (Law 25) and Canada’s PIPEDA.',
+          'Kezzo respects your privacy. This Policy explains how we collect, use, share, keep and protect personal information when you use Kezzo, including sign-up, feeds, posts, live battles, solo and group livestreams, recordings, highlights, groups, chat and calls. Kezzo is operated by WeDIL Inc., Canada, which is responsible for your personal information. Under Québec law, the person with the highest authority at WeDIL Inc. is in charge of protecting personal information; reach them at kezzo.app@gmail.com. We follow Québec’s Act respecting the protection of personal information in the private sector (Law 25) and Canada’s PIPEDA.',
         ] },
         { h: '2. What we collect', body: [
           'What we collect depends on the features you use.',
@@ -158,7 +158,7 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
         { h: '14. Changes', body: [
           'We may update this Policy as Kezzo or the law changes. We will change the date above and notify you in the app before significant changes take effect, and ask for consent where required.',
         ] },
-        { h: '15. Contact', body: ['Privacy questions, access or deletion requests, or complaints: WeDIL Inc., Montréal, Québec — kezzo.app@gmail.com'] },
+        { h: '15. Contact', body: ['Privacy questions, access or deletion requests, or complaints: WeDIL Inc., Canada — kezzo.app@gmail.com'] },
       ],
     },
   },
@@ -169,7 +169,7 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
       sections: [
         { h: '1. Introduction', body: [
           'Bienvenue sur Kezzo. Les présentes conditions d’utilisation (les « Conditions ») régissent votre accès au site Web, à la plateforme et aux services connexes de Kezzo (la « Plateforme ») et leur utilisation. Kezzo est une plateforme sociale pour créateurs où vous pouvez découvrir et partager des vidéos, des photos et des fichiers audio, participer à des battles en direct, animer des diffusions en direct en solo ou en groupe, rejoindre des groupes, clavarder et appeler d’autres utilisateurs, et publier des faits saillants vidéo.',
-          'Kezzo est exploitée par WeDIL Inc., établie à Montréal (Québec) Canada (« Kezzo », « nous »). Écrivez-nous à kezzo.app@gmail.com. En créant un compte ou en utilisant Kezzo, vous acceptez ces Conditions et notre Politique de confidentialité. Si vous n’êtes pas d’accord, n’utilisez pas la Plateforme.',
+          'Kezzo est exploitée par WeDIL Inc., établie au Canada (« Kezzo », « nous »). Écrivez-nous à kezzo.app@gmail.com. En créant un compte ou en utilisant Kezzo, vous acceptez ces Conditions et notre Politique de confidentialité. Si vous n’êtes pas d’accord, n’utilisez pas la Plateforme.',
         ] },
         { h: '2. Admissibilité et comptes', body: [
           'Vous devez avoir au moins 16 ans pour créer un compte. Nous pouvons fermer les comptes qui, selon nous, appartiennent à une personne de moins de 16 ans. Vous pouvez vous inscrire avec Google ou avec un courriel et un mot de passe. Vous vous engagez à :',
@@ -244,7 +244,7 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
         { h: '16. Langue', body: [
           'Ces Conditions sont offertes en anglais et en français. Les parties ont exigé que les présentes conditions soient rédigées en anglais et en français. The parties have required that these Terms be drawn up in English and French.',
         ] },
-        { h: '17. Contact', body: ['WeDIL Inc., Montréal (Québec) — kezzo.app@gmail.com'] },
+        { h: '17. Contact', body: ['WeDIL Inc., Canada — kezzo.app@gmail.com'] },
       ],
     },
     privacy: {
@@ -252,7 +252,7 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
       updated: 'En vigueur le 19 octobre 2026 · Dernière mise à jour le 20 octobre 2026',
       sections: [
         { h: '1. Introduction et responsable', body: [
-          'Kezzo respecte votre vie privée. La présente Politique explique comment nous recueillons, utilisons, communiquons, conservons et protégeons les renseignements personnels lorsque vous utilisez Kezzo, y compris l’inscription, les fils, les publications, les battles en direct, les diffusions en solo et en groupe, les enregistrements, les faits saillants, les groupes, le clavardage et les appels. Kezzo est exploitée par WeDIL Inc., Montréal (Québec), qui est responsable de vos renseignements personnels. En vertu du droit québécois, la personne ayant la plus haute autorité chez WeDIL Inc. veille à la protection des renseignements personnels; vous pouvez la joindre à kezzo.app@gmail.com. Nous respectons la Loi sur la protection des renseignements personnels dans le secteur privé du Québec (Loi 25) et la LPRPDE du Canada.',
+          'Kezzo respecte votre vie privée. La présente Politique explique comment nous recueillons, utilisons, communiquons, conservons et protégeons les renseignements personnels lorsque vous utilisez Kezzo, y compris l’inscription, les fils, les publications, les battles en direct, les diffusions en solo et en groupe, les enregistrements, les faits saillants, les groupes, le clavardage et les appels. Kezzo est exploitée par WeDIL Inc., Canada, qui est responsable de vos renseignements personnels. En vertu du droit québécois, la personne ayant la plus haute autorité chez WeDIL Inc. veille à la protection des renseignements personnels; vous pouvez la joindre à kezzo.app@gmail.com. Nous respectons la Loi sur la protection des renseignements personnels dans le secteur privé du Québec (Loi 25) et la LPRPDE du Canada.',
         ] },
         { h: '2. Ce que nous recueillons', body: [
           'Ce que nous recueillons dépend des fonctions que vous utilisez.',
@@ -315,7 +315,7 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
         { h: '14. Modifications', body: [
           'Nous pouvons modifier la présente Politique à mesure que Kezzo ou la loi évolue. Nous changerons la date ci-dessus et vous aviserons dans l’application avant l’entrée en vigueur de modifications importantes, et demanderons votre consentement lorsque requis.',
         ] },
-        { h: '15. Contact', body: ['Questions sur la vie privée, demandes d’accès ou de suppression, ou plaintes : WeDIL Inc., Montréal (Québec) — kezzo.app@gmail.com'] },
+        { h: '15. Contact', body: ['Questions sur la vie privée, demandes d’accès ou de suppression, ou plaintes : WeDIL Inc., Canada — kezzo.app@gmail.com'] },
       ],
     },
   },

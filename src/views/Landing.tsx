@@ -266,7 +266,7 @@ function Footer() {
           <InstallButton className={`${outline} px-4 py-2 text-sm font-semibold`} label={t('download_kezzo')} />
         </div>
       </div>
-      <p className="mx-auto mt-10 max-w-6xl border-t border-stone-200 pt-5 text-xs text-zinc-500">© {new Date().getFullYear()} WeDIL Inc., Montréal, Québec</p>
+      <p className="mx-auto mt-10 max-w-6xl border-t border-stone-200 pt-5 text-xs text-zinc-500">© {new Date().getFullYear()} Kezzo, WeDIL Inc., Canada</p>
     </footer>
   );
 }
