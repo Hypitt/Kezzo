@@ -8,6 +8,8 @@ import { Chip, Loading, PageHeader, Spinner } from '../components/ui';
 import { api } from '../lib/api';
 import { r2Enabled } from '../lib/storage';
 import { HomeSections } from '../components/HomeSections';
+import { adminText } from '../lib/adminText';
+import { AdminContent, AdminContests, AdminLog, AdminOverview, AdminReports, AdminUsers } from './AdminTools';
 
 /** Admin statistics. Only people listed in the `admins` table can load data (checked in the database, not here). */
 
@@ -278,7 +280,8 @@ function MoveToR2({ fr }: { fr: boolean }) {
   );
 }
 
-export function AdminView() {
+/** The statistics tab. */
+function Analytics() {
   const { user, loading, openAuth } = useAuth();
   const { lang } = useI18n();
   const { go } = useRouter();
@@ -495,11 +498,99 @@ export function AdminView() {
           </table>
         )}
       </Panel>
-      <button type="button" className="btn btn-accent" onClick={() => go('contest')}>{lang === 'fr' ? 'Gérer les concours' : 'Manage contests'}</button>
-      <button type="button" className="btn btn-accent" onClick={() => go('site')}>{lang === 'fr' ? 'Modifier la page d’accueil publique' : 'Edit the public homepage'}</button>
-      <button type="button" className="btn btn-accent" onClick={() => go('theme')}>{lang === 'fr' ? 'Couleurs, polices et taille du texte' : 'Colors, fonts and text size'}</button>
+    </div>
+  );
+}
+
+/** Public site, look and storage tools. */
+function SiteTab() {
+  const { lang } = useI18n();
+  const { go } = useRouter();
+  const a = adminText(lang);
+  return (
+    <div className="space-y-5">
+      <Panel title={a.siteTools}>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className="btn btn-accent" onClick={() => go('site')}>{a.siteHome}</button>
+          <button type="button" className="btn btn-accent" onClick={() => go('theme')}>{a.siteTheme}</button>
+        </div>
+      </Panel>
       <HomeSections fr={lang === 'fr'} />
       {r2Enabled && <MoveToR2 fr={lang === 'fr'} />}
+    </div>
+  );
+}
+
+/** The admin area: one tab per job, so each screen stays short. */
+export function AdminView({ tab }: { tab?: string }) {
+  const { user, loading, openAuth } = useAuth();
+  const { lang } = useI18n();
+  const { go } = useRouter();
+  const a = adminText(lang);
+  const [admin, setAdmin] = useState<boolean | null>(null);
+  const [pending, setPending] = useState(0);
+
+  const refreshCount = useCallback(async () => {
+    const { data } = await supabase.rpc('admin_overview');
+    if (data) setPending((data as { open_reports: number }).open_reports);
+  }, []);
+
+  useEffect(() => {
+    if (!user) { setAdmin(null); return; }
+    void supabase.rpc('is_admin').then(({ data }) => {
+      setAdmin(data === true);
+      if (data === true) void refreshCount();
+    });
+  }, [user, refreshCount]);
+
+  if (loading) return <Loading />;
+  if (!user) {
+    return (
+      <div className="card mx-auto max-w-md space-y-3 text-center">
+        <ShieldAlert className="mx-auto h-8 w-8 text-zinc-500" aria-hidden="true" />
+        <p className="text-sm text-zinc-700">{a.noAccess}</p>
+        <button type="button" className="btn btn-primary" onClick={() => openAuth()}>{a.signIn}</button>
+      </div>
+    );
+  }
+  if (admin === null) return <Loading />;
+  if (!admin) {
+    return (
+      <div className="card mx-auto max-w-md space-y-2 text-center">
+        <ShieldAlert className="mx-auto h-8 w-8 text-zinc-500" aria-hidden="true" />
+        <p className="font-medium text-zinc-900">{a.noAccess}</p>
+        <p className="text-sm text-zinc-600">{a.noAccessHelp}</p>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('search')}>OK</button>
+      </div>
+    );
+  }
+
+  const TABS: Array<[string, string]> = [
+    ['overview', a.tabOverview], ['reports', a.tabReports], ['users', a.tabUsers], ['content', a.tabContent],
+    ['contests', a.tabContests], ['analytics', a.tabAnalytics], ['site', a.tabSite], ['log', a.tabLog],
+  ];
+  const current = TABS.some(([k]) => k === tab) ? (tab as string) : 'overview';
+  const open = (t: string) => go('admin', t);
+
+  return (
+    <div className="space-y-4">
+      <PageHeader title={a.title} sub={a.sub} />
+      <nav className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1" aria-label={a.title}>
+        {TABS.map(([k, label]) => (
+          <Chip key={k} active={current === k} onClick={() => open(k)}>
+            {label}
+            {k === 'reports' && pending > 0 && <span className="ml-1.5 rounded-full bg-red-600 px-1.5 text-[10px] font-semibold text-white">{pending}</span>}
+          </Chip>
+        ))}
+      </nav>
+      {current === 'overview' && <AdminOverview onTab={open} />}
+      {current === 'reports' && <AdminReports onChanged={() => void refreshCount()} />}
+      {current === 'users' && <AdminUsers />}
+      {current === 'content' && <AdminContent onChanged={() => void refreshCount()} />}
+      {current === 'contests' && <AdminContests onChanged={() => void refreshCount()} />}
+      {current === 'analytics' && <Analytics />}
+      {current === 'site' && <SiteTab />}
+      {current === 'log' && <AdminLog />}
     </div>
   );
 }

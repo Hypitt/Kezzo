@@ -7,6 +7,7 @@ import { NotificationsProvider } from './state/Notifications';
 import { CallsProvider } from './state/Calls';
 import { ToastProvider, useToast } from './state/Toast';
 import { AuthDialog, Gate, Onboarding, SetupNotice } from './components/AuthScreens';
+import { RestrictionBanner } from './components/RestrictionBanner';
 import { Navbar } from './components/Navbar';
 import { SectionTabs } from './components/SectionTabs';
 import { Loading } from './components/ui';
@@ -66,7 +67,7 @@ function View() {
     case 'vsla': return <Gate>{route.id ? <VslaRoom key={route.id} id={route.id} /> : <VslaView />}</Gate>;
     case 'messages': return <Gate><MessagesView otherId={route.id} /></Gate>;
     case 'profile': return <ProfileView id={route.id} />;
-    case 'admin': return <AdminView />;
+    case 'admin': return <AdminView tab={route.id} />;
     case 'community': return <CommunityView focus={route.id} />;
     case 'post': return <PostView id={route.id} />;
     case 'contest': return <ContestView id={route.id} />;
@@ -159,6 +160,7 @@ function Shell() {
   return (
     <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
       <Navbar />
+      <RestrictionBanner />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
         <SectionTabs />
         <Suspense fallback={<Loading />}>

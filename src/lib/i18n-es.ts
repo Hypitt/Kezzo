@@ -242,6 +242,8 @@ export const es: Record<Key, string> = {
   rec_waiting: 'La grabación empieza en cuanto la batalla sale en vivo.', rec_recording: 'Grabando {time}', rec_unsupported: 'Este navegador no admite grabación. Prueba con Chrome, Edge o Firefox en un ordenador.',
   nav_menu: 'Menú',
   voice_record: 'Grabar un mensaje de voz', voice_send: 'Enviar mensaje de voz', voice_cancel: 'Cancelar grabación', voice_mic_denied: 'El acceso al micrófono está bloqueado. Permítelo en los ajustes del navegador para grabar.', voice_too_short: 'La grabación fue demasiado corta.', voice_message: 'Mensaje de voz',
+  restricted_suspended: 'Tu cuenta está suspendida hasta el {date}. Puedes leer Kezzo, pero no publicar, comentar, enviar mensajes ni transmitir en vivo.', restricted_banned: 'Tu cuenta fue bloqueada. Puedes leer Kezzo, pero no publicar, comentar, enviar mensajes ni transmitir en vivo.', restricted_reason: 'Motivo',
+  restricted_suspended_open: 'Tu cuenta está suspendida. Puedes leer Kezzo, pero no publicar, comentar, enviar mensajes ni transmitir en vivo.',
   rec_failed: 'No se pudo iniciar la grabación en este dispositivo.', rec_title: 'Grabación de la batalla', rec_saved_note: 'La grabación completa se conserva en este navegador hasta que la elimines. Descárgala ahora para guardarla de forma segura.',
   live_rec_opt_in: 'Grabar esta sesión en mi dispositivo',
   live_rec_waiting: 'La grabación empieza en cuanto abras el escenario.',
