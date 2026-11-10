@@ -495,7 +495,7 @@ export function AdminView() {
           </table>
         )}
       </Panel>
-      <button type="button" className="btn btn-accent" onClick={() => go('contest')}>{lang === 'fr' ? 'Gérer le concours' : 'Manage the contest'}</button>
+      <button type="button" className="btn btn-accent" onClick={() => go('contest')}>{lang === 'fr' ? 'Gérer les concours' : 'Manage contests'}</button>
       <button type="button" className="btn btn-accent" onClick={() => go('site')}>{lang === 'fr' ? 'Modifier la page d’accueil publique' : 'Edit the public homepage'}</button>
       <button type="button" className="btn btn-accent" onClick={() => go('theme')}>{lang === 'fr' ? 'Couleurs, polices et taille du texte' : 'Colors, fonts and text size'}</button>
       <HomeSections fr={lang === 'fr'} />

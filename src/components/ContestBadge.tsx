@@ -1,27 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Trophy } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { CONTEST, phaseOf, type Contest, type Entry } from '../lib/contest';
+import { CONTEST } from '../lib/contest';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 
-interface Info { rank: number; score: number; winner: boolean }
+interface Info { rank: number; score: number; winner: boolean; contestId?: string }
 let cache: { at: number; map: Map<string, Info> } | null = null;
 let pending: Promise<Map<string, Info>> | null = null;
 
-/** The contest entries by post id (shared by every post on screen, refreshed at most once a minute). */
+interface RankRow { post_id: string; contest_id: string; rank: number; score: number; winner: boolean }
+
+/** The contest entries by post id (shared by every post on screen, refreshed at most once a minute). A post in several contests shows its best rank. */
 function entries(): Promise<Map<string, Info>> {
   if (cache && Date.now() - cache.at < 60000) return Promise.resolve(cache.map);
   if (pending) return pending;
   pending = (async () => {
     const map = new Map<string, Info>();
     try {
-      const { data } = await supabase.rpc('contest_current');
-      const c = Array.isArray(data) ? (data[0] as Contest | undefined) : undefined;
-      if (c) {
-        const { data: rows } = await supabase.rpc('contest_board', { p_contest: c.id });
-        const ended = phaseOf(c) === 'ended';
-        for (const e of (Array.isArray(rows) ? rows : []) as Entry[]) map.set(e.post_id, { rank: e.rank, score: e.score, winner: ended && e.rank === 1 });
+      const { data } = await supabase.rpc('contest_entry_ranks');
+      for (const e of (Array.isArray(data) ? data : []) as RankRow[]) {
+        const old = map.get(e.post_id);
+        if (!old || (e.winner && !old.winner) || (e.winner === old.winner && e.rank < old.rank)) map.set(e.post_id, { rank: e.rank, score: e.score, winner: e.winner, contestId: e.contest_id });
       }
     } catch { /* no badge */ }
     cache = { at: Date.now(), map };
@@ -56,6 +56,6 @@ export function ContestBadge({ info, link = true }: { info: Info; link?: boolean
     </>
   );
   return link
-    ? <button type="button" className={`${cls} hover:opacity-90`} onClick={() => go('contest')}>{body}</button>
+    ? <button type="button" className={`${cls} hover:opacity-90`} onClick={() => go('contest', info.contestId)}>{body}</button>
     : <span className={cls}>{body}</span>;
 }

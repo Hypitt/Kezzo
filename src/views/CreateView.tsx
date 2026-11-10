@@ -41,7 +41,7 @@ export function CreateView({ initial }: { initial?: string }) {
         <Chip active={mode === 'event'} onClick={() => setMode('event')}>{t('create_event')}</Chip>
         <Chip active={mode === 'poll'} onClick={() => setMode('poll')}>{t('create_poll')}</Chip>
       </div>
-      <div className="card">{mode === 'post' ? <PostForm contest={initial === 'contest'} /> : mode === 'battle' ? <BattleForm /> : mode === 'event' ? <EventForm onCreated={(id) => go('community', id)} /> : mode === 'poll' ? <PollForm onCreated={(id) => go('community', id)} /> : <StatusForm />}</div>
+      <div className="card">{mode === 'post' ? <PostForm contest={initial === 'contest' || Boolean(initial?.startsWith('contest:'))} contestId={initial?.startsWith('contest:') ? initial.slice(8) : undefined} /> : mode === 'battle' ? <BattleForm /> : mode === 'event' ? <EventForm onCreated={(id) => go('community', id)} /> : mode === 'poll' ? <PollForm onCreated={(id) => go('community', id)} /> : <StatusForm />}</div>
     </div>
   );
 }
@@ -56,7 +56,7 @@ interface PostJob {
 
 const MAX_PHOTOS = 10;
 
-function PostForm({ contest = false }: { contest?: boolean }) {
+function PostForm({ contest = false, contestId }: { contest?: boolean; contestId?: string }) {
   const { user, ensureAuth } = useAuth();
   const { t } = useI18n();
   const { toast } = useToast();
@@ -121,11 +121,16 @@ function PostForm({ contest = false }: { contest?: boolean }) {
       if (contest && created) {
         // Entering the running contest straight away; the contest page shows the result.
         try {
-          const { data: cur } = await supabase.rpc('contest_current');
-          const c = Array.isArray(cur) ? (cur[0] as { id: string } | undefined) : undefined;
-          if (c) await supabase.rpc('enter_contest', { p_contest: c.id, p_post: (created as { id: string }).id });
+          let target = contestId;
+          if (!target) {
+            const { data: cur } = await supabase.rpc('contest_current');
+            target = Array.isArray(cur) ? (cur[0] as { id: string } | undefined)?.id : undefined;
+          }
+          if (target) await supabase.rpc('enter_contest', { p_contest: target, p_post: (created as { id: string }).id });
+          go('contest', target);
+          return;
         } catch { /* the contest page lets the person enter this post by hand */ }
-        go('contest');
+        go('contest', contestId);
         return;
       }
       go('search');

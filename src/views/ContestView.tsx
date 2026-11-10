@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ExternalLink, Pencil, RefreshCw, Trash2, Trophy, Heart, MessageCircle } from 'lucide-react';
+import { ArrowLeft, ExternalLink, EyeOff, Pencil, RefreshCw, Trash2, Trophy, Heart, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { thumbPath } from '../lib/media';
 import { removePublic } from '../lib/storage';
@@ -8,7 +8,10 @@ import type { Post } from '../lib/types';
 import { Thumb } from '../components/ContestThumb';
 import { PostCard } from '../components/PostCard';
 import { ContestBadge } from '../components/ContestBadge';
-import { CONTEST, phaseOf, type Contest, type Entry } from '../lib/contest';
+import { CONTEST, phaseOf, type Entry } from '../lib/contest';
+import { HUB, contestError, type ContestRow } from '../lib/contestHub';
+import { ContestForm } from '../components/ContestForm';
+import { ContestHub } from './ContestHub';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
@@ -16,37 +19,36 @@ import { useToast } from '../state/Toast';
 import { ShareButton } from '../components/ShareButton';
 import { Avatar, Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
 
-interface AdminEntry { post_id: string; title: string; author_name: string; likes: number; commenters: number; score: number; disqualified: boolean }
+interface AdminEntry { post_id: string; title: string; author_id: string; author_name: string; likes: number; commenters: number; score: number; disqualified: boolean; banned: boolean }
 interface MyPost { id: string; kind: 'photo' | 'video'; title: string; media_path: string }
-
-const toLocalInput = (iso: string) => {
-  const d = new Date(iso);
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
-};
 
 const ADMIN = {
   en: { title: 'Contest (admin)', save: 'Save contest', create: 'New contest', t: 'Title', th: 'Theme', pr: 'Prize (e.g. $100 cash)', ru: 'Rules', st: 'Starts', en: 'Ends', dq: 'Remove', saved: 'Saved', restore: 'Restore', removedTag: 'Removed', entriesTitle: 'All entries', endNow: 'End now', plus1: '+1 day', plus7: '+7 days', del: 'Delete this contest', delAsk: 'Delete this contest and its entries? The posts stay on Kezzo.', stats: (n: number, l: number, c: number) => `${n} entries · ${l} likes · ${c} commenters`, hint: 'Saving with an existing contest changes it; “New contest” starts a separate one.' },
   fr: { title: 'Concours (admin)', save: 'Enregistrer', create: 'Nouveau concours', t: 'Titre', th: 'Thème', pr: 'Prix (ex. 100 $ comptant)', ru: 'Règlement', st: 'Début', en: 'Fin', dq: 'Retirer', saved: 'Enregistré', restore: 'Rétablir', removedTag: 'Retirée', entriesTitle: 'Toutes les participations', endNow: 'Terminer maintenant', plus1: '+1 jour', plus7: '+7 jours', del: 'Supprimer ce concours', delAsk: 'Supprimer ce concours et ses participations ? Les publications restent sur Kezzo.', stats: (n: number, l: number, c: number) => `${n} participations · ${l} j’aime · ${c} commentateurs`, hint: 'Enregistrer modifie le concours actuel ; « Nouveau concours » en démarre un autre.' },
 } as const;
 
-/** One contest at a time: people enter a photo or video, the audience likes and comments, and the live ranking shows the winner. */
-export function ContestView() {
+/** The contests page: the list of all contests, or one contest when an id is given. */
+export function ContestView({ id }: { id?: string }) {
+  return id ? <ContestDetail key={id} id={id} /> : <ContestHub />;
+}
+
+/** One contest: people enter a photo or video, the audience likes and comments, and the live ranking shows the winner. */
+function ContestDetail({ id }: { id: string }) {
   const { user, openAuth } = useAuth();
   const { lang } = useI18n();
   const { go } = useRouter();
   const { toast } = useToast();
   const w = CONTEST[lang];
   const A = lang === 'fr' ? ADMIN.fr : ADMIN.en;
+  const h = HUB[lang];
 
-  const [contest, setContest] = useState<Contest | null>(null);
+  const [contest, setContest] = useState<ContestRow | null>(null);
   const [board, setBoard] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [mine, setMine] = useState<MyPost[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [admin, setAdmin] = useState(false);
-  const [form, setForm] = useState({ id: '', title: '', theme: '', prize: '', rules: '', starts: '', ends: '' });
-  const [creating, setCreating] = useState(false);
+  const [editingContest, setEditingContest] = useState(false);
   const [mineDetail, setMineDetail] = useState<{ title: string; body: string } | null>(null);
   const [editing, setEditing] = useState<{ title: string; body: string } | null>(null);
   const [allEntries, setAllEntries] = useState<AdminEntry[]>([]);
@@ -57,20 +59,19 @@ export function ContestView() {
   const seed = useRef(newSeed());
 
   const load = useCallback(async () => {
-    const { data } = await supabase.rpc('contest_current');
-    const c = Array.isArray(data) ? ((data[0] as Contest | undefined) ?? null) : null;
+    const { data } = await supabase.rpc('contest_list', { p_id: id });
+    const c = Array.isArray(data) ? ((data[0] as ContestRow | undefined) ?? null) : null;
     setContest(c);
     if (c) {
       const { data: rows } = await supabase.rpc('contest_board', { p_contest: c.id });
       setBoard(Array.isArray(rows) ? (rows as Entry[]) : []);
-      if (isAdmin.current) {
-        const adm = await supabase.rpc('admin_contest_entries', { p_contest: c.id });
+      if (c.can_manage) {
+        const adm = await supabase.rpc('manage_contest_entries', { p_contest: c.id });
         setAllEntries(!adm.error && Array.isArray(adm.data) ? (adm.data as AdminEntry[]) : []);
       }
-      setForm({ id: c.id, title: c.title, theme: c.theme, prize: c.prize, rules: c.rules, starts: toLocalInput(c.starts_at), ends: toLocalInput(c.ends_at) });
     }
     setLoading(false);
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     void load();
@@ -80,7 +81,7 @@ export function ContestView() {
 
   useEffect(() => {
     if (!user) { setAdmin(false); return; }
-    void supabase.rpc('is_admin').then(({ data }) => { isAdmin.current = data === true; setAdmin(data === true); if (data === true) void load(); });
+    void supabase.rpc('is_admin').then(({ data }) => { isAdmin.current = data === true; setAdmin(data === true); });
   }, [user, load]);
 
   // The entries as full posts (video player, like, comments), in a random order that stays the same during the visit.
@@ -123,21 +124,10 @@ export function ContestView() {
     setBusy(false);
     if (error) {
       const m = error.message ?? '';
-      toast(m.includes('already_entered') ? w.errAlready : m.includes('ended') || m.includes('not_started') ? w.errClosed : w.errGeneric, 'error');
+      toast(m.includes('already_entered') ? w.errAlready : m.includes('banned') ? h.errBanned : m.includes('ended') || m.includes('not_started') ? w.errClosed : w.errGeneric, 'error');
       return;
     }
     toast(w.thanks, 'info');
-    void load();
-  };
-
-  const save = async (asNew: boolean) => {
-    const { error } = await supabase.rpc('admin_save_contest', {
-      p_id: asNew ? null : form.id || null, p_title: form.title, p_theme: form.theme, p_prize: form.prize, p_rules: form.rules,
-      p_starts: new Date(form.starts).toISOString(), p_ends: new Date(form.ends).toISOString(),
-    });
-    if (error) { toast(error.message, 'error'); return; }
-    toast(A.saved, 'info');
-    setCreating(false);
     void load();
   };
 
@@ -176,11 +166,11 @@ export function ContestView() {
 
   const setEnd = async (iso: string) => {
     if (!contest) return;
-    const { error } = await supabase.rpc('admin_save_contest', {
+    const { error } = await supabase.rpc('save_contest', {
       p_id: contest.id, p_title: contest.title, p_theme: contest.theme, p_prize: contest.prize, p_rules: contest.rules,
       p_starts: contest.starts_at, p_ends: iso,
     });
-    if (error) { toast(error.message, 'error'); return; }
+    if (error) { toast(contestError(error.message, h), 'error'); return; }
     toast(A.saved);
     void load();
   };
@@ -188,31 +178,47 @@ export function ContestView() {
 
   const restore = async (postId: string) => {
     if (!contest) return;
-    await supabase.rpc('admin_disqualify_entry', { p_contest: contest.id, p_post: postId, p_flag: false });
+    await supabase.rpc('moderate_contest_entry', { p_contest: contest.id, p_post: postId, p_flag: false });
     void load();
   };
 
   const deleteContest = async () => {
     if (!contest || !window.confirm(A.delAsk)) return;
-    const { error } = await supabase.rpc('admin_delete_contest', { p_id: contest.id });
-    if (error) { toast(error.message, 'error'); return; }
-    setContest(null); setBoard([]); setAllEntries([]);
+    const { error } = await supabase.rpc('delete_contest', { p_id: contest.id });
+    if (error) { toast(contestError(error.message, h), 'error'); return; }
     toast(A.saved);
+    go('contest');
   };
 
   const disqualify = async (postId: string) => {
     if (!contest) return;
-    await supabase.rpc('admin_disqualify_entry', { p_contest: contest.id, p_post: postId, p_flag: true });
+    await supabase.rpc('moderate_contest_entry', { p_contest: contest.id, p_post: postId, p_flag: true });
+    void load();
+  };
+
+  const ban = async (userId: string, flag: boolean) => {
+    if (!contest) return;
+    const { error } = await supabase.rpc('contest_ban_user', { p_contest: contest.id, p_user: userId, p_flag: flag });
+    if (error) { toast(contestError(error.message, h), 'error'); return; }
+    void load();
+  };
+
+  const setHidden = async (hidden: boolean) => {
+    if (!contest) return;
+    const { error } = await supabase.rpc('admin_hide_contest', { p_id: contest.id, p_hidden: hidden });
+    if (error) { toast(contestError(error.message, h), 'error'); return; }
     void load();
   };
 
   const fmt = (iso: string) => new Date(iso).toLocaleString(lang, { dateStyle: 'medium', timeStyle: 'short' });
   const field = 'w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900';
+  const canManage = contest?.can_manage === true;
 
   if (loading) return <Loading />;
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
+      <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('contest')}><ArrowLeft className="h-4 w-4" aria-hidden="true" />{h.all}</button>
       <PageHeader title={contest?.title ?? w.nav} sub={contest?.theme || undefined}
         action={<button type="button" className="btn btn-ghost btn-sm" onClick={() => void load()}><RefreshCw className="h-4 w-4" aria-hidden="true" />{w.refresh}</button>} />
 
@@ -226,8 +232,12 @@ export function ContestView() {
               <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold">{phase === 'soon' ? w.soon : phase === 'open' ? w.open : w.ended}</span>
               <span className="text-zinc-600">{phase === 'soon' ? `${w.startsOn} ${fmt(contest.starts_at)}` : `${w.endsOn} ${fmt(contest.ends_at)}`}</span>
               <span className="text-zinc-600">{w.entriesN(board.length)}</span>
+              {contest.official ? <span className="text-zinc-600">{h.official}</span> : contest.owner_name && <span className="text-zinc-600">{h.by} {contest.owner_name}</span>}
+              {contest.entered && <span className="rounded-full bg-emerald-100 px-2.5 py-1 font-semibold text-emerald-800">{h.entered}</span>}
+              {contest.voted && <span className="rounded-full bg-rose-100 px-2.5 py-1 font-semibold text-rose-800">{h.voted}</span>}
               {phase === 'open' && <span className="rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold text-white">{left.d === 0 && left.h < 6 ? w.lastHours : w.left(left.d, left.h)}</span>}
             </div>
+            {contest.hidden && <p className="mt-3 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700"><EyeOff className="h-4 w-4 shrink-0" aria-hidden="true" />{h.hiddenNote}</p>}
             <h2 className="mt-4 text-sm font-semibold">{w.how}</h2>
             <ol className="mt-1 list-decimal space-y-1 pl-5 text-sm text-zinc-700">
               <li>{w.step1}</li><li>{w.step2}</li><li>{w.step3}</li>
@@ -292,7 +302,7 @@ export function ContestView() {
               ) : (
                 <>
                   <p className="mt-1 text-sm text-zinc-600">{w.enterHelp}</p>
-                  <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 mt-3" onClick={() => go('create', 'contest')}>{w.uploadNew}</button>
+                  <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 mt-3" onClick={() => go('create', `contest:${contest.id}`)}>{w.uploadNew}</button>
                   {mine !== null && mine.length > 0 && <p className="mt-4 text-sm font-medium">{w.orPick}</p>}
                   {mine === null || mine.length === 0 ? null : (
                     <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -361,7 +371,7 @@ export function ContestView() {
                     <div className="flex shrink-0 flex-col gap-1">
                       <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('post', e.post_id)}><ExternalLink className="h-4 w-4" aria-hidden="true" />{w.view}</button>
                       {phase !== 'ended' && <ShareButton type="post" id={e.post_id} title={e.title || e.author_name} />}
-                      {admin && <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void disqualify(e.post_id)}>{A.dq}</button>}
+                      {canManage && <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void disqualify(e.post_id)}>{A.dq}</button>}
                     </div>
                   </li>
                 ))}
@@ -371,48 +381,41 @@ export function ContestView() {
         </>
       )}
 
-      {admin && (
-        <section className="rounded-2xl border border-zinc-200 bg-white p-4 text-zinc-900" aria-label={A.title}>
-          <h2 className="text-sm font-semibold">{A.title}</h2>
-          <p className="mt-1 text-xs text-zinc-500">{A.hint}</p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <label className="text-xs sm:col-span-2">{A.t}<input className={field} value={form.title} maxLength={80} onChange={(e) => setForm({ ...form, title: e.target.value })} /></label>
-            <label className="text-xs">{A.th}<input className={field} value={form.theme} maxLength={200} onChange={(e) => setForm({ ...form, theme: e.target.value })} /></label>
-            <label className="text-xs">{A.pr}<input className={field} value={form.prize} maxLength={120} onChange={(e) => setForm({ ...form, prize: e.target.value })} /></label>
-            <label className="text-xs">{A.st}<input type="datetime-local" className={field} value={form.starts} onChange={(e) => setForm({ ...form, starts: e.target.value })} /></label>
-            <label className="text-xs">{A.en}<input type="datetime-local" className={field} value={form.ends} onChange={(e) => setForm({ ...form, ends: e.target.value })} /></label>
-            <label className="text-xs sm:col-span-2">{A.ru}<textarea className={field} rows={5} value={form.rules} maxLength={3000} onChange={(e) => setForm({ ...form, rules: e.target.value })} /></label>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {contest && !creating && <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" disabled={!form.title || !form.starts || !form.ends} onClick={() => void save(false)}>{A.save}</button>}
-            <button type="button" className="btn btn-ghost btn-sm" disabled={creating && (!form.title || !form.starts || !form.ends)}
-              onClick={() => { if (!creating && contest) { setCreating(true); setForm({ id: '', title: '', theme: '', prize: '', rules: '', starts: '', ends: '' }); } else void save(true); }}>
-              {creating || !contest ? A.save : A.create}
-            </button>
-          </div>
-          {contest && (
-            <div className="mt-5 border-t border-zinc-200 pt-4">
-              <p className="text-xs text-zinc-600">{A.stats(allEntries.length, allEntries.reduce((n, e) => n + e.likes, 0), allEntries.reduce((n, e) => n + e.commenters, 0))}</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => plusDays(1)}>{A.plus1}</button>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => plusDays(7)}>{A.plus7}</button>
-                <button type="button" className="btn btn-ghost btn-sm" disabled={phase === 'ended'} onClick={() => void setEnd(new Date().toISOString())}>{A.endNow}</button>
-                <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void deleteContest()}>{A.del}</button>
-              </div>
-              <h3 className="mt-4 text-sm font-semibold">{A.entriesTitle}</h3>
-              <ul className="mt-2 divide-y divide-zinc-100 text-sm">
-                {allEntries.map((e) => (
-                  <li key={e.post_id} className="flex items-center gap-2 py-2">
-                    <span className="min-w-0 flex-1 truncate">{e.author_name} · {e.title} · {e.score}{e.disqualified && <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700">{A.removedTag}</span>}</span>
-                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('post', e.post_id)}>{w.view}</button>
-                    {e.disqualified
-                      ? <button type="button" className="btn btn-ghost btn-sm" onClick={() => void restore(e.post_id)}>{A.restore}</button>
-                      : <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void disqualify(e.post_id)}>{A.dq}</button>}
-                  </li>
-                ))}
-              </ul>
+      {contest && canManage && (
+        <section className="rounded-2xl border border-zinc-200 bg-white p-4 text-zinc-900" aria-label={h.manage}>
+          <h2 className="text-sm font-semibold">{h.manage}</h2>
+          <p className="mt-1 text-xs text-zinc-500">{h.mgmtHelp}</p>
+          {editingContest ? (
+            <div className="mt-3"><ContestForm contest={contest} onCancel={() => setEditingContest(false)} onSaved={() => { setEditingContest(false); void load(); }} /></div>
+          ) : (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" onClick={() => setEditingContest(true)}><Pencil className="h-4 w-4" aria-hidden="true" />{h.edit}</button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => plusDays(1)}>{A.plus1}</button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => plusDays(7)}>{A.plus7}</button>
+              <button type="button" className="btn btn-ghost btn-sm" disabled={phase === 'ended'} onClick={() => void setEnd(new Date().toISOString())}>{A.endNow}</button>
+              {admin && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void setHidden(!contest.hidden)}><EyeOff className="h-4 w-4" aria-hidden="true" />{contest.hidden ? h.unhide : h.hide}</button>}
+              <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void deleteContest()}>{A.del}</button>
             </div>
           )}
+          <div className="mt-5 border-t border-zinc-200 pt-4">
+            <p className="text-xs text-zinc-600">{A.stats(allEntries.length, allEntries.reduce((n, e) => n + e.likes, 0), allEntries.reduce((n, e) => n + e.commenters, 0))}</p>
+            <h3 className="mt-3 text-sm font-semibold">{A.entriesTitle}</h3>
+            <ul className="mt-2 divide-y divide-zinc-100 text-sm">
+              {allEntries.map((e) => (
+                <li key={e.post_id} className="flex flex-wrap items-center gap-2 py-2">
+                  <span className="min-w-0 flex-1 truncate">{e.author_name} · {e.title} · {e.score}
+                    {e.disqualified && <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700">{A.removedTag}</span>}
+                    {e.banned && <span className="ml-2 rounded bg-zinc-200 px-1.5 py-0.5 text-xs text-zinc-700">{h.bannedTag}</span>}
+                  </span>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('post', e.post_id)}>{w.view}</button>
+                  {e.disqualified
+                    ? <button type="button" className="btn btn-ghost btn-sm" onClick={() => void restore(e.post_id)}>{A.restore}</button>
+                    : <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void disqualify(e.post_id)}>{A.dq}</button>}
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => void ban(e.author_id, !e.banned)}>{e.banned ? h.unbanUser : h.banUser}</button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
       )}
     </div>

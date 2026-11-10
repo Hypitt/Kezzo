@@ -69,7 +69,7 @@ function View() {
     case 'admin': return <AdminView />;
     case 'community': return <CommunityView focus={route.id} />;
     case 'post': return <PostView id={route.id} />;
-    case 'contest': return <ContestView />;
+    case 'contest': return <ContestView id={route.id} />;
     case 'site': return <Gate><SiteEditorView /></Gate>;
     case 'theme': return <Gate><ThemeEditorView /></Gate>;
     case 'opportunities': return <OpportunitiesView focus={route.id} />;
