@@ -1,47 +1,35 @@
-/** Adds a small Kezzo mark (logo + name) in the bottom-right corner of a picture or video, in the browser. */
+/** Adds the Kezzo logo in the bottom-right corner of a picture or video, in the browser. */
 
 export const WATERMARK_MAX_VIDEO_SECONDS = 180;
 
-const K1 = new Path2D('M253,92 192,93 193,354 253,307zM442,206 291,324 291,391 412,524 489,525 354,360 486,207z');
+// The Kezzo logo exactly as supplied (public/logo.png); only the artwork area of the picture is drawn.
+let logoImg: HTMLImageElement | null = null;
+const CROP = { x: 317 / 2000, y: 479 / 2000, w: 1501 / 2000, h: 697 / 2000 };
 
-/** Draws the mark on a canvas of size w x h. */
+/** Loads the logo once. Call (and wait for) this before drawing a mark. */
+export async function loadLogo(): Promise<void> {
+  if (logoImg) return;
+  const img = new Image();
+  img.src = '/logo.png';
+  await img.decode();
+  logoImg = img;
+}
+
+/** Draws the logo on a white rounded plate in the bottom-right corner of a canvas of size w x h. */
 export function drawMark(ctx: CanvasRenderingContext2D, w: number, h: number): void {
-  const base = Math.max(14, Math.min(w, h) * 0.04); // text size
-  const logoH = base * 1.5;
-  const k = logoH / 448; // logo viewBox is 316 x 448
-  const logoW = 316 * k;
-  const gap = base * 0.45;
-  const padX = base * 0.7;
-  const padY = base * 0.45;
-  ctx.save();
-  ctx.font = `700 ${base}px "Helvetica Neue", Roboto, Arial, sans-serif`;
-  const textW = ctx.measureText('Kezzo').width;
-  const boxW = padX * 2 + logoW + gap + textW;
-  const boxH = padY * 2 + logoH;
-  const margin = base * 0.9;
+  if (!logoImg) return;
+  const boxH = Math.max(36, Math.min(w, h) * 0.09);
+  const boxW = boxH * (CROP.w / CROP.h);
+  const margin = boxH * 0.4;
   const x = w - margin - boxW;
   const y = h - margin - boxH;
-  ctx.fillStyle = 'rgba(0,0,0,0.45)';
-  ctx.beginPath();
-  ctx.roundRect(x, y, boxW, boxH, boxH * 0.3);
-  ctx.fill();
-  // logo
-  ctx.translate(x + padX, y + padY);
-  ctx.scale(k, k);
-  ctx.translate(-180, -86);
-  ctx.fillStyle = '#ffffff';
-  ctx.fill(K1);
-  ctx.fillStyle = '#fa6b05';
-  ctx.beginPath();
-  ctx.arc(223, 488, 38.5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-  // name
+  const n = logoImg.naturalWidth;
   ctx.save();
-  ctx.font = `700 ${base}px "Helvetica Neue", Roboto, Arial, sans-serif`;
   ctx.fillStyle = '#ffffff';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('Kezzo', x + padX + logoW + gap, y + boxH / 2 + base * 0.04);
+  ctx.beginPath();
+  ctx.roundRect(x, y, boxW, boxH, boxH * 0.12);
+  ctx.fill();
+  ctx.drawImage(logoImg, CROP.x * n, CROP.y * n, CROP.w * n, CROP.h * n, x, y, boxW, boxH);
   ctx.restore();
 }
 
@@ -50,6 +38,7 @@ const slug = (s: string) => (s.normalize('NFKD').replace(/[^\w\s-]/g, '').trim()
 export async function watermarkPhoto(url: string, name: string, index = 0): Promise<File> {
   const res = await fetch(url, { mode: 'cors' });
   if (!res.ok) throw new Error('fetch');
+  await loadLogo();
   const bitmap = await createImageBitmap(await res.blob());
   const scale = Math.min(1, 2048 / Math.max(bitmap.width, bitmap.height));
   const w = Math.round(bitmap.width * scale);
@@ -78,6 +67,7 @@ export async function watermarkVideo(url: string, name: string, onProgress: (rat
   if (!type || typeof HTMLCanvasElement.prototype.captureStream !== 'function') throw new Error('unsupported');
   const res = await fetch(url, { mode: 'cors' });
   if (!res.ok) throw new Error('fetch');
+  await loadLogo();
   const objectUrl = URL.createObjectURL(await res.blob());
   const video = document.createElement('video');
   video.src = objectUrl;

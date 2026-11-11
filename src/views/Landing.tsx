@@ -1,3 +1,4 @@
+import { Logo } from '../components/Logo';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowRight, Check, Mic, Swords, UserPlus, Users, type LucideIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -228,9 +229,8 @@ function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-stone-200/70 bg-white/85 text-zinc-900 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-8">
-        <a href="#/" onClick={(e) => { e.preventDefault(); go('search'); }} className="flex shrink-0 items-center gap-2 font-display text-lg font-bold text-zinc-900 sm:text-xl">
-          <img src="/logo.svg" alt="" width="20" height="28" className="h-7 w-auto" decoding="async" />
-          Kezzo
+        <a href="#/" onClick={(e) => { e.preventDefault(); go('search'); }} className="shrink-0" aria-label="Kezzo">
+          <Logo className="h-9 sm:h-10" />
         </a>
         <div className="flex items-center gap-1.5 sm:gap-2.5">
           <LanguageSwitch className={`${outline} btn-sm`} />
@@ -252,7 +252,7 @@ function Footer() {
     <footer className="border-t border-stone-200 bg-stone-50 px-4 pb-8 pt-12 text-zinc-600 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
         <div className="max-w-sm">
-          <p className="flex items-center gap-2 font-display text-xl font-bold text-zinc-900"><img src="/logo.svg" alt="" width="20" height="28" className="h-7 w-auto" decoding="async" />Kezzo</p>
+          <Logo className="h-10" />
           <p className="mt-3 text-sm leading-relaxed">{c.leadTag}</p>
         </div>
         <nav aria-label="Kezzo" className="flex flex-col items-start gap-2 text-sm">

@@ -7,6 +7,7 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { Chip, Empty, Loading, PageHeader } from '../components/ui';
 import { ContestForm } from '../components/ContestForm';
+import { WinnersStrip } from '../components/WinnersStrip';
 
 type Filter = 'all' | 'open' | 'entered' | 'voted' | 'mine' | 'ended';
 
@@ -51,6 +52,8 @@ export function ContestHub() {
         action={<button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" onClick={() => (user ? setCreating(true) : openAuth('signup'))}><Plus className="h-4 w-4" aria-hidden="true" />{user ? h.create : h.signIn}</button>} />
 
       {creating && <ContestForm onCancel={() => setCreating(false)} onSaved={(id) => { setCreating(false); if (id) go('contest', id); else void load(); }} />}
+
+      {filter === 'all' && <WinnersStrip />}
 
       <div className="flex gap-2 overflow-x-auto pb-1" aria-label={h.title}>
         {FILTERS.filter(([k]) => user || (k !== 'entered' && k !== 'voted' && k !== 'mine')).map(([k, label]) => (

@@ -5,6 +5,7 @@ import type { Contest } from './contest';
 export interface ContestRow extends Contest {
   owner_id: string | null; owner_name: string | null; official: boolean; hidden: boolean; entries: number;
   entered: boolean; voted: boolean; can_manage: boolean; phase: 'soon' | 'open' | 'ended';
+  winner_count: number; place_prizes: string[];
 }
 
 export const toLocalInput = (iso: string): string => {
@@ -91,3 +92,61 @@ export function contestError(message: string | undefined, h: HubWords): string {
   if (m.includes('banned')) return h.errBanned;
   return h.errGeneric;
 }
+
+/** A winner of a finished contest, as the public sees it. */
+export interface WinnerRow {
+  contest_id: string; contest_title: string; ends_at: string; place: number; prize: string; post_id: string; kind: 'photo' | 'video';
+  media_path: string; title: string; author_id: string; author_name: string; author_avatar: string | null; score: number;
+}
+
+/** The owner's report on one contest. */
+export interface ContestReport {
+  title: string; phase: 'soon' | 'open' | 'ended'; starts_at: string; ends_at: string; winner_count: number;
+  totals: { entries: number; likes: number; commenters: number; voters: number };
+  winners: Array<{ place: number; prize: string; post_id: string; post_title: string; author_id: string; author_name: string; handle: string | null; score: number; likes: number; commenters: number; entered_at: string }>;
+}
+
+export interface WinWords {
+  winnersTitle: string; winnersTop: string; place: (n: number) => string; prizeFor: (n: number) => string; howMany: string; howManyHelp: string; prizesTitle: string; prizesHelp: string;
+  recent: string; report: string; reportHelp: string; reportLive: string; download: string; totals: string; voters: string; noWinners: string; likes: string; commenters: string; score: string; hide: string;
+}
+
+export const WIN: Record<Lang, WinWords> = {
+  en: {
+    winnersTitle: 'Winners', winnersTop: 'Winners', place: (n) => (n === 1 ? '1st place' : n === 2 ? '2nd place' : n === 3 ? '3rd place' : `${n}th place`), prizeFor: (n) => `Prize for place ${n} (optional)`,
+    howMany: 'Number of winners', howManyHelp: '1 = one winner. More = winner and runners-up, each place can have its own prize.', prizesTitle: 'Prize for each place', prizesHelp: 'Leave a place empty if it has no prize. The general prize above is shown to everyone.',
+    recent: 'Recent winners', report: 'Winners report', reportHelp: 'Only you and Kezzo admins see this report.', reportLive: 'The contest is still running: these are the current leaders.', download: 'Download (CSV)', totals: 'Totals',
+    voters: 'People who voted', noWinners: 'No winners yet: there are no entries.', likes: 'Likes', commenters: 'Commenters', score: 'Score', hide: 'Hide',
+  },
+  fr: {
+    winnersTitle: 'Gagnants', winnersTop: 'Gagnants', place: (n) => (n === 1 ? '1re place' : `${n}e place`), prizeFor: (n) => `Prix de la place ${n} (facultatif)`,
+    howMany: 'Nombre de gagnants', howManyHelp: '1 = un seul gagnant. Plus = gagnant et finalistes, chaque place peut avoir son prix.', prizesTitle: 'Prix de chaque place', prizesHelp: 'Laissez vide si la place n’a pas de prix. Le prix général ci-dessus est montré à tous.',
+    recent: 'Gagnants récents', report: 'Rapport des gagnants', reportHelp: 'Seuls vous et les admins Kezzo voyez ce rapport.', reportLive: 'Le concours est en cours : voici les meneurs actuels.', download: 'Télécharger (CSV)', totals: 'Totaux',
+    voters: 'Personnes ayant voté', noWinners: 'Pas encore de gagnants : aucune participation.', likes: 'J’aime', commenters: 'Commentateurs', score: 'Score', hide: 'Masquer',
+  },
+  es: {
+    winnersTitle: 'Ganadores', winnersTop: 'Ganadores', place: (n) => `${n}.º lugar`, prizeFor: (n) => `Premio del lugar ${n} (opcional)`,
+    howMany: 'Número de ganadores', howManyHelp: '1 = un solo ganador. Más = ganador y finalistas; cada lugar puede tener su premio.', prizesTitle: 'Premio de cada lugar', prizesHelp: 'Déjalo vacío si el lugar no tiene premio. El premio general de arriba lo ve todo el mundo.',
+    recent: 'Ganadores recientes', report: 'Informe de ganadores', reportHelp: 'Solo tú y los administradores de Kezzo ven este informe.', reportLive: 'El concurso sigue en marcha: estos son los líderes actuales.', download: 'Descargar (CSV)', totals: 'Totales',
+    voters: 'Personas que votaron', noWinners: 'Aún no hay ganadores: no hay participaciones.', likes: 'Me gusta', commenters: 'Comentaristas', score: 'Puntos', hide: 'Ocultar',
+  },
+  pt: {
+    winnersTitle: 'Vencedores', winnersTop: 'Vencedores', place: (n) => `${n}º lugar`, prizeFor: (n) => `Prêmio do ${n}º lugar (opcional)`,
+    howMany: 'Número de vencedores', howManyHelp: '1 = um vencedor. Mais = vencedor e finalistas; cada lugar pode ter seu prêmio.', prizesTitle: 'Prêmio de cada lugar', prizesHelp: 'Deixe vazio se o lugar não tem prêmio. O prêmio geral acima é mostrado a todos.',
+    recent: 'Vencedores recentes', report: 'Relatório dos vencedores', reportHelp: 'Só você e os administradores do Kezzo veem este relatório.', reportLive: 'O concurso ainda está aberto: estes são os líderes atuais.', download: 'Baixar (CSV)', totals: 'Totais',
+    voters: 'Pessoas que votaram', noWinners: 'Ainda sem vencedores: não há participações.', likes: 'Curtidas', commenters: 'Comentaristas', score: 'Pontos', hide: 'Ocultar',
+  },
+  hi: {
+    winnersTitle: 'विजेता', winnersTop: 'विजेता', place: (n) => `स्थान ${n}`, prizeFor: (n) => `स्थान ${n} का इनाम (वैकल्पिक)`,
+    howMany: 'विजेताओं की संख्या', howManyHelp: '1 = एक विजेता। ज़्यादा = विजेता और उपविजेता; हर स्थान का अपना इनाम हो सकता है।', prizesTitle: 'हर स्थान का इनाम', prizesHelp: 'इनाम न हो तो खाली छोड़ें। ऊपर का सामान्य इनाम सबको दिखता है।',
+    recent: 'हाल के विजेता', report: 'विजेता रिपोर्ट', reportHelp: 'यह रिपोर्ट केवल आपको और Kezzo एडमिन को दिखती है।', reportLive: 'प्रतियोगिता अभी चल रही है: ये मौजूदा अग्रणी हैं।', download: 'डाउनलोड (CSV)', totals: 'कुल',
+    voters: 'वोट देने वाले लोग', noWinners: 'अभी कोई विजेता नहीं: कोई प्रविष्टि नहीं है।', likes: 'लाइक', commenters: 'टिप्पणीकार', score: 'स्कोर', hide: 'छिपाएँ',
+  },
+};
+
+/** One CSV cell, safe for spreadsheets (quotes doubled; a leading = + - @ is defused). */
+export const csvCell = (v: string | number | null | undefined): string => {
+  let s = String(v ?? '');
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  return `"${s.replace(/"/g, '""')}"`;
+};

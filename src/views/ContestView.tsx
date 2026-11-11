@@ -9,7 +9,7 @@ import { Thumb } from '../components/ContestThumb';
 import { PostCard } from '../components/PostCard';
 import { ContestBadge } from '../components/ContestBadge';
 import { CONTEST, phaseOf, type Entry } from '../lib/contest';
-import { HUB, contestError, type ContestRow } from '../lib/contestHub';
+import { HUB, WIN, contestError, csvCell, type ContestReport, type ContestRow } from '../lib/contestHub';
 import { ContestForm } from '../components/ContestForm';
 import { ContestHub } from './ContestHub';
 import { useAuth } from '../state/Auth';
@@ -41,6 +41,7 @@ function ContestDetail({ id }: { id: string }) {
   const w = CONTEST[lang];
   const A = lang === 'fr' ? ADMIN.fr : ADMIN.en;
   const h = HUB[lang];
+  const x = WIN[lang];
 
   const [contest, setContest] = useState<ContestRow | null>(null);
   const [board, setBoard] = useState<Entry[]>([]);
@@ -49,6 +50,7 @@ function ContestDetail({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   const [admin, setAdmin] = useState(false);
   const [editingContest, setEditingContest] = useState(false);
+  const [report, setReport] = useState<ContestReport | null>(null);
   const [mineDetail, setMineDetail] = useState<{ title: string; body: string } | null>(null);
   const [editing, setEditing] = useState<{ title: string; body: string } | null>(null);
   const [allEntries, setAllEntries] = useState<AdminEntry[]>([]);
@@ -168,7 +170,7 @@ function ContestDetail({ id }: { id: string }) {
     if (!contest) return;
     const { error } = await supabase.rpc('save_contest', {
       p_id: contest.id, p_title: contest.title, p_theme: contest.theme, p_prize: contest.prize, p_rules: contest.rules,
-      p_starts: contest.starts_at, p_ends: iso,
+      p_starts: contest.starts_at, p_ends: iso, p_winner_count: contest.winner_count, p_place_prizes: contest.place_prizes,
     });
     if (error) { toast(contestError(error.message, h), 'error'); return; }
     toast(A.saved);
@@ -214,6 +216,23 @@ function ContestDetail({ id }: { id: string }) {
   const field = 'w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900';
   const canManage = contest?.can_manage === true;
 
+  const openReport = async () => {
+    if (!contest) return;
+    const { data, error } = await supabase.rpc('contest_report', { p_contest: contest.id });
+    if (error || !data) { toast(contestError(error?.message, h), 'error'); return; }
+    setReport(data as ContestReport);
+  };
+  const downloadReport = () => {
+    if (!report) return;
+    const head = ['#', x.winnersTitle, '@', x.score, x.likes, x.commenters, 'Post', 'Prize'];
+    const lines = [head.map(csvCell).join(','), ...report.winners.map((r) => [r.place, r.author_name, r.handle ?? '', r.score, r.likes, r.commenters, r.post_title, r.prize].map(csvCell).join(','))];
+    const url = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = `kezzo-winners-${contest?.id.slice(0, 8) ?? 'contest'}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   if (loading) return <Loading />;
 
   return (
@@ -242,6 +261,9 @@ function ContestDetail({ id }: { id: string }) {
             <ol className="mt-1 list-decimal space-y-1 pl-5 text-sm text-zinc-700">
               <li>{w.step1}</li><li>{w.step2}</li><li>{w.step3}</li>
             </ol>
+            {contest.winner_count > 1 && (
+              <p className="mt-3 text-sm text-zinc-700"><span className="font-semibold">{x.winnersTitle}: {contest.winner_count}</span>{contest.place_prizes.some(Boolean) ? ' · ' + contest.place_prizes.map((p, i) => (p ? `${x.place(i + 1)}: ${p}` : '')).filter(Boolean).join(' · ') : ''}</p>
+            )}
             {contest.rules && (
               <details className="mt-3 text-sm">
                 <summary className="cursor-pointer font-semibold">{w.rulesTitle}</summary>
@@ -251,16 +273,23 @@ function ContestDetail({ id }: { id: string }) {
           </section>
 
           {phase === 'ended' && board[0] && (
-            <section className="rounded-2xl border-2 border-zinc-900 bg-white p-4 text-zinc-900">
-              <p className="flex items-center gap-2 text-sm font-semibold"><Trophy className="h-5 w-5 text-accent" aria-hidden="true" />{w.winner}</p>
-              <div className="mt-3 flex items-center gap-3">
-                <Avatar p={{ display_name: board[0].author_name, avatar_url: board[0].author_avatar }} size={44} />
-                <div className="min-w-0">
-                  <p className="truncate font-semibold">{board[0].author_name}</p>
-                  <p className="truncate text-sm text-zinc-600">{board[0].title} · {board[0].score}</p>
-                </div>
-              </div>
-              <p className="mt-2 text-sm text-zinc-600">{w.winnerNote}</p>
+            <section className="rounded-2xl border-2 border-zinc-900 bg-white p-4 text-zinc-900" aria-label={x.winnersTitle}>
+              <p className="flex items-center gap-2 text-sm font-semibold"><Trophy className="h-5 w-5 text-accent" aria-hidden="true" />{board.length > 1 && contest.winner_count > 1 ? x.winnersTitle : w.winner}</p>
+              <ol className="mt-3 space-y-3">
+                {board.slice(0, contest.winner_count).map((e) => (
+                  <li key={e.post_id} className="flex items-center gap-3">
+                    <span className="w-14 shrink-0 text-xs font-semibold text-zinc-600">{x.place(e.rank)}</span>
+                    <Avatar p={{ display_name: e.author_name, avatar_url: e.author_avatar }} size={44} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold">{e.author_name}</p>
+                      <p className="truncate text-sm text-zinc-600">{e.title} · {e.score}</p>
+                    </div>
+                    {contest.place_prizes[e.rank - 1] && <span className="shrink-0 text-right text-xs font-semibold text-accent">{contest.place_prizes[e.rank - 1]}</span>}
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('post', e.post_id)}><ExternalLink className="h-4 w-4" aria-hidden="true" />{w.view}</button>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-3 text-sm text-zinc-600">{w.winnerNote}</p>
             </section>
           )}
 
@@ -328,13 +357,13 @@ function ContestDetail({ id }: { id: string }) {
           {tab === 'vote' && (
             <section aria-label={w.tabVote} className="space-y-4">
               <p className="text-sm text-zinc-600">{w.voteHelp}</p>
-              {board.length === 0 ? <Empty text={w.empty} /> : posts.slice(0, shown).map((p) => {
+              {board.length === 0 ? <Empty text={w.empty} /> : (phase === 'ended' ? [...posts].sort((a, b) => (board.find((e) => e.post_id === a.id)?.rank ?? 999) - (board.find((e) => e.post_id === b.id)?.rank ?? 999)) : posts).slice(0, shown).map((p) => {
                 const e = board.find((x) => x.post_id === p.id);
                 return (
                   <div key={p.id} className="overflow-hidden rounded-2xl border-2 border-zinc-900 bg-white">
                     {e && (
                       <div className="flex flex-wrap items-center gap-2 px-3 py-2 text-xs text-zinc-800">
-                        <ContestBadge info={{ rank: e.rank, score: e.score, winner: phase === 'ended' && e.rank === 1 }} link={false} />
+                        <ContestBadge info={{ rank: e.rank, score: e.score, winner: phase === 'ended' && e.rank <= (contest?.winner_count ?? 1) }} link={false} />
                         <span className="inline-flex items-center gap-1"><Heart className="h-3.5 w-3.5" aria-hidden="true" />{e.likes}</span>
                         <span className="inline-flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />{e.commenters}</span>
                         <span className="font-semibold">{w.score}: {e.score}</span>
@@ -397,6 +426,33 @@ function ContestDetail({ id }: { id: string }) {
               <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void deleteContest()}>{A.del}</button>
             </div>
           )}
+          <div className="mt-5 border-t border-zinc-200 pt-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-sm font-semibold">{x.report}</h3>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => void openReport()}><Trophy className="h-4 w-4" aria-hidden="true" />{report ? w.refresh : x.report}</button>
+              {report && <button type="button" className="btn btn-ghost btn-sm" onClick={downloadReport}>{x.download}</button>}
+              {report && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setReport(null)}>{x.hide}</button>}
+            </div>
+            <p className="mt-1 text-xs text-zinc-500">{x.reportHelp}</p>
+            {report && (
+              <div className="mt-3 space-y-2 rounded-xl bg-zinc-50 p-3 text-sm">
+                {report.phase !== 'ended' && <p className="text-xs text-zinc-600">{x.reportLive}</p>}
+                <p className="text-xs text-zinc-700">{x.totals}: {report.totals.entries} · {x.likes} {report.totals.likes} · {x.commenters} {report.totals.commenters} · {x.voters} {report.totals.voters}</p>
+                {report.winners.length === 0 ? <p className="text-xs">{x.noWinners}</p> : (
+                  <ol className="divide-y divide-zinc-200">
+                    {report.winners.map((r) => (
+                      <li key={r.post_id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
+                        <span className="w-16 shrink-0 text-xs font-semibold">{x.place(r.place)}</span>
+                        <span className="min-w-0 flex-1 truncate font-semibold">{r.author_name}{r.handle ? ` (@${r.handle})` : ''}</span>
+                        <span className="text-xs text-zinc-600">{x.score} {r.score} · {r.likes} / {r.commenters}</span>
+                        {r.prize && <span className="text-xs font-semibold text-accent">{r.prize}</span>}
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </div>
+            )}
+          </div>
           <div className="mt-5 border-t border-zinc-200 pt-4">
             <p className="text-xs text-zinc-600">{A.stats(allEntries.length, allEntries.reduce((n, e) => n + e.likes, 0), allEntries.reduce((n, e) => n + e.commenters, 0))}</p>
             <h3 className="mt-3 text-sm font-semibold">{A.entriesTitle}</h3>
