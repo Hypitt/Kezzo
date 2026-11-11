@@ -7,7 +7,7 @@ import { isSafe } from '../lib/moderation';
 import { compressImage } from '../lib/media';
 import { startUpload } from '../lib/upload';
 import { publicFilePath, publicUrl, removePublic } from '../lib/storage';
-import { CURRENCIES, MARKET, MARKET_CATS, MARKET_KINDS, formatPrice, type Listing, type MarketCat, type MarketKind, type MarketStatus } from '../lib/market';
+import { MARKET, MARKET_CATS, MARKET_KINDS, formatPrice, type Listing, type MarketCat, type MarketKind, type MarketStatus } from '../lib/market';
 import { readPlace } from '../lib/opportunities';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
@@ -113,7 +113,7 @@ function Form({ editing, onDone, onCancel }: { editing: Listing | null; onDone: 
   const place = readPlace();
   const [d, setD] = useState<Draft>(() => editing
     ? { kind: editing.kind, category: editing.category, title: editing.title, body: editing.body, price: editing.price === null ? '' : String(editing.price), currency: editing.currency, condition: editing.condition ?? '', country: editing.country, city: editing.city, online: editing.online, contact: editing.contact ?? '' }
-    : { kind: 'product', category: 'other', title: '', body: '', price: '', currency: 'USD', condition: '', country: place.country, city: place.city, online: false, contact: '' });
+    : { kind: 'product', category: 'other', title: '', body: '', price: '', currency: '', condition: '', country: place.country, city: place.city, online: false, contact: '' });
   const [photos, setPhotos] = useState<string[]>(editing?.photos ?? []);
   const added = useRef<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -150,7 +150,7 @@ function Form({ editing, onDone, onCancel }: { editing: Listing | null; onDone: 
     const price = priceText === '' ? null : Number(priceText);
     if (price !== null && (!Number.isFinite(price) || price < 0)) return setErr(w.errGeneric);
     const row = {
-      kind: d.kind, category: d.category, title: d.title.trim(), body: d.body.trim(), price, currency: d.currency,
+      kind: d.kind, category: d.category, title: d.title.trim(), body: d.body.trim(), price, currency: d.currency.trim(),
       condition: d.kind === 'product' && d.condition ? d.condition : null, country: d.country.trim(), city: d.city.trim(),
       online: d.online, contact: d.contact.trim() || null, photos,
     };
@@ -189,12 +189,7 @@ function Form({ editing, onDone, onCancel }: { editing: Listing | null; onDone: 
           </div>
         )}
         <div><label className="label" htmlFor="mk-price">{w.fPrice}</label><input id="mk-price" className="input" inputMode="decimal" value={d.price} maxLength={14} onChange={(e) => set('price', e.target.value)} /></div>
-        <div>
-          <label className="label" htmlFor="mk-cur">{w.fCurrency}</label>
-          <select id="mk-cur" className="input" value={d.currency} onChange={(e) => set('currency', e.target.value)}>
-            {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
+        <div><label className="label" htmlFor="mk-cur">{w.fCurrency}</label><input id="mk-cur" className="input" value={d.currency} maxLength={12} placeholder="USD, CAD, FCFA, €" onChange={(e) => set('currency', e.target.value)} /></div>
       </div>
       <p className="-mt-1 text-xs text-zinc-500">{w.fPriceHelp}</p>
       <div><label className="label" htmlFor="mk-body">{w.fBody}</label><textarea id="mk-body" className="input" rows={5} value={d.body} maxLength={3000} onChange={(e) => set('body', e.target.value)} /></div>

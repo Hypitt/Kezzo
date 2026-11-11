@@ -11,7 +11,7 @@ create table if not exists public.market_listings (
   title text not null check (char_length(title) between 3 and 120),
   body text not null default '' check (char_length(body) <= 3000),
   price numeric(12, 2) check (price is null or (price >= 0 and price < 1000000000)),
-  currency text not null default 'USD' check (currency ~ '^[A-Z]{3}$'),
+  currency text not null default '' check (char_length(currency) <= 12),
   condition text check (condition is null or condition in ('new', 'used')),
   country text not null default '' check (char_length(country) <= 60),
   city text not null default '' check (char_length(city) <= 80),
@@ -28,6 +28,10 @@ create index if not exists market_listings_created_idx on public.market_listings
 create index if not exists market_listings_kind_idx on public.market_listings (kind, category, created_at desc);
 create index if not exists market_listings_place_idx on public.market_listings (lower(country), lower(city));
 create index if not exists market_listings_seller_idx on public.market_listings (seller_id, created_at desc);
+-- (for a database that already ran an earlier version of this file: the currency is free text)
+alter table public.market_listings drop constraint if exists market_listings_currency_check;
+alter table public.market_listings alter column currency set default '';
+alter table public.market_listings add constraint market_listings_currency_check check (char_length(currency) <= 12);
 alter table public.market_listings enable row level security;
 
 revoke all on public.market_listings from anon, authenticated;
