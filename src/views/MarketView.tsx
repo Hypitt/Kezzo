@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { ImagePlus, MapPin, MessageCircle, Pencil, Plus, Store, Trash2, X } from 'lucide-react';
+import { ArrowLeft, ImagePlus, MapPin, MessageCircle, Pencil, Plus, Share2, Store, Trash2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { PUBLIC_PROFILE } from '../lib/data';
 import { fileExt } from '../lib/format';
@@ -9,19 +9,20 @@ import { startUpload } from '../lib/upload';
 import { publicFilePath, publicUrl, removePublic } from '../lib/storage';
 import { MARKET, MARKET_CATS, MARKET_KINDS, formatPrice, type Listing, type MarketCat, type MarketKind, type MarketStatus } from '../lib/market';
 import { readPlace } from '../lib/opportunities';
+import { copyText } from '../lib/share';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { ReportButton } from '../components/ReportButton';
-import { Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
+import { Avatar, Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
 
 const PAGE = 18;
 const SELECT = `id,seller_id,kind,category,title,body,price,currency,condition,country,city,online,contact,photos,status,hidden,created_at,seller:profiles!seller_id(${PUBLIC_PROFILE})`;
 const clean = (s: string) => s.replace(/[%_,()*\\"]/g, ' ').trim();
 const sellerOf = (l: Listing) => (Array.isArray(l.seller) ? l.seller[0] : l.seller) ?? null;
 
-function Card({ l, mine, admin, onEdit, onChanged }: { l: Listing; mine: boolean; admin: boolean; onEdit: () => void; onChanged: () => void }) {
+function Card({ l, mine, admin, onEdit, onChanged, onShop }: { l: Listing; mine: boolean; admin: boolean; onEdit: () => void; onChanged: () => void; onShop?: () => void }) {
   const { lang } = useI18n();
   const { user, openAuth } = useAuth();
   const { go } = useRouter();
@@ -79,7 +80,9 @@ function Card({ l, mine, admin, onEdit, onChanged }: { l: Listing; mine: boolean
         )}
         <button type="button" className="text-xs font-semibold text-accent hover:underline" aria-expanded={open} onClick={() => setOpen((v) => !v)}>{open ? w.showLess : w.readMore}</button>
         <div className="flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-2">
-          {seller && <span className="text-xs text-zinc-500">{w.byLabel} {seller.display_name}</span>}
+          {seller && (onShop
+            ? <button type="button" className="text-xs text-zinc-500 hover:underline" onClick={onShop}>{w.byLabel} <span className="font-semibold">{seller.display_name}</span> · {w.visitShop}</button>
+            : <span className="text-xs text-zinc-500">{w.byLabel} {seller.display_name}</span>)}
           <span className="flex-1" />
           {mine ? (
             <>
@@ -230,8 +233,10 @@ function Form({ editing, onDone, onCancel }: { editing: Listing | null; onDone: 
 }
 
 /** Members sell products and services. No payments yet: buyers message sellers and arrange the deal themselves. */
-export function MarketView() {
+export function MarketView({ shop }: { shop?: string }) {
   const { user, openAuth } = useAuth();
+  const { go } = useRouter();
+  const { toast } = useToast();
   const { lang } = useI18n();
   const w = MARKET[lang];
   const [kind, setKind] = useState<'all' | MarketKind | 'mine'>('all');
@@ -245,7 +250,14 @@ export function MarketView() {
   const [form, setForm] = useState<{ open: boolean; editing: Listing | null }>({ open: false, editing: null });
   const [admin, setAdmin] = useState(false);
   const [hiddenRows, setHiddenRows] = useState<Listing[]>([]);
+  const [owner, setOwner] = useState<{ id: string; display_name: string; avatar_url: string | null; bio: string } | null>(null);
   const request = useRef(0);
+
+  useEffect(() => {
+    setOwner(null);
+    if (!shop) return;
+    void supabase.from('profiles').select('id,display_name,avatar_url,bio').eq('id', shop).maybeSingle().then(({ data }) => setOwner((data as typeof owner) ?? null));
+  }, [shop]);
 
   useEffect(() => { const id = window.setTimeout(() => setTerm(clean(input)), 350); return () => window.clearTimeout(id); }, [input]);
   useEffect(() => {
@@ -256,13 +268,14 @@ export function MarketView() {
   const fetchPage = useCallback(async (offset: number): Promise<Listing[]> => {
     let q = supabase.from('market_listings').select(SELECT).eq('hidden', false)
       .order('created_at', { ascending: false }).range(offset, offset + PAGE - 1);
-    if (kind === 'mine') q = user ? q.eq('seller_id', user.id) : q.eq('seller_id', '00000000-0000-0000-0000-000000000000');
+    if (shop) { q = q.eq('seller_id', shop); if (shop !== user?.id) q = q.neq('status', 'paused'); }
+    else if (kind === 'mine') q = user ? q.eq('seller_id', user.id) : q.eq('seller_id', '00000000-0000-0000-0000-000000000000');
     else { if (kind !== 'all') q = q.eq('kind', kind); q = q.neq('status', 'paused'); }
     if (cat !== 'all') q = q.eq('category', cat);
     if (term) q = q.or(`title.ilike.%${term}%,city.ilike.%${term}%,country.ilike.%${term}%`);
     const { data } = await q;
     return (data ?? []) as unknown as Listing[];
-  }, [kind, cat, term, user]);
+  }, [kind, cat, term, user, shop]);
 
   const load = useCallback(() => {
     const mine = ++request.current;
@@ -288,15 +301,31 @@ export function MarketView() {
   const card = (l: Listing) => (
     <Card key={l.id} l={l} mine={l.seller_id === user?.id} admin={admin}
       onEdit={() => { setForm({ open: true, editing: l }); window.scrollTo(0, 0); }}
-      onChanged={() => { load(); loadHidden(); }} />
+      onChanged={() => { load(); loadHidden(); }} onShop={shop ? undefined : () => go('market', l.seller_id)} />
   );
   const tabs: Array<['all' | MarketKind | 'mine', string]> = [['all', w.all], ['product', w.products], ['service', w.services]];
   if (user) tabs.push(['mine', w.mine]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-3">
-      <PageHeader title={w.title} sub={w.sub}
-        action={<button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700" onClick={() => (user ? setForm({ open: true, editing: null }) : openAuth('signup'))}><Plus className="h-4 w-4" aria-hidden="true" />{w.sell}</button>} />
+      {shop && (
+        <section className="card flex flex-wrap items-center gap-3 text-zinc-900">
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('market')}><ArrowLeft className="h-4 w-4" aria-hidden="true" />{w.title}</button>
+          {owner && <Avatar p={owner} size={48} />}
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate font-display text-lg font-bold">{owner ? w.shopOf(owner.display_name) : w.title}</h1>
+            {owner?.bio && <p className="line-clamp-2 text-xs text-zinc-600">{owner.bio}</p>}
+            <p className="text-xs text-zinc-500">{w.listingsN(rows.length)}</p>
+          </div>
+          <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" onClick={async () => {
+            const url = `${window.location.origin}/#/market/${shop}`;
+            if (typeof navigator.share === 'function') { try { await navigator.share({ title: owner ? w.shopOf(owner.display_name) : 'Kezzo', url }); return; } catch { /* cancelled: fall back to copy */ } }
+            toast((await copyText(url)) ? w.linkCopied : w.errGeneric);
+          }}><Share2 className="h-4 w-4" aria-hidden="true" />{w.shareShop}</button>
+        </section>
+      )}
+      {!shop && <PageHeader title={w.title} sub={w.sub}
+        action={<button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700" onClick={() => (user ? setForm({ open: true, editing: null }) : openAuth('signup'))}><Plus className="h-4 w-4" aria-hidden="true" />{w.sell}</button>} />}
 
       {form.open && <Form editing={form.editing} onCancel={() => setForm({ open: false, editing: null })} onDone={() => { setForm({ open: false, editing: null }); load(); }} />}
 
@@ -304,14 +333,14 @@ export function MarketView() {
 
       <div className="space-y-2">
         <input className="input" placeholder={w.search} aria-label={w.search} value={input} onChange={(e) => setInput(e.target.value)} />
-        <div className="flex flex-wrap gap-2">{tabs.map(([k, label]) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{label}</Chip>)}</div>
+        {!shop && <div className="flex flex-wrap gap-2">{tabs.map(([k, label]) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{label}</Chip>)}</div>}
         <select className="input" aria-label={w.fCat} value={cat} onChange={(e) => setCat(e.target.value as 'all' | MarketCat)}>
           <option value="all">{w.anyCategory}</option>
           {MARKET_CATS.map((c) => <option key={c} value={c}>{w.cats[c]}</option>)}
         </select>
       </div>
 
-      {loading ? <Loading /> : rows.length === 0 ? <Empty text={kind === 'mine' ? w.emptyMine : w.empty}><Store className="mx-auto mt-3 h-6 w-6 text-zinc-400" aria-hidden="true" /></Empty> : (
+      {loading ? <Loading /> : rows.length === 0 ? <Empty text={shop ? w.emptyShop : kind === 'mine' ? w.emptyMine : w.empty}><Store className="mx-auto mt-3 h-6 w-6 text-zinc-400" aria-hidden="true" /></Empty> : (
         <div className="grid gap-3 sm:grid-cols-2">{rows.map(card)}</div>
       )}
       <LoadMore show={!loading && more} busy={busy} onClick={() => void showMore()} label={w.more} />

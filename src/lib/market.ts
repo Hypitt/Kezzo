@@ -31,6 +31,7 @@ export interface MarketWords {
   fCountry: string; fCity: string; fOnline: string; fContact: string; fPhotos: string; fPhotosHelp: string; addPhoto: string; removePhoto: string;
   publish: string; save: string; cancel: string; posted: string; saved: string; message: string; signIn: string; edit: string; del: string; delAsk: string;
   markSold: string; markActive: string; pause: string; readMore: string; showLess: string; contact: string; hide: string; unhide: string; hiddenTitle: string;
+  visitShop: string; shopOf: (name: string) => string; listingsN: (n: number) => string; shareShop: string; linkCopied: string; emptyShop: string;
   errPlace: string; errRate: string; errSafe: string; errGeneric: string; errPhoto: string; location: string; uploading: string;
 }
 
@@ -46,6 +47,7 @@ export const MARKET: Record<Lang, MarketWords> = {
     fCountry: 'Country', fCity: 'City', fOnline: 'Available online or by delivery', fContact: 'Other contact (optional)', fPhotos: 'Photos (up to 5)', fPhotosHelp: 'Clear photos sell faster.', addPhoto: 'Add photo', removePhoto: 'Remove photo',
     publish: 'Publish', save: 'Save', cancel: 'Cancel', posted: 'Your listing is live.', saved: 'Saved', message: 'Message seller', signIn: 'Sign in to message the seller', edit: 'Edit', del: 'Delete', delAsk: 'Delete this listing?',
     markSold: 'Mark as sold', markActive: 'Mark as available', pause: 'Pause', readMore: 'Read more', showLess: 'Show less', contact: 'Contact', hide: 'Hide', unhide: 'Show again', hiddenTitle: 'Hidden listings',
+    visitShop: 'Visit shop', shopOf: (n) => `${n}’s shop`, listingsN: (n) => `${n} ${n === 1 ? 'listing' : 'listings'}`, shareShop: 'Share shop', linkCopied: 'Shop link copied', emptyShop: 'This shop has nothing for sale right now.',
     errPlace: 'Enter a country, or tick “Available online or by delivery”.', errRate: 'You have posted a lot today. Please try again tomorrow.', errSafe: 'Please remove words that are not allowed.', errGeneric: 'Something went wrong. Try again.', errPhoto: 'A photo could not be added. Try another one.', location: 'Location', uploading: 'Uploading…',
   },
   fr: {
@@ -59,6 +61,7 @@ export const MARKET: Record<Lang, MarketWords> = {
     fCountry: 'Pays', fCity: 'Ville', fOnline: 'Disponible en ligne ou par livraison', fContact: 'Autre contact (facultatif)', fPhotos: 'Photos (jusqu’à 5)', fPhotosHelp: 'De belles photos vendent plus vite.', addPhoto: 'Ajouter une photo', removePhoto: 'Retirer la photo',
     publish: 'Publier', save: 'Enregistrer', cancel: 'Annuler', posted: 'Votre annonce est publiée.', saved: 'Enregistré', message: 'Écrire au vendeur', signIn: 'Connectez-vous pour écrire au vendeur', edit: 'Modifier', del: 'Supprimer', delAsk: 'Supprimer cette annonce ?',
     markSold: 'Marquer comme vendu', markActive: 'Marquer comme disponible', pause: 'Mettre en pause', readMore: 'Lire la suite', showLess: 'Réduire', contact: 'Contact', hide: 'Masquer', unhide: 'Afficher de nouveau', hiddenTitle: 'Annonces masquées',
+    visitShop: 'Voir la boutique', shopOf: (n) => `Boutique de ${n}`, listingsN: (n) => `${n} annonce${n > 1 ? 's' : ''}`, shareShop: 'Partager la boutique', linkCopied: 'Lien de la boutique copié', emptyShop: 'Cette boutique n’a rien en vente pour l’instant.',
     errPlace: 'Indiquez un pays ou cochez « Disponible en ligne ou par livraison ».', errRate: 'Vous avez beaucoup publié aujourd’hui. Réessayez demain.', errSafe: 'Retirez les mots non permis.', errGeneric: 'Une erreur est survenue. Réessayez.', errPhoto: 'Une photo n’a pas pu être ajoutée. Essayez-en une autre.', location: 'Lieu', uploading: 'Envoi…',
   },
   es: {
@@ -72,6 +75,7 @@ export const MARKET: Record<Lang, MarketWords> = {
     fCountry: 'País', fCity: 'Ciudad', fOnline: 'Disponible en línea o con envío', fContact: 'Otro contacto (opcional)', fPhotos: 'Fotos (hasta 5)', fPhotosHelp: 'Las fotos claras venden más rápido.', addPhoto: 'Añadir foto', removePhoto: 'Quitar foto',
     publish: 'Publicar', save: 'Guardar', cancel: 'Cancelar', posted: 'Tu anuncio ya está publicado.', saved: 'Guardado', message: 'Escribir al vendedor', signIn: 'Inicia sesión para escribir al vendedor', edit: 'Editar', del: 'Eliminar', delAsk: '¿Eliminar este anuncio?',
     markSold: 'Marcar como vendido', markActive: 'Marcar como disponible', pause: 'Pausar', readMore: 'Leer más', showLess: 'Ver menos', contact: 'Contacto', hide: 'Ocultar', unhide: 'Mostrar de nuevo', hiddenTitle: 'Anuncios ocultos',
+    visitShop: 'Ver tienda', shopOf: (n) => `Tienda de ${n}`, listingsN: (n) => `${n} ${n === 1 ? 'anuncio' : 'anuncios'}`, shareShop: 'Compartir tienda', linkCopied: 'Enlace de la tienda copiado', emptyShop: 'Esta tienda no tiene nada a la venta ahora.',
     errPlace: 'Escribe un país o marca «Disponible en línea o con envío».', errRate: 'Has publicado mucho hoy. Inténtalo mañana.', errSafe: 'Quita las palabras no permitidas.', errGeneric: 'Algo salió mal. Inténtalo de nuevo.', errPhoto: 'No se pudo añadir una foto. Prueba con otra.', location: 'Lugar', uploading: 'Subiendo…',
   },
   pt: {
@@ -85,6 +89,7 @@ export const MARKET: Record<Lang, MarketWords> = {
     fCountry: 'País', fCity: 'Cidade', fOnline: 'Disponível online ou com entrega', fContact: 'Outro contato (opcional)', fPhotos: 'Fotos (até 5)', fPhotosHelp: 'Fotos nítidas vendem mais rápido.', addPhoto: 'Adicionar foto', removePhoto: 'Remover foto',
     publish: 'Publicar', save: 'Salvar', cancel: 'Cancelar', posted: 'Seu anúncio está no ar.', saved: 'Salvo', message: 'Escrever ao vendedor', signIn: 'Entre para escrever ao vendedor', edit: 'Editar', del: 'Excluir', delAsk: 'Excluir este anúncio?',
     markSold: 'Marcar como vendido', markActive: 'Marcar como disponível', pause: 'Pausar', readMore: 'Ler mais', showLess: 'Ver menos', contact: 'Contato', hide: 'Ocultar', unhide: 'Mostrar de novo', hiddenTitle: 'Anúncios ocultos',
+    visitShop: 'Ver loja', shopOf: (n) => `Loja de ${n}`, listingsN: (n) => `${n} ${n === 1 ? 'anúncio' : 'anúncios'}`, shareShop: 'Compartilhar loja', linkCopied: 'Link da loja copiado', emptyShop: 'Esta loja não tem nada à venda agora.',
     errPlace: 'Informe um país ou marque “Disponível online ou com entrega”.', errRate: 'Você publicou muito hoje. Tente amanhã.', errSafe: 'Remova as palavras não permitidas.', errGeneric: 'Algo deu errado. Tente de novo.', errPhoto: 'Não foi possível adicionar uma foto. Tente outra.', location: 'Local', uploading: 'Enviando…',
   },
   hi: {
@@ -98,6 +103,7 @@ export const MARKET: Record<Lang, MarketWords> = {
     fCountry: 'देश', fCity: 'शहर', fOnline: 'ऑनलाइन या डिलीवरी से उपलब्ध', fContact: 'अन्य संपर्क (वैकल्पिक)', fPhotos: 'फ़ोटो (5 तक)', fPhotosHelp: 'साफ़ फ़ोटो जल्दी बिकती हैं।', addPhoto: 'फ़ोटो जोड़ें', removePhoto: 'फ़ोटो हटाएँ',
     publish: 'प्रकाशित करें', save: 'सहेजें', cancel: 'रद्द करें', posted: 'आपका विज्ञापन प्रकाशित हो गया।', saved: 'सहेजा गया', message: 'विक्रेता को संदेश', signIn: 'विक्रेता को संदेश भेजने के लिए साइन इन करें', edit: 'बदलें', del: 'हटाएँ', delAsk: 'यह विज्ञापन हटाएँ?',
     markSold: 'बिका हुआ चिह्नित करें', markActive: 'उपलब्ध चिह्नित करें', pause: 'रोकें', readMore: 'और पढ़ें', showLess: 'कम दिखाएँ', contact: 'संपर्क', hide: 'छिपाएँ', unhide: 'फिर दिखाएँ', hiddenTitle: 'छिपे विज्ञापन',
+    visitShop: 'दुकान देखें', shopOf: (n) => `${n} की दुकान`, listingsN: (n) => `${n} विज्ञापन`, shareShop: 'दुकान साझा करें', linkCopied: 'दुकान का लिंक कॉपी हुआ', emptyShop: 'इस दुकान में अभी कुछ बिक्री के लिए नहीं है।',
     errPlace: 'देश लिखें या “ऑनलाइन या डिलीवरी से उपलब्ध” चुनें।', errRate: 'आपने आज बहुत पोस्ट किया है। कल फिर कोशिश करें।', errSafe: 'अनुमति-रहित शब्द हटाएँ।', errGeneric: 'कुछ गड़बड़ हुई। फिर कोशिश करें।', errPhoto: 'एक फ़ोटो नहीं जुड़ सकी। दूसरी आज़माएँ।', location: 'स्थान', uploading: 'भेजा जा रहा है…',
   },
 };

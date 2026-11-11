@@ -75,7 +75,7 @@ function View() {
     case 'site': return <Gate><SiteEditorView /></Gate>;
     case 'theme': return <Gate><ThemeEditorView /></Gate>;
     case 'opportunities': return <OpportunitiesView focus={route.id} />;
-    case 'market': return <MarketView />;
+    case 'market': return <MarketView key={route.id ?? 'all'} shop={route.id} />;
     case 'legal': return <LegalView id={route.id} />;
     case 'join': return <JoinGroupView code={route.id} />;
     case 'search':
