@@ -44,6 +44,7 @@ const PostView = page(() => import('./views/PostView').then((m) => ({ default: m
 const ThemeEditorView = page(() => import('./views/ThemeEditorView').then((m) => ({ default: m.ThemeEditorView })));
 const SiteEditorView = page(() => import('./views/SiteEditorView').then((m) => ({ default: m.SiteEditorView })));
 const ContestView = page(() => import('./views/ContestView').then((m) => ({ default: m.ContestView })));
+const MarketView = page(() => import('./views/MarketView').then((m) => ({ default: m.MarketView })));
 const OpportunitiesView = page(() => import('./views/OpportunitiesView').then((m) => ({ default: m.OpportunitiesView })));
 const CommunityView = page(() => import('./views/CommunityView').then((m) => ({ default: m.CommunityView })));
 const FOOT: Record<Lang, { terms: string; privacy: string }> = {
@@ -74,6 +75,7 @@ function View() {
     case 'site': return <Gate><SiteEditorView /></Gate>;
     case 'theme': return <Gate><ThemeEditorView /></Gate>;
     case 'opportunities': return <OpportunitiesView focus={route.id} />;
+    case 'market': return <MarketView />;
     case 'legal': return <LegalView id={route.id} />;
     case 'join': return <JoinGroupView code={route.id} />;
     case 'search':

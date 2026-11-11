@@ -25,7 +25,7 @@ const when = (iso: string, lang: string) => new Date(iso).toLocaleString(lang, {
 function useOpen() {
   const { go } = useRouter();
   return (type: string, id: string, postId?: string | null) => {
-    const map: Record<string, Tab> = { post: 'post', profile: 'profile', battle: 'battles', group: 'groups', opportunity: 'opportunities' };
+    const map: Record<string, Tab> = { post: 'post', profile: 'profile', battle: 'battles', group: 'groups', opportunity: 'opportunities', listing: 'market' };
     if (type === 'comment' && postId) return go('post', postId);
     if (map[type]) go(map[type], id);
   };

@@ -1,8 +1,9 @@
-import { Briefcase, CalendarDays, Home, MessageCircle, PlusCircle, Radio, Search, Swords, Image as ImageIcon, User, Users, Trophy, CalendarCheck, PiggyBank, type LucideIcon } from 'lucide-react';
+import { Store, Briefcase, CalendarDays, Home, MessageCircle, PlusCircle, Radio, Search, Swords, Image as ImageIcon, User, Users, Trophy, CalendarCheck, PiggyBank, type LucideIcon } from 'lucide-react';
 import type { Key } from './i18n';
 import type { Lang } from './types';
 import type { Tab } from '../state/Router';
 import { CONTEST } from './contest';
+import { MARKET } from './market';
 
 /** The app menu groups related pages. Every page is still its own address (#/search, #/battles ...); nothing was removed. */
 export interface NavGroup { id: string; icon: LucideIcon; tabs: Tab[]; name: Key | Record<Lang, string> }
@@ -11,14 +12,14 @@ export const GROUPS: NavGroup[] = [
   { id: 'explore', icon: Home, tabs: ['home', 'search', 'media'], name: { en: 'Explore', fr: 'Explorer', es: 'Explorar', pt: 'Explorar', hi: 'एक्सप्लोर' } },
   { id: 'arena', icon: Swords, tabs: ['battles', 'live', 'contest'], name: { en: 'Arena', fr: 'Arène', es: 'Arena', pt: 'Arena', hi: 'अरेना' } },
   { id: 'create', icon: PlusCircle, tabs: ['create'], name: 'nav_create' },
-  { id: 'community', icon: CalendarDays, tabs: ['opportunities', 'community'], name: { en: 'Community', fr: 'Communauté', es: 'Comunidad', pt: 'Comunidade', hi: 'समुदाय' } },
+  { id: 'community', icon: CalendarDays, tabs: ['market', 'opportunities', 'community'], name: { en: 'Community', fr: 'Communauté', es: 'Comunidad', pt: 'Comunidade', hi: 'समुदाय' } },
   { id: 'connect', icon: Users, tabs: ['groups', 'vsla', 'messages'], name: { en: 'Connect', fr: 'Échanger', es: 'Conectar', pt: 'Conectar', hi: 'जुड़ें' } },
   { id: 'profile', icon: User, tabs: ['profile'], name: 'nav_profile' },
 ];
 
 export const TAB_ICON: Partial<Record<Tab, LucideIcon>> = {
   home: Home, search: Search, media: ImageIcon, battles: Swords, live: Radio, contest: Trophy,
-  community: CalendarCheck, opportunities: Briefcase, groups: Users, vsla: PiggyBank, messages: MessageCircle,
+  community: CalendarCheck, opportunities: Briefcase, market: Store, groups: Users, vsla: PiggyBank, messages: MessageCircle,
 };
 
 const TAB_KEY: Partial<Record<Tab, Key>> = {
@@ -34,6 +35,7 @@ export function groupName(g: NavGroup, lang: Lang, t: (k: Key) => string): strin
 }
 export function tabName(tab: Tab, lang: Lang, t: (k: Key) => string): string {
   if (tab === 'contest') return CONTEST[lang].nav;
+  if (tab === 'market') return MARKET[lang].title;
   const k = TAB_KEY[tab];
   return k ? t(k) : tab;
 }
