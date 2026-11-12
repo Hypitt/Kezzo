@@ -14,7 +14,7 @@ export function SectionTabs() {
     <nav className="mb-3 flex gap-1 overflow-x-auto rounded-lg bg-zinc-100 p-0.5" aria-label={group.id}>
       {group.tabs.map((tab) => {
         const Icon = TAB_ICON[tab];
-        const active = route.tab === tab;
+        const active = route.tab === tab || (tab === 'battles' && route.tab === 'live');
         return (
           <button key={tab} type="button" onClick={() => go(tab)} aria-current={active ? 'page' : undefined}
             className={`flex flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition ${active ? 'bg-zinc-900 text-white' : 'text-zinc-700 hover:bg-white'}`}>

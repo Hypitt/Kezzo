@@ -21,7 +21,7 @@ export interface Player {
   cool: number; tack: number; tcool: number; stun: number; tackUsed: boolean; anim: number; human: number;
   think: number; want: '' | 'pass' | 'shoot'; hold: number; dribX: number; dribY: number; ptarget: number;
 }
-export interface Human { id: number; team: Team; pidx: number; prevA: boolean; prevB: boolean; hold: number; lock: number }
+export interface Human { id: number; team: Team; pidx: number; prevA: boolean; prevB: boolean; hold: number; lock: number; keeper: boolean }
 export interface Ball { x: number; y: number; vx: number; vy: number; owner: number; last: Team }
 export interface Match {
   n: number; duration: number; clock: number; phase: Phase; phaseT: number;
@@ -41,7 +41,7 @@ interface Slot { role: Role; fx: number; fy: number }
 /** Where a team of n players stands, in "team" coordinates: fx 0 = own goal line, 1 = the goal it attacks; fy across the pitch. */
 export function formation(n: number): Slot[] {
   if (n <= 1) return [{ role: 'fwd', fx: 0.3, fy: 0.5 }];
-  if (n === 2) return [{ role: 'def', fx: 0.2, fy: 0.5 }, { role: 'fwd', fx: 0.4, fy: 0.5 }];
+  if (n === 2) return [{ role: 'gk', fx: 0.03, fy: 0.5 }, { role: 'fwd', fx: 0.35, fy: 0.5 }];
   const out: Slot[] = [{ role: 'gk', fx: 0.03, fy: 0.5 }];
   const f = n - 1;
   let d = Math.max(1, Math.round(f * 0.4));
@@ -91,11 +91,13 @@ function startKickoff(m: Match, team: Team): void {
 }
 
 /** Sets who is playing. People keep the footballer they control; new people get one on the next step. */
-export function setHumans(m: Match, list: Array<{ id: number; team: Team }>): void {
+export function setHumans(m: Match, list: Array<{ id: number; team: Team; keeper?: boolean }>): void {
   const keep = new Map(m.humans.map((h) => [h.id, h]));
   m.humans = list.map((x) => {
     const old = keep.get(x.id);
-    return old && old.team === x.team ? old : { id: x.id, team: x.team, pidx: -1, prevA: false, prevB: false, hold: 0, lock: 0 };
+    const keeper = x.keeper === true;
+    if (old && old.team === x.team) { if (old.keeper !== keeper) old.pidx = -1; old.keeper = keeper; return old; }
+    return { id: x.id, team: x.team, pidx: -1, prevA: false, prevB: false, hold: 0, lock: 0, keeper };
   });
   for (const p of m.players) if (!m.humans.some((h) => h.id === p.human)) p.human = -1;
 }
@@ -312,6 +314,7 @@ function humanIntent(m: Match, p: Player, h: Human, c: Cmd, dt: number): Intent 
   it.sp = c.sp;
   it.ax = mag > 0.3 ? c.mx : Math.cos(p.ang); it.ay = mag > 0.3 ? c.my : Math.sin(p.ang);
   const hasBall = m.ball.owner === p.id;
+  if (p.role === 'gk' && c.b && !h.prevB && !hasBall && mag > 0.3) p.ang = Math.atan2(c.my, c.mx); // dive the way you steer
   const aDown = c.a && !h.prevA; const bDown = c.b && !h.prevB; const bUp = !c.b && h.prevB;
   const ballNear = m.ball.owner < 0 && dist(p.x, p.y, m.ball.x, m.ball.y) < 1.5;
   if (hasBall) {
@@ -340,18 +343,23 @@ function assignHumans(m: Match, dt: number, cmds: Record<number, Cmd>): void {
     const sorted = [...field].sort((a, c) => key(a) - key(c));
     const taken = new Set<number>();
     for (const h of hs) h.lock = Math.max(0, h.lock - dt);
+    // a person who chose the goalkeeper plays the goalkeeper, if the team has one
+    const gk = m.players.find((p) => p.team === team && p.role === 'gk');
+    const kh = gk ? hs.find((h) => h.keeper) : undefined;
+    if (kh && gk) { kh.pidx = gk.id; taken.add(gk.id); }
+    const rest = hs.filter((h) => h !== kh);
     // keep whoever they already control, unless it is clearly no longer close to the action
-    for (const h of hs) {
+    for (const h of rest) {
       const cur = h.pidx >= 0 ? m.players[h.pidx] : null;
       if (!cur || cur.team !== team || cur.role === 'gk' || taken.has(cur.id)) { h.pidx = -1; continue; }
       const rank = sorted.findIndex((q) => q.id === cur.id);
       const c = cmds[h.id];
       if (c && c.a && !h.prevA && !(owner && owner.id === cur.id) && !(m.ball.owner < 0 && dist(cur.x, cur.y, m.ball.x, m.ball.y) < 1.5)) { h.pidx = -1; continue; } // pressed pass without the ball: switch
-      if (h.lock <= 0 && rank >= hs.length + 2) { h.pidx = -1; continue; }
+      if (h.lock <= 0 && rank >= rest.length + 2) { h.pidx = -1; continue; }
       if (h.lock <= 0 && owner && owner.team === team && owner.id !== cur.id && !m.humans.some((o) => o.pidx === owner.id)) { h.pidx = -1; continue; }
       taken.add(cur.id);
     }
-    for (const h of hs) {
+    for (const h of rest) {
       if (h.pidx >= 0) continue;
       const pick = sorted.find((q) => !taken.has(q.id));
       if (pick) { h.pidx = pick.id; taken.add(pick.id); h.lock = 0.45; }
@@ -400,6 +408,12 @@ function act(m: Match, p: Player, it: Intent, dt: number): void {
   if (it.sp && mag > 0.2 && p.stam > 0.04) p.stam = Math.max(0, p.stam - 0.26 * dt); else p.stam = Math.min(1, p.stam + 0.12 * dt);
   p.anim += sp * 1.6 * dt;
   p.x += p.vx * dt; p.y += p.vy * dt;
+  if (p.human >= 0 && p.role === 'gk') { // a goalkeeper played by a person stays near their goal
+    const gx = ownGoalX(p.team); const inward = dirOf(p.team);
+    const along = (p.x - gx) * inward;
+    if (along > 16) p.x = gx + inward * 16; if (along < 0.3) p.x = gx + inward * 0.3;
+    p.y = clamp(p.y, W / 2 - 20, W / 2 + 20);
+  }
 
   if (m.phase === 'goal' || m.phase === 'end' || m.phase === 'kickoff') return;
   if (hasBall && it.pass) doPass(m, p, it);
@@ -437,7 +451,7 @@ function updateBall(m: Match, dt: number): void {
   // who gets the ball
   let best: Player | null = null; let bd = 99;
   for (const p of m.players) {
-    if (p.cool > 0 || p.stun > 0 || p.tack > 0) continue;
+    if (p.cool > 0 || p.stun > 0 || (p.tack > 0 && p.role !== 'gk')) continue;
     if (m.phase === 'restart' && p.team !== m.restart.team) continue;
     if (m.phase !== 'play' && m.phase !== 'restart') continue;
     const d = dist(p.x, p.y, b.x, b.y);

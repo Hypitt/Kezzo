@@ -1,10 +1,10 @@
 import { supabase } from '../../lib/supabase';
 
 /** One person in a match room. */
-export interface Member { uid: string; name: string; avatar: string | null; team: 0 | 1; host: boolean; t: number }
+export interface Member { uid: string; name: string; avatar: string | null; team: 0 | 1; host: boolean; t: number; gk?: boolean }
 export interface RoomInfo { n: number; minutes: number; playing: boolean }
 export type MemberRow = Member & { info?: RoomInfo };
-export interface RosterEntry { rid: number; uid: string; name: string; team: 0 | 1 }
+export interface RosterEntry { rid: number; uid: string; name: string; team: 0 | 1; gk?: boolean }
 
 export interface Room {
   send: (event: string, payload: unknown) => void;

@@ -11,7 +11,7 @@ import { TouchPad } from './TouchPad';
 export interface GameProps {
   mode: 'local' | 'host' | 'client'; n: number; minutes: number; roster: RosterEntry[]; myRid: number; room: Room | null;
   bus: MutableRefObject<((event: string, payload: unknown) => void) | null>;
-  words: FootballWords; teamNames: [string, string]; onQuit: () => void; onEnd: (score: [number, number]) => void;
+  words: FootballWords; teamNames: [string, string]; localKeepers?: [boolean, boolean]; onQuit: () => void; onEnd: (score: [number, number]) => void;
 }
 
 const STEP = 1 / 60;
@@ -19,7 +19,7 @@ const emptyCmd = (): Cmd => ({ ...NO_CMD });
 interface Frame { t: number; view: View; h: number[] }
 
 /** The match screen: draws the pitch, reads the controls and, on the host's device (or in a local game), runs the match. */
-export function FootballGame({ mode, n, minutes, roster, myRid, room, bus, words, teamNames, onQuit, onEnd }: GameProps) {
+export function FootballGame({ mode, n, minutes, roster, myRid, room, bus, words, teamNames, localKeepers, onQuit, onEnd }: GameProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const wrap = useRef<HTMLDivElement>(null);
   const touch = useRef<[Cmd, Cmd]>([emptyCmd(), emptyCmd()]);
@@ -50,8 +50,8 @@ export function FootballGame({ mode, n, minutes, roster, myRid, room, bus, words
 
     const apply = () => {
       if (!m) return;
-      if (mode === 'local') setHumans(m, [{ id: 0, team: 0 }, { id: 1, team: 1 }]);
-      else setHumans(m, rosterRef.current.map((r) => ({ id: r.rid, team: r.team })));
+      if (mode === 'local') setHumans(m, [{ id: 0, team: 0, keeper: localKeepers?.[0] === true }, { id: 1, team: 1, keeper: localKeepers?.[1] === true }]);
+      else setHumans(m, rosterRef.current.map((r) => ({ id: r.rid, team: r.team, keeper: r.gk === true })));
     };
     if (mode !== 'client') { m = createMatch(n, minutes); apply(); }
     applyRef.current = apply;

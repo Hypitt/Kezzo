@@ -11,7 +11,7 @@ export interface NavGroup { id: string; icon: LucideIcon; tabs: Tab[]; name: Key
 
 export const GROUPS: NavGroup[] = [
   { id: 'explore', icon: Home, tabs: ['home', 'search', 'media'], name: { en: 'Explore', fr: 'Explorer', es: 'Explorar', pt: 'Explorar', hi: 'एक्सप्लोर' } },
-  { id: 'arena', icon: Swords, tabs: ['battles', 'live', 'contest', 'football'], name: { en: 'Arena', fr: 'Arène', es: 'Arena', pt: 'Arena', hi: 'अरेना' } },
+  { id: 'arena', icon: Swords, tabs: ['football', 'contest', 'battles'], name: { en: 'Arena', fr: 'Arène', es: 'Arena', pt: 'Arena', hi: 'अरेना' } },
   { id: 'create', icon: PlusCircle, tabs: ['create'], name: 'nav_create' },
   { id: 'community', icon: CalendarDays, tabs: ['market', 'opportunities', 'community'], name: { en: 'Community', fr: 'Communauté', es: 'Comunidad', pt: 'Comunidade', hi: 'समुदाय' } },
   { id: 'connect', icon: Users, tabs: ['groups', 'vsla', 'messages'], name: { en: 'Connect', fr: 'Échanger', es: 'Conectar', pt: 'Conectar', hi: 'जुड़ें' } },
@@ -29,7 +29,10 @@ const TAB_KEY: Partial<Record<Tab, Key>> = {
   create: 'nav_create', profile: 'nav_profile',
 };
 
-export const groupOf = (tab: Tab): NavGroup | undefined => GROUPS.find((g) => g.tabs.includes(tab));
+/** Go live is a part of the Battles page, so it belongs to the same menu item. */
+export const BATTLES_LIVE: Record<Lang, string> = { en: 'Battles & Live', fr: 'Duels et direct', es: 'Duelos y directo', pt: 'Duelos e ao vivo', hi: 'बैटल और लाइव' };
+
+export const groupOf = (tab: Tab): NavGroup | undefined => GROUPS.find((g) => g.tabs.includes(tab === 'live' ? 'battles' : tab));
 
 export function groupName(g: NavGroup, lang: Lang, t: (k: Key) => string): string {
   return typeof g.name === 'string' ? t(g.name) : g.name[lang];
@@ -38,6 +41,7 @@ export function tabName(tab: Tab, lang: Lang, t: (k: Key) => string): string {
   if (tab === 'contest') return CONTEST[lang].nav;
   if (tab === 'market') return MARKET[lang].title;
   if (tab === 'football') return FOOTBALL[lang].title;
+  if (tab === 'battles') return BATTLES_LIVE[lang];
   const k = TAB_KEY[tab];
   return k ? t(k) : tab;
 }

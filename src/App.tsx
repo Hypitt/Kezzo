@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, type ComponentType } from 'react';
 import { AuthProvider, useAuth } from './state/Auth';
 import { I18nProvider, useI18n } from './state/I18n';
+import { BattlesLive } from './views/BattlesLive';
 import { RouterProvider, useRouter } from './state/Router';
 import { LegalProvider } from './state/Legal';
 import { NotificationsProvider } from './state/Notifications';
@@ -61,8 +62,8 @@ function View() {
   const { route } = useRouter();
   switch (route.tab) {
     case 'home': return <HomeView />;
-    case 'battles': return route.id ? <BattleRoom key={route.id} id={route.id} /> : <BattlesView />;
-    case 'live': return route.id ? <LiveStreamRoom key={route.id} id={route.id} /> : <LiveView />;
+    case 'battles': return route.id ? <BattleRoom key={route.id} id={route.id} /> : <BattlesLive which="battles"><BattlesView /></BattlesLive>;
+    case 'live': return route.id ? <LiveStreamRoom key={route.id} id={route.id} /> : <BattlesLive which="live"><LiveView /></BattlesLive>;
     case 'create': return <Gate><CreateView initial={route.id} /></Gate>;
     case 'media': return <MediaView />;
     case 'groups': return route.id ? <GroupRoom key={route.id} id={route.id} /> : <GroupsView />;

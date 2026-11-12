@@ -6,7 +6,7 @@ export interface FootballWords {
   teamA: string; teamB: string; code: string; copyLink: string; copied: string; share: string; lobbyTitle: string; you: string; host: string; waitHost: string; startMatch: string; fillAi: string;
   humansN: (n: number) => string; leave: string; publicMatch: string; full: string; takeTeam: string; hostOf: (n: string) => string; matchOf: (n: number, m: number) => string;
   kickoff: string; goal: string; fullTime: string; out: string; pause: string; resume: string; quit: string; rotate: string; keepOpen: string; connecting: string; hostLeft: string; badCode: string;
-  winner: (t: string) => string; draw: string; playAgain: string; back: string; pass: string; shoot: string; sprint: string; limit: string; p1: string; p2: string; inviteText: string; noRoom: string;
+  winner: (t: string) => string; draw: string; playAgain: string; back: string; pass: string; shoot: string; sprint: string; p1: string; p2: string; gkPlay: string; gkBadge: string; helpGk: string; p1Gk: string; p2Gk: string; inviteText: string; noRoom: string;
 }
 
 export const FOOTBALL: Record<Lang, FootballWords> = {
@@ -19,7 +19,8 @@ export const FOOTBALL: Record<Lang, FootballWords> = {
     startMatch: 'Start match', fillAi: 'Empty places are filled by computer players.', humansN: (n) => `${n} ${n === 1 ? 'person' : 'people'}`, leave: 'Leave', publicMatch: 'Show in open matches', full: 'Full', takeTeam: 'Join this team',
     hostOf: (n) => `${n}’s match`, matchOf: (n, m) => `${n} v ${n} · ${m} min`, kickoff: 'Kick off', goal: 'GOAL!', fullTime: 'Full time', out: 'Out of play', pause: 'Pause', resume: 'Resume', quit: 'Quit',
     rotate: 'Turn your phone sideways to play.', keepOpen: 'Keep this screen open: you are hosting the match.', connecting: 'Connecting…', hostLeft: 'The host left the match.', badCode: 'Enter the 5-letter match code.',
-    winner: (t) => `${t} wins!`, draw: 'Draw', playAgain: 'Play again', back: 'Back to Football', pass: 'Pass', shoot: 'Shoot', sprint: 'Run', limit: 'Online matches work best with up to about 8 people at once on the free Supabase plan.', p1: 'P1', p2: 'P2',
+    winner: (t) => `${t} wins!`, draw: 'Draw', playAgain: 'Play again', back: 'Back to Football', pass: 'Pass', shoot: 'Shoot', sprint: 'Run', p1: 'P1', p2: 'P2',
+    gkPlay: 'Play as goalkeeper', gkBadge: 'GK', helpGk: 'Goalkeeper: you stay near your goal. Steer, press shoot to dive, press pass to throw the ball out.', p1Gk: 'Player 1 is a goalkeeper', p2Gk: 'Player 2 is a goalkeeper',
     inviteText: 'Join my Kezzo football match!', noRoom: 'This match is not open.',
   },
   fr: {
@@ -31,7 +32,8 @@ export const FOOTBALL: Record<Lang, FootballWords> = {
     startMatch: 'Lancer le match', fillAi: 'Les places vides sont remplies par des joueurs ordinateur.', humansN: (n) => `${n} personne${n > 1 ? 's' : ''}`, leave: 'Quitter', publicMatch: 'Afficher dans les matchs ouverts', full: 'Complet', takeTeam: 'Rejoindre cette équipe',
     hostOf: (n) => `Match de ${n}`, matchOf: (n, m) => `${n} c. ${n} · ${m} min`, kickoff: 'Coup d’envoi', goal: 'BUT !', fullTime: 'Fin du match', out: 'Ballon sorti', pause: 'Pause', resume: 'Reprendre', quit: 'Quitter',
     rotate: 'Tournez votre téléphone à l’horizontale pour jouer.', keepOpen: 'Gardez cet écran ouvert : vous hébergez le match.', connecting: 'Connexion…', hostLeft: 'L’hôte a quitté le match.', badCode: 'Entrez le code du match à 5 caractères.',
-    winner: (t) => `${t} gagne !`, draw: 'Match nul', playAgain: 'Rejouer', back: 'Retour au football', pass: 'Passe', shoot: 'Tir', sprint: 'Course', limit: 'Les matchs en ligne fonctionnent mieux jusqu’à environ 8 personnes à la fois avec l’offre gratuite de Supabase.', p1: 'J1', p2: 'J2',
+    winner: (t) => `${t} gagne !`, draw: 'Match nul', playAgain: 'Rejouer', back: 'Retour au football', pass: 'Passe', shoot: 'Tir', sprint: 'Course', p1: 'J1', p2: 'J2',
+    gkPlay: 'Jouer gardien de but', gkBadge: 'GB', helpGk: 'Gardien : vous restez près de votre but. Dirigez, tir pour plonger, passe pour relancer.', p1Gk: 'Le joueur 1 est gardien', p2Gk: 'Le joueur 2 est gardien',
     inviteText: 'Rejoins mon match de football sur Kezzo !', noRoom: 'Ce match n’est pas ouvert.',
   },
   es: {
@@ -43,7 +45,8 @@ export const FOOTBALL: Record<Lang, FootballWords> = {
     startMatch: 'Empezar partido', fillAi: 'Los lugares vacíos los llenan jugadores de la computadora.', humansN: (n) => `${n} ${n === 1 ? 'persona' : 'personas'}`, leave: 'Salir', publicMatch: 'Mostrar en partidos abiertos', full: 'Completo', takeTeam: 'Unirse a este equipo',
     hostOf: (n) => `Partido de ${n}`, matchOf: (n, m) => `${n} vs ${n} · ${m} min`, kickoff: 'Saque inicial', goal: '¡GOL!', fullTime: 'Final', out: 'Fuera de juego', pause: 'Pausa', resume: 'Seguir', quit: 'Salir',
     rotate: 'Gira el teléfono en horizontal para jugar.', keepOpen: 'Mantén esta pantalla abierta: eres el anfitrión.', connecting: 'Conectando…', hostLeft: 'El anfitrión salió del partido.', badCode: 'Escribe el código de 5 caracteres.',
-    winner: (t) => `¡Gana ${t}!`, draw: 'Empate', playAgain: 'Jugar otra vez', back: 'Volver al fútbol', pass: 'Pase', shoot: 'Tiro', sprint: 'Correr', limit: 'Los partidos en línea funcionan mejor con hasta unas 8 personas a la vez en el plan gratuito de Supabase.', p1: 'J1', p2: 'J2',
+    winner: (t) => `¡Gana ${t}!`, draw: 'Empate', playAgain: 'Jugar otra vez', back: 'Volver al fútbol', pass: 'Pase', shoot: 'Tiro', sprint: 'Correr', p1: 'J1', p2: 'J2',
+    gkPlay: 'Jugar de portero', gkBadge: 'POR', helpGk: 'Portero: te quedas cerca de tu portería. Dirige, tiro para lanzarte, pase para sacar el balón.', p1Gk: 'El jugador 1 es portero', p2Gk: 'El jugador 2 es portero',
     inviteText: '¡Únete a mi partido de fútbol en Kezzo!', noRoom: 'Este partido no está abierto.',
   },
   pt: {
@@ -55,7 +58,8 @@ export const FOOTBALL: Record<Lang, FootballWords> = {
     startMatch: 'Começar partida', fillAi: 'Vagas vazias são preenchidas por jogadores do computador.', humansN: (n) => `${n} ${n === 1 ? 'pessoa' : 'pessoas'}`, leave: 'Sair', publicMatch: 'Mostrar em partidas abertas', full: 'Cheio', takeTeam: 'Entrar neste time',
     hostOf: (n) => `Partida de ${n}`, matchOf: (n, m) => `${n} x ${n} · ${m} min`, kickoff: 'Pontapé inicial', goal: 'GOL!', fullTime: 'Fim de jogo', out: 'Bola fora', pause: 'Pausa', resume: 'Continuar', quit: 'Sair',
     rotate: 'Vire o celular na horizontal para jogar.', keepOpen: 'Mantenha esta tela aberta: você é o anfitrião.', connecting: 'Conectando…', hostLeft: 'O anfitrião saiu da partida.', badCode: 'Digite o código de 5 caracteres.',
-    winner: (t) => `${t} vence!`, draw: 'Empate', playAgain: 'Jogar de novo', back: 'Voltar ao futebol', pass: 'Passe', shoot: 'Chute', sprint: 'Correr', limit: 'As partidas online funcionam melhor com até cerca de 8 pessoas ao mesmo tempo no plano gratuito do Supabase.', p1: 'J1', p2: 'J2',
+    winner: (t) => `${t} vence!`, draw: 'Empate', playAgain: 'Jogar de novo', back: 'Voltar ao futebol', pass: 'Passe', shoot: 'Chute', sprint: 'Correr', p1: 'J1', p2: 'J2',
+    gkPlay: 'Jogar de goleiro', gkBadge: 'GOL', helpGk: 'Goleiro: você fica perto do seu gol. Direcione, chute para se jogar, passe para repor a bola.', p1Gk: 'O jogador 1 é goleiro', p2Gk: 'O jogador 2 é goleiro',
     inviteText: 'Entre na minha partida de futebol no Kezzo!', noRoom: 'Esta partida não está aberta.',
   },
   hi: {
@@ -67,7 +71,8 @@ export const FOOTBALL: Record<Lang, FootballWords> = {
     startMatch: 'मैच शुरू करें', fillAi: 'खाली जगहें कंप्यूटर खिलाड़ी भरेंगे।', humansN: (n) => `${n} लोग`, leave: 'छोड़ें', publicMatch: 'खुले मैचों में दिखाएँ', full: 'भरा', takeTeam: 'इस टीम में जुड़ें',
     hostOf: (n) => `${n} का मैच`, matchOf: (n, m) => `${n} बनाम ${n} · ${m} मिनट`, kickoff: 'किक-ऑफ़', goal: 'गोल!', fullTime: 'मैच ख़त्म', out: 'गेंद बाहर', pause: 'रोकें', resume: 'जारी रखें', quit: 'छोड़ें',
     rotate: 'खेलने के लिए फ़ोन को आड़ा घुमाएँ।', keepOpen: 'यह स्क्रीन खुली रखें: आप मैच के मेज़बान हैं।', connecting: 'जुड़ रहा है…', hostLeft: 'मेज़बान ने मैच छोड़ दिया।', badCode: '5 अक्षर का मैच कोड लिखें।',
-    winner: (t) => `${t} जीता!`, draw: 'ड्रॉ', playAgain: 'फिर खेलें', back: 'फ़ुटबॉल पर लौटें', pass: 'पास', shoot: 'शॉट', sprint: 'दौड़', limit: 'मुफ़्त Supabase प्लान पर ऑनलाइन मैच एक समय में लगभग 8 लोगों तक सबसे अच्छे चलते हैं।', p1: 'खि1', p2: 'खि2',
+    winner: (t) => `${t} जीता!`, draw: 'ड्रॉ', playAgain: 'फिर खेलें', back: 'फ़ुटबॉल पर लौटें', pass: 'पास', shoot: 'शॉट', sprint: 'दौड़', p1: 'खि1', p2: 'खि2',
+    gkPlay: 'गोलकीपर बनकर खेलें', gkBadge: 'GK', helpGk: 'गोलकीपर: आप अपने गोल के पास रहते हैं। दिशा दें, शॉट से डाइव करें, पास से गेंद फेंकें।', p1Gk: 'खिलाड़ी 1 गोलकीपर है', p2Gk: 'खिलाड़ी 2 गोलकीपर है',
     inviteText: 'Kezzo पर मेरे फ़ुटबॉल मैच में जुड़ें!', noRoom: 'यह मैच खुला नहीं है।',
   },
 };

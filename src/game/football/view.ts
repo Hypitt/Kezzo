@@ -49,7 +49,7 @@ export function fromSnap(s: Snap): View {
 /** Roles follow the same formation as the engine, so the network need not carry them. */
 function roleOf(n: number, i: number): 'gk' | 'def' | 'mid' | 'fwd' {
   if (n <= 1) return 'fwd';
-  if (n === 2) return i === 0 ? 'def' : 'fwd';
+  if (n === 2) return i === 0 ? 'gk' : 'fwd';
   if (i === 0) return 'gk';
   const f = n - 1;
   let d = Math.max(1, Math.round(f * 0.4)); let fw = Math.max(1, Math.round(f * 0.2));

@@ -37,6 +37,7 @@ export function FootballView({ code: linkCode }: { code?: string }) {
   const [result, setResult] = useState<[number, number] | null>(null);
   const [round, setRound] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [keepers, setKeepers] = useState<[boolean, boolean]>([false, false]);
 
   const room = useRef<Room | null>(null);
   const bus = useRef<((event: string, payload: unknown) => void) | null>(null);
@@ -119,9 +120,9 @@ export function FootballView({ code: linkCode }: { code?: string }) {
     return members.map((m) => {
       let rid = rids.current.get(m.uid);
       if (rid === undefined) { rid = rids.current.size; rids.current.set(m.uid, rid); }
-      return { rid, uid: m.uid, name: m.name, team: m.team };
+      return { rid, uid: m.uid, name: m.name, team: m.team, gk: m.gk === true && n >= 2 };
     });
-  }, [members, mode]);
+  }, [members, mode, n]);
 
   useEffect(() => {
     if (mode !== 'host') return undefined;
@@ -172,7 +173,7 @@ export function FootballView({ code: linkCode }: { code?: string }) {
     return (
       <>
         <FootballGame key={`${mode}-${round}`} mode={mode} n={n} minutes={minutes} roster={roster} myRid={myRid} room={room.current} bus={bus}
-          words={w} teamNames={teamNames} onQuit={quitGame} onEnd={(s) => setResult(s)} />
+          words={w} teamNames={teamNames} localKeepers={keepers} onQuit={quitGame} onEnd={(s) => setResult(s)} />
         {result && (
           <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4">
             <div className="w-full max-w-sm space-y-3 rounded-2xl bg-white p-5 text-center text-zinc-900">
@@ -234,15 +235,19 @@ export function FootballView({ code: linkCode }: { code?: string }) {
                 <ul className="min-h-[2.5rem] space-y-1.5">
                   {list.map((m) => (
                     <li key={m.uid} className="flex items-center gap-2 text-sm"><Avatar p={{ display_name: m.name, avatar_url: m.avatar }} size={24} /><span className="truncate">{m.name}</span>
+                      {m.gk && per >= 2 && <span className="rounded bg-amber-100 px-1.5 text-[10px] font-semibold text-amber-800">{w.gkBadge}</span>}
                       {m.host && <span className="rounded bg-zinc-100 px-1.5 text-[10px] text-zinc-600">{w.host}</span>}{m.uid === me && <span className="text-[10px] text-zinc-500">({w.you})</span>}</li>
                   ))}
                 </ul>
+                {mine && mine.team === t && per >= 2 && (
+                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={mine.gk === true} disabled={mine.gk !== true && list.some((m) => m.gk === true)} onChange={(e) => room.current?.setMe({ gk: e.target.checked })} />{w.gkPlay}</label>
+                )}
                 {mine && mine.team !== t && <button type="button" className="btn btn-ghost btn-sm" disabled={full} onClick={() => room.current?.setMe({ team: t })}>{full ? w.full : w.takeTeam}</button>}
               </section>
             );
           })}
         </div>
-        <p className="text-xs text-zinc-500">{w.fillAi} {w.limit}</p>
+        <p className="text-xs text-zinc-500">{w.fillAi}</p>
         {mode === 'host'
           ? <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 w-full" disabled={!connected} onClick={startOnline}>{w.startMatch}</button>
           : <p className="rounded-lg bg-zinc-100 px-3 py-2 text-center text-sm text-zinc-700">{w.waitHost}</p>}
@@ -267,6 +272,12 @@ export function FootballView({ code: linkCode }: { code?: string }) {
           <span className="label">{w.minutes}</span>
           <div className="flex flex-wrap gap-2">{LENGTHS.map((k) => <Chip key={k} active={minutes === k} onClick={() => setMinutes(k)}>{k}</Chip>)}</div>
         </div>
+        {n >= 2 && (
+          <div className="space-y-1">
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={keepers[0]} onChange={(e) => setKeepers([e.target.checked, keepers[1]])} />{w.p1Gk}</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={keepers[1]} onChange={(e) => setKeepers([keepers[0], e.target.checked])} />{w.p2Gk}</label>
+          </div>
+        )}
         <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700" onClick={startLocal}>{w.local}</button>
       </section>
 
@@ -304,7 +315,7 @@ export function FootballView({ code: linkCode }: { code?: string }) {
 
       <section className="card space-y-1 text-xs text-zinc-700">
         <h2 className="text-sm font-semibold text-zinc-900">{w.helpTitle}</h2>
-        <p>{w.helpP1}</p><p>{w.helpP2}</p><p>{w.helpOnline}</p><p>{w.helpTouch}</p><p>{w.keysLegend}</p>
+        <p>{w.helpP1}</p><p>{w.helpP2}</p><p>{w.helpOnline}</p><p>{w.helpTouch}</p><p>{w.keysLegend}</p><p>{w.helpGk}</p>
       </section>
     </div>
   );
