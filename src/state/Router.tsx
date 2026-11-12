@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-export const TABS = ['home', 'battles', 'live', 'search', 'create', 'media', 'groups', 'messages', 'profile', 'community', 'opportunities', 'market', 'vsla'] as const;
+export const TABS = ['home', 'battles', 'live', 'search', 'create', 'media', 'groups', 'messages', 'profile', 'community', 'opportunities', 'market', 'football', 'vsla'] as const;
 export type Tab = (typeof TABS)[number] | 'legal' | 'join' | 'admin' | 'post' | 'contest' | 'site' | 'theme';
 export interface Route { tab: Tab; id?: string }
 
