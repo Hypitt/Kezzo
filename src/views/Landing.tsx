@@ -329,6 +329,7 @@ function LoopVideo({ name, className }: { name: string; className: string }) {
 
 export function Landing({ invite, gate = false }: { invite?: string; gate?: boolean }) {
   const { openAuth } = useAuth();
+  const { go } = useRouter();
   const { lang, t } = useI18n();
   const c = useCopy(COPY[lang], lang);
   const site = useSiteContent();
@@ -383,39 +384,48 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
 
   return (
     <PublicFrame>
-      {/* Hero: one big photo, a short headline with the key line in colour, two buttons */}
-      <section className="relative isolate overflow-hidden bg-zinc-900 text-white">
-        {!site.hidden.includes('hero') && (
-          <img
-            src={site.images.hero ?? '/landing/hero-photo.jpg'}
-            alt=""
-            width="1400"
-            height="905"
-            className="absolute inset-0 -z-10 h-full w-full object-cover object-[60%_35%]"
-            fetchPriority="high"
-            decoding="async"
-          />
-        )}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-zinc-950/70 via-zinc-950/45 to-zinc-950/80" aria-hidden="true" />
-        <div className={`${wrap} flex min-h-[32rem] flex-col items-center justify-center py-16 text-center sm:min-h-[36rem] sm:py-20 lg:min-h-[41rem] lg:py-28`}>
-          {liveBattles > 0 && (
-            <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-medium backdrop-blur">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" aria-hidden="true" />
-              {c.live(liveBattles)}
-            </span>
-          )}
-          <h1 data-part="hero-title" className="max-w-4xl font-display font-extrabold leading-[1.04] tracking-tight" style={{ fontSize: 'clamp(2.35rem, 7.4vw, 5rem)' }}>
-            {c.h1a}<br /><span className="text-[color-mix(in_srgb,var(--color-accent),white_30%)]">{c.h1b}</span>
-          </h1>
-          <p data-part="hero-text" className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">{c.leadTag}</p>
-          <p data-part="hero-text" className="mt-2 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">{c.talent}</p>
-          <div className="mt-8 flex w-full max-w-sm flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:justify-center">
-            <button type="button" className="btn btn-accent justify-center rounded-full px-7 py-3 text-base font-semibold " onClick={() => openAuth('signup')}>
-              {c.cta}<ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </button>
-            <InstallButton className="btn justify-center rounded-full border border-white/40 bg-white/10 px-7 py-3 text-base font-semibold text-white backdrop-blur hover:bg-white/20" label={t('download_kezzo')} />
+      {/* Hero: two columns. Left: big headline with the key line in colour and a collage of photos. Right: a calm sign-in panel. */}
+      <section className="bg-white text-zinc-900">
+        <div className={`${wrap} grid items-center gap-10 py-10 sm:py-14 lg:min-h-[40rem] lg:grid-cols-[1.25fr_1fr] lg:gap-16 lg:py-16`}>
+          <div className="text-center lg:text-left">
+            {liveBattles > 0 && (
+              <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3.5 py-1.5 text-xs font-medium text-zinc-700">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" aria-hidden="true" />
+                {c.live(liveBattles)}
+              </span>
+            )}
+            <h1 data-part="hero-title" className="font-display font-extrabold leading-[1.06] tracking-tight" style={{ fontSize: 'clamp(2.2rem, 5.6vw, 4rem)' }}>
+              {c.h1a} <span className="text-accent">{c.h1b}</span>
+            </h1>
+            <p data-part="hero-text" className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-zinc-600 sm:text-lg lg:mx-0">{c.leadTag}</p>
+            {!site.hidden.includes('hero') && (
+              <div className="mx-auto mt-8 grid max-w-xl grid-cols-5 grid-rows-2 gap-3 lg:mx-0" aria-hidden="true">
+                <img src={site.images.hero ?? '/landing/hero-photo.jpg'} alt="" width="1400" height="905" className="col-span-3 row-span-2 h-full min-h-56 w-full rounded-3xl object-cover object-[60%_35%] shadow-sm" fetchPriority="high" decoding="async" />
+                <img src="/landing/group-friends.jpg" alt="" className="col-span-2 aspect-[4/3] w-full -rotate-2 rounded-2xl object-cover shadow-md" loading="lazy" decoding="async" />
+                <img src="/landing/group-creators.jpg" alt="" className="col-span-2 aspect-[4/3] w-full rotate-2 rounded-2xl object-cover shadow-md" loading="lazy" decoding="async" />
+              </div>
+            )}
           </div>
-          <p className="mt-3 text-xs text-white/60">{c.ctaNote}</p>
+          <div className="mx-auto w-full max-w-sm">
+            <div data-part="card" className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+              <div className="flex items-center justify-between">
+                <Logo className="h-10" />
+                <LanguageSwitch className={`${outline} btn-sm`} />
+              </div>
+              <p className="mt-6 font-display text-xl font-extrabold leading-tight">{c.talent}</p>
+              <div className="mt-6 flex flex-col gap-3">
+                <button type="button" className="btn btn-accent w-full justify-center rounded-full py-3 text-base font-semibold" onClick={() => openAuth('signin')}>{c.login}</button>
+                <button type="button" className={`${outline} w-full justify-center rounded-full py-3 text-base font-semibold`} onClick={() => openAuth('signup')}>{c.cta}</button>
+                <InstallButton className={`${outline} w-full justify-center rounded-full py-3 text-base font-semibold`} label={t('download_kezzo')} />
+              </div>
+              <p className="mt-4 text-center text-xs text-zinc-500">{c.ctaNote}</p>
+            </div>
+            <p className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-zinc-500">
+              <button type="button" className="hover:text-zinc-900" onClick={() => go('legal', 'terms')}>{c.terms}</button>
+              <button type="button" className="hover:text-zinc-900" onClick={() => go('legal', 'privacy')}>{c.privacy}</button>
+              <a className="hover:text-zinc-900" href="mailto:kezzo.app@gmail.com">{c.contact}</a>
+            </p>
+          </div>
         </div>
       </section>
 
