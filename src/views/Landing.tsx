@@ -327,6 +327,20 @@ function LoopVideo({ name, className }: { name: string; className: string }) {
     : <img src={`/landing/${name}.jpg`} alt="" className={className} loading="lazy" decoding="async" />;
 }
 
+/** A photo shown inside a phone-shaped frame (bezel, notch, story bar). Decorative. */
+function PhoneShot({ src, className = '', priority = false }: { src: string; className?: string; priority?: boolean }) {
+  return (
+    <div className={`${className} shrink-0 rounded-[1.6rem] bg-zinc-900 p-[5px] shadow-xl ring-1 ring-black/10 sm:rounded-[2rem] sm:p-[6px]`}>
+      <div className="relative aspect-[9/19] overflow-hidden rounded-[1.2rem] bg-zinc-800 sm:rounded-[1.55rem]">
+        <img src={src} alt="" className="h-full w-full object-cover" loading={priority ? 'eager' : 'lazy'} decoding="async" {...(priority ? { fetchPriority: 'high' as const } : {})} />
+        <div className="absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-black/45 to-transparent" />
+        <span className="absolute left-1/2 top-1.5 h-1.5 w-1/4 -translate-x-1/2 rounded-full bg-black/80" />
+        <span className="absolute inset-x-3 top-4 h-0.5 rounded-full bg-white/70" />
+      </div>
+    </div>
+  );
+}
+
 export function Landing({ invite, gate = false }: { invite?: string; gate?: boolean }) {
   const { openAuth } = useAuth();
   const { go } = useRouter();
@@ -399,10 +413,10 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
             </h1>
             <p data-part="hero-text" className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-zinc-600 sm:text-lg lg:mx-0">{c.leadTag}</p>
             {!site.hidden.includes('hero') && (
-              <div className="mx-auto mt-8 grid max-w-xl grid-cols-5 grid-rows-2 gap-3 lg:mx-0" aria-hidden="true">
-                <img src={site.images.hero ?? '/landing/hero-photo.jpg'} alt="" width="1400" height="905" className="col-span-3 row-span-2 h-full min-h-56 w-full rounded-3xl object-cover object-[60%_35%] shadow-sm" fetchPriority="high" decoding="async" />
-                <img src="/landing/group-friends.jpg" alt="" className="col-span-2 aspect-[4/3] w-full -rotate-2 rounded-2xl object-cover shadow-md" loading="lazy" decoding="async" />
-                <img src="/landing/group-creators.jpg" alt="" className="col-span-2 aspect-[4/3] w-full rotate-2 rounded-2xl object-cover shadow-md" loading="lazy" decoding="async" />
+              <div className="mx-auto mt-10 flex max-w-xl items-end justify-center gap-3 sm:gap-5 lg:mx-0 lg:justify-start" aria-hidden="true">
+                <PhoneShot src="/landing/group-friends.jpg" className="w-[26%] -rotate-3" />
+                <PhoneShot src={site.images.hero ?? '/landing/hero-photo.jpg'} className="w-[38%] -translate-y-4" priority />
+                <PhoneShot src="/landing/group-creators.jpg" className="w-[26%] rotate-3" />
               </div>
             )}
           </div>
