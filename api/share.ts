@@ -60,6 +60,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   const w = W[lang];
   const p: Preview = { label: 'Kezzo', title: 'Kezzo', text: '', lines: [], image: '', ogImage: '', video: '', ogVideo: '', note: '', by: '' };
   let description = w.tag;
+  let textOnly = false;
 
   try {
     const db = adminClient();
@@ -74,7 +75,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         const author = one(data.author as { display_name: string } | { display_name: string }[] | null);
         p.label = w.by; p.title = clip(String(data.title), 120); p.by = author?.display_name ?? '';
         p.text = clip(String(data.body ?? '').replace(/\s+/g, ' ').trim(), 220);
-        description = `${author?.display_name ?? 'Someone'} on Kezzo`;
+        // the preview text is the post itself (longer than the on-page glimpse), with the author after it
+        const full = clip(String(data.body ?? '').replace(/\s+/g, ' ').trim(), 300);
+        description = full ? `${full} — ${author?.display_name ?? 'Kezzo'}` : `${author?.display_name ?? 'Someone'} on Kezzo`;
+        textOnly = data.kind === 'text';
         const path = String(data.media_path ?? '');
         if (data.media_bucket === 'media-public' && path && !data.download_price) {
           if (data.kind === 'photo') { p.image = fileUrl(thumbOf(path)); p.ogImage = fileUrl(path); }
@@ -140,7 +144,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     /* keep the generic Kezzo preview */
   }
 
-  if (!p.ogImage && base) p.ogImage = `${base}/icon-512.png`;
+  if (!p.ogImage && base && !textOnly) p.ogImage = `${base}/icon-512.png`;
   const dest = `${base}/#/${target}/${id}`;
   const signup = `${base}/?auth=signup#/${target}/${id}`;
   const login = `${base}/?auth=signin#/${target}/${id}`;
