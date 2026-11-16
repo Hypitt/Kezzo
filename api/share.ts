@@ -25,7 +25,7 @@ const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1).trim
 const one = <T,>(v: T | T[] | null | undefined): T | null => (Array.isArray(v) ? (v[0] ?? null) : (v ?? null));
 const R2_NAME = /^[0-9a-f-]{36}\/r-/i;
 
-interface Preview { label: string; title: string; text: string; lines: string[]; image: string; ogImage: string; video: string; note: string; by: string }
+interface Preview { label: string; title: string; text: string; lines: string[]; image: string; ogImage: string; video: string; ogVideo: string; note: string; by: string }
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   const q = (k: string) => String(Array.isArray(req.query[k]) ? req.query[k]?.[0] : req.query[k] ?? '');
@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   const accept = String(req.headers['accept-language'] ?? '').toLowerCase();
   const lang: L = (['fr', 'es', 'pt', 'hi'] as const).find((l) => accept.startsWith(l) || accept.includes(`,${l}`)) ?? 'en';
   const w = W[lang];
-  const p: Preview = { label: 'Kezzo', title: 'Kezzo', text: '', lines: [], image: '', ogImage: '', video: '', note: '', by: '' };
+  const p: Preview = { label: 'Kezzo', title: 'Kezzo', text: '', lines: [], image: '', ogImage: '', video: '', ogVideo: '', note: '', by: '' };
   let description = w.tag;
 
   try {
@@ -79,7 +79,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         if (data.media_bucket === 'media-public' && path && !data.download_price) {
           if (data.kind === 'photo') { p.image = fileUrl(thumbOf(path)); p.ogImage = fileUrl(path); }
           // a glimpse of a video only when it comes from R2 (free downloads); other videos show a plain tile
-          if (data.kind === 'video' && R2_NAME.test(path)) p.video = fileUrl(path);
+          if (data.kind === 'video' && R2_NAME.test(path)) { p.video = fileUrl(path); p.ogVideo = p.video; }
+          // videos uploaded since this update have a poster picture next to them; older ones do not (a plain Kezzo picture is used)
+          if (data.kind === 'video') {
+            const poster = fileUrl(thumbOf(path));
+            try {
+              const ok = poster && (await fetch(poster, { method: 'HEAD', signal: AbortSignal.timeout(2500) })).ok;
+              if (ok) { p.image = poster; p.ogImage = poster; }
+            } catch { /* no poster */ }
+          }
         } else if (data.download_price) p.note = w.locked;
       }
     } else if (type === 'profile') {
@@ -132,6 +140,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     /* keep the generic Kezzo preview */
   }
 
+  if (!p.ogImage && base) p.ogImage = `${base}/icon-512.png`;
   const dest = `${base}/#/${target}/${id}`;
   const signup = `${base}/?auth=signup#/${target}/${id}`;
   const login = `${base}/?auth=signin#/${target}/${id}`;
@@ -152,11 +161,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 <title>${esc(ogTitle)}</title>
 <meta name="description" content="${esc(description)}" />
 <meta property="og:site_name" content="Kezzo" />
-<meta property="og:type" content="website" />
+<meta property="og:type" content="${p.ogVideo ? 'video.other' : 'website'}" />
 <meta property="og:title" content="${esc(ogTitle)}" />
 <meta property="og:description" content="${esc(description)}" />
 <meta property="og:url" content="${esc(self)}" />
-${p.ogImage ? `<meta property="og:image" content="${esc(p.ogImage)}" />\n` : ''}<meta name="twitter:card" content="${p.ogImage ? 'summary_large_image' : 'summary'}" />
+${p.ogImage ? `<meta property="og:image" content="${esc(p.ogImage)}" />\n<meta property="og:image:secure_url" content="${esc(p.ogImage)}" />\n` : ''}${p.ogVideo ? `<meta property="og:video" content="${esc(p.ogVideo)}" />\n<meta property="og:video:secure_url" content="${esc(p.ogVideo)}" />\n<meta property="og:video:type" content="video/mp4" />\n` : ''}<meta name="twitter:card" content="${p.ogImage ? 'summary_large_image' : 'summary'}" />
 <meta name="twitter:title" content="${esc(ogTitle)}" />
 <meta name="twitter:description" content="${esc(description)}" />
 ${p.ogImage ? `<meta name="twitter:image" content="${esc(p.ogImage)}" />` : ''}

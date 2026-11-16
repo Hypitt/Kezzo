@@ -5,7 +5,7 @@ import { explain } from '../lib/errors';
 import { fileExt } from '../lib/format';
 import { formatClock } from '../lib/battle';
 import { isSafe } from '../lib/moderation';
-import { MAX_VIDEO_SECONDS, compressImage, makeThumbnail, mediaDuration, thumbPath } from '../lib/media';
+import { MAX_VIDEO_SECONDS, compressImage, makeThumbnail, makeVideoPoster, mediaDuration, thumbPath } from '../lib/media';
 import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB, startUpload, type UploadFailure, type UploadHandle } from '../lib/upload';
 import { BATTLE_CATEGORIES, type BattleCategory, type PostKind } from '../lib/types';
 import type { Key } from '../lib/i18n';
@@ -100,7 +100,7 @@ function PostForm({ contest = false, contestId }: { contest?: boolean; contestId
       }
       const first = list[0];
       // A small preview for profile grids, so the full photo is only downloaded when someone opens the post. Failure is harmless.
-      if (kind === 'photo' && first?.bucket === 'media-public' && thumb.current) {
+      if ((kind === 'photo' || kind === 'video') && first?.bucket === 'media-public' && thumb.current) {
         try { await startUpload({ bucket: 'media-public', path: thumbPath(first.path), file: thumb.current }).done; } catch { /* the grid falls back to the full photo */ }
       }
       // The title is optional: without one, the start of the text (or the kind of post) is used.
@@ -195,7 +195,7 @@ function PostForm({ contest = false, contestId }: { contest?: boolean; contestId
     const same = jobs.current.length === ready.length && jobs.current.every((j, i) => j.file === ready[i]);
     if (!same) {
       discardUploaded();
-      thumb.current = kind === 'photo' ? await makeThumbnail(ready[0]) : null;
+      thumb.current = kind === 'photo' ? await makeThumbnail(ready[0]) : kind === 'video' ? await makeVideoPoster(ready[0]) : null;
       jobs.current = ready.map((file) => ({
         bucket: price > 0 ? 'media-paid' : 'media-public',
         path: price > 0 ? `${user.id}/${crypto.randomUUID()}.${fileExt(file.name)}` : publicFilePath(user.id, `${crypto.randomUUID()}.${fileExt(file.name)}`),

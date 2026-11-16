@@ -99,6 +99,41 @@ export async function makeThumbnail(file: File, maxSide = 480): Promise<File | n
   }
 }
 
+/** A still picture from a video (about 960 px wide), used as the preview when the post is shared on Facebook, WhatsApp and so on. Returns null if the browser cannot read the video. */
+export function makeVideoPoster(file: File, maxSide = 960): Promise<File | null> {
+  return new Promise((resolve) => {
+    const v = document.createElement('video');
+    const url = URL.createObjectURL(file);
+    let done = false;
+    const end = (f: File | null) => {
+      if (done) return;
+      done = true;
+      window.clearTimeout(timer);
+      URL.revokeObjectURL(url);
+      v.removeAttribute('src');
+      v.load();
+      resolve(f);
+    };
+    const timer = window.setTimeout(() => end(null), 10000);
+    v.muted = true;
+    v.playsInline = true;
+    v.preload = 'auto';
+    v.onerror = () => end(null);
+    v.onloadedmetadata = () => { v.currentTime = Math.min(1, Math.max(0, (v.duration || 0) / 3)); };
+    v.onseeked = () => {
+      try {
+        const scale = Math.min(1, maxSide / Math.max(v.videoWidth, v.videoHeight));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(2, Math.round(v.videoWidth * scale));
+        canvas.height = Math.max(2, Math.round(v.videoHeight * scale));
+        canvas.getContext('2d')?.drawImage(v, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((b) => end(b ? new File([b], 'thumb.jpg', { type: 'image/jpeg' }) : null), 'image/jpeg', 0.8);
+      } catch { end(null); }
+    };
+    v.src = url;
+  });
+}
+
 /** Where the preview of a photo is stored: next to it, with "-t.jpg" added. */
 export const thumbPath = (path: string): string => path.replace(/\.[^.\/]+$/, '') + '-t.jpg';
 
