@@ -9,7 +9,8 @@ import { startUpload } from '../lib/upload';
 import { publicFilePath, publicUrl, removePublic } from '../lib/storage';
 import { MARKET, MARKET2, MARKET_CATS, MARKET_KINDS, SHOP, formatPrice, rememberAbout, type Listing, type Shop, type MarketCat, type MarketKind, type MarketStatus } from '../lib/market';
 import { readPlace } from '../lib/opportunities';
-import { copyText } from '../lib/share';
+import { copyText, shareUrl } from '../lib/share';
+import { ShareButton } from '../components/ShareButton';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
@@ -122,6 +123,7 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
               <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" onClick={() => { if (!user) { openAuth('signup'); return; } rememberAbout(l.seller_id, l.id); go('messages', l.seller_id); }}>
                 <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />{user ? w.message : w.signIn}
               </button>
+              <ShareButton type="listing" id={l.id} title={l.title} />
               <ReportButton targetType="listing" targetId={l.id} />
             </>
           )}
@@ -466,7 +468,7 @@ export function MarketView({ shop }: { shop?: string }) {
             <div className="flex gap-2">
               {user?.id === shop && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditShop((v) => !v)}><Pencil className="h-4 w-4" aria-hidden="true" />{sw.edit}</button>}
               <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" onClick={async () => {
-                const url = `${window.location.origin}/#/market/${shop}`;
+                const url = shareUrl('shop', shop);
                 const title = shopRow?.name || (owner ? w.shopOf(owner.display_name) : 'Kezzo');
                 if (typeof navigator.share === 'function') { try { await navigator.share({ title, url }); return; } catch { /* cancelled: fall back to copy */ } }
                 toast((await copyText(url)) ? w.linkCopied : w.errGeneric);

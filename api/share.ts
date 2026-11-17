@@ -10,14 +10,14 @@ import { adminClient, UUID_RE } from './_lib/server';
  *  - Signed-in members are sent straight to the content in the app.
  * Only public details are used, and only a short part of the text.
  */
-const TARGET: Record<string, string> = { post: 'post', profile: 'profile', battle: 'battles', live: 'live', group: 'groups', event: 'community', poll: 'community', opportunity: 'opportunities' };
+const TARGET: Record<string, string> = { post: 'post', profile: 'profile', battle: 'battles', live: 'live', group: 'groups', event: 'community', poll: 'community', opportunity: 'opportunities', shop: 'market', listing: 'market' };
 type L = 'en' | 'fr' | 'es' | 'pt' | 'hi';
-const W: Record<L, { more: string; signup: string; login: string; why: string; locked: string; by: string; poll: string; opp: string; event: string; profile: string; battle: string; live: string; group: string; tag: string }> = {
-  en: { more: 'Sign up or log in to read the rest and see everything.', signup: 'Create a free account', login: 'Log in', why: 'The full post, picture and video are for Kezzo members.', locked: 'Paid content: unlock it in Kezzo.', by: 'by', poll: 'Poll', opp: 'Opportunity', event: 'Event', profile: 'Profile', battle: 'Live battle', live: 'Live', group: 'Group', tag: 'Get to know the world through its people.' },
-  fr: { more: 'Inscrivez-vous ou connectez-vous pour lire la suite et tout voir.', signup: 'Créer un compte gratuit', login: 'Se connecter', why: 'La publication complète, l’image et la vidéo sont réservées aux membres de Kezzo.', locked: 'Contenu payant : débloquez-le dans Kezzo.', by: 'par', poll: 'Sondage', opp: 'Opportunité', event: 'Événement', profile: 'Profil', battle: 'Battle en direct', live: 'En direct', group: 'Groupe', tag: 'Découvrez le monde à travers ses gens.' },
-  es: { more: 'Regístrate o inicia sesión para leer el resto y verlo todo.', signup: 'Crear una cuenta gratis', login: 'Iniciar sesión', why: 'La publicación completa, la imagen y el video son para miembros de Kezzo.', locked: 'Contenido de pago: desbloquéalo en Kezzo.', by: 'por', poll: 'Encuesta', opp: 'Oportunidad', event: 'Evento', profile: 'Perfil', battle: 'Batalla en vivo', live: 'En vivo', group: 'Grupo', tag: 'Conoce el mundo a través de su gente.' },
-  pt: { more: 'Cadastre-se ou entre para ler o resto e ver tudo.', signup: 'Criar uma conta grátis', login: 'Entrar', why: 'A publicação completa, a imagem e o vídeo são para membros do Kezzo.', locked: 'Conteúdo pago: desbloqueie no Kezzo.', by: 'por', poll: 'Enquete', opp: 'Oportunidade', event: 'Evento', profile: 'Perfil', battle: 'Batalha ao vivo', live: 'Ao vivo', group: 'Grupo', tag: 'Conheça o mundo através das suas pessoas.' },
-  hi: { more: 'बाकी पढ़ने और सब कुछ देखने के लिए साइन अप या लॉग इन करें।', signup: 'मुफ़्त खाता बनाएँ', login: 'लॉग इन', why: 'पूरी पोस्ट, तस्वीर और वीडियो Kezzo के सदस्यों के लिए हैं।', locked: 'सशुल्क सामग्री: Kezzo में अनलॉक करें।', by: 'द्वारा', poll: 'पोल', opp: 'अवसर', event: 'इवेंट', profile: 'प्रोफ़ाइल', battle: 'लाइव बैटल', live: 'लाइव', group: 'ग्रुप', tag: 'लोगों के ज़रिए दुनिया को जानें।' },
+const W: Record<L, { more: string; signup: string; login: string; why: string; locked: string; by: string; poll: string; opp: string; event: string; profile: string; battle: string; live: string; group: string; shop: string; listing: string; tag: string }> = {
+  en: { more: 'Sign up or log in to read the rest and see everything.', signup: 'Create a free account', login: 'Log in', why: 'The full post, picture and video are for Kezzo members.', locked: 'Paid content: unlock it in Kezzo.', by: 'by', poll: 'Poll', opp: 'Opportunity', event: 'Event', profile: 'Profile', battle: 'Live battle', live: 'Live', group: 'Group', shop: 'Shop', listing: 'For sale', tag: 'Get to know the world through its people.' },
+  fr: { more: 'Inscrivez-vous ou connectez-vous pour lire la suite et tout voir.', signup: 'Créer un compte gratuit', login: 'Se connecter', why: 'La publication complète, l’image et la vidéo sont réservées aux membres de Kezzo.', locked: 'Contenu payant : débloquez-le dans Kezzo.', by: 'par', poll: 'Sondage', opp: 'Opportunité', event: 'Événement', profile: 'Profil', battle: 'Battle en direct', live: 'En direct', group: 'Groupe', shop: 'Boutique', listing: 'À vendre', tag: 'Découvrez le monde à travers ses gens.' },
+  es: { more: 'Regístrate o inicia sesión para leer el resto y verlo todo.', signup: 'Crear una cuenta gratis', login: 'Iniciar sesión', why: 'La publicación completa, la imagen y el video son para miembros de Kezzo.', locked: 'Contenido de pago: desbloquéalo en Kezzo.', by: 'por', poll: 'Encuesta', opp: 'Oportunidad', event: 'Evento', profile: 'Perfil', battle: 'Batalla en vivo', live: 'En vivo', group: 'Grupo', shop: 'Tienda', listing: 'En venta', tag: 'Conoce el mundo a través de su gente.' },
+  pt: { more: 'Cadastre-se ou entre para ler o resto e ver tudo.', signup: 'Criar uma conta grátis', login: 'Entrar', why: 'A publicação completa, a imagem e o vídeo são para membros do Kezzo.', locked: 'Conteúdo pago: desbloqueie no Kezzo.', by: 'por', poll: 'Enquete', opp: 'Oportunidade', event: 'Evento', profile: 'Perfil', battle: 'Batalha ao vivo', live: 'Ao vivo', group: 'Grupo', shop: 'Loja', listing: 'À venda', tag: 'Conheça o mundo através das suas pessoas.' },
+  hi: { more: 'बाकी पढ़ने और सब कुछ देखने के लिए साइन अप या लॉग इन करें।', signup: 'मुफ़्त खाता बनाएँ', login: 'लॉग इन', why: 'पूरी पोस्ट, तस्वीर और वीडियो Kezzo के सदस्यों के लिए हैं।', locked: 'सशुल्क सामग्री: Kezzo में अनलॉक करें।', by: 'द्वारा', poll: 'पोल', opp: 'अवसर', event: 'इवेंट', profile: 'प्रोफ़ाइल', battle: 'लाइव बैटल', live: 'लाइव', group: 'ग्रुप', shop: 'दुकान', listing: 'बिक्री के लिए', tag: 'लोगों के ज़रिए दुनिया को जानें।' },
 };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' })[c] as string);
@@ -61,6 +61,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   const p: Preview = { label: 'Kezzo', title: 'Kezzo', text: '', lines: [], image: '', ogImage: '', video: '', ogVideo: '', note: '', by: '' };
   let description = w.tag;
   let textOnly = false;
+  let destId = id;
 
   try {
     const db = adminClient();
@@ -73,7 +74,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         .select('title,body,kind,media_bucket,media_path,download_price,author:profiles!author_id(display_name)').eq('id', id).maybeSingle();
       if (data) {
         const author = one(data.author as { display_name: string } | { display_name: string }[] | null);
-        p.label = w.by; p.title = clip(String(data.title), 120); p.by = author?.display_name ?? '';
+        p.label = w.by; p.title = clip(String(data.title || '').trim(), 120) || author?.display_name || 'Kezzo'; p.by = data.title ? (author?.display_name ?? '') : '';
         p.text = clip(String(data.body ?? '').replace(/\s+/g, ' ').trim(), 220);
         // the preview text is the post itself (longer than the on-page glimpse), with the author after it
         const full = clip(String(data.body ?? '').replace(/\s+/g, ' ').trim(), 300);
@@ -110,7 +111,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         p.lines = [new Date(String(data.starts_at)).toUTCString().slice(0, 22) + ' UTC', String(data.location ?? '')].filter(Boolean);
         p.text = clip(String(data.description ?? '').replace(/\s+/g, ' ').trim(), 200);
         if (data.cover_path) { p.image = fileUrl(String(data.cover_path)); p.ogImage = p.image; }
-        description = `${w.event} · ${p.lines[0] ?? ''}`;
+        description = [`${w.event} · ${p.lines.join(' · ')}`, p.text].filter(Boolean).join(' — ');
       }
     } else if (type === 'opportunity') {
       const { data } = await db.from('opportunities').select('title,org,body,city,country,hidden').eq('id', id).maybeSingle();
@@ -118,14 +119,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         p.label = w.opp; p.title = clip(String(data.title), 120);
         p.lines = [[data.org, data.city, data.country].filter(Boolean).join(' · ')].filter(Boolean);
         p.text = clip(String(data.body ?? '').replace(/\s+/g, ' ').trim(), 200);
-        description = `${w.opp} · ${clip(p.lines[0] ?? '', 100)}`;
+        description = [`${w.opp} · ${clip(p.lines[0] ?? '', 100)}`, p.text].filter(Boolean).join(' — ');
       }
     } else if (type === 'poll') {
       const { data } = await db.from('polls').select('question,poll_options(label)').eq('id', id).maybeSingle();
       if (data) {
         p.label = w.poll; p.title = clip(String(data.question), 160);
         p.lines = ((data.poll_options as { label: string }[] | null) ?? []).slice(0, 4).map((o) => clip(String(o.label), 60));
-        description = w.poll;
+        description = p.lines.length ? `${w.poll}: ${p.lines.join(' / ')}` : w.poll;
       }
     } else if (type === 'battle') {
       const { data } = await db.from('battles').select('title,topic,status').eq('id', id).maybeSingle();
@@ -135,6 +136,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       const { data } = await db.from('live_streams').select('title').eq('id', id).maybeSingle();
       p.label = w.live; p.title = data ? clip(String(data.title), 120) : 'Kezzo';
       description = w.live;
+    } else if (type === 'shop') {
+      const [{ data: sh }, { data: pr }, { data: items }] = await Promise.all([
+        db.from('market_shops').select('name,about,logo_path,cover_path').eq('owner_id', id).maybeSingle(),
+        db.from('profiles').select('display_name,avatar_url,bio').eq('id', id).maybeSingle(),
+        db.from('market_listings').select('title,photos').eq('seller_id', id).eq('hidden', false).eq('status', 'active').order('created_at', { ascending: false }).limit(6),
+      ]);
+      if (pr) {
+        const name = String(sh?.name || '').trim() || String(pr.display_name);
+        p.label = w.shop; p.title = clip(name, 80);
+        p.text = clip(String(sh?.about || pr.bio || '').replace(/\s+/g, ' ').trim(), 220);
+        p.lines = ((items ?? []) as Array<{ title: string }>).slice(0, 4).map((i) => clip(String(i.title), 60));
+        const firstPhoto = ((items ?? []) as Array<{ photos: string[] }>).find((i) => i.photos?.[0])?.photos[0];
+        const pic = sh?.cover_path ? fileUrl(String(sh.cover_path)) : sh?.logo_path ? fileUrl(String(sh.logo_path)) : firstPhoto ? fileUrl(firstPhoto) : String(pr.avatar_url ?? '');
+        p.image = pic; p.ogImage = pic;
+        description = [p.text, p.lines.join(' · ')].filter(Boolean).join(' — ') || `${w.shop} · Kezzo`;
+      }
+    } else if (type === 'listing') {
+      const { data } = await db.from('market_listings').select('seller_id,title,body,price,currency,photos,city,country,hidden,status,seller:profiles!seller_id(display_name)').eq('id', id).maybeSingle();
+      if (data && !data.hidden) {
+        const seller = one(data.seller as { display_name: string } | { display_name: string }[] | null);
+        destId = String(data.seller_id);
+        p.label = w.listing; p.title = clip(String(data.title), 120); p.by = seller?.display_name ?? '';
+        const price = data.price === null ? '' : Number(data.price) === 0 ? '' : `${Number(data.price).toLocaleString('en')} ${String(data.currency ?? '').trim()}`.trim();
+        p.lines = [price, [data.city, data.country].filter(Boolean).join(', ')].filter(Boolean);
+        p.text = clip(String(data.body ?? '').replace(/\s+/g, ' ').trim(), 220);
+        const photo = (data.photos as string[] | null)?.[0];
+        if (photo) { p.image = fileUrl(photo); p.ogImage = p.image; }
+        description = [price, p.text, seller?.display_name].filter(Boolean).join(' — ');
+      }
     } else {
       const { data } = await db.from('groups').select('name,tagline,join_policy').eq('id', id).maybeSingle();
       p.label = w.group; p.title = data ? clip(String(data.name), 80) : 'Kezzo';
@@ -146,9 +176,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   if (!p.ogImage && base && !textOnly) p.ogImage = `${base}/icon-512.png`;
-  const dest = `${base}/#/${target}/${id}`;
-  const signup = `${base}/?auth=signup#/${target}/${id}`;
-  const login = `${base}/?auth=signin#/${target}/${id}`;
+  const dest = `${base}/#/${target}/${destId}`;
+  const signup = `${base}/?auth=signup#/${target}/${destId}`;
+  const login = `${base}/?auth=signin#/${target}/${destId}`;
   const self = `${base}/s/${type}/${UUID_RE.test(given) ? id : given}`;
   const ogTitle = `${p.title} · Kezzo`;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');

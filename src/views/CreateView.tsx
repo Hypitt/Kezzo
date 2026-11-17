@@ -103,8 +103,8 @@ function PostForm({ contest = false, contestId }: { contest?: boolean; contestId
       if ((kind === 'photo' || kind === 'video') && first?.bucket === 'media-public' && thumb.current) {
         try { await startUpload({ bucket: 'media-public', path: thumbPath(first.path), file: thumb.current }).done; } catch { /* the grid falls back to the full photo */ }
       }
-      // The title is optional: without one, the start of the text (or the kind of post) is used.
-      const finalTitle = (title.trim() || body.trim().split('\n')[0].slice(0, 120) || t(`kind_${kind}` as Key)).slice(0, 120);
+      // The title is optional: without one, the post simply has none (nothing is made up).
+      const finalTitle = title.trim().slice(0, 120);
       const { data: created, error: insErr } = await supabase.from('posts').insert({
         author_id: user.id, kind, title: finalTitle, body: body.trim(),
         media_bucket: first?.bucket ?? null, media_path: first?.path ?? null, media_extra: list.slice(1).map((j) => j.path),

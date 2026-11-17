@@ -167,7 +167,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
 
       {editing ? (
         <form onSubmit={saveEdit} className="space-y-2">
-          <input className="input" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} required aria-label={t('title')} />
+          <input className="input" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} aria-label={t('title')} />
           <textarea className="input" rows={3} value={body} maxLength={2000} onChange={(e) => setBody(e.target.value)} aria-label={t('body')} />
           <div className="flex gap-2">
             <button className="btn btn-primary btn-sm">{t('save')}</button>
@@ -176,7 +176,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
         </form>
       ) : (
         <div>
-          <h3 className="text-base font-semibold">{tx.out[0]}</h3>
+          {post.title && <h3 className="text-base font-semibold">{tx.out[0]}</h3>}
           {post.body && <p className="mt-1 whitespace-pre-wrap break-words text-sm text-zinc-700">{tx.out[1]}</p>}
           <TranslationNote tx={tx} />
         </div>
@@ -194,7 +194,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
             </div>
           ) : mediaUrl ? (
             <>
-              {post.kind === 'photo' && <PhotoCarousel urls={[mediaUrl, ...extraUrls]} alt={post.title} />}
+              {post.kind === 'photo' && <PhotoCarousel urls={[mediaUrl, ...extraUrls]} alt={post.title || post.body.slice(0, 80)} />}
               {post.kind === 'video' && <FeedVideo src={mediaUrl} postId={post.download_price === 0 ? post.id : undefined} version={capVersion} />}
               {post.kind === 'audio' && (post.download_price === 0 ? <CaptionedAudio src={mediaUrl} postId={post.id} version={capVersion} /> : <audio src={mediaUrl} controls preload="none" className="w-full" />)}
               {needsSubs && <button type="button" className="btn btn-ghost btn-sm mt-2" disabled={subsBusy} onClick={() => void addSubtitles()}>{subsBusy ? TR[lang].working : TR[lang].addSubs}</button>}
@@ -218,7 +218,7 @@ export function PostCard({ post, onChange, onDelete }: Props) {
           <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
           {post.comments}
         </button>
-        <ShareButton type="post" id={post.id} title={post.title} media={shareMedia} />
+        <ShareButton type="post" id={post.id} title={post.title || post.body.replace(/\s+/g, ' ').slice(0, 60)} media={shareMedia} />
         <span className="flex-1" />
         {mine ? (
           <>

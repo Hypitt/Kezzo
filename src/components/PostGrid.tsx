@@ -32,12 +32,12 @@ export function PostGrid({ posts, onChange, onDelete }: { posts: Post[]; onChang
       <ul className="grid grid-cols-3 gap-1 sm:gap-2">
         {posts.map((p) => (
           <li key={p.id}>
-            <Tile post={p} onOpen={() => setOpenId(p.id)} label={`${t('open_post')}: ${p.title}`} />
+            <Tile post={p} onOpen={() => setOpenId(p.id)} label={`${t('open_post')}: ${p.title || p.body || ''}`} />
           </li>
         ))}
       </ul>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-3 sm:p-6" role="dialog" aria-modal="true" aria-label={open.title} onClick={() => setOpenId(null)}>
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-3 sm:p-6" role="dialog" aria-modal="true" aria-label={open.title || open.body || undefined} onClick={() => setOpenId(null)}>
           <div className="relative my-auto w-full max-w-xl" onClick={(e) => e.stopPropagation()}>
             <button type="button" className="absolute -top-2 right-0 z-10 flex h-8 w-8 -translate-y-full items-center justify-center rounded-full bg-white text-zinc-900 shadow" onClick={() => setOpenId(null)} aria-label={t('close')}>
               <X className="h-4 w-4" aria-hidden="true" />
@@ -89,13 +89,13 @@ function Tile({ post, onOpen, label }: { post: Post; onOpen: () => void; label: 
         <span className="relative flex h-full w-full items-center justify-center bg-zinc-800 text-white">
           {/* Videos play by themselves (muted) while on screen */}
           {videoFrame
-            ? <AutoVideo src={videoFrame} label={post.title} className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+            ? <AutoVideo src={videoFrame} label={post.title || post.body || ''} className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
             : <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-black/45"><Play className="h-5 w-5 fill-white" aria-hidden="true" /></span>}
         </span>
       ) : post.kind === 'audio' ? (
-        <span className="flex h-full w-full flex-col items-center justify-center gap-1 p-2 text-zinc-500"><Music className="h-6 w-6" aria-hidden="true" /><span className="line-clamp-2 text-center text-[11px]">{post.title}</span></span>
+        <span className="flex h-full w-full flex-col items-center justify-center gap-1 p-2 text-zinc-500"><Music className="h-6 w-6" aria-hidden="true" /><span className="line-clamp-2 text-center text-[11px]">{post.title || post.body}</span></span>
       ) : post.kind === 'text' ? (
-        <span className="flex h-full w-full flex-col gap-1 p-2 text-zinc-600"><Type className="h-4 w-4 shrink-0" aria-hidden="true" /><span className="line-clamp-4 text-xs font-medium">{post.title}</span></span>
+        <span className="flex h-full w-full flex-col gap-1 p-2 text-zinc-600"><Type className="h-4 w-4 shrink-0" aria-hidden="true" /><span className="line-clamp-4 text-xs font-medium">{post.title || post.body}</span></span>
       ) : null}
       {extra > 0 && !locked && <Images className="absolute right-1.5 top-1.5 h-4 w-4 text-white drop-shadow" aria-hidden="true" />}
     </button>

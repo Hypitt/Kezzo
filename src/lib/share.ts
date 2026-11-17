@@ -1,4 +1,4 @@
-export type ShareType = 'post' | 'profile' | 'battle' | 'live' | 'group' | 'event' | 'poll' | 'opportunity';
+export type ShareType = 'post' | 'profile' | 'battle' | 'live' | 'group' | 'event' | 'poll' | 'opportunity' | 'shop' | 'listing';
 
 /** The link people paste elsewhere, made of words only: /s/post/my-dance-battle. It shows the Kezzo name and a preview, then opens the right page. */
 export function shareUrl(type: ShareType, id: string, slug?: string): string {

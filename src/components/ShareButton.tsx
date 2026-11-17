@@ -25,7 +25,7 @@ export function ShareButton({ type, id, title, media, className = 'btn btn-ghost
   const stop = useRef(false);
   const [slug, setSlug] = useState('');
   const url = shareUrl(type, id, slug);
-  const text = t(`share_text_${type}` as never, { title }) as string;
+  const text = t(`share_text_${type === 'shop' || type === 'listing' ? 'post' : type}` as never, { title }) as string;
   const canNative = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
   // The readable name of this link (made on the server from the item's title the first time it is shared).
