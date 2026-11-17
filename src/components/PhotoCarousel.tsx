@@ -24,7 +24,7 @@ export function PhotoCarousel({ urls, alt }: { urls: string[]; alt: string }) {
   };
 
   if (urls.length === 1) {
-    return <img src={urls[0]} alt={alt} className="max-h-[32rem] w-full rounded-xl bg-zinc-100 object-contain" loading="lazy" decoding="async" />;
+    return <img src={urls[0]} alt={alt} className="h-[min(36rem,75vh)] w-full rounded-xl bg-zinc-100 object-cover object-[50%_30%]" loading="lazy" decoding="async" />;
   }
 
   return (
@@ -40,7 +40,7 @@ export function PhotoCarousel({ urls, alt }: { urls: string[]; alt: string }) {
         {urls.map((u, i) => (
           <img
             key={u} src={u} alt={t('photo_n', { i: i + 1, n: urls.length })}
-            className="h-[min(32rem,70vh)] w-full shrink-0 snap-center object-contain" loading="lazy" decoding="async" draggable={false}
+            className="h-[min(36rem,75vh)] w-full shrink-0 snap-center object-cover object-[50%_30%]" loading="lazy" decoding="async" draggable={false}
           />
         ))}
       </div>

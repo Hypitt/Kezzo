@@ -153,7 +153,7 @@ export function FeedVideo({ src, postId, version = 0 }: { src: string; postId?: 
         playsInline
         loop
         preload={live ? 'metadata' : 'none'}
-        className="max-h-[32rem] min-h-40 w-full bg-black"
+        className="h-[min(36rem,75vh)] w-full bg-black object-cover object-[50%_30%]"
         onLoadedData={() => { const v = video.current; if (AUTOPLAY && v && v.paused && visible.current && !manualPause.current) start(); }}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
