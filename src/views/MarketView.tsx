@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, ImagePlus, MapPin, MessageCircle, Pencil, Plus, Share2, Store, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Heart, ImagePlus, MapPin, MessageCircle, Pencil, Plus, Share2, Store, Trash2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { PUBLIC_PROFILE } from '../lib/data';
 import { fileExt } from '../lib/format';
@@ -7,7 +7,7 @@ import { isSafe } from '../lib/moderation';
 import { compressImage, resizeCover } from '../lib/media';
 import { startUpload } from '../lib/upload';
 import { publicFilePath, publicUrl, removePublic } from '../lib/storage';
-import { MARKET, MARKET_CATS, MARKET_KINDS, SHOP, formatPrice, type Listing, type Shop, type MarketCat, type MarketKind, type MarketStatus } from '../lib/market';
+import { MARKET, MARKET2, MARKET_CATS, MARKET_KINDS, SHOP, formatPrice, type Listing, type Shop, type MarketCat, type MarketKind, type MarketStatus } from '../lib/market';
 import { readPlace } from '../lib/opportunities';
 import { copyText } from '../lib/share';
 import { useAuth } from '../state/Auth';
@@ -18,17 +18,20 @@ import { ReportButton } from '../components/ReportButton';
 import { Avatar, Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
 
 const PAGE = 18;
-const SELECT = `id,seller_id,kind,category,title,body,price,currency,condition,country,city,online,contact,photos,status,hidden,created_at,seller:profiles!seller_id(${PUBLIC_PROFILE})`;
+const SELECT = `id,seller_id,kind,category,title,body,price,currency,condition,country,city,online,contact,photos,quantity,status,hidden,created_at,seller:profiles!seller_id(${PUBLIC_PROFILE})`;
 const clean = (s: string) => s.replace(/[%_,()*\\"]/g, ' ').trim();
 const sellerOf = (l: Listing) => (Array.isArray(l.seller) ? l.seller[0] : l.seller) ?? null;
 
-function Card({ l, mine, admin, onEdit, onChanged, onShop }: { l: Listing; mine: boolean; admin: boolean; onEdit: () => void; onChanged: () => void; onShop?: () => void }) {
+function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Listing; mine: boolean; admin: boolean; fav: boolean; onFav: () => void; onEdit: () => void; onChanged: () => void; onShop?: () => void }) {
   const { lang } = useI18n();
   const { user, openAuth } = useAuth();
   const { go } = useRouter();
   const { toast } = useToast();
   const w = MARKET[lang];
+  const m2 = MARKET2[lang];
   const [open, setOpen] = useState(false);
+  const [qtyText, setQtyText] = useState(l.quantity === null ? '' : String(l.quantity));
+  useEffect(() => { setQtyText(l.quantity === null ? '' : String(l.quantity)); }, [l.quantity]);
   const seller = sellerOf(l);
   const place = l.online && !l.country ? w.online : [l.city, l.country].filter(Boolean).join(', ');
   const price = formatPrice(l.price, l.currency, lang, w.free, w.ask);
@@ -36,7 +39,9 @@ function Card({ l, mine, admin, onEdit, onChanged, onShop }: { l: Listing; mine:
   const gone = l.status !== 'active';
 
   const setStatus = async (status: MarketStatus) => {
-    const { error } = await supabase.from('market_listings').update({ status, updated_at: new Date().toISOString() }).eq('id', l.id);
+    // putting a sold-out item back on sale clears the count, otherwise it would stay at 0
+    const patch = status === 'active' && l.quantity === 0 ? { status, quantity: null } : { status };
+    const { error } = await supabase.from('market_listings').update({ ...patch, updated_at: new Date().toISOString() }).eq('id', l.id);
     if (error) toast(w.errGeneric, 'error'); else onChanged();
   };
   const remove = async () => {
@@ -45,6 +50,11 @@ function Card({ l, mine, admin, onEdit, onChanged, onShop }: { l: Listing; mine:
     if (error) { toast(w.errGeneric, 'error'); return; }
     await removePublic('media-public', l.photos);
     onChanged();
+  };
+  const setQty = async (n: number | null) => {
+    if (n !== null && (!Number.isInteger(n) || n < 0 || n > 100000)) { toast(w.errGeneric, 'error'); return; }
+    const { error } = await supabase.from('market_listings').update({ quantity: n, updated_at: new Date().toISOString() }).eq('id', l.id);
+    if (error) toast(w.errGeneric, 'error'); else { toast(m2.qtyUpdated); onChanged(); }
   };
   const hide = async () => { await supabase.rpc('admin_hide_listing', { p_id: l.id, p_hide: !l.hidden }); onChanged(); };
 
@@ -55,11 +65,19 @@ function Card({ l, mine, admin, onEdit, onChanged, onShop }: { l: Listing; mine:
           ? <img src={photo} alt={l.title} loading="lazy" decoding="async" className={`h-full w-full object-cover ${gone ? 'opacity-50' : ''}`} />
           : <div className="flex h-full items-center justify-center text-zinc-400"><Store className="h-10 w-10" aria-hidden="true" /></div>}
         <span className="absolute left-2 top-2 rounded-full bg-zinc-900 px-2.5 py-0.5 text-xs font-semibold text-white">{w.kinds[l.kind]}</span>
+        {user && !mine && (
+          <button type="button" aria-pressed={fav} aria-label={fav ? m2.favRemove : m2.favAdd} title={fav ? m2.favRemove : m2.favAdd} onClick={onFav}
+            className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow hover:bg-white">
+            <Heart className={`h-5 w-5 ${fav ? 'fill-red-500 text-red-500' : 'text-zinc-700'}`} aria-hidden="true" />
+          </button>
+        )}
         {gone && <span className="absolute right-2 top-2 rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold">{l.status === 'sold' ? w.sold : w.paused}</span>}
         {l.hidden && <span className="absolute bottom-2 left-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700">{w.hide}</span>}
       </div>
       <div className="space-y-1.5 p-3">
-        <p className="text-base font-bold">{price}</p>
+        <p className="flex items-center gap-2 text-base font-bold">{price}
+          {l.quantity !== null && <span className={`text-xs font-semibold ${l.quantity === 0 ? 'text-red-600' : l.quantity <= 3 ? 'text-amber-600' : 'text-zinc-500'}`}>{l.quantity === 0 ? m2.soldOut : m2.left(l.quantity)}</span>}
+        </p>
         <h3 className="text-sm font-semibold">{l.title}</h3>
         <p className="flex flex-wrap items-center gap-x-3 text-xs text-zinc-600">
           <span>{w.cats[l.category]}</span>
@@ -79,6 +97,14 @@ function Card({ l, mine, admin, onEdit, onChanged, onShop }: { l: Listing; mine:
           </div>
         )}
         <button type="button" className="text-xs font-semibold text-accent hover:underline" aria-expanded={open} onClick={() => setOpen((v) => !v)}>{open ? w.showLess : w.readMore}</button>
+        {mine && (
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <label className="text-xs font-semibold text-zinc-600" htmlFor={`q-${l.id}`}>{m2.qty}</label>
+            <input id={`q-${l.id}`} className="input !w-20 !py-1 text-sm" inputMode="numeric" value={qtyText} maxLength={6} onChange={(e) => setQtyText(e.target.value.replace(/\D/g, ''))} />
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => void setQty(qtyText === '' ? null : Number(qtyText))}>{m2.update}</button>
+            {l.quantity !== null && l.quantity > 0 && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void setQty(l.quantity! - 1)}>{m2.soldOne}</button>}
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-2">
           {seller && (onShop
             ? <button type="button" className="text-xs text-zinc-500 hover:underline" onClick={onShop}>{w.byLabel} <span className="font-semibold">{seller.display_name}</span> · {w.visitShop}</button>
@@ -106,17 +132,18 @@ function Card({ l, mine, admin, onEdit, onChanged, onShop }: { l: Listing; mine:
   );
 }
 
-interface Draft { kind: MarketKind; category: MarketCat; title: string; body: string; price: string; currency: string; condition: '' | 'new' | 'used'; country: string; city: string; online: boolean; contact: string }
+interface Draft { kind: MarketKind; category: MarketCat; title: string; body: string; price: string; currency: string; condition: '' | 'new' | 'used'; country: string; city: string; online: boolean; contact: string; quantity: string }
 
 function Form({ editing, onDone, onCancel }: { editing: Listing | null; onDone: () => void; onCancel: () => void }) {
   const { user } = useAuth();
   const { lang } = useI18n();
   const { toast } = useToast();
   const w = MARKET[lang];
+  const m2 = MARKET2[lang];
   const place = readPlace();
   const [d, setD] = useState<Draft>(() => editing
-    ? { kind: editing.kind, category: editing.category, title: editing.title, body: editing.body, price: editing.price === null ? '' : String(editing.price), currency: editing.currency, condition: editing.condition ?? '', country: editing.country, city: editing.city, online: editing.online, contact: editing.contact ?? '' }
-    : { kind: 'product', category: 'other', title: '', body: '', price: '', currency: '', condition: '', country: place.country, city: place.city, online: false, contact: '' });
+    ? { kind: editing.kind, category: editing.category, title: editing.title, body: editing.body, price: editing.price === null ? '' : String(editing.price), currency: editing.currency, condition: editing.condition ?? '', country: editing.country, city: editing.city, online: editing.online, contact: editing.contact ?? '', quantity: editing.quantity === null ? '' : String(editing.quantity) }
+    : { kind: 'product', category: 'other', title: '', body: '', price: '', currency: '', condition: '', country: place.country, city: place.city, online: false, contact: '', quantity: '' });
   const [photos, setPhotos] = useState<string[]>(editing?.photos ?? []);
   const added = useRef<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -152,7 +179,11 @@ function Form({ editing, onDone, onCancel }: { editing: Listing | null; onDone: 
     const priceText = d.price.trim().replace(',', '.');
     const price = priceText === '' ? null : Number(priceText);
     if (price !== null && (!Number.isFinite(price) || price < 0)) return setErr(w.errGeneric);
+    const qtyText = d.quantity.trim();
+    const quantity = qtyText === '' ? null : Number(qtyText);
+    if (quantity !== null && (!Number.isInteger(quantity) || quantity < 0 || quantity > 100000)) return setErr(w.errGeneric);
     const row = {
+      quantity,
       kind: d.kind, category: d.category, title: d.title.trim(), body: d.body.trim(), price, currency: d.currency.trim(),
       condition: d.kind === 'product' && d.condition ? d.condition : null, country: d.country.trim(), city: d.city.trim(),
       online: d.online, contact: d.contact.trim() || null, photos,
@@ -195,6 +226,7 @@ function Form({ editing, onDone, onCancel }: { editing: Listing | null; onDone: 
         <div><label className="label" htmlFor="mk-cur">{w.fCurrency}</label><input id="mk-cur" className="input" value={d.currency} maxLength={12} placeholder="USD, CAD, FCFA, €" onChange={(e) => set('currency', e.target.value)} /></div>
       </div>
       <p className="-mt-1 text-xs text-zinc-500">{w.fPriceHelp}</p>
+      <div><label className="label" htmlFor="mk-qty">{m2.qty}</label><input id="mk-qty" className="input" inputMode="numeric" value={d.quantity} maxLength={6} onChange={(e) => set('quantity', e.target.value.replace(/\D/g, ''))} /><p className="mt-1 text-xs text-zinc-500">{m2.qtyHelp}</p></div>
       <div><label className="label" htmlFor="mk-body">{w.fBody}</label><textarea id="mk-body" className="input" rows={5} value={d.body} maxLength={3000} onChange={(e) => set('body', e.target.value)} /></div>
 
       <div>
@@ -307,7 +339,7 @@ export function MarketView({ shop }: { shop?: string }) {
   const { toast } = useToast();
   const { lang } = useI18n();
   const w = MARKET[lang];
-  const [kind, setKind] = useState<'all' | MarketKind | 'mine'>('all');
+  const [kind, setKind] = useState<'all' | MarketKind | 'mine' | 'fav'>('all');
   const [cat, setCat] = useState<'all' | MarketCat>('all');
   const [input, setInput] = useState('');
   const [term, setTerm] = useState('');
@@ -319,6 +351,10 @@ export function MarketView({ shop }: { shop?: string }) {
   const [admin, setAdmin] = useState(false);
   const [hiddenRows, setHiddenRows] = useState<Listing[]>([]);
   const [owner, setOwner] = useState<{ id: string; display_name: string; avatar_url: string | null; bio: string } | null>(null);
+  const [favs, setFavs] = useState<Set<string>>(new Set());
+  const [sort, setSort] = useState<'new' | 'low' | 'high'>('new');
+  const [avail, setAvail] = useState(false);
+  const m2 = MARKET2[lang];
   const [shopRow, setShopRow] = useState<Shop | null>(null);
   const [editShop, setEditShop] = useState(false);
   const sw = SHOP[lang];
@@ -339,17 +375,47 @@ export function MarketView({ shop }: { shop?: string }) {
     void supabase.rpc('is_admin').then(({ data }) => setAdmin(data === true));
   }, [user]);
 
+  useEffect(() => {
+    if (!user) { setFavs(new Set()); return; }
+    void supabase.from('market_favorites').select('listing_id').eq('user_id', user.id).limit(1000).then(({ data }) => setFavs(new Set((data ?? []).map((r) => String(r.listing_id)))));
+  }, [user]);
+
+  const toggleFav = async (id: string) => {
+    if (!user) return;
+    const on = favs.has(id);
+    setFavs((f) => { const n = new Set(f); if (on) n.delete(id); else n.add(id); return n; });
+    const { error } = on
+      ? await supabase.from('market_favorites').delete().eq('user_id', user.id).eq('listing_id', id)
+      : await supabase.from('market_favorites').insert({ user_id: user.id, listing_id: id });
+    if (error) setFavs((f) => { const n = new Set(f); if (on) n.add(id); else n.delete(id); return n; });
+  };
+
   const fetchPage = useCallback(async (offset: number): Promise<Listing[]> => {
-    let q = supabase.from('market_listings').select(SELECT).eq('hidden', false)
-      .order('created_at', { ascending: false }).range(offset, offset + PAGE - 1);
+    let q = supabase.from('market_listings').select(SELECT).eq('hidden', false);
+    q = sort === 'low' ? q.order('price', { ascending: true, nullsFirst: false }) : sort === 'high' ? q.order('price', { ascending: false, nullsFirst: false }) : q;
+    q = q.order('created_at', { ascending: false }).range(offset, offset + PAGE - 1);
     if (shop) { q = q.eq('seller_id', shop); if (shop !== user?.id) q = q.neq('status', 'paused'); }
     else if (kind === 'mine') q = user ? q.eq('seller_id', user.id) : q.eq('seller_id', '00000000-0000-0000-0000-000000000000');
+    else if (kind === 'fav') { if (favs.size === 0) return []; q = q.in('id', [...favs]).neq('status', 'paused'); }
     else { if (kind !== 'all') q = q.eq('kind', kind); q = q.neq('status', 'paused'); }
     if (cat !== 'all') q = q.eq('category', cat);
-    if (term) q = q.or(`title.ilike.%${term}%,city.ilike.%${term}%,country.ilike.%${term}%`);
+    if (avail) q = q.eq('status', 'active');
+    if (term) {
+      // name, description, place, category and seller (name or @handle)
+      const lower = term.toLowerCase();
+      const parts = [`title.ilike.%${term}%`, `body.ilike.%${term}%`, `city.ilike.%${term}%`, `country.ilike.%${term}%`];
+      const cats = MARKET_CATS.filter((c) => c.includes(lower) || MARKET[lang].cats[c].toLowerCase().includes(lower));
+      if (cats.length) parts.push(`category.in.(${cats.join(',')})`);
+      if (!shop) {
+        const { data: people } = await supabase.from('profiles').select('id').or(`display_name.ilike.%${term}%,handle.ilike.%${term.replace(/^@/, '')}%`).limit(30);
+        const ids = (people ?? []).map((r) => String(r.id));
+        if (ids.length) parts.push(`seller_id.in.(${ids.join(',')})`);
+      }
+      q = q.or(parts.join(','));
+    }
     const { data } = await q;
     return (data ?? []) as unknown as Listing[];
-  }, [kind, cat, term, user, shop]);
+  }, [kind, cat, term, user, shop, sort, avail, lang, favs.size === 0 && kind === 'fav', kind === 'fav' ? favs : null]);
 
   const load = useCallback(() => {
     const mine = ++request.current;
@@ -373,12 +439,12 @@ export function MarketView({ shop }: { shop?: string }) {
   };
 
   const card = (l: Listing) => (
-    <Card key={l.id} l={l} mine={l.seller_id === user?.id} admin={admin}
+    <Card key={l.id} l={l} mine={l.seller_id === user?.id} admin={admin} fav={favs.has(l.id)} onFav={() => void toggleFav(l.id)}
       onEdit={() => { setForm({ open: true, editing: l }); window.scrollTo(0, 0); }}
       onChanged={() => { load(); loadHidden(); }} onShop={shop ? undefined : () => go('market', l.seller_id)} />
   );
-  const tabs: Array<['all' | MarketKind | 'mine', string]> = [['all', w.all], ['product', w.products], ['service', w.services]];
-  if (user) tabs.push(['mine', w.mine]);
+  const tabs: Array<['all' | MarketKind | 'mine' | 'fav', string]> = [['all', w.all], ['product', w.products], ['service', w.services]];
+  if (user) tabs.push(['fav', m2.favorites], ['mine', w.mine]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-3">
@@ -418,15 +484,21 @@ export function MarketView({ shop }: { shop?: string }) {
       <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] text-zinc-600">{w.safety}</p>
 
       <div className="space-y-2">
-        <input className="input" placeholder={w.search} aria-label={w.search} value={input} onChange={(e) => setInput(e.target.value)} />
+        <input className="input" placeholder={m2.searchHint} aria-label={w.search} value={input} onChange={(e) => setInput(e.target.value)} />
         {!shop && <div className="flex flex-wrap gap-2">{tabs.map(([k, label]) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{label}</Chip>)}</div>}
         <select className="input" aria-label={w.fCat} value={cat} onChange={(e) => setCat(e.target.value as 'all' | MarketCat)}>
           <option value="all">{w.anyCategory}</option>
           {MARKET_CATS.map((c) => <option key={c} value={c}>{w.cats[c]}</option>)}
         </select>
+        <div className="flex flex-wrap items-center gap-3">
+          <select className="input !w-auto" aria-label={m2.sortNew} value={sort} onChange={(e) => setSort(e.target.value as 'new' | 'low' | 'high')}>
+            <option value="new">{m2.sortNew}</option><option value="low">{m2.sortLow}</option><option value="high">{m2.sortHigh}</option>
+          </select>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={avail} onChange={(e) => setAvail(e.target.checked)} />{m2.onlyAvail}</label>
+        </div>
       </div>
 
-      {loading ? <Loading /> : rows.length === 0 ? <Empty text={shop ? w.emptyShop : kind === 'mine' ? w.emptyMine : w.empty}><Store className="mx-auto mt-3 h-6 w-6 text-zinc-400" aria-hidden="true" /></Empty> : (
+      {loading ? <Loading /> : rows.length === 0 ? <Empty text={shop ? w.emptyShop : kind === 'mine' ? w.emptyMine : kind === 'fav' ? m2.emptyFav : w.empty}><Store className="mx-auto mt-3 h-6 w-6 text-zinc-400" aria-hidden="true" /></Empty> : (
         <div className="grid gap-3 sm:grid-cols-2">{rows.map(card)}</div>
       )}
       <LoadMore show={!loading && more} busy={busy} onClick={() => void showMore()} label={w.more} />
