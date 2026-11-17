@@ -7,7 +7,7 @@ import { isSafe } from '../lib/moderation';
 import { compressImage, resizeCover } from '../lib/media';
 import { startUpload } from '../lib/upload';
 import { publicFilePath, publicUrl, removePublic } from '../lib/storage';
-import { MARKET, MARKET2, MARKET_CATS, MARKET_KINDS, SHOP, formatPrice, type Listing, type Shop, type MarketCat, type MarketKind, type MarketStatus } from '../lib/market';
+import { MARKET, MARKET2, MARKET_CATS, MARKET_KINDS, SHOP, formatPrice, rememberAbout, type Listing, type Shop, type MarketCat, type MarketKind, type MarketStatus } from '../lib/market';
 import { readPlace } from '../lib/opportunities';
 import { copyText } from '../lib/share';
 import { useAuth } from '../state/Auth';
@@ -119,7 +119,7 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
             </>
           ) : (
             <>
-              <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" onClick={() => (user ? go('messages', l.seller_id) : openAuth('signup'))}>
+              <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" onClick={() => { if (!user) { openAuth('signup'); return; } rememberAbout(l.seller_id, l.id); go('messages', l.seller_id); }}>
                 <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />{user ? w.message : w.signIn}
               </button>
               <ReportButton targetType="listing" targetId={l.id} />

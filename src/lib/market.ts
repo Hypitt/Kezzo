@@ -130,3 +130,26 @@ export const MARKET2: Record<Lang, MarketWords2> = {
   pt: { qty: 'Quantidade disponível', qtyHelp: 'Opcional. Atualize quando vender; em 0 aparece como esgotado.', left: (n) => `Restam ${n}`, soldOut: 'Esgotado', soldOne: 'Vendi 1', update: 'Atualizar', qtyUpdated: 'Quantidade atualizada.', favorites: 'Favoritos', favAdd: 'Salvar nos favoritos', favRemove: 'Remover dos favoritos', emptyFav: 'Você ainda não tem favoritos. Toque no coração de um item para salvá-lo.', onlyAvail: 'Só disponíveis', sortNew: 'Mais recentes', sortLow: 'Preço: menor para maior', sortHigh: 'Preço: maior para menor', searchHint: 'Busque por nome, local, vendedor ou categoria' },
   hi: { qty: 'उपलब्ध मात्रा', qtyHelp: 'वैकल्पिक। बिक्री पर इसे अपडेट करें; 0 होने पर आइटम बिक चुका दिखेगा।', left: (n) => `${n} बचे`, soldOut: 'स्टॉक ख़त्म', soldOne: '1 बिका', update: 'अपडेट', qtyUpdated: 'मात्रा अपडेट हुई।', favorites: 'पसंदीदा', favAdd: 'पसंदीदा में सहेजें', favRemove: 'पसंदीदा से हटाएँ', emptyFav: 'अभी कोई पसंदीदा नहीं। सहेजने के लिए आइटम पर दिल दबाएँ।', onlyAvail: 'सिर्फ़ उपलब्ध', sortNew: 'सबसे नए', sortLow: 'कीमत: कम से ज़्यादा', sortHigh: 'कीमत: ज़्यादा से कम', searchHint: 'नाम, जगह, विक्रेता या श्रेणी से खोजें' },
 };
+
+/** Remembers which listing a buyer is about to message the seller about (read once by the chat). */
+export const DM_ABOUT_KEY = 'kezzo.dm.about';
+export function rememberAbout(to: string, listing: string): void {
+  try { sessionStorage.setItem(DM_ABOUT_KEY, JSON.stringify({ to, listing })); } catch { /* the chat just opens without a product */ }
+}
+export function takeAbout(to: string): string | null {
+  try {
+    const raw = sessionStorage.getItem(DM_ABOUT_KEY);
+    const v = raw ? (JSON.parse(raw) as { to?: string; listing?: string }) : null;
+    return v && v.to === to && typeof v.listing === 'string' ? v.listing : null;
+  } catch { return null; }
+}
+
+export function clearAbout(): void { try { sessionStorage.removeItem(DM_ABOUT_KEY); } catch { /* nothing to clear */ } }
+
+export const ABOUT_WORDS: Record<Lang, { about: string; gone: string; drop: string; view: string }> = {
+  en: { about: 'About this item', gone: 'This item is no longer available', drop: 'Remove', view: 'View' },
+  fr: { about: 'À propos de cet article', gone: 'Cet article n’est plus disponible', drop: 'Retirer', view: 'Voir' },
+  es: { about: 'Sobre este artículo', gone: 'Este artículo ya no está disponible', drop: 'Quitar', view: 'Ver' },
+  pt: { about: 'Sobre este item', gone: 'Este item não está mais disponível', drop: 'Remover', view: 'Ver' },
+  hi: { about: 'इस आइटम के बारे में', gone: 'यह आइटम अब उपलब्ध नहीं है', drop: 'हटाएँ', view: 'देखें' },
+};

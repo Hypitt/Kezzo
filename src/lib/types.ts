@@ -118,6 +118,7 @@ export interface DirectMessage {
   body: string;
   audio_path?: string | null;
   audio_seconds?: number | null;
+  listing_id?: string | null;
   read_at: string | null;
   created_at: string;
 }

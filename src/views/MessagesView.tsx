@@ -15,9 +15,12 @@ import { Avatar, Empty, Loading } from '../components/ui';
 import { Tx } from '../components/Tx';
 import { VoiceRecorder } from '../components/VoiceRecorder';
 import { startUpload } from '../lib/upload';
+import { ABOUT_WORDS, clearAbout, formatPrice, MARKET, takeAbout } from '../lib/market';
+import { publicUrl } from '../lib/storage';
 
 interface Conversation { otherId: string; last: DirectMessage; unread: number }
-const COLUMNS = 'id,sender_id,recipient_id,body,audio_path,audio_seconds,read_at,created_at';
+const COLUMNS = 'id,sender_id,recipient_id,body,audio_path,audio_seconds,listing_id,read_at,created_at';
+interface Item { id: string; title: string; price: number | null; currency: string; photo: string | null; seller_id: string }
 
 export function MessagesView({ otherId }: { otherId?: string }) {
   const { user, blocked } = useAuth();
@@ -113,6 +116,12 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
   const [other, setOther] = useState<PublicProfile | null>(null);
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [text, setText] = useState('');
+  const { lang } = useI18n();
+  const aw = ABOUT_WORDS[lang];
+  const mw = MARKET[lang];
+  // The product the buyer clicked "Message" on: it is attached to the first message they send.
+  const [aboutId, setAboutId] = useState<string | null>(() => takeAbout(otherId));
+  const [items, setItems] = useState<Record<string, Item | null>>({});
   const { active, startCall, endCall } = useCalls();
   // The call runs in a floating window (see CallDock), so it keeps going while the person browses the rest of Kezzo.
   const calling = active?.kind === 'dm' && active.target === otherId;
@@ -139,6 +148,35 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me, otherId, refreshKey]);
 
+  useEffect(() => {
+    const ids = [...new Set([...(aboutId ? [aboutId] : []), ...messages.map((m) => m.listing_id).filter((x): x is string => Boolean(x))])].filter((id) => !(id in items));
+    if (ids.length === 0) return;
+    let off = false;
+    void supabase.from('market_listings').select('id,title,price,currency,photos,seller_id').in('id', ids).then(({ data }) => {
+      if (off) return;
+      const found: Record<string, Item | null> = {};
+      for (const id of ids) found[id] = null;
+      for (const r of (data ?? []) as Array<{ id: string; title: string; price: number | null; currency: string; photos: string[]; seller_id: string }>) {
+        found[r.id] = { id: r.id, title: r.title, price: r.price, currency: r.currency, photo: r.photos?.[0] ?? null, seller_id: r.seller_id };
+      }
+      setItems((cur) => ({ ...cur, ...found }));
+    });
+    return () => { off = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, aboutId]);
+
+  const chip = (it: Item | null, id: string, mine: boolean) => (
+    <button type="button" disabled={!it} onClick={() => it && go('market', it.seller_id)}
+      className={`mb-1 flex w-full items-center gap-2 rounded-xl border px-2 py-1.5 text-left ${mine ? 'border-white/20 bg-white/10' : 'border-zinc-200 bg-white'}`}>
+      {it?.photo ? <img src={publicUrl('media-public', it.photo)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" /> : <span className="h-10 w-10 shrink-0 rounded-lg bg-zinc-200" />}
+      <span className="min-w-0">
+        <span className={`block text-[10px] font-semibold uppercase tracking-wide ${mine ? 'text-white/70' : 'text-zinc-500'}`}>{aw.about}</span>
+        <span className="block truncate text-xs font-semibold">{it ? it.title : (id in items ? aw.gone : '…')}</span>
+        {it && <span className="block text-xs opacity-80">{formatPrice(it.price, it.currency, lang, mw.free, mw.ask)}</span>}
+      </span>
+    </button>
+  );
+
   // A voice message goes to private storage (dm/<me>/<them>/...), then the message row points at it.
   const sendVoice = async (file: File, seconds: number) => {
     const path = `dm/${me}/${otherId}/${crypto.randomUUID()}.${file.name.split('.').pop()}`;
@@ -163,9 +201,11 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
     const body = text.trim();
     if (!body) return;
     if (!isSafe(body)) return toast(t('blocked_content'), 'error');
-    const { data, error } = await supabase.from('direct_messages').insert({ sender_id: me, recipient_id: otherId, body }).select(COLUMNS).single();
+    const { data, error } = await supabase.from('direct_messages').insert({ sender_id: me, recipient_id: otherId, body, ...(aboutId ? { listing_id: aboutId } : {}) }).select(COLUMNS).single();
     if (error || !data) return toast(t('dm_not_allowed'), 'error');
     setText('');
+    setAboutId(null);
+    clearAbout();
     setMessages((m) => [...m, data as DirectMessage]);
     // Optional email to the other person (they can turn it off). Failures never matter here.
     void api('notify-message', { messageId: (data as DirectMessage).id }).catch(() => undefined);
@@ -191,15 +231,22 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
       {calling && <p className="border-b border-zinc-100 bg-emerald-50 px-4 py-2 text-xs text-emerald-800">{t('call_hint')}</p>}
       <div className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
         {messages.length === 0 && <p className="text-sm text-zinc-500">{t('say_hello')}</p>}
-        {messages.map((m) => (
+        {messages.map((m, i) => (
           <div key={m.id} className={`flex ${m.sender_id === me ? 'justify-end' : ''}`}>
             <div className={`max-w-[80%] break-words rounded-2xl px-3 py-1.5 text-sm ${m.sender_id === me ? 'bg-zinc-900 text-white' : 'bg-zinc-100'}`}>
+              {m.listing_id && m.listing_id !== messages[i - 1]?.listing_id && chip(items[m.listing_id] ?? null, m.listing_id, m.sender_id === me)}
               {m.audio_path && <DmAudio path={m.audio_path} />}
               {m.body && <Tx text={m.body} enabled={m.sender_id !== me} />}
             </div>
           </div>
         ))}
       </div>
+      {aboutId && (
+        <div className="flex items-center gap-2 border-t border-zinc-100 bg-zinc-50 px-3 pt-2">
+          <div className="min-w-0 flex-1">{chip(items[aboutId] ?? null, aboutId, false)}</div>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setAboutId(null); clearAbout(); }}>{aw.drop}</button>
+        </div>
+      )}
       <form onSubmit={send} className="flex gap-2 border-t border-zinc-100 p-3">
         <VoiceRecorder onDone={(f, sec) => void sendVoice(f, sec)} />
         <input className="input" value={text} maxLength={1000} onChange={(e) => setText(e.target.value)} placeholder={t('message_placeholder')} aria-label={t('message_placeholder')} />
