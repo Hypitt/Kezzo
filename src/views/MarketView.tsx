@@ -54,7 +54,7 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
   const setQty = async (n: number | null) => {
     if (n !== null && (!Number.isInteger(n) || n < 0 || n > 100000)) { toast(w.errGeneric, 'error'); return; }
     const { error } = await supabase.from('market_listings').update({ quantity: n, updated_at: new Date().toISOString() }).eq('id', l.id);
-    if (error) toast(w.errGeneric, 'error'); else { toast(m2.qtyUpdated); onChanged(); }
+    if (error) toast(`${w.errGeneric} (${error.message})`, 'error'); else { toast(m2.qtyUpdated); onChanged(); }
   };
   const hide = async () => { await supabase.rpc('admin_hide_listing', { p_id: l.id, p_hide: !l.hidden }); onChanged(); };
 
@@ -193,7 +193,7 @@ function Form({ editing, onDone, onCancel }: { editing: Listing | null; onDone: 
       ? await supabase.from('market_listings').update({ ...row, updated_at: new Date().toISOString() }).eq('id', editing.id)
       : await supabase.from('market_listings').insert({ ...row, seller_id: user.id });
     setBusy(false);
-    if (error) return setErr(error.message.includes('rate_limited') ? w.errRate : w.errGeneric);
+    if (error) return setErr(error.message.includes('rate_limited') ? w.errRate : `${w.errGeneric} (${error.message})`);
     if (editing) await removePublic('media-public', editing.photos.filter((p) => !photos.includes(p)));
     toast(editing ? w.saved : w.posted);
     onDone();

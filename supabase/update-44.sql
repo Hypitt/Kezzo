@@ -6,10 +6,14 @@ alter table public.market_listings add column if not exists quantity integer che
 -- Quantity 0 marks the listing as sold; raising it again from 0 puts it back on sale.
 create or replace function public.market_quantity() returns trigger language plpgsql as $$
 begin
-  if new.quantity = 0 and (tg_op = 'INSERT' or old.quantity is distinct from 0) then
-    new.status := 'sold';
-  elsif new.quantity > 0 and tg_op = 'UPDATE' and old.quantity = 0 and old.status = 'sold' and new.status = 'sold' then
-    new.status := 'active';
+  if tg_op = 'INSERT' then
+    if new.quantity = 0 then new.status := 'sold'; end if;
+  else
+    if new.quantity = 0 and old.quantity is distinct from 0 then
+      new.status := 'sold';
+    elsif new.quantity > 0 and old.quantity = 0 and old.status = 'sold' and new.status = 'sold' then
+      new.status := 'active';
+    end if;
   end if;
   return new;
 end; $$;
