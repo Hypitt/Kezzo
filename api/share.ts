@@ -83,7 +83,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         if (data.media_bucket === 'media-public' && path && !data.download_price) {
           if (data.kind === 'photo') { p.image = fileUrl(thumbOf(path)); p.ogImage = fileUrl(path); }
           // a glimpse of a video only when it comes from R2 (free downloads); other videos show a plain tile
-          if (data.kind === 'video' && R2_NAME.test(path)) { p.video = fileUrl(path); p.ogVideo = p.video; }
+          // every free public video can be played on the share page (with play controls); only R2 videos are offered to Facebook as playable
+          if (data.kind === 'video') { p.video = fileUrl(path); if (R2_NAME.test(path)) p.ogVideo = p.video; }
           // videos uploaded since this update have a poster picture next to them; older ones do not (a plain Kezzo picture is used)
           if (data.kind === 'video') {
             const poster = fileUrl(thumbOf(path));
@@ -154,7 +155,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
   res.setHeader('Vary', 'Accept-Language');
   const media = p.video
-    ? `<video id="v" src="${esc(p.video)}#t=0.1" muted autoplay loop playsinline preload="metadata" disablepictureinpicture controlslist="nodownload noplaybackrate" oncontextmenu="return false" style="width:100%;max-height:420px;display:block;background:#000"></video>`
+    ? `<video id="v" src="${esc(p.video)}" ${p.image ? `poster="${esc(p.image)}" ` : ''}controls playsinline preload="metadata" controlslist="nodownload noplaybackrate" disablepictureinpicture oncontextmenu="return false" style="width:100%;max-height:70vh;display:block;background:#000"></video>`
     : p.image
       ? `<img src="${esc(p.image)}" alt="" style="width:100%;max-height:420px;object-fit:cover;display:block" onerror="if(this.dataset.f!=='1'&&${JSON.stringify(p.ogImage || '')}){this.dataset.f='1';this.src=${JSON.stringify(p.ogImage || '').replace(/</g, '\\u003c')}}" />`
       : '';
@@ -204,6 +205,5 @@ ${p.note ? `<p class="small">${esc(p.note)}</p>` : ''}
 <p class="small" style="margin-top:12px;text-align:center">${esc(w.more)}</p>
 </div></div>
 </main>
-<script>var v=document.getElementById('v');if(v){v.addEventListener('timeupdate',function(){if(v.currentTime>6){v.currentTime=0;v.play().catch(function(){})}})}</script>
 </body></html>`);
 }

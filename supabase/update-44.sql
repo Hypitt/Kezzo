@@ -38,3 +38,11 @@ create policy market_fav_delete on public.market_favorites for delete to authent
 -- Faster search by place and seller
 create index if not exists market_listings_city_idx on public.market_listings (lower(city));
 create index if not exists market_listings_seller_idx on public.market_listings (seller_id);
+
+-- Permissions: the listings table only allows named columns, so the new column must be added to those lists
+grant insert (quantity) on public.market_listings to authenticated;
+grant update (quantity) on public.market_listings to authenticated;
+
+-- Make sure shops and favorites are usable by signed-in members (rules above still limit each person to their own rows)
+grant select, insert, update, delete on public.market_shops to authenticated;
+grant select, insert, delete on public.market_favorites to authenticated;
