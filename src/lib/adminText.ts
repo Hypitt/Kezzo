@@ -19,6 +19,7 @@ const EN = {
   open: 'Open', hide: 'Hide', show: 'Show', del: 'Delete', hidden: 'Hidden', entries: 'entries', delContestAsk: 'Delete this contest and its entries? The posts stay on Kezzo.', official: 'Kezzo', noContests: 'No contests yet.',
   logWhen: 'When', logWho: 'Admin', logWhat: 'Action', logOn: 'On', noLog: 'No admin actions recorded yet.',
   siteTools: 'Public site and look', siteHome: 'Edit the public homepage', siteTheme: 'Colors, fonts and text size', siteSections: 'Home and landing sections', siteStorage: 'Storage',
+ tabTeam: 'Admins', teamTitle: 'Admin team', teamHelp: 'Admins can add co-admins by e-mail or @handle. The owner can remove anyone; a co-admin can remove only the people they added.', teamAddPh: 'E-mail or @handle of a member', teamAdd: 'Make co-admin', teamOwner: 'Owner', teamCo: 'Co-admin', teamBy: 'Added by', teamRemove: 'Remove', teamRemoveAsk: 'Remove this admin? They keep their account but lose admin access.', teamNotFound: 'No member found with that e-mail or @handle.', teamAdded: 'Co-admin added.', teamRemoved: 'Admin removed.', teamYou: 'you',
 } as const;
 type Words = Record<keyof typeof EN, string>;
 
@@ -41,6 +42,7 @@ const FR: Words = {
   open: 'Ouvrir', hide: 'Masquer', show: 'Afficher', del: 'Supprimer', hidden: 'Masqué', entries: 'participations', delContestAsk: 'Supprimer ce concours et ses participations ? Les publications restent sur Kezzo.', official: 'Kezzo', noContests: 'Aucun concours.',
   logWhen: 'Quand', logWho: 'Admin', logWhat: 'Action', logOn: 'Sur', noLog: 'Aucune action admin enregistrée.',
   siteTools: 'Site public et apparence', siteHome: 'Modifier la page d’accueil publique', siteTheme: 'Couleurs, polices et taille du texte', siteSections: 'Sections de l’accueil et de la page publique', siteStorage: 'Stockage',
+ tabTeam: 'Admins', teamTitle: 'Équipe d’admins', teamHelp: 'Les admins peuvent ajouter des co-admins par e-mail ou @pseudo. Le propriétaire peut retirer n’importe qui ; un co-admin ne peut retirer que les personnes qu’il a ajoutées.', teamAddPh: 'E-mail ou @pseudo d’un membre', teamAdd: 'Nommer co-admin', teamOwner: 'Propriétaire', teamCo: 'Co-admin', teamBy: 'Ajouté par', teamRemove: 'Retirer', teamRemoveAsk: 'Retirer cet admin ? Il garde son compte mais perd l’accès admin.', teamNotFound: 'Aucun membre trouvé avec cet e-mail ou ce @pseudo.', teamAdded: 'Co-admin ajouté.', teamRemoved: 'Admin retiré.', teamYou: 'vous',
 };
 
 export const adminText = (lang: Lang): Words => (lang === 'fr' ? FR : (EN as Words));

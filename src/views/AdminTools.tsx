@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Check, EyeOff, Search as SearchIcon, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { adminText } from '../lib/adminText';
 import type { ContestRow } from '../lib/contestHub';
 import { useI18n } from '../state/I18n';
+import { useAuth } from '../state/Auth';
 import { useRouter, type Tab } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { Avatar, Chip, Empty, Loading } from '../components/ui';
@@ -344,6 +345,67 @@ export function AdminLog() {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+interface TeamRow { user_id: string; display_name: string | null; handle: string | null; avatar_url: string | null; is_owner: boolean; added_by_name: string | null; created_at: string; can_remove: boolean }
+
+/** The admin team: add co-admins by e-mail or @handle, and remove them. Every rule is checked in the database. */
+export function AdminTeam() {
+  const { lang } = useI18n();
+  const a = adminText(lang);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [rows, setRows] = useState<TeamRow[] | null>(null);
+  const [who, setWho] = useState('');
+  const [busy, setBusy] = useState(false);
+  const load = useCallback(() => { void supabase.rpc('admin_team').then(({ data }) => setRows(Array.isArray(data) ? (data as TeamRow[]) : [])); }, []);
+  useEffect(load, [load]);
+
+  const add = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!who.trim()) return;
+    setBusy(true);
+    const { error } = await supabase.rpc('admin_add', { p_who: who.trim() });
+    setBusy(false);
+    if (error) return toast(error.message.includes('not found') ? a.teamNotFound : a.err, 'error');
+    setWho('');
+    toast(a.teamAdded);
+    load();
+  };
+  const remove = async (id: string) => {
+    if (!window.confirm(a.teamRemoveAsk)) return;
+    const { error } = await supabase.rpc('admin_remove', { p_user: id });
+    if (error) return toast(a.err, 'error');
+    toast(a.teamRemoved);
+    load();
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className={card}>
+        <h2 className="text-base font-semibold">{a.teamTitle}</h2>
+        <p className="mt-1 text-xs text-zinc-600">{a.teamHelp}</p>
+        <form onSubmit={add} className="mt-3 flex flex-wrap gap-2">
+          <input className="input min-w-0 flex-1" value={who} maxLength={120} placeholder={a.teamAddPh} aria-label={a.teamAddPh} onChange={(e) => setWho(e.target.value)} />
+          <button className="btn bg-zinc-900 text-white hover:bg-zinc-700" disabled={busy || !who.trim()}>{a.teamAdd}</button>
+        </form>
+      </div>
+      {rows === null ? <Loading /> : (
+        <ul className="space-y-2">
+          {rows.map((r) => (
+            <li key={r.user_id} className={`${card} flex items-center gap-3`}>
+              <Avatar p={{ display_name: r.display_name ?? '?', avatar_url: r.avatar_url }} size={36} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{r.display_name ?? '–'}{r.handle && <span className="ml-1 font-normal text-zinc-500">@{r.handle}</span>}{r.user_id === user?.id && <span className="ml-1 text-xs font-normal text-zinc-500">({a.teamYou})</span>}</p>
+                <p className="text-xs text-zinc-500">{r.is_owner ? a.teamOwner : a.teamCo}{r.added_by_name ? ` · ${a.teamBy} ${r.added_by_name}` : ''} · {when(r.created_at, lang)}</p>
+              </div>
+              {r.can_remove && <button type="button" className="btn btn-ghost btn-sm text-red-700" onClick={() => void remove(r.user_id)}><Trash2 className="h-4 w-4" aria-hidden="true" />{a.teamRemove}</button>}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

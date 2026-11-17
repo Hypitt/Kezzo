@@ -57,6 +57,7 @@ export const COPY = {
     cats: { dance: 'Dance crew', roasting: 'Roasting', singing: 'Singing', debate: 'Debate', comedy: 'Comedy', other: 'Community' } as Record<string, string>,
     members: 'Kezzo is for members. Sign up or log in to see the feed, videos, live streams, battles and profiles.',
     finalTitle: 'Don’t just scroll. Get involved.', finalSub: 'Join Kezzo today and be part of the next moment.',
+    usKicker: 'About us', usTitle: 'Built to bring the world’s cultures closer.', usText: 'Kezzo is a social platform where people share their culture, their talent and their everyday life, and get to know the world through its people.\n\nWe believe every community has something worth showing: a dance, a song, a recipe, a story, a craft. Kezzo gives it a stage, with live battles, contests, groups and a marketplace, so talent gets seen and people meet across borders.\n\nKezzo is built step by step, with the people who use it. Your ideas and feedback shape what comes next.',
     videoTitle: '',
     terms: 'Terms', privacy: 'Privacy', contact: 'Contact',
   },
@@ -95,6 +96,7 @@ export const COPY = {
     cats: { dance: 'Équipe de danse', roasting: 'Roasting', singing: 'Chant', debate: 'Débat', comedy: 'Humour', other: 'Communauté' } as Record<string, string>,
     members: 'Kezzo est réservé aux membres. Inscrivez-vous ou connectez-vous pour voir le fil, les vidéos, les directs, les battles et les profils.',
     finalTitle: 'Ne faites pas que défiler. Participez.', finalSub: 'Joignez Kezzo aujourd’hui et faites partie du prochain moment.',
+    usKicker: 'À propos de nous', usTitle: 'Conçu pour rapprocher les cultures du monde.', usText: 'Kezzo est une plateforme sociale où chacun partage sa culture, son talent et son quotidien, et découvre le monde à travers ses habitants.\n\nNous croyons que chaque communauté a quelque chose à montrer : une danse, une chanson, une recette, une histoire, un savoir-faire. Kezzo lui offre une scène, avec des battles en direct, des concours, des groupes et un marché, pour que les talents soient vus et que les gens se rencontrent au-delà des frontières.\n\nKezzo se construit pas à pas, avec celles et ceux qui l’utilisent. Vos idées et vos retours façonnent la suite.',
     videoTitle: '',
     terms: 'Conditions', privacy: 'Confidentialité', contact: 'Contact',
   },
@@ -133,6 +135,7 @@ export const COPY = {
     cats: { dance: 'Crew de baile', roasting: 'Roast', singing: 'Canto', debate: 'Debate', comedy: 'Comedia', other: 'Comunidad' } as Record<string, string>,
     members: 'Kezzo es para miembros. Regístrate o inicia sesión para ver el feed, los vídeos, las transmisiones en vivo, las batallas y los perfiles.',
     finalTitle: 'No te limites a desplazarte. Participa.', finalSub: 'Únete hoy a Kezzo y sé parte del próximo momento.',
+    usKicker: 'Sobre nosotros', usTitle: 'Creado para acercar las culturas del mundo.', usText: 'Kezzo es una plataforma social donde las personas comparten su cultura, su talento y su vida diaria, y conocen el mundo a través de su gente.\n\nCreemos que cada comunidad tiene algo que mostrar: un baile, una canción, una receta, una historia, un oficio. Kezzo le da un escenario, con batallas en vivo, concursos, grupos y un mercado, para que el talento sea visto y la gente se conozca más allá de las fronteras.\n\nKezzo se construye paso a paso, junto a quienes lo usan. Tus ideas y comentarios definen lo que viene.',
     videoTitle: '',
     terms: 'Términos', privacy: 'Privacidad', contact: 'Contacto',
   },
@@ -171,6 +174,7 @@ export const COPY = {
     cats: { dance: 'Crew de dança', roasting: 'Roast', singing: 'Canto', debate: 'Debate', comedy: 'Comédia', other: 'Comunidade' } as Record<string, string>,
     members: 'O Kezzo é para membros. Cadastre-se ou entre para ver o feed, os vídeos, as lives, as batalhas e os perfis.',
     finalTitle: 'Não fique só rolando a tela. Participe.', finalSub: 'Entre hoje no Kezzo e faça parte do próximo momento.',
+    usKicker: 'Sobre nós', usTitle: 'Criado para aproximar as culturas do mundo.', usText: 'O Kezzo é uma plataforma social onde as pessoas compartilham sua cultura, seu talento e seu dia a dia, e conhecem o mundo por meio de sua gente.\n\nAcreditamos que toda comunidade tem algo a mostrar: uma dança, uma música, uma receita, uma história, um ofício. O Kezzo dá a isso um palco, com batalhas ao vivo, concursos, grupos e um mercado, para que o talento seja visto e as pessoas se conheçam além das fronteiras.\n\nO Kezzo é construído passo a passo, junto com quem o usa. Suas ideias e opiniões definem o que vem a seguir.',
     videoTitle: '',
     terms: 'Termos', privacy: 'Privacidade', contact: 'Contato',
   },
@@ -209,6 +213,7 @@ export const COPY = {
     cats: { dance: 'डांस क्रू', roasting: 'रोस्टिंग', singing: 'गायन', debate: 'बहस', comedy: 'कॉमेडी', other: 'समुदाय' } as Record<string, string>,
     members: 'Kezzo सदस्यों के लिए है। फ़ीड, वीडियो, लाइव स्ट्रीम, बैटल और प्रोफ़ाइल देखने के लिए साइन अप या लॉग इन करें।',
     finalTitle: 'सिर्फ़ स्क्रॉल मत कीजिए। जुड़िए।', finalSub: 'आज ही Kezzo से जुड़ें और अगले पल का हिस्सा बनें।',
+    usKicker: 'हमारे बारे में', usTitle: 'दुनिया की संस्कृतियों को क़रीब लाने के लिए बना।', usText: 'Kezzo एक सोशल प्लेटफ़ॉर्म है जहाँ लोग अपनी संस्कृति, अपनी प्रतिभा और रोज़मर्रा की ज़िंदगी साझा करते हैं और लोगों के ज़रिए दुनिया को जानते हैं।\n\nहमारा मानना है कि हर समुदाय के पास दिखाने के लिए कुछ है: एक नृत्य, एक गीत, एक व्यंजन, एक कहानी, एक हुनर। Kezzo उसे मंच देता है, लाइव बैटल, प्रतियोगिताओं, समूहों और बाज़ार के साथ, ताकि प्रतिभा को पहचान मिले और लोग सीमाओं के पार मिलें।\n\nKezzo क़दम-दर-क़दम, इसे इस्तेमाल करने वालों के साथ बन रहा है। आपके विचार और सुझाव तय करते हैं कि आगे क्या आएगा।',
     videoTitle: '',
     terms: 'नियम', privacy: 'गोपनीयता', contact: 'संपर्क',
   },
@@ -569,6 +574,23 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+      )}
+
+      {/* About us: who we are, written by the admins (Admin > Site) */}
+      {on('aboutus') && (c.usTitle || c.usText) && (
+      <section className="bg-white py-14 text-zinc-900 sm:py-20 lg:py-24" aria-label={c.usKicker} style={at('aboutus')}>
+        <div className={`${wrap} grid gap-8 lg:grid-cols-[1fr_1.4fr] lg:gap-16`}>
+          <Reveal>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{c.usKicker}</p>
+            <h2 data-part="section-title" className="mt-3 font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{c.usTitle}</h2>
+          </Reveal>
+          <Reveal>
+            <div className="space-y-4 text-base leading-relaxed text-zinc-600 sm:text-lg">
+              {c.usText.split(/\n\s*\n|\\n\\n/).map((para) => para.trim()).filter(Boolean).map((para, i) => <p key={i}>{para}</p>)}
+            </div>
+          </Reveal>
         </div>
       </section>
       )}

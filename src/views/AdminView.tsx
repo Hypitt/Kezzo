@@ -9,7 +9,7 @@ import { api } from '../lib/api';
 import { r2Enabled } from '../lib/storage';
 import { HomeSections } from '../components/HomeSections';
 import { adminText } from '../lib/adminText';
-import { AdminContent, AdminContests, AdminLog, AdminOverview, AdminReports, AdminUsers } from './AdminTools';
+import { AdminContent, AdminContests, AdminLog, AdminOverview, AdminReports, AdminTeam, AdminUsers } from './AdminTools';
 
 /** Admin statistics. Only people listed in the `admins` table can load data (checked in the database, not here). */
 
@@ -567,7 +567,7 @@ export function AdminView({ tab }: { tab?: string }) {
 
   const TABS: Array<[string, string]> = [
     ['overview', a.tabOverview], ['reports', a.tabReports], ['users', a.tabUsers], ['content', a.tabContent],
-    ['contests', a.tabContests], ['analytics', a.tabAnalytics], ['site', a.tabSite], ['log', a.tabLog],
+    ['contests', a.tabContests], ['analytics', a.tabAnalytics], ['site', a.tabSite], ['team', a.tabTeam], ['log', a.tabLog],
   ];
   const current = TABS.some(([k]) => k === tab) ? (tab as string) : 'overview';
   const open = (t: string) => go('admin', t);
@@ -590,6 +590,7 @@ export function AdminView({ tab }: { tab?: string }) {
       {current === 'contests' && <AdminContests onChanged={() => void refreshCount()} />}
       {current === 'analytics' && <Analytics />}
       {current === 'site' && <SiteTab />}
+      {current === 'team' && <AdminTeam />}
       {current === 'log' && <AdminLog />}
     </div>
   );
