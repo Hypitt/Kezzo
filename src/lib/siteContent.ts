@@ -18,7 +18,7 @@ export interface SiteContent {
 }
 export const EMPTY_CONTENT: SiteContent = { texts: {}, images: {}, video: {}, order: [], hidden: [], auto: {}, originals: {} };
 /** Default top-to-bottom order of the sections under the top banner. */
-export const DEFAULT_ORDER = ['tagline', 'video', 'contest', 'media', 'groups', 'about', 'aboutus', 'modes', 'join', 'cta'] as const;
+export const DEFAULT_ORDER = ['tagline', 'video', 'contest', 'media', 'groups', 'about', 'modes', 'join', 'cta'] as const;
 /** Pictures an admin can replace. */
 export const IMAGE_SLOTS = ['hero', 'feed'] as const;
 

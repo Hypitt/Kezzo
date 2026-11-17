@@ -252,7 +252,9 @@ function Footer() {
   const { lang, t } = useI18n();
   const { go } = useRouter();
   const { openAuth } = useAuth();
-  const c = COPY[lang];
+  const c = useCopy(COPY[lang], lang);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const hasAbout = (String(c.usTitle) + String(c.usText)).trim() !== '';
   return (
     <footer className="border-t border-stone-200 bg-stone-50 px-4 pb-8 pt-12 text-zinc-600 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
@@ -266,11 +268,20 @@ function Footer() {
           <button type="button" className="hover:text-zinc-900" onClick={() => go('legal', 'terms')}>{c.terms}</button>
           <button type="button" className="hover:text-zinc-900" onClick={() => go('legal', 'privacy')}>{c.privacy}</button>
           <a className="hover:text-zinc-900" href="mailto:kezzo.app@gmail.com">{c.contact}</a>
+          {hasAbout && <button type="button" className="hover:text-zinc-900" aria-expanded={aboutOpen} aria-controls="footer-about" onClick={() => setAboutOpen((v) => !v)}>{c.usKicker}</button>}
         </nav>
         <div className="flex flex-col items-start gap-3">
           <InstallButton className={`${outline} px-4 py-2 text-sm font-semibold`} label={t('download_kezzo')} />
         </div>
       </div>
+      {hasAbout && aboutOpen && (
+        <section id="footer-about" className="mx-auto mt-10 max-w-6xl rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+          <h2 className="font-display text-xl font-extrabold leading-tight text-zinc-900 sm:text-2xl">{c.usTitle}</h2>
+          <div className="mt-3 max-w-3xl space-y-3 text-sm leading-relaxed sm:text-base">
+            {c.usText.split(/\n\s*\n|\\n\\n/).map((para) => para.trim()).filter(Boolean).map((para, i) => <p key={i}>{para}</p>)}
+          </div>
+        </section>
+      )}
       <p className="mx-auto mt-10 max-w-6xl border-t border-stone-200 pt-5 text-xs text-zinc-500">© {new Date().getFullYear()} Kezzo, WeDIL Inc., Canada</p>
     </footer>
   );
@@ -574,23 +585,6 @@ export function Landing({ invite, gate = false }: { invite?: string; gate?: bool
               </li>
             ))}
           </ul>
-        </div>
-      </section>
-      )}
-
-      {/* About us: who we are, written by the admins (Admin > Site) */}
-      {on('aboutus') && (c.usTitle || c.usText) && (
-      <section className="bg-white py-14 text-zinc-900 sm:py-20 lg:py-24" aria-label={c.usKicker} style={at('aboutus')}>
-        <div className={`${wrap} grid gap-8 lg:grid-cols-[1fr_1.4fr] lg:gap-16`}>
-          <Reveal>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{c.usKicker}</p>
-            <h2 data-part="section-title" className="mt-3 font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{c.usTitle}</h2>
-          </Reveal>
-          <Reveal>
-            <div className="space-y-4 text-base leading-relaxed text-zinc-600 sm:text-lg">
-              {c.usText.split(/\n\s*\n|\\n\\n/).map((para) => para.trim()).filter(Boolean).map((para, i) => <p key={i}>{para}</p>)}
-            </div>
-          </Reveal>
         </div>
       </section>
       )}

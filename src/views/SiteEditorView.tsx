@@ -22,7 +22,7 @@ const W = {
     pictures: 'Pictures', hero: 'Top banner photo', feed: 'Participation section photo', replace: 'Choose a picture', original: 'Original picture in use', restore: 'Use the original',
     video: 'Featured video', videoSub: 'Shown as its own section. It starts playing by itself (muted, looping); visitors can unmute with the controls. Show or hide it in “Home page sections”.', videoTitle: 'Title above the video',
     videoPick: 'Choose a video', videoNone: 'No video yet', videoRemove: 'Remove video', order: 'Order of sections', orderSub: 'The top banner always stays first. Use the arrows to move a section.',
-    names: { tagline: 'Two taglines strip', video: 'Featured video', contest: 'Contest box', media: 'Community photos and videos', groups: 'Groups', about: 'Five things Kezzo is about', aboutus: 'About us', modes: 'Solo, group, battle', join: 'Participation', cta: 'Final sign-up call' } as Record<string, string>,
+    names: { tagline: 'Two taglines strip', video: 'Featured video', contest: 'Contest box', media: 'Community photos and videos', groups: 'Groups', about: 'Five things Kezzo is about', modes: 'Solo, group, battle', join: 'Participation', cta: 'Final sign-up call' } as Record<string, string>,
     removedPic: 'Picture deleted (nothing shown)', uploading: 'Uploading…', tooBig: (n: number) => `That file is too big (max ${n} MB).`, fail: 'Upload failed. Try again.', changed: 'changed', deleted: 'deleted', del: 'Delete', delPic: 'Delete the picture', delVid: 'Delete the video', reset: 'Original',
   },
   fr: {
@@ -31,7 +31,7 @@ const W = {
     pictures: 'Images', hero: 'Photo de la bannière du haut', feed: 'Photo de la section participation', replace: 'Choisir une image', original: 'Image d’origine utilisée', restore: 'Reprendre l’original',
     video: 'Vidéo à la une', videoSub: 'Affichée dans sa propre section, lue automatiquement (sans son, en boucle) ; les visiteurs peuvent activer le son. Affichez ou masquez-la dans « Sections de la page d’accueil ».', videoTitle: 'Titre au-dessus de la vidéo',
     videoPick: 'Choisir une vidéo', videoNone: 'Pas encore de vidéo', videoRemove: 'Retirer la vidéo', order: 'Ordre des sections', orderSub: 'La bannière du haut reste toujours en premier. Utilisez les flèches pour déplacer une section.',
-    names: { tagline: 'Bandeau des deux phrases', video: 'Vidéo à la une', contest: 'Encadré du concours', media: 'Photos et vidéos de la communauté', groups: 'Groupes', about: 'Les cinq choses de Kezzo', aboutus: 'À propos de nous', modes: 'Solo, groupe, battle', join: 'Participation', cta: 'Appel final à s’inscrire' } as Record<string, string>,
+    names: { tagline: 'Bandeau des deux phrases', video: 'Vidéo à la une', contest: 'Encadré du concours', media: 'Photos et vidéos de la communauté', groups: 'Groupes', about: 'Les cinq choses de Kezzo', modes: 'Solo, groupe, battle', join: 'Participation', cta: 'Appel final à s’inscrire' } as Record<string, string>,
     removedPic: 'Image supprimée (rien d’affiché)', uploading: 'Envoi…', tooBig: (n: number) => `Ce fichier est trop gros (max ${n} Mo).`, fail: 'Échec de l’envoi. Réessayez.', changed: 'modifié', deleted: 'supprimé', del: 'Supprimer', delPic: 'Supprimer l’image', delVid: 'Supprimer la vidéo', reset: 'Original',
   },
 };
