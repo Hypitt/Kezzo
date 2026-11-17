@@ -8,7 +8,7 @@ import { compressImage, resizeCover } from '../lib/media';
 import { startUpload } from '../lib/upload';
 import { publicFilePath, publicUrl, removePublic } from '../lib/storage';
 import { MARKET, MARKET2, MARKET_CATS, MARKET_KINDS, SHOP, formatPrice, rememberAbout, type Listing, type Shop, type MarketCat, type MarketKind, type MarketStatus } from '../lib/market';
-import { readPlace } from '../lib/opportunities';
+import { readPlace, savePlace } from '../lib/opportunities';
 import { copyText, shareUrl } from '../lib/share';
 import { ShareButton } from '../components/ShareButton';
 import { useAuth } from '../state/Auth';
@@ -354,7 +354,13 @@ export function MarketView({ shop }: { shop?: string }) {
   const [hiddenRows, setHiddenRows] = useState<Listing[]>([]);
   const [owner, setOwner] = useState<{ id: string; display_name: string; avatar_url: string | null; bio: string } | null>(null);
   const [favs, setFavs] = useState<Set<string>>(new Set());
-  const [sort, setSort] = useState<'new' | 'low' | 'high'>('new');
+  const [seed] = useState(() => {
+    try { const k = 'kezzo_market_seed'; const v = sessionStorage.getItem(k) ?? crypto.randomUUID(); sessionStorage.setItem(k, v); return v; } catch { return crypto.randomUUID(); }
+  });
+  const [place, setPlace] = useState(readPlace);
+  const [saved, setSaved] = useState(readPlace);
+  const [placeEdit, setPlaceEdit] = useState(false);
+  const [sort, setSort] = useState<'smart' | 'new' | 'low' | 'high'>('smart');
   const [avail, setAvail] = useState(false);
   const m2 = MARKET2[lang];
   const [shopRow, setShopRow] = useState<Shop | null>(null);
@@ -393,6 +399,24 @@ export function MarketView({ shop }: { shop?: string }) {
   };
 
   const fetchPage = useCallback(async (offset: number): Promise<Listing[]> => {
+    // Browsing the whole market: a random order that stays the same while you scroll, with items near you first, then online, then elsewhere.
+    if (!shop && sort === 'smart' && (kind === 'all' || kind === 'product' || kind === 'service')) {
+      let cats: string[] | null = null;
+      let sellers: string[] | null = null;
+      if (term) {
+        const lower = term.toLowerCase();
+        const c = MARKET_CATS.filter((x) => x.includes(lower) || MARKET[lang].cats[x].toLowerCase().includes(lower));
+        cats = c.length ? [...c] : null;
+        const { data: people } = await supabase.from('profiles').select('id').or(`display_name.ilike.%${term}%,handle.ilike.%${term.replace(/^@/, '')}%`).limit(30);
+        sellers = (people ?? []).length ? (people ?? []).map((r) => String(r.id)) : null;
+      }
+      const { data } = await supabase.rpc('market_feed', {
+        p_seed: seed, p_country: saved.country.trim(), p_city: saved.city.trim(),
+        p_kind: kind === 'all' ? null : kind, p_cat: cat === 'all' ? null : cat, p_avail: avail,
+        p_term: term || null, p_cats: cats, p_sellers: sellers, p_offset: offset, p_limit: PAGE,
+      }).select(SELECT);
+      return (data ?? []) as unknown as Listing[];
+    }
     let q = supabase.from('market_listings').select(SELECT).eq('hidden', false);
     q = sort === 'low' ? q.order('price', { ascending: true, nullsFirst: false }) : sort === 'high' ? q.order('price', { ascending: false, nullsFirst: false }) : q;
     q = q.order('created_at', { ascending: false }).range(offset, offset + PAGE - 1);
@@ -417,7 +441,7 @@ export function MarketView({ shop }: { shop?: string }) {
     }
     const { data } = await q;
     return (data ?? []) as unknown as Listing[];
-  }, [kind, cat, term, user, shop, sort, avail, lang, favs.size === 0 && kind === 'fav', kind === 'fav' ? favs : null]);
+  }, [kind, cat, term, user, shop, sort, avail, lang, seed, saved.country, saved.city, favs.size === 0 && kind === 'fav', kind === 'fav' ? favs : null]);
 
   const load = useCallback(() => {
     const mine = ++request.current;
@@ -485,6 +509,22 @@ export function MarketView({ shop }: { shop?: string }) {
 
       <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] text-zinc-600">{w.safety}</p>
 
+      {!shop && (
+        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-600">
+          <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+          {placeEdit || (!place.country && !place.city) ? (
+            <>
+              <input className="input !w-36 !py-1 text-sm" aria-label={m2.placeCountry} placeholder={m2.placeCountry} value={place.country} maxLength={60} onChange={(e) => setPlace({ ...place, country: e.target.value })} />
+              <input className="input !w-36 !py-1 text-sm" aria-label={m2.placeCity} placeholder={m2.placeCity} value={place.city} maxLength={60} onChange={(e) => setPlace({ ...place, city: e.target.value })} />
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => { const next = { country: place.country.trim(), city: place.city.trim() }; savePlace(next); setSaved(next); setPlaceEdit(false); }}>{m2.placeSave}</button>
+              {!place.country && !place.city && <span>{m2.placeHint}</span>}
+            </>
+          ) : (
+            <button type="button" className="hover:underline" onClick={() => setPlaceEdit(true)}>{m2.placeTitle}: <span className="font-semibold">{[place.city, place.country].filter(Boolean).join(', ')}</span></button>
+          )}
+        </div>
+      )}
+
       <div className="space-y-2">
         <input className="input" placeholder={m2.searchHint} aria-label={w.search} value={input} onChange={(e) => setInput(e.target.value)} />
         {!shop && <div className="flex flex-wrap gap-2">{tabs.map(([k, label]) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{label}</Chip>)}</div>}
@@ -493,8 +533,8 @@ export function MarketView({ shop }: { shop?: string }) {
           {MARKET_CATS.map((c) => <option key={c} value={c}>{w.cats[c]}</option>)}
         </select>
         <div className="flex flex-wrap items-center gap-3">
-          <select className="input !w-auto" aria-label={m2.sortNew} value={sort} onChange={(e) => setSort(e.target.value as 'new' | 'low' | 'high')}>
-            <option value="new">{m2.sortNew}</option><option value="low">{m2.sortLow}</option><option value="high">{m2.sortHigh}</option>
+          <select className="input !w-auto" aria-label={m2.sortNew} value={sort} onChange={(e) => setSort(e.target.value as 'smart' | 'new' | 'low' | 'high')}>
+            <option value="smart">{m2.sortSmart}</option><option value="new">{m2.sortNew}</option><option value="low">{m2.sortLow}</option><option value="high">{m2.sortHigh}</option>
           </select>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={avail} onChange={(e) => setAvail(e.target.checked)} />{m2.onlyAvail}</label>
         </div>
