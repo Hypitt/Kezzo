@@ -4,10 +4,10 @@ import { supabase } from '../lib/supabase';
 import { PUBLIC_PROFILE } from '../lib/data';
 import { fileExt } from '../lib/format';
 import { isSafe } from '../lib/moderation';
-import { compressImage } from '../lib/media';
+import { compressImage, resizeCover } from '../lib/media';
 import { startUpload } from '../lib/upload';
 import { publicFilePath, publicUrl, removePublic } from '../lib/storage';
-import { MARKET, MARKET_CATS, MARKET_KINDS, formatPrice, type Listing, type MarketCat, type MarketKind, type MarketStatus } from '../lib/market';
+import { MARKET, MARKET_CATS, MARKET_KINDS, SHOP, formatPrice, type Listing, type Shop, type MarketCat, type MarketKind, type MarketStatus } from '../lib/market';
 import { readPlace } from '../lib/opportunities';
 import { copyText } from '../lib/share';
 import { useAuth } from '../state/Auth';
@@ -233,6 +233,74 @@ function Form({ editing, onDone, onCancel }: { editing: Listing | null; onDone: 
 }
 
 /** Members sell products and services. No payments yet: buyers message sellers and arrange the deal themselves. */
+/** The seller's own shop look: name, about text, profile picture and cover. Saved in market_shops. */
+function ShopEditor({ ownerId, shop, onCancel, onSaved }: { ownerId: string; shop: Shop | null; onCancel: () => void; onSaved: (s: Shop) => void }) {
+  const { lang } = useI18n();
+  const { toast } = useToast();
+  const w = MARKET[lang];
+  const sw = SHOP[lang];
+  const [name, setName] = useState(shop?.name ?? '');
+  const [about, setAbout] = useState(shop?.about ?? '');
+  const [logo, setLogo] = useState<string | null>(shop?.logo_path ?? null);
+  const [cover, setCover] = useState<string | null>(shop?.cover_path ?? null);
+  const [busy, setBusy] = useState(false);
+  const added = useRef<string[]>([]);
+
+  const pick = async (file: File | undefined, which: 'logo' | 'cover') => {
+    if (!file) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return toast(sw.tooBig);
+    setBusy(true);
+    try {
+      const small = which === 'cover' ? await resizeCover(file) : await compressImage(file, 600, 0.85);
+      const path = publicFilePath(ownerId, `${crypto.randomUUID()}.${fileExt(small.name)}`);
+      await startUpload({ bucket: 'media-public', path, file: small }).done;
+      added.current.push(path);
+      if (which === 'logo') setLogo(path); else setCover(path);
+    } catch { toast(w.errGeneric); }
+    setBusy(false);
+  };
+
+  const save = async () => {
+    if (!isSafe(`${name} ${about}`)) return toast(w.errGeneric);
+    setBusy(true);
+    const row = { owner_id: ownerId, name: name.trim().slice(0, 60), about: about.trim().slice(0, 300), logo_path: logo, cover_path: cover, updated_at: new Date().toISOString() };
+    const { error } = await supabase.from('market_shops').upsert(row);
+    if (error) { setBusy(false); return toast(w.errGeneric); }
+    // pictures that were replaced or removed, and ones uploaded but not kept, are deleted
+    await removePublic('media-public', [shop?.logo_path, shop?.cover_path, ...added.current].filter((p) => p && p !== logo && p !== cover));
+    setBusy(false);
+    toast(sw.saved);
+    onSaved(row);
+  };
+
+  const pickerRow = (label: string, path: string | null, which: 'logo' | 'cover', set: (v: null) => void) => (
+    <div className="flex items-center gap-3">
+      {path ? <img src={publicUrl('media-public', path)} alt="" className={which === 'logo' ? 'h-14 w-14 rounded-full object-cover' : 'h-14 w-28 rounded-lg object-cover'} /> : <span className={`${which === 'logo' ? 'h-14 w-14 rounded-full' : 'h-14 w-28 rounded-lg'} flex items-center justify-center bg-stone-100 text-zinc-400`}><ImagePlus className="h-5 w-5" aria-hidden="true" /></span>}
+      <div className="min-w-0 flex-1"><p className="text-sm font-semibold">{label}</p></div>
+      <label className="btn btn-ghost btn-sm cursor-pointer">{sw.change}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={busy} onChange={(e) => { void pick(e.target.files?.[0], which); e.target.value = ''; }} /></label>
+      {path && <button type="button" className="btn btn-ghost btn-sm" onClick={() => set(null)}>{sw.remove}</button>}
+    </div>
+  );
+
+  return (
+    <section className="card space-y-3 text-zinc-900">
+      {pickerRow(sw.cover, cover, 'cover', () => setCover(null))}
+      {pickerRow(sw.logo, logo, 'logo', () => setLogo(null))}
+      <label className="block text-sm font-semibold">{sw.name}
+        <input className="input mt-1 w-full" value={name} maxLength={60} onChange={(e) => setName(e.target.value)} />
+      </label>
+      <label className="block text-sm font-semibold">{sw.about}
+        <textarea className="input mt-1 w-full" rows={3} value={about} maxLength={300} onChange={(e) => setAbout(e.target.value)} />
+      </label>
+      <p className="text-xs text-zinc-500">{sw.hint}</p>
+      <div className="flex justify-end gap-2">
+        <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={busy}>{sw.cancel}</button>
+        <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700" onClick={() => void save()} disabled={busy}>{sw.save}</button>
+      </div>
+    </section>
+  );
+}
+
 export function MarketView({ shop }: { shop?: string }) {
   const { user, openAuth } = useAuth();
   const { go } = useRouter();
@@ -251,11 +319,17 @@ export function MarketView({ shop }: { shop?: string }) {
   const [admin, setAdmin] = useState(false);
   const [hiddenRows, setHiddenRows] = useState<Listing[]>([]);
   const [owner, setOwner] = useState<{ id: string; display_name: string; avatar_url: string | null; bio: string } | null>(null);
+  const [shopRow, setShopRow] = useState<Shop | null>(null);
+  const [editShop, setEditShop] = useState(false);
+  const sw = SHOP[lang];
   const request = useRef(0);
 
   useEffect(() => {
     setOwner(null);
+    setShopRow(null);
+    setEditShop(false);
     if (!shop) return;
+    void supabase.from('market_shops').select('owner_id,name,about,logo_path,cover_path').eq('owner_id', shop).maybeSingle().then(({ data }) => setShopRow((data as Shop | null) ?? null));
     void supabase.from('profiles').select('id,display_name,avatar_url,bio').eq('id', shop).maybeSingle().then(({ data }) => setOwner((data as typeof owner) ?? null));
   }, [shop]);
 
@@ -309,23 +383,35 @@ export function MarketView({ shop }: { shop?: string }) {
   return (
     <div className="mx-auto max-w-3xl space-y-3">
       {shop && (
-        <section className="card flex flex-wrap items-center gap-3 text-zinc-900">
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('market')}><ArrowLeft className="h-4 w-4" aria-hidden="true" />{w.title}</button>
-          {owner && <Avatar p={owner} size={48} />}
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate font-display text-lg font-bold">{owner ? w.shopOf(owner.display_name) : w.title}</h1>
-            {owner?.bio && <p className="line-clamp-2 text-xs text-zinc-600">{owner.bio}</p>}
-            <p className="text-xs text-zinc-500">{w.listingsN(rows.length)}</p>
+        <section className="card overflow-hidden p-0 text-zinc-900">
+          <div className="relative h-32 bg-gradient-to-br from-zinc-800 to-zinc-600 sm:h-44">
+            {shopRow?.cover_path && <img src={publicUrl('media-public', shopRow.cover_path)} alt="" className="h-full w-full object-cover" />}
+            <button type="button" className="btn btn-sm absolute left-2 top-2 bg-white/90 text-zinc-900 hover:bg-white" onClick={() => go('market')}><ArrowLeft className="h-4 w-4" aria-hidden="true" />{w.title}</button>
           </div>
-          <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" onClick={async () => {
-            const url = `${window.location.origin}/#/market/${shop}`;
-            if (typeof navigator.share === 'function') { try { await navigator.share({ title: owner ? w.shopOf(owner.display_name) : 'Kezzo', url }); return; } catch { /* cancelled: fall back to copy */ } }
-            toast((await copyText(url)) ? w.linkCopied : w.errGeneric);
-          }}><Share2 className="h-4 w-4" aria-hidden="true" />{w.shareShop}</button>
+          <div className="flex flex-wrap items-end gap-3 px-4 pb-4">
+            {shopRow?.logo_path
+              ? <img src={publicUrl('media-public', shopRow.logo_path)} alt="" className="-mt-8 h-16 w-16 shrink-0 rounded-full border-4 border-white bg-white object-cover" />
+              : owner && <span className="-mt-8 rounded-full border-4 border-white bg-white"><Avatar p={owner} size={56} /></span>}
+            <div className="min-w-0 flex-1 pt-2">
+              <h1 className="truncate font-display text-lg font-bold">{shopRow?.name || (owner ? w.shopOf(owner.display_name) : w.title)}</h1>
+              {(shopRow?.about || owner?.bio) && <p className="line-clamp-3 text-xs text-zinc-600">{shopRow?.about || owner?.bio}</p>}
+              <p className="text-xs text-zinc-500">{w.listingsN(rows.length)}</p>
+            </div>
+            <div className="flex gap-2">
+              {user?.id === shop && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditShop((v) => !v)}><Pencil className="h-4 w-4" aria-hidden="true" />{sw.edit}</button>}
+              <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" onClick={async () => {
+                const url = `${window.location.origin}/#/market/${shop}`;
+                const title = shopRow?.name || (owner ? w.shopOf(owner.display_name) : 'Kezzo');
+                if (typeof navigator.share === 'function') { try { await navigator.share({ title, url }); return; } catch { /* cancelled: fall back to copy */ } }
+                toast((await copyText(url)) ? w.linkCopied : w.errGeneric);
+              }}><Share2 className="h-4 w-4" aria-hidden="true" />{w.shareShop}</button>
+            </div>
+          </div>
         </section>
       )}
+      {shop && editShop && user?.id === shop && <ShopEditor ownerId={shop} shop={shopRow} onCancel={() => setEditShop(false)} onSaved={(s) => { setShopRow(s); setEditShop(false); }} />}
       {!shop && <PageHeader title={w.title} sub={w.sub}
-        action={<button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700" onClick={() => (user ? setForm({ open: true, editing: null }) : openAuth('signup'))}><Plus className="h-4 w-4" aria-hidden="true" />{w.sell}</button>} />}
+        action={<div className="flex gap-2">{user && <button type="button" className="btn btn-ghost" onClick={() => go('market', user.id)}><Store className="h-4 w-4" aria-hidden="true" />{sw.myShop}</button>}<button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700" onClick={() => (user ? setForm({ open: true, editing: null }) : openAuth('signup'))}><Plus className="h-4 w-4" aria-hidden="true" />{w.sell}</button></div>} />}
 
       {form.open && <Form editing={form.editing} onCancel={() => setForm({ open: false, editing: null })} onDone={() => { setForm({ open: false, editing: null }); load(); }} />}
 

@@ -107,3 +107,14 @@ export const MARKET: Record<Lang, MarketWords> = {
     errPlace: 'देश लिखें या “ऑनलाइन या डिलीवरी से उपलब्ध” चुनें।', errRate: 'आपने आज बहुत पोस्ट किया है। कल फिर कोशिश करें।', errSafe: 'अनुमति-रहित शब्द हटाएँ।', errGeneric: 'कुछ गड़बड़ हुई। फिर कोशिश करें।', errPhoto: 'एक फ़ोटो नहीं जुड़ सकी। दूसरी आज़माएँ।', location: 'स्थान', uploading: 'भेजा जा रहा है…',
   },
 };
+
+export interface Shop { owner_id: string; name: string; about: string; logo_path: string | null; cover_path: string | null }
+
+export interface ShopWords { edit: string; myShop: string; name: string; about: string; logo: string; cover: string; change: string; remove: string; save: string; cancel: string; saved: string; tooBig: string; hint: string }
+export const SHOP: Record<Lang, ShopWords> = {
+  en: { edit: 'Edit shop', myShop: 'My shop', name: 'Shop name', about: 'About your shop', logo: 'Profile picture', cover: 'Cover picture', change: 'Change', remove: 'Remove', save: 'Save', cancel: 'Cancel', saved: 'Shop saved.', tooBig: 'Pick a picture (JPG, PNG or WebP).', hint: 'Leave empty to use your Kezzo name and photo.' },
+  fr: { edit: 'Modifier la boutique', myShop: 'Ma boutique', name: 'Nom de la boutique', about: 'À propos de votre boutique', logo: 'Photo de profil', cover: 'Photo de couverture', change: 'Changer', remove: 'Retirer', save: 'Enregistrer', cancel: 'Annuler', saved: 'Boutique enregistrée.', tooBig: 'Choisissez une image (JPG, PNG ou WebP).', hint: 'Laissez vide pour utiliser votre nom et photo Kezzo.' },
+  es: { edit: 'Editar tienda', myShop: 'Mi tienda', name: 'Nombre de la tienda', about: 'Sobre tu tienda', logo: 'Foto de perfil', cover: 'Foto de portada', change: 'Cambiar', remove: 'Quitar', save: 'Guardar', cancel: 'Cancelar', saved: 'Tienda guardada.', tooBig: 'Elige una imagen (JPG, PNG o WebP).', hint: 'Déjalo vacío para usar tu nombre y foto de Kezzo.' },
+  pt: { edit: 'Editar loja', myShop: 'Minha loja', name: 'Nome da loja', about: 'Sobre a sua loja', logo: 'Foto de perfil', cover: 'Foto de capa', change: 'Alterar', remove: 'Remover', save: 'Salvar', cancel: 'Cancelar', saved: 'Loja salva.', tooBig: 'Escolha uma imagem (JPG, PNG ou WebP).', hint: 'Deixe vazio para usar seu nome e foto do Kezzo.' },
+  hi: { edit: 'दुकान बदलें', myShop: 'मेरी दुकान', name: 'दुकान का नाम', about: 'आपकी दुकान के बारे में', logo: 'प्रोफ़ाइल फ़ोटो', cover: 'कवर फ़ोटो', change: 'बदलें', remove: 'हटाएँ', save: 'सहेजें', cancel: 'रद्द करें', saved: 'दुकान सहेजी गई।', tooBig: 'एक तस्वीर चुनें (JPG, PNG या WebP)।', hint: 'खाली छोड़ने पर आपका Kezzo नाम और फ़ोटो इस्तेमाल होगा।' },
+};
