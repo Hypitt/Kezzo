@@ -57,7 +57,10 @@ export const COPY = {
     cats: { dance: 'Dance crew', roasting: 'Roasting', singing: 'Singing', debate: 'Debate', comedy: 'Comedy', other: 'Community' } as Record<string, string>,
     members: 'Kezzo is for members. Sign up or log in to see the feed, videos, live streams, battles and profiles.',
     finalTitle: 'Don’t just scroll. Get involved.', finalSub: 'Join Kezzo today and be part of the next moment.',
-    usKicker: 'About us', usTitle: 'Built to bring the world’s cultures closer.', usText: 'Kezzo is a social platform where people share their culture, their talent and their everyday life, and get to know the world through its people.\n\nWe believe every community has something worth showing: a dance, a song, a recipe, a story, a craft. Kezzo gives it a stage, with live battles, contests, groups and a marketplace, so talent gets seen and people meet across borders.\n\nKezzo is built step by step, with the people who use it. Your ideas and feedback shape what comes next.',
+    usKicker: 'About Kezzo', usTitle: 'Turning creativity and community into real economic opportunity', usText: 'Kezzo is a web and mobile platform where youth, artists, content creators, entrepreneurs and local communities in emerging markets can connect and earn.\\n\\nIn low-income regions, millions of talented creators and grassroots groups have plenty of creativity and drive. What they lack is a way to earn from their work, access to financial and digital tools built for them and a route to bigger markets. Kezzo closes that gap by putting creative expression, direct commerce and community finance together in one simple platform.',
+    usDoTitle: 'What We Do', usDo: [['Connect and share.','Post photos and videos, chat, make calls and go live to reach your community and build your audience.'],['Empower creators and artists.','Join sponsored contests and challenges, show your talent and earn steady income from your work.'],['Sell online.','Open your own online shop in minutes and buy or sell products and services on the Kezzo marketplace.'],['Connect to local opportunity.','Find gigs, grants, collaborations and market opportunities in your community.'],['Digitize community finance.','Manage your Village Savings and Loan Association (VSLA) on Kezzo and keep track of contributions, loans and payouts in clear, shared records.']],
+    usApproachTitle: 'Our Approach', usApproach: 'Technology only works when it works for everyone. We build every Kezzo feature to be light, easy to use and reliable on slow connections. A weak internet signal or a lack of technical experience shouldn’t keep anyone out of the economy.\\n\\nWhether you’re an artist launching your first paid project, a young entrepreneur looking for your next opportunity or a savings group managing shared funds, Kezzo gives you the tools to grow on your own terms.',
+    usWhoTitle: 'Who We Are', usWho: 'Kezzo is a product of WeDIL Inc., a technology company registered in Canada. WeDIL builds digital tools that open up economic opportunity and help more people take part in the digital economy.',
     videoTitle: '',
     terms: 'Terms', privacy: 'Privacy', contact: 'Contact',
   },
@@ -96,7 +99,10 @@ export const COPY = {
     cats: { dance: 'Équipe de danse', roasting: 'Roasting', singing: 'Chant', debate: 'Débat', comedy: 'Humour', other: 'Communauté' } as Record<string, string>,
     members: 'Kezzo est réservé aux membres. Inscrivez-vous ou connectez-vous pour voir le fil, les vidéos, les directs, les battles et les profils.',
     finalTitle: 'Ne faites pas que défiler. Participez.', finalSub: 'Joignez Kezzo aujourd’hui et faites partie du prochain moment.',
-    usKicker: 'À propos de nous', usTitle: 'Conçu pour rapprocher les cultures du monde.', usText: 'Kezzo est une plateforme sociale où chacun partage sa culture, son talent et son quotidien, et découvre le monde à travers ses habitants.\n\nNous croyons que chaque communauté a quelque chose à montrer : une danse, une chanson, une recette, une histoire, un savoir-faire. Kezzo lui offre une scène, avec des battles en direct, des concours, des groupes et un marché, pour que les talents soient vus et que les gens se rencontrent au-delà des frontières.\n\nKezzo se construit pas à pas, avec celles et ceux qui l’utilisent. Vos idées et vos retours façonnent la suite.',
+    usKicker: 'À propos de Kezzo', usTitle: 'Transformer la créativité et la communauté en véritables opportunités économiques', usText: 'Kezzo est une plateforme web et mobile où les jeunes, les artistes, les créateurs de contenu, les entrepreneurs et les communautés locales des marchés émergents peuvent se connecter et gagner leur vie.\\n\\nDans les régions à faible revenu, des millions de créateurs talentueux et de groupes communautaires débordent de créativité et d’énergie. Ce qui leur manque : un moyen de tirer un revenu de leur travail, l’accès à des outils financiers et numériques conçus pour eux, et une voie vers de plus grands marchés. Kezzo comble ce fossé en réunissant l’expression créative, le commerce direct et la finance communautaire sur une plateforme simple.',
+    usDoTitle: 'Ce que nous faisons', usDo: [['Se connecter et partager.','Publiez des photos et des vidéos, discutez, appelez et passez en direct pour toucher votre communauté et bâtir votre audience.'],['Soutenir les créateurs et les artistes.','Participez à des concours et défis parrainés, montrez votre talent et tirez un revenu régulier de votre travail.'],['Vendre en ligne.','Ouvrez votre boutique en ligne en quelques minutes et achetez ou vendez des produits et des services sur le marché Kezzo.'],['Accéder aux opportunités locales.','Trouvez des contrats, des subventions, des collaborations et des occasions de marché dans votre communauté.'],['Numériser la finance communautaire.','Gérez votre Association Villageoise d’Épargne et de Crédit (AVEC) sur Kezzo et suivez cotisations, prêts et versements dans des registres clairs et partagés.']],
+    usApproachTitle: 'Notre approche', usApproach: 'La technologie ne fonctionne que si elle fonctionne pour tout le monde. Chaque fonction de Kezzo est conçue pour être légère, simple à utiliser et fiable sur les connexions lentes. Un signal internet faible ou le manque d’expérience technique ne devrait exclure personne de l’économie.\\n\\nQue vous soyez un artiste qui lance son premier projet rémunéré, un jeune entrepreneur en quête de sa prochaine occasion ou un groupe d’épargne qui gère des fonds communs, Kezzo vous donne les outils pour grandir à votre façon.',
+    usWhoTitle: 'Qui nous sommes', usWho: 'Kezzo est un produit de WeDIL Inc., une entreprise technologique enregistrée au Canada. WeDIL crée des outils numériques qui ouvrent des opportunités économiques et aident plus de personnes à participer à l’économie numérique.',
     videoTitle: '',
     terms: 'Conditions', privacy: 'Confidentialité', contact: 'Contact',
   },
@@ -135,7 +141,10 @@ export const COPY = {
     cats: { dance: 'Crew de baile', roasting: 'Roast', singing: 'Canto', debate: 'Debate', comedy: 'Comedia', other: 'Comunidad' } as Record<string, string>,
     members: 'Kezzo es para miembros. Regístrate o inicia sesión para ver el feed, los vídeos, las transmisiones en vivo, las batallas y los perfiles.',
     finalTitle: 'No te limites a desplazarte. Participa.', finalSub: 'Únete hoy a Kezzo y sé parte del próximo momento.',
-    usKicker: 'Sobre nosotros', usTitle: 'Creado para acercar las culturas del mundo.', usText: 'Kezzo es una plataforma social donde las personas comparten su cultura, su talento y su vida diaria, y conocen el mundo a través de su gente.\n\nCreemos que cada comunidad tiene algo que mostrar: un baile, una canción, una receta, una historia, un oficio. Kezzo le da un escenario, con batallas en vivo, concursos, grupos y un mercado, para que el talento sea visto y la gente se conozca más allá de las fronteras.\n\nKezzo se construye paso a paso, junto a quienes lo usan. Tus ideas y comentarios definen lo que viene.',
+    usKicker: 'Sobre Kezzo', usTitle: 'Convertir la creatividad y la comunidad en oportunidades económicas reales', usText: 'Kezzo es una plataforma web y móvil donde jóvenes, artistas, creadores de contenido, emprendedores y comunidades locales de mercados emergentes pueden conectarse y generar ingresos.\\n\\nEn las regiones de bajos ingresos, millones de creadores con talento y grupos comunitarios tienen mucha creatividad y empuje. Lo que les falta es una forma de ganar con su trabajo, acceso a herramientas financieras y digitales hechas para ellos y un camino hacia mercados más grandes. Kezzo cierra esa brecha uniendo la expresión creativa, el comercio directo y las finanzas comunitarias en una plataforma sencilla.',
+    usDoTitle: 'Qué hacemos', usDo: [['Conectar y compartir.','Publica fotos y videos, chatea, llama y transmite en vivo para llegar a tu comunidad y hacer crecer tu audiencia.'],['Impulsar a creadores y artistas.','Participa en concursos y retos patrocinados, muestra tu talento y obtén ingresos constantes con tu trabajo.'],['Vender en línea.','Abre tu tienda en línea en minutos y compra o vende productos y servicios en el mercado de Kezzo.'],['Acceder a oportunidades locales.','Encuentra trabajos, becas, colaboraciones y oportunidades de mercado en tu comunidad.'],['Digitalizar las finanzas comunitarias.','Gestiona tu Asociación de Ahorro y Crédito de la Comunidad (VSLA) en Kezzo y lleva el control de aportes, préstamos y pagos en registros claros y compartidos.']],
+    usApproachTitle: 'Nuestro enfoque', usApproach: 'La tecnología solo funciona cuando funciona para todos. Cada función de Kezzo es ligera, fácil de usar y fiable con conexiones lentas. Una señal de internet débil o la falta de experiencia técnica no debería dejar a nadie fuera de la economía.\\n\\nSeas un artista que lanza su primer proyecto pagado, un joven emprendedor en busca de su próxima oportunidad o un grupo de ahorro que administra fondos compartidos, Kezzo te da las herramientas para crecer a tu manera.',
+    usWhoTitle: 'Quiénes somos', usWho: 'Kezzo es un producto de WeDIL Inc., una empresa tecnológica registrada en Canadá. WeDIL crea herramientas digitales que abren oportunidades económicas y ayudan a más personas a participar en la economía digital.',
     videoTitle: '',
     terms: 'Términos', privacy: 'Privacidad', contact: 'Contacto',
   },
@@ -174,7 +183,10 @@ export const COPY = {
     cats: { dance: 'Crew de dança', roasting: 'Roast', singing: 'Canto', debate: 'Debate', comedy: 'Comédia', other: 'Comunidade' } as Record<string, string>,
     members: 'O Kezzo é para membros. Cadastre-se ou entre para ver o feed, os vídeos, as lives, as batalhas e os perfis.',
     finalTitle: 'Não fique só rolando a tela. Participe.', finalSub: 'Entre hoje no Kezzo e faça parte do próximo momento.',
-    usKicker: 'Sobre nós', usTitle: 'Criado para aproximar as culturas do mundo.', usText: 'O Kezzo é uma plataforma social onde as pessoas compartilham sua cultura, seu talento e seu dia a dia, e conhecem o mundo por meio de sua gente.\n\nAcreditamos que toda comunidade tem algo a mostrar: uma dança, uma música, uma receita, uma história, um ofício. O Kezzo dá a isso um palco, com batalhas ao vivo, concursos, grupos e um mercado, para que o talento seja visto e as pessoas se conheçam além das fronteiras.\n\nO Kezzo é construído passo a passo, junto com quem o usa. Suas ideias e opiniões definem o que vem a seguir.',
+    usKicker: 'Sobre o Kezzo', usTitle: 'Transformando criatividade e comunidade em oportunidade econômica real', usText: 'O Kezzo é uma plataforma web e móvel onde jovens, artistas, criadores de conteúdo, empreendedores e comunidades locais de mercados emergentes podem se conectar e ganhar dinheiro.\\n\\nEm regiões de baixa renda, milhões de criadores talentosos e grupos comunitários têm muita criatividade e disposição. O que falta é uma forma de ganhar com o próprio trabalho, acesso a ferramentas financeiras e digitais feitas para eles e um caminho para mercados maiores. O Kezzo fecha essa lacuna reunindo expressão criativa, comércio direto e finanças comunitárias em uma plataforma simples.',
+    usDoTitle: 'O que fazemos', usDo: [['Conectar e compartilhar.','Publique fotos e vídeos, converse, faça chamadas e transmita ao vivo para alcançar sua comunidade e crescer sua audiência.'],['Fortalecer criadores e artistas.','Participe de concursos e desafios patrocinados, mostre seu talento e tenha renda constante com o seu trabalho.'],['Vender online.','Abra sua loja online em minutos e compre ou venda produtos e serviços no mercado do Kezzo.'],['Acessar oportunidades locais.','Encontre trabalhos, bolsas, colaborações e oportunidades de mercado na sua comunidade.'],['Digitalizar as finanças comunitárias.','Gerencie sua Associação de Poupança e Crédito da Comunidade (VSLA) no Kezzo e acompanhe contribuições, empréstimos e pagamentos em registros claros e compartilhados.']],
+    usApproachTitle: 'Nossa abordagem', usApproach: 'A tecnologia só funciona quando funciona para todos. Cada recurso do Kezzo é leve, fácil de usar e confiável em conexões lentas. Um sinal fraco de internet ou a falta de experiência técnica não deve deixar ninguém fora da economia.\\n\\nSeja você um artista lançando o primeiro projeto pago, um jovem empreendedor em busca da próxima oportunidade ou um grupo de poupança gerindo fundos compartilhados, o Kezzo dá as ferramentas para crescer do seu jeito.',
+    usWhoTitle: 'Quem somos', usWho: 'O Kezzo é um produto da WeDIL Inc., empresa de tecnologia registrada no Canadá. A WeDIL cria ferramentas digitais que abrem oportunidades econômicas e ajudam mais pessoas a participar da economia digital.',
     videoTitle: '',
     terms: 'Termos', privacy: 'Privacidade', contact: 'Contato',
   },
@@ -213,7 +225,10 @@ export const COPY = {
     cats: { dance: 'डांस क्रू', roasting: 'रोस्टिंग', singing: 'गायन', debate: 'बहस', comedy: 'कॉमेडी', other: 'समुदाय' } as Record<string, string>,
     members: 'Kezzo सदस्यों के लिए है। फ़ीड, वीडियो, लाइव स्ट्रीम, बैटल और प्रोफ़ाइल देखने के लिए साइन अप या लॉग इन करें।',
     finalTitle: 'सिर्फ़ स्क्रॉल मत कीजिए। जुड़िए।', finalSub: 'आज ही Kezzo से जुड़ें और अगले पल का हिस्सा बनें।',
-    usKicker: 'हमारे बारे में', usTitle: 'दुनिया की संस्कृतियों को क़रीब लाने के लिए बना।', usText: 'Kezzo एक सोशल प्लेटफ़ॉर्म है जहाँ लोग अपनी संस्कृति, अपनी प्रतिभा और रोज़मर्रा की ज़िंदगी साझा करते हैं और लोगों के ज़रिए दुनिया को जानते हैं।\n\nहमारा मानना है कि हर समुदाय के पास दिखाने के लिए कुछ है: एक नृत्य, एक गीत, एक व्यंजन, एक कहानी, एक हुनर। Kezzo उसे मंच देता है, लाइव बैटल, प्रतियोगिताओं, समूहों और बाज़ार के साथ, ताकि प्रतिभा को पहचान मिले और लोग सीमाओं के पार मिलें।\n\nKezzo क़दम-दर-क़दम, इसे इस्तेमाल करने वालों के साथ बन रहा है। आपके विचार और सुझाव तय करते हैं कि आगे क्या आएगा।',
+    usKicker: 'Kezzo के बारे में', usTitle: 'रचनात्मकता और समुदाय को असली आर्थिक अवसर में बदलना', usText: 'Kezzo एक वेब और मोबाइल प्लेटफ़ॉर्म है जहाँ उभरते बाज़ारों के युवा, कलाकार, कंटेंट क्रिएटर, उद्यमी और स्थानीय समुदाय जुड़ सकते हैं और कमाई कर सकते हैं।\\n\\nकम आय वाले क्षेत्रों में लाखों प्रतिभाशाली क्रिएटर और ज़मीनी समूहों के पास रचनात्मकता और जज़्बे की कमी नहीं है। कमी है अपने काम से कमाने के तरीक़े की, उनके लिए बने वित्तीय और डिजिटल साधनों तक पहुँच की, और बड़े बाज़ारों तक रास्ते की। Kezzo रचनात्मक अभिव्यक्ति, सीधे व्यापार और सामुदायिक वित्त को एक सरल प्लेटफ़ॉर्म पर जोड़कर इस खाई को भरता है।',
+    usDoTitle: 'हम क्या करते हैं', usDo: [['जुड़ें और साझा करें।','फ़ोटो और वीडियो पोस्ट करें, चैट और कॉल करें और लाइव जाकर अपने समुदाय तक पहुँचें और अपनी ऑडियंस बनाएँ।'],['क्रिएटरों और कलाकारों को सशक्त बनाना।','प्रायोजित प्रतियोगिताओं और चुनौतियों में भाग लें, अपनी प्रतिभा दिखाएँ और अपने काम से नियमित आय कमाएँ।'],['ऑनलाइन बेचें।','मिनटों में अपनी ऑनलाइन दुकान खोलें और Kezzo बाज़ार में उत्पाद और सेवाएँ ख़रीदें या बेचें।'],['स्थानीय अवसरों से जुड़ें।','अपने समुदाय में काम, अनुदान, सहयोग और बाज़ार के अवसर खोजें।'],['सामुदायिक वित्त को डिजिटल बनाएँ।','अपना ग्राम बचत और ऋण संघ (VSLA) Kezzo पर चलाएँ और योगदान, ऋण और भुगतान का साफ़, साझा रिकॉर्ड रखें।']],
+    usApproachTitle: 'हमारा तरीक़ा', usApproach: 'तकनीक तभी कारगर है जब वह सबके लिए काम करे। हम Kezzo की हर सुविधा को हल्का, आसान और धीमे इंटरनेट पर भी भरोसेमंद बनाते हैं। कमज़ोर सिग्नल या तकनीकी अनुभव की कमी किसी को अर्थव्यवस्था से बाहर न रखे।\\n\\nचाहे आप अपना पहला भुगतान वाला प्रोजेक्ट शुरू करने वाले कलाकार हों, अगला मौक़ा खोजते युवा उद्यमी हों या साझा पैसे संभालता बचत समूह, Kezzo आपको अपने तरीक़े से आगे बढ़ने के साधन देता है।',
+    usWhoTitle: 'हम कौन हैं', usWho: 'Kezzo, WeDIL Inc. का उत्पाद है, जो कनाडा में पंजीकृत एक टेक्नोलॉजी कंपनी है। WeDIL ऐसे डिजिटल साधन बनाती है जो आर्थिक अवसर खोलते हैं और अधिक लोगों को डिजिटल अर्थव्यवस्था में भाग लेने में मदद करते हैं।',
     videoTitle: '',
     terms: 'नियम', privacy: 'गोपनीयता', contact: 'संपर्क',
   },
@@ -254,7 +269,8 @@ function Footer() {
   const { openAuth } = useAuth();
   const c = useCopy(COPY[lang], lang);
   const [aboutOpen, setAboutOpen] = useState(false);
-  const hasAbout = (String(c.usTitle) + String(c.usText)).trim() !== '';
+  const hasAbout = (String(c.usTitle) + String(c.usText) + String(c.usWho)).trim() !== '';
+  const paras = (text: string) => text.split(/\n\s*\n|\\n\\n/).map((x) => x.trim()).filter(Boolean).map((x, i) => <p key={i}>{x}</p>);
   return (
     <footer className="border-t border-stone-200 bg-stone-50 px-4 pb-8 pt-12 text-zinc-600 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
@@ -275,11 +291,24 @@ function Footer() {
         </div>
       </div>
       {hasAbout && aboutOpen && (
-        <section id="footer-about" className="mx-auto mt-10 max-w-6xl rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
-          <h2 className="font-display text-xl font-extrabold leading-tight text-zinc-900 sm:text-2xl">{c.usTitle}</h2>
-          <div className="mt-3 max-w-3xl space-y-3 text-sm leading-relaxed sm:text-base">
-            {c.usText.split(/\n\s*\n|\\n\\n/).map((para) => para.trim()).filter(Boolean).map((para, i) => <p key={i}>{para}</p>)}
-          </div>
+        <section id="footer-about" className="mx-auto mt-10 max-w-6xl rounded-2xl border border-stone-200 bg-white p-6 text-sm leading-relaxed sm:p-8 sm:text-base">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{c.usKicker}</p>
+          <h2 className="mt-2 max-w-3xl font-display text-2xl font-extrabold leading-tight text-zinc-900 sm:text-3xl">{c.usTitle}</h2>
+          <div className="mt-4 max-w-3xl space-y-3">{paras(c.usText)}</div>
+          {c.usDo.length > 0 && (
+            <>
+              <h3 className="mt-6 font-display text-lg font-bold text-zinc-900">{c.usDoTitle}</h3>
+              <ul className="mt-3 grid max-w-4xl gap-3">
+                {c.usDo.map(([lead, text]) => (
+                  <li key={lead} className="flex gap-2"><Check className="mt-1 h-4 w-4 shrink-0 text-accent" aria-hidden="true" /><span><strong className="font-semibold text-zinc-900">{lead}</strong> {text}</span></li>
+                ))}
+              </ul>
+            </>
+          )}
+          <h3 className="mt-6 font-display text-lg font-bold text-zinc-900">{c.usApproachTitle}</h3>
+          <div className="mt-3 max-w-3xl space-y-3">{paras(c.usApproach)}</div>
+          <h3 className="mt-6 font-display text-lg font-bold text-zinc-900">{c.usWhoTitle}</h3>
+          <div className="mt-3 max-w-3xl space-y-3">{paras(c.usWho)}</div>
         </section>
       )}
       <p className="mx-auto mt-10 max-w-6xl border-t border-stone-200 pt-5 text-xs text-zinc-500">© {new Date().getFullYear()} Kezzo, WeDIL Inc., Canada</p>
