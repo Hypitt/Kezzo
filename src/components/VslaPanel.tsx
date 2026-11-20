@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
-import { PiggyBank, WifiOff, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
+import { PiggyBank, WifiOff, ChevronLeft, ChevronRight, Check, X, Minus, Plus, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
 import { Spinner } from './ui';
+import { VslaGuide } from './VslaGuide';
+import { VSLA } from '../lib/vslaText';
 export interface VslaMember { id: string; user_id: string | null; display_name: string; role: 'admin' | 'member'; active?: boolean }
 interface Request { id: string; member_id: string; amount: number; note: string; status: 'pending' | 'approved' | 'declined'; created_at: string }
 export type VslaView = 'overview' | 'contrib' | 'loans';
+interface Contrib { id: string; member_id: string; kind: 'shares' | 'social' | 'loan_repay'; shares: number; amount: number; loan_id: string | null; note: string; meeting_date: string; status: 'pending' | 'approved' | 'declined' | 'cancelled'; created_at: string }
 
 interface Cycle { id: string; name: string; currency: string; share_price: number; max_shares: number; loan_interest_pct: number; loan_multiple: number | null; frequency?: 'weekly' | 'biweekly' | 'monthly'; status: 'active' | 'closed' }
 interface Loan { id: string; member_id: string; principal: number; interest_pct: number; due_date: string | null; guarantor_id?: string | null; status: 'open' | 'repaid' }
 interface Entry { id: string; member_id: string; kind: 'shares' | 'social' | 'fine' | 'loan_repay'; amount: number; shares: number; loan_id: string | null; note: string; meeting_date: string; created_at: string }
-interface Book { cycle: Cycle | null; loans: Loan[]; entries: Entry[]; requests: Request[] }
+interface Book { cycle: Cycle | null; loans: Loan[]; entries: Entry[]; requests: Request[]; contribs?: Contrib[] }
 type Op = { id: string; type: 'record'; args: Record<string, unknown> } | { id: string; type: 'lend'; args: Record<string, unknown> } | { id: string; type: 'start'; args: Record<string, unknown> };
 
 const num = (v: unknown) => Number(v) || 0;
@@ -25,8 +28,9 @@ const isNetwork = (e: { message?: string } | null) => !navigator.onLine || /fetc
  * Village savings and loans (VSLA) books for a group. Everyone in the group can read them; admins record each meeting.
  * Entries are sent with a unique id, so when the phone is offline they wait on the device and are sent later without ever being counted twice.
  */
-export function VslaPanel({ groupId, members, admin, meId, view }: { groupId: string; members: VslaMember[]; admin: boolean; meId: string | null; view: VslaView }) {
-  const { t } = useI18n();
+export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOpenTab }: { groupId: string; members: VslaMember[]; admin: boolean; meId: string | null; view: VslaView; onPending?: (n: number) => void; onOpenTab?: (tab: VslaView) => void }) {
+  const { t, lang } = useI18n();
+  const w = VSLA[lang];
   const { toast } = useToast();
   const [book, setBook] = useState<Book | null>(null);
   const [offline, setOffline] = useState(false);
@@ -45,17 +49,20 @@ export function VslaPanel({ groupId, members, admin, meId, view }: { groupId: st
     let loans: Loan[] = [];
     let entries: Entry[] = [];
     let requests: Request[] = [];
+    let contribs: Contrib[] = [];
     if (cycle) {
-      const [l, e, q] = await Promise.all([
+      const [l, e, q, k] = await Promise.all([
         supabase.from('vsla_loans').select('id,member_id,principal,interest_pct,due_date,guarantor_id,status').eq('cycle_id', cycle.id).limit(2000),
         supabase.from('vsla_entries').select('id,member_id,kind,amount,shares,loan_id,note,meeting_date,created_at').eq('cycle_id', cycle.id).order('created_at', { ascending: false }).limit(3000),
         supabase.from('vsla_requests').select('id,member_id,amount,note,status,created_at').eq('group_id', groupId).order('created_at', { ascending: false }).limit(100),
+        supabase.from('vsla_contributions').select('id,member_id,kind,shares,amount,loan_id,note,meeting_date,status,created_at').eq('group_id', groupId).order('created_at', { ascending: false }).limit(300),
       ]);
       loans = ((l.data ?? []) as Loan[]).map((x) => ({ ...x, principal: num(x.principal), interest_pct: num(x.interest_pct) }));
       entries = ((e.data ?? []) as Entry[]).map((x) => ({ ...x, amount: num(x.amount) }));
       requests = ((q.data ?? []) as Request[]).map((x) => ({ ...x, amount: num(x.amount) }));
+      contribs = ((k.data ?? []) as Contrib[]).map((x) => ({ ...x, amount: num(x.amount) }));
     }
-    const next = { cycle: cycle ? { ...cycle, share_price: num(cycle.share_price), loan_interest_pct: num(cycle.loan_interest_pct) } : null, loans, entries, requests };
+    const next = { cycle: cycle ? { ...cycle, share_price: num(cycle.share_price), loan_interest_pct: num(cycle.loan_interest_pct) } : null, loans, entries, requests, contribs };
     setOffline(false);
     setBook(next);
     write(cacheKey(groupId), next);
@@ -105,6 +112,9 @@ export function VslaPanel({ groupId, members, admin, meId, view }: { groupId: st
     return false;
   };
 
+  const pendingContribs = useMemo(() => (book?.contribs ?? []).filter((x) => x.status === 'pending'), [book]);
+  useEffect(() => { onPending?.(admin ? pendingContribs.length : 0); }, [admin, pendingContribs.length, onPending]);
+
   const names = useMemo(() => new Map(members.map((m) => [m.id, m.display_name])), [members]);
   const nameOf = (id: string) => names.get(id) ?? '—';
 
@@ -142,6 +152,9 @@ export function VslaPanel({ groupId, members, admin, meId, view }: { groupId: st
   const openLoans = book.loans.filter((l) => l.status === 'open');
   const active = cycle?.status === 'active';
   const mine = meId ? stats.perMember.get(meId) : undefined;
+  const myContribs = (book.contribs ?? []).filter((x) => x.member_id === meId);
+  const kindLabel = (k: Contrib['kind']) => (k === 'shares' ? w.kShares : k === 'social' ? w.kSocial : w.kRepay);
+  const statusLabel = (st: Contrib['status']) => (st === 'pending' ? w.stPending : st === 'approved' ? w.stApproved : st === 'declined' ? w.stDeclined : w.stCancelled);
 
   const decide = async (id: string, approve: boolean, due: string) => {
     setBusy(true);
@@ -149,6 +162,20 @@ export function VslaPanel({ groupId, members, admin, meId, view }: { groupId: st
     setBusy(false);
     if (error) return toast(t('vs_error', { why: error.message }), 'error');
     void load();
+  };
+
+  const decideContrib = async (id: string, approve: boolean) => {
+    setBusy(true);
+    const { error } = await supabase.rpc('vsla_decide_contribution', { p_id: id, p_approve: approve });
+    setBusy(false);
+    if (error) { toast(t('vs_error', { why: error.message }), 'error'); return false; }
+    void load();
+    return true;
+  };
+  const approveAll = async () => {
+    let done = 0;
+    for (const x of pendingContribs) { if (await decideContrib(x.id, true)) done += 1; else break; }
+    if (done) toast(w.approvedN(done));
   };
 
   const header = (
@@ -166,7 +193,8 @@ export function VslaPanel({ groupId, members, admin, meId, view }: { groupId: st
     return (
       <section className="card space-y-4" aria-label={t('vs_title')}>
         {header}
-        <p className="text-sm text-zinc-500">{admin ? t('vs_intro') : t('vs_wait_cycle')}</p>
+        <VslaGuide startOpen />
+        <NextStep text={admin ? w.hintStart : w.hintWait} />
         {admin && <StartCycle busy={busy} onStart={(a) => submit('start', 'vsla_start_cycle', { ...a, p_group: groupId })} />}
       </section>
     );
@@ -178,6 +206,11 @@ export function VslaPanel({ groupId, members, admin, meId, view }: { groupId: st
       <section className="card space-y-4" aria-label={t('vs_title')}>
         {header}
         {admin && !active && <StartCycle busy={busy} onStart={(a) => submit('start', 'vsla_start_cycle', { ...a, p_group: groupId })} />}
+        <VslaGuide />
+        {active && (admin && pendingContribs.length > 0
+          ? <NextStep text={w.hintReview(pendingContribs.length)} button={w.hintReviewBtn} onClick={() => onOpenTab?.('contrib')} />
+          : meId ? <NextStep text={w.hintPay} button={w.hintPayBtn} onClick={() => onOpenTab?.('contrib')} /> : null)}
+        <h3 className="text-sm font-semibold">{w.sectSummary}</h3>
         <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
           {[[t('vs_cash'), stats.cash], [t('vs_savings'), stats.saved], [t('vs_loans_out'), stats.outstanding], [t('vs_social'), stats.social]].map(([label, value]) => (
             <div key={label as string} className="rounded-xl bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{label}</dt><dd className="font-semibold">{fmt(value as number)}</dd></div>
@@ -193,6 +226,7 @@ export function VslaPanel({ groupId, members, admin, meId, view }: { groupId: st
           {t('vs_rules2', { freq: t(`vs_freq_${cycle.frequency ?? 'weekly'}` as 'vs_freq_weekly'), price: fmt(cycle.share_price), max: cycle.max_shares, pct: cycle.loan_interest_pct })}
           {cycle.loan_multiple ? ` ${t('vs_limit_note', { mult: cycle.loan_multiple })}` : ''}
         </p>
+        <h3 className="text-sm font-semibold">{w.sectMembers}</h3>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[420px] text-left text-sm">
             <thead><tr className="text-[11px] text-zinc-500"><th className="py-1 font-medium">{t('vs_member')}</th><th className="font-medium">{t('vs_col_shares')}</th><th className="font-medium">{t('vs_col_saved')}</th><th className="font-medium">{t('vs_col_owes')}</th><th className="font-medium">{t('vs_col_payout')}</th></tr></thead>
@@ -208,12 +242,13 @@ export function VslaPanel({ groupId, members, admin, meId, view }: { groupId: st
         <p className="text-[11px] text-zinc-500">{t('vs_estimate_note')}</p>
         {admin && active && (
           <div className="space-y-3 border-t border-zinc-100 pt-4">
-            <h3 className="text-sm font-semibold">{t('vs_record')}</h3>
+            <h3 className="text-sm font-semibold">{w.sectRecord}</h3>
+            <p className="text-xs text-zinc-500">{w.recordHelp}</p>
             <RecordForm cycle={cycle} members={live} perMember={stats.perMember} cash={stats.cash} fmt={fmt} loans={openLoans} nameOf={nameOf} busy={busy} onSubmit={submit} />
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => window.confirm(t('vs_close_confirm')) && supabase.rpc('vsla_close', { p_cycle: cycle.id }).then(({ error }) => (error ? toast(t('vs_error', { why: error.message }), 'error') : load()))}>{t('vs_close')}</button>
           </div>
         )}
-        <EntryList entries={book.entries.slice(0, 15)} title={t('vs_recent')} nameOf={nameOf} fmt={fmt} />
+        <EntryList entries={book.entries.slice(0, 15)} title={w.sectRecent} nameOf={nameOf} fmt={fmt} />
       </section>
     );
   }
@@ -236,6 +271,53 @@ export function VslaPanel({ groupId, members, admin, meId, view }: { groupId: st
     return (
       <section className="card space-y-4" aria-label={t('vs_tab_contrib')}>
         {header}
+        {admin && (
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold">{w.toApprove} {pendingContribs.length > 0 && <span className="ml-1 rounded-full bg-accent px-2 py-0.5 text-[11px] text-white">{pendingContribs.length}</span>}</h3>
+              {pendingContribs.length > 1 && <button type="button" className="btn btn-accent btn-sm" disabled={busy} onClick={() => void approveAll()}><Check className="h-3.5 w-3.5" aria-hidden="true" />{w.approveAll}</button>}
+            </div>
+            {pendingContribs.length === 0 ? <p className="text-sm text-zinc-500">{w.nothingToApprove}</p> : (
+              <ul className="space-y-2">
+                {pendingContribs.map((x) => (
+                  <li key={x.id} className="flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 p-3 text-sm">
+                    <span className="min-w-0 flex-1">
+                      <span className="font-medium">{nameOf(x.member_id)}</span> · <span className="text-zinc-500">{kindLabel(x.kind)}{x.kind === 'shares' ? ` ×${x.shares}` : ''}</span>
+                      <span className="block text-xs text-zinc-500">{x.meeting_date}{x.note ? ` · ${x.note}` : ''}</span>
+                    </span>
+                    <span className="font-semibold">{fmt(x.amount)}</span>
+                    <button type="button" className="btn btn-accent btn-sm" disabled={busy} onClick={() => void decideContrib(x.id, true)}><Check className="h-3.5 w-3.5" aria-hidden="true" />{w.approveBtn}</button>
+                    <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => void decideContrib(x.id, false)}><X className="h-3.5 w-3.5" aria-hidden="true" />{w.declineBtn}</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="flex gap-1.5 text-xs text-zinc-500"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />{w.adminHint}</p>
+          </div>
+        )}
+        {meId && active && (
+          <div className="space-y-3 border-t border-zinc-100 pt-4">
+            <h3 className="text-sm font-semibold">{w.payTitle}</h3>
+            <p className="text-xs text-zinc-500">{w.payHelp}</p>
+            <PayForm groupId={groupId} cycle={cycle} loans={openLoans.filter((l) => l.member_id === meId)} owed={stats.owedByLoan} fmt={fmt} onSent={load} />
+            <div className="space-y-1">
+              <h4 className="text-sm font-semibold">{w.mineTitle}</h4>
+              {myContribs.length === 0 ? <p className="text-sm text-zinc-500">{w.mineEmpty}</p> : (
+                <ul className="divide-y divide-zinc-100 text-sm">
+                  {myContribs.slice(0, 8).map((x) => (
+                    <li key={x.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5">
+                      <span className="mr-auto">{kindLabel(x.kind)}{x.kind === 'shares' ? ` ×${x.shares}` : ''} <span className="text-xs text-zinc-400">{x.meeting_date}</span></span>
+                      <span className="font-medium">{fmt(x.amount)}</span>
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${x.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : x.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-zinc-200 text-zinc-700'}`}>{statusLabel(x.status)}</span>
+                      {x.status === 'pending' && <button type="button" className="btn btn-ghost btn-sm" onClick={async () => { await supabase.rpc('vsla_cancel_contribution', { p_id: x.id }); void load(); }}>{w.cancelBtn}</button>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
+        <h3 className="border-t border-zinc-100 pt-4 text-sm font-semibold">{t('vs_tab_contrib')}</h3>
         <div className="flex items-center justify-between gap-2">
           <button type="button" className="btn btn-ghost btn-sm" aria-label={t('vs_prev_month')} disabled={month <= first} onClick={() => shift(-1)}><ChevronLeft className="h-4 w-4" aria-hidden="true" /></button>
           <div className="text-center"><p className="font-semibold capitalize">{label}</p><p className="text-xs text-zinc-500">{t(`vs_freq_${cycle.frequency ?? 'weekly'}` as 'vs_freq_weekly')}</p></div>
@@ -369,6 +451,9 @@ function RequestForm({ groupId, onSent }: { groupId: string; onSent: () => void 
 
 function StartCycle({ busy, onStart }: { busy: boolean; onStart: (a: Record<string, unknown>) => Promise<boolean> }) {
   const { t } = useI18n();
+  const { lang } = useI18n();
+  const w = VSLA[lang];
+  const hp = (text: string) => <p className="mt-1 text-xs text-zinc-500">{text}</p>;
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('Cycle 1');
   const [currency, setCurrency] = useState('');
@@ -384,6 +469,7 @@ function StartCycle({ busy, onStart }: { busy: boolean; onStart: (a: Record<stri
   };
   return (
     <form className="grid gap-3 rounded-xl bg-zinc-50 p-3 sm:grid-cols-2" onSubmit={go}>
+      <p className="flex gap-1.5 text-xs text-zinc-600 sm:col-span-2"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />{w.startHelp}</p>
       <div><label className="label" htmlFor="vs-name">{t('vs_cycle_name')}</label><input id="vs-name" className="input" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} required /></div>
       <div className="sm:col-span-2">
         <span className="label">{t('vs_freq')}</span>
@@ -392,11 +478,12 @@ function StartCycle({ busy, onStart }: { busy: boolean; onStart: (a: Record<stri
             <button key={f} type="button" aria-pressed={frequency === f} onClick={() => setFrequency(f)} className={`chip ${frequency === f ? 'bg-zinc-900 text-white' : ''}`}>{t(`vs_freq_${f}` as 'vs_freq_weekly')}</button>
           ))}
         </div>
+        {hp(w.cycleHelp.freq)}
       </div>
-      <div><label className="label" htmlFor="vs-cur">{t('vs_currency')}</label><input id="vs-cur" className="input" value={currency} maxLength={6} placeholder="KES, UGX, RWF…" onChange={(e) => setCurrency(e.target.value)} required /></div>
-      <div><label className="label" htmlFor="vs-price">{t('vs_share_price')}</label><input id="vs-price" className="input" type="number" min="0.01" step="any" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} required /></div>
-      <div><label className="label" htmlFor="vs-int">{t('vs_interest')}</label><input id="vs-int" className="input" type="number" min="0" max="100" step="any" inputMode="decimal" value={interest} onChange={(e) => setInterest(e.target.value)} required /></div>
-      <div><label className="label" htmlFor="vs-mult">{t('vs_multiple_opt')}</label><input id="vs-mult" className="input" type="number" min="1" max="10" step="1" inputMode="numeric" value={multiple} onChange={(e) => setMultiple(e.target.value)} /></div>
+      <div><label className="label" htmlFor="vs-cur">{t('vs_currency')}</label><input id="vs-cur" className="input" value={currency} maxLength={6} placeholder="KES, UGX, RWF…" onChange={(e) => setCurrency(e.target.value)} required />{hp(w.cycleHelp.currency)}</div>
+      <div><label className="label" htmlFor="vs-price">{t('vs_share_price')}</label><input id="vs-price" className="input" type="number" min="0.01" step="any" inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} required />{hp(w.cycleHelp.price)}</div>
+      <div><label className="label" htmlFor="vs-int">{t('vs_interest')}</label><input id="vs-int" className="input" type="number" min="0" max="100" step="any" inputMode="decimal" value={interest} onChange={(e) => setInterest(e.target.value)} required />{hp(w.cycleHelp.interest)}</div>
+      <div><label className="label" htmlFor="vs-mult">{t('vs_multiple_opt')}</label><input id="vs-mult" className="input" type="number" min="1" max="10" step="1" inputMode="numeric" value={multiple} onChange={(e) => setMultiple(e.target.value)} />{hp(w.cycleHelp.multiple)}</div>
       <div className="flex items-end gap-2 sm:col-span-2">
         <button className="btn btn-accent btn-sm" disabled={busy}>{busy && <Spinner />}{t('vs_start')}</button>
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpen(false)}>{t('cancel')}</button>
@@ -410,7 +497,8 @@ function RecordForm({ cycle, members, perMember, cash, fmt, loans, nameOf, busy,
   cycle: Cycle; members: VslaMember[]; perMember: Map<string, { saved: number; owes: number }>; cash: number; fmt: (n: number) => string; loans: Loan[]; nameOf: (id: string) => string; busy: boolean;
   onSubmit: (type: Op['type'], rpc: 'vsla_record' | 'vsla_lend', args: Record<string, unknown>) => Promise<boolean>;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const w = VSLA[lang];
   const [kind, setKind] = useState<Kind>('shares');
   const [member, setMember] = useState(members[0]?.id ?? '');
   const [shares, setShares] = useState('1');
@@ -447,6 +535,7 @@ function RecordForm({ cycle, members, perMember, cash, fmt, loans, nameOf, busy,
             className={`chip ${kind === k ? 'bg-zinc-900 text-white' : ''}`}>{t(`vs_kind_${k}` as 'vs_kind_shares')}</button>
         ))}
       </div>
+      <p className="flex gap-1.5 text-xs text-zinc-600"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />{w.kindHelp[kind]}</p>
       <div className="grid gap-3 sm:grid-cols-2">
         {kind !== 'loan_repay' && (
           <div><label className="label" htmlFor="vs-m">{t('vs_member')}</label>
@@ -476,6 +565,95 @@ function RecordForm({ cycle, members, perMember, cash, fmt, loans, nameOf, busy,
       {overLimit && <p className="text-xs text-amber-700">{t('vs_warn_limit', { max: fmt(mine.saved * (cycle.loan_multiple ?? 0)) })}</p>}
       {overCash && <p className="text-xs text-amber-700">{t('vs_warn_cash', { cash: fmt(cash) })}</p>}
       <button className="btn btn-accent btn-sm" disabled={busy}>{busy && <Spinner />}{t('vs_save')}</button>
+    </form>
+  );
+}
+
+/** A short line telling the person what to do next, with an optional button. */
+function NextStep({ text, button, onClick }: { text: string; button?: string; onClick?: () => void }) {
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-accent/30 bg-accent/5 p-3 text-sm">
+      <Info className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
+      <p className="min-w-0 flex-1 font-medium">{text}</p>
+      {button && onClick && <button type="button" className="btn btn-accent btn-sm" onClick={onClick}>{button}</button>}
+    </div>
+  );
+}
+
+/** A member sends a contribution; a treasurer approves it and it joins the books. */
+function PayForm({ groupId, cycle, loans, owed, fmt, onSent }: { groupId: string; cycle: Cycle; loans: Loan[]; owed: Map<string, number>; fmt: (n: number) => string; onSent: () => void }) {
+  const { t, lang } = useI18n();
+  const { toast } = useToast();
+  const w = VSLA[lang];
+  const [kind, setKind] = useState<'shares' | 'social' | 'loan_repay'>('shares');
+  const [shares, setShares] = useState(1);
+  const [amount, setAmount] = useState('');
+  const [loan, setLoan] = useState('');
+  const [note, setNote] = useState('');
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [busy, setBusy] = useState(false);
+  const kinds: Array<['shares' | 'social' | 'loan_repay', string]> = [['shares', w.kShares], ['social', w.kSocial], ['loan_repay', w.kRepay]];
+  const total = kind === 'shares' ? shares * cycle.share_price : Number(amount) || 0;
+  const noLoan = kind === 'loan_repay' && loans.length === 0;
+
+  const send = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!navigator.onLine) return toast(w.offlineNow, 'error');
+    setBusy(true);
+    const { error } = await supabase.rpc('vsla_submit_contribution', {
+      p_group: groupId, p_kind: kind, p_shares: kind === 'shares' ? shares : 0, p_amount: kind === 'shares' ? null : Number(amount),
+      p_loan: kind === 'loan_repay' ? loan : null, p_note: note, p_date: date || null,
+    });
+    setBusy(false);
+    if (error) return toast(t('vs_error', { why: error.message }), 'error');
+    toast(w.sentOk);
+    setAmount(''); setNote(''); setShares(1);
+    onSent();
+  };
+
+  return (
+    <form className="space-y-3 rounded-xl bg-zinc-50 p-3" onSubmit={send}>
+      <div>
+        <span className="label">{w.whatPaid}</span>
+        <div className="flex flex-wrap gap-1.5">
+          {kinds.map(([k, label]) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)} className={`chip ${kind === k ? 'bg-zinc-900 text-white' : ''}`}>{label}</button>)}
+        </div>
+      </div>
+      {kind === 'shares' && (
+        <div>
+          <span className="label">{w.sharesQ}</span>
+          <div className="flex items-center gap-3">
+            <button type="button" className="btn btn-ghost btn-sm" aria-label="−" disabled={shares <= 1} onClick={() => setShares((n) => Math.max(1, n - 1))}><Minus className="h-4 w-4" aria-hidden="true" /></button>
+            <span className="w-8 text-center text-lg font-semibold" aria-live="polite">{shares}</span>
+            <button type="button" className="btn btn-ghost btn-sm" aria-label="+" disabled={shares >= cycle.max_shares} onClick={() => setShares((n) => Math.min(cycle.max_shares, n + 1))}><Plus className="h-4 w-4" aria-hidden="true" /></button>
+          </div>
+          <p className="mt-1 text-xs text-zinc-500">{w.sharesHelp(fmt(cycle.share_price), cycle.max_shares)}</p>
+        </div>
+      )}
+      {kind === 'loan_repay' && (
+        noLoan ? <p className="text-sm text-zinc-500">{w.noLoan}</p> : (
+          <div><label className="label" htmlFor="pf-loan">{w.loanQ}</label>
+            <select id="pf-loan" className="input" value={loan} onChange={(e) => setLoan(e.target.value)} required>
+              <option value="">—</option>{loans.map((l) => <option key={l.id} value={l.id}>{fmt(owed.get(l.id) ?? 0)}</option>)}
+            </select></div>
+        )
+      )}
+      {kind !== 'shares' && !noLoan && (
+        <div><label className="label" htmlFor="pf-amt">{w.amountL}</label>
+          <input id="pf-amt" className="input" type="number" min="0.01" step="any" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} required /></div>
+      )}
+      {!noLoan && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div><label className="label" htmlFor="pf-date">{w.dateL}</label><input id="pf-date" className="input" type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+          <div><label className="label" htmlFor="pf-note">{w.noteL}</label><input id="pf-note" className="input" value={note} maxLength={120} placeholder={w.notePh} onChange={(e) => setNote(e.target.value)} /></div>
+        </div>
+      )}
+      {!noLoan && (
+        <div className="flex flex-wrap items-center gap-3">
+          <button className="btn btn-accent" disabled={busy || total <= 0 || (kind === 'loan_repay' && !loan)}>{busy && <Spinner />}{w.send}</button>
+          {total > 0 && <span className="text-sm font-semibold">{w.youPay(fmt(total))}</span>}
+        </div>
+      )}
     </form>
   );
 }

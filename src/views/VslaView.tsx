@@ -121,6 +121,7 @@ export function VslaRoom({ id }: { id: string }) {
   const [details, setDetails] = useState<Map<string, Details>>(new Map());
   const [missing, setMissing] = useState(false);
   const [tab, setTab] = useState<RoomTab>('overview');
+  const [pending, setPending] = useState(0);
 
   const load = useCallback(async () => {
     const [g, m] = await Promise.all([
@@ -158,7 +159,7 @@ export function VslaRoom({ id }: { id: string }) {
           return (
             <button key={x.id} type="button" onClick={() => setTab(x.id)} aria-current={tab === x.id ? 'page' : undefined}
               className={`flex flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-medium transition ${tab === x.id ? 'bg-zinc-900 text-white' : 'text-zinc-700 hover:bg-white'}`}>
-              <Icon className="h-3.5 w-3.5" aria-hidden="true" />{t(x.key)}
+              <Icon className="h-3.5 w-3.5" aria-hidden="true" />{t(x.key)}{x.id === 'contrib' && pending > 0 && <span className="ml-0.5 rounded-full bg-red-600 px-1.5 text-[10px] font-semibold text-white">{pending}</span>}
             </button>
           );
         })}
@@ -166,7 +167,7 @@ export function VslaRoom({ id }: { id: string }) {
 
       {/* The books stay mounted while another tab is open, so nothing reloads and the offline queue keeps running. */}
       <div hidden={tab === 'members' || tab === 'messages'}>
-        <VslaPanel groupId={id} members={members} admin={Boolean(admin)} meId={me?.id ?? null} view={tab === 'contrib' || tab === 'loans' ? tab : 'overview'} />
+        <VslaPanel groupId={id} members={members} admin={Boolean(admin)} meId={me?.id ?? null} view={tab === 'contrib' || tab === 'loans' ? tab : 'overview'} onPending={setPending} onOpenTab={setTab} />
       </div>
       {tab === 'members' && <MembersTab group={group} members={members} details={details} me={me} admin={Boolean(admin)} owner={group.owner_id === user?.id} onChanged={load} />}
       {tab === 'messages' && <MessagesTab groupId={id} members={members} admin={Boolean(admin)} meUser={user?.id ?? ''} />}
