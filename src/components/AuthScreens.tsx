@@ -272,7 +272,7 @@ export function Onboarding() {
     try {
       await createProfile({ handle: h, display_name: displayName.trim(), generation });
       toast(t('welcome_toast'));
-      go('search');
+      go('home');
     } catch (err) {
       const code = (err as { code?: string }).code;
       setError(code === '23505' ? t('err_handle_taken') : t('error_generic'));

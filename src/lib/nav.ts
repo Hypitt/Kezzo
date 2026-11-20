@@ -14,7 +14,7 @@ export const GROUPS: NavGroup[] = [
   { id: 'arena', icon: Swords, tabs: ['football', 'contest', 'battles'], name: { en: 'Arena', fr: 'Arène', es: 'Arena', pt: 'Arena', hi: 'अरेना' } },
   { id: 'create', icon: PlusCircle, tabs: ['create'], name: 'nav_create' },
   { id: 'community', icon: CalendarDays, tabs: ['market', 'opportunities', 'community'], name: { en: 'Community', fr: 'Communauté', es: 'Comunidad', pt: 'Comunidade', hi: 'समुदाय' } },
-  { id: 'connect', icon: Users, tabs: ['groups', 'vsla', 'messages'], name: { en: 'Connect', fr: 'Échanger', es: 'Conectar', pt: 'Conectar', hi: 'जुड़ें' } },
+  { id: 'connect', icon: Users, tabs: ['vsla', 'messages', 'groups'], name: { en: 'Chat', fr: 'Discussion', es: 'Chat', pt: 'Chat', hi: 'चैट' } },
   { id: 'profile', icon: User, tabs: ['profile'], name: 'nav_profile' },
 ];
 

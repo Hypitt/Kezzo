@@ -36,7 +36,7 @@ export function Navbar() {
     <>
       <header className="sticky top-0 z-40 border-b border-zinc-800 bg-black text-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
-          <button type="button" onClick={() => go('search')} className="shrink-0 rounded-md bg-white" aria-label="Kezzo">
+          <button type="button" onClick={() => go('home')} className="shrink-0 rounded-md bg-white" aria-label="Kezzo">
             <Logo className="h-9" />
           </button>
           <nav className="hidden items-center gap-5 text-sm font-medium text-white lg:flex" aria-label="Main">

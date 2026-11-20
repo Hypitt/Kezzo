@@ -135,9 +135,9 @@ function Shell() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id]);
 
-  // Signed-in people land on Search & Feeds (Home stays reachable from the navbar). Visitors see the public landing page instead.
+  // Signed-in people land on Home. Visitors see the public landing page instead.
   useEffect(() => {
-    if (!loading && user && !window.location.hash) go('search');
+    if (!loading && user && !window.location.hash) go('home');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user?.id]);
 
@@ -186,7 +186,7 @@ function Shell() {
 function Providers() {
   const { go } = useRouter();
   return (
-    <AuthProvider onSignedIn={() => go('search')}>
+    <AuthProvider onSignedIn={() => go('home')}>
       <NotificationsProvider>
         <CallsProvider>
           <Shell />

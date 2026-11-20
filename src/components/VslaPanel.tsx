@@ -7,11 +7,11 @@ import { Spinner } from './ui';
 import { VslaGuide } from './VslaGuide';
 import { VSLA } from '../lib/vslaText';
 export interface VslaMember { id: string; user_id: string | null; display_name: string; role: 'admin' | 'member'; active?: boolean }
-interface Request { id: string; member_id: string; amount: number; note: string; status: 'pending' | 'approved' | 'declined'; created_at: string }
+interface Request { id: string; member_id: string; amount: number; approved_amount?: number | null; note: string; status: 'pending' | 'approved' | 'declined'; created_at: string }
 export type VslaView = 'overview' | 'contrib' | 'loans';
-interface Contrib { id: string; member_id: string; kind: 'shares' | 'social' | 'loan_repay'; shares: number; amount: number; loan_id: string | null; note: string; meeting_date: string; status: 'pending' | 'approved' | 'declined' | 'cancelled'; created_at: string }
+interface Contrib { id: string; member_id: string; kind: 'shares' | 'social' | 'loan_repay'; shares: number; amount: number; approved_amount?: number | null; loan_id: string | null; note: string; meeting_date: string; status: 'pending' | 'approved' | 'declined' | 'cancelled'; created_at: string }
 
-interface Cycle { id: string; name: string; currency: string; share_price: number; max_shares: number; loan_interest_pct: number; loan_multiple: number | null; frequency?: 'weekly' | 'biweekly' | 'monthly'; status: 'active' | 'closed' }
+interface Cycle { id: string; name: string; currency: string; share_price: number; max_shares: number; loan_interest_pct: number; loan_multiple: number | null; frequency?: 'weekly' | 'biweekly' | 'monthly'; social_monthly?: number; status: 'active' | 'closed' }
 interface Loan { id: string; member_id: string; principal: number; interest_pct: number; due_date: string | null; guarantor_id?: string | null; status: 'open' | 'repaid' }
 interface Entry { id: string; member_id: string; kind: 'shares' | 'social' | 'fine' | 'loan_repay'; amount: number; shares: number; loan_id: string | null; note: string; meeting_date: string; created_at: string }
 interface Book { cycle: Cycle | null; loans: Loan[]; entries: Entry[]; requests: Request[]; contribs?: Contrib[] }
@@ -54,15 +54,15 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
       const [l, e, q, k] = await Promise.all([
         supabase.from('vsla_loans').select('id,member_id,principal,interest_pct,due_date,guarantor_id,status').eq('cycle_id', cycle.id).limit(2000),
         supabase.from('vsla_entries').select('id,member_id,kind,amount,shares,loan_id,note,meeting_date,created_at').eq('cycle_id', cycle.id).order('created_at', { ascending: false }).limit(3000),
-        supabase.from('vsla_requests').select('id,member_id,amount,note,status,created_at').eq('group_id', groupId).order('created_at', { ascending: false }).limit(100),
-        supabase.from('vsla_contributions').select('id,member_id,kind,shares,amount,loan_id,note,meeting_date,status,created_at').eq('group_id', groupId).order('created_at', { ascending: false }).limit(300),
+        supabase.from('vsla_requests').select('id,member_id,amount,approved_amount,note,status,created_at').eq('group_id', groupId).order('created_at', { ascending: false }).limit(100),
+        supabase.from('vsla_contributions').select('id,member_id,kind,shares,amount,approved_amount,loan_id,note,meeting_date,status,created_at').eq('group_id', groupId).order('created_at', { ascending: false }).limit(300),
       ]);
       loans = ((l.data ?? []) as Loan[]).map((x) => ({ ...x, principal: num(x.principal), interest_pct: num(x.interest_pct) }));
       entries = ((e.data ?? []) as Entry[]).map((x) => ({ ...x, amount: num(x.amount) }));
-      requests = ((q.data ?? []) as Request[]).map((x) => ({ ...x, amount: num(x.amount) }));
-      contribs = ((k.data ?? []) as Contrib[]).map((x) => ({ ...x, amount: num(x.amount) }));
+      requests = ((q.data ?? []) as Request[]).map((x) => ({ ...x, amount: num(x.amount), approved_amount: x.approved_amount == null ? null : num(x.approved_amount) }));
+      contribs = ((k.data ?? []) as Contrib[]).map((x) => ({ ...x, amount: num(x.amount), approved_amount: x.approved_amount == null ? null : num(x.approved_amount) }));
     }
-    const next = { cycle: cycle ? { ...cycle, share_price: num(cycle.share_price), loan_interest_pct: num(cycle.loan_interest_pct) } : null, loans, entries, requests, contribs };
+    const next = { cycle: cycle ? { ...cycle, share_price: num(cycle.share_price), social_monthly: num(cycle.social_monthly), loan_interest_pct: num(cycle.loan_interest_pct) } : null, loans, entries, requests, contribs };
     setOffline(false);
     setBook(next);
     write(cacheKey(groupId), next);
@@ -156,17 +156,17 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
   const kindLabel = (k: Contrib['kind']) => (k === 'shares' ? w.kShares : k === 'social' ? w.kSocial : w.kRepay);
   const statusLabel = (st: Contrib['status']) => (st === 'pending' ? w.stPending : st === 'approved' ? w.stApproved : st === 'declined' ? w.stDeclined : w.stCancelled);
 
-  const decide = async (id: string, approve: boolean, due: string) => {
+  const decide = async (id: string, approve: boolean, due: string, amount?: number) => {
     setBusy(true);
-    const { error } = await supabase.rpc('vsla_decide_request', { p_request: id, p_approve: approve, p_due: due || null });
+    const { error } = await supabase.rpc('vsla_decide_request', { p_request: id, p_approve: approve, p_due: due || null, p_amount: approve && amount ? amount : null });
     setBusy(false);
     if (error) return toast(t('vs_error', { why: error.message }), 'error');
     void load();
   };
 
-  const decideContrib = async (id: string, approve: boolean) => {
+  const decideContrib = async (id: string, approve: boolean, amount?: number) => {
     setBusy(true);
-    const { error } = await supabase.rpc('vsla_decide_contribution', { p_id: id, p_approve: approve });
+    const { error } = await supabase.rpc('vsla_decide_contribution', { p_id: id, p_approve: approve, p_amount: approve && amount ? amount : null });
     setBusy(false);
     if (error) { toast(t('vs_error', { why: error.message }), 'error'); return false; }
     void load();
@@ -271,6 +271,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
     return (
       <section className="card space-y-4" aria-label={t('vs_tab_contrib')}>
         {header}
+        {admin && active && <SocialSetting cycle={cycle} fmt={fmt} onSaved={load} />}
         {admin && (
           <div className="space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -280,15 +281,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
             {pendingContribs.length === 0 ? <p className="text-sm text-zinc-500">{w.nothingToApprove}</p> : (
               <ul className="space-y-2">
                 {pendingContribs.map((x) => (
-                  <li key={x.id} className="flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 p-3 text-sm">
-                    <span className="min-w-0 flex-1">
-                      <span className="font-medium">{nameOf(x.member_id)}</span> · <span className="text-zinc-500">{kindLabel(x.kind)}{x.kind === 'shares' ? ` ×${x.shares}` : ''}</span>
-                      <span className="block text-xs text-zinc-500">{x.meeting_date}{x.note ? ` · ${x.note}` : ''}</span>
-                    </span>
-                    <span className="font-semibold">{fmt(x.amount)}</span>
-                    <button type="button" className="btn btn-accent btn-sm" disabled={busy} onClick={() => void decideContrib(x.id, true)}><Check className="h-3.5 w-3.5" aria-hidden="true" />{w.approveBtn}</button>
-                    <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => void decideContrib(x.id, false)}><X className="h-3.5 w-3.5" aria-hidden="true" />{w.declineBtn}</button>
-                  </li>
+                  <ApproveRow key={x.id} x={x} name={nameOf(x.member_id)} kind={kindLabel(x.kind)} busy={busy} fmt={fmt} onDecide={(ok, amt) => void decideContrib(x.id, ok, amt)} />
                 ))}
               </ul>
             )}
@@ -307,7 +300,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
                   {myContribs.slice(0, 8).map((x) => (
                     <li key={x.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5">
                       <span className="mr-auto">{kindLabel(x.kind)}{x.kind === 'shares' ? ` ×${x.shares}` : ''} <span className="text-xs text-zinc-400">{x.meeting_date}</span></span>
-                      <span className="font-medium">{fmt(x.amount)}</span>
+                      <span className="font-medium">{x.status === 'approved' && x.approved_amount != null && x.approved_amount !== x.amount ? w.approvedOf(fmt(x.approved_amount)) : fmt(x.amount)}</span>
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${x.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : x.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-zinc-200 text-zinc-700'}`}>{statusLabel(x.status)}</span>
                       {x.status === 'pending' && <button type="button" className="btn btn-ghost btn-sm" onClick={async () => { await supabase.rpc('vsla_cancel_contribution', { p_id: x.id }); void load(); }}>{w.cancelBtn}</button>}
                     </li>
@@ -364,7 +357,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
           {myRequests.length > 0 && (
             <ul className="divide-y divide-zinc-100 text-sm">
               {myRequests.slice(0, 5).map((q) => (
-                <li key={q.id} className="flex items-center gap-2 py-1.5"><span className="mr-auto">{fmt(q.amount)}{q.note && <span className="text-xs text-zinc-500"> · {q.note}</span>}</span>
+                <li key={q.id} className="flex items-center gap-2 py-1.5"><span className="mr-auto">{q.status === 'approved' && q.approved_amount != null && q.approved_amount !== q.amount ? `${fmt(q.amount)} → ${fmt(q.approved_amount)}` : fmt(q.amount)}{q.note && <span className="text-xs text-zinc-500"> · {q.note}</span>}</span>
                   <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${q.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : q.status === 'declined' ? 'bg-zinc-200 text-zinc-700' : 'bg-amber-100 text-amber-800'}`}>{t(`vs_status_${q.status}` as 'vs_status_pending')}</span></li>
               ))}
             </ul>
@@ -408,15 +401,17 @@ function EntryList({ entries, title, nameOf, fmt, empty }: { entries: Entry[]; t
   );
 }
 
-function RequestRow({ q, name, fmt, busy, onDecide }: { q: Request; name: string; fmt: (n: number) => string; busy: boolean; onDecide: (id: string, approve: boolean, due: string) => void }) {
-  const { t } = useI18n();
+function RequestRow({ q, name, fmt, busy, onDecide }: { q: Request; name: string; fmt: (n: number) => string; busy: boolean; onDecide: (id: string, approve: boolean, due: string, amount?: number) => void }) {
+  const { t, lang } = useI18n();
   const [due, setDue] = useState('');
+  const [amt, setAmt] = useState(String(q.amount));
   return (
     <div className="space-y-2 rounded-xl border border-zinc-200 p-3 text-sm">
       <p><span className="font-medium">{name}</span> · {fmt(q.amount)}{q.note && <span className="block text-xs text-zinc-500">{q.note}</span>}</p>
       <div className="flex flex-wrap items-end gap-2">
+        <div><label className="label" htmlFor={`rqa-${q.id}`}>{VSLA[lang].approvedAmtL}</label><input id={`rqa-${q.id}`} className="input w-32" type="number" min="0.01" step="any" inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value)} /></div>
         <div><label className="label" htmlFor={`rq-${q.id}`}>{t('vs_due')}</label><input id={`rq-${q.id}`} className="input" type="date" value={due} onChange={(e) => setDue(e.target.value)} /></div>
-        <button type="button" className="btn btn-accent btn-sm" disabled={busy} onClick={() => onDecide(q.id, true, due)}><Check className="h-3.5 w-3.5" aria-hidden="true" />{t('vs_approve')}</button>
+        <button type="button" className="btn btn-accent btn-sm" disabled={busy || !(Number(amt) > 0)} onClick={() => onDecide(q.id, true, due, Number(amt))}><Check className="h-3.5 w-3.5" aria-hidden="true" />{t('vs_approve')}</button>
         <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => onDecide(q.id, false, '')}><X className="h-3.5 w-3.5" aria-hidden="true" />{t('vs_decline')}</button>
       </div>
     </div>
@@ -616,7 +611,7 @@ function PayForm({ groupId, cycle, loans, owed, fmt, onSent }: { groupId: string
       <div>
         <span className="label">{w.whatPaid}</span>
         <div className="flex flex-wrap gap-1.5">
-          {kinds.map(([k, label]) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)} className={`chip ${kind === k ? 'bg-zinc-900 text-white' : ''}`}>{label}</button>)}
+          {kinds.map(([k, label]) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); if (k === 'social' && !amount && cycle.social_monthly) setAmount(String(cycle.social_monthly)); }} className={`chip ${kind === k ? 'bg-zinc-900 text-white' : ''}`}>{label}</button>)}
         </div>
       </div>
       {kind === 'shares' && (
@@ -630,6 +625,7 @@ function PayForm({ groupId, cycle, loans, owed, fmt, onSent }: { groupId: string
           <p className="mt-1 text-xs text-zinc-500">{w.sharesHelp(fmt(cycle.share_price), cycle.max_shares)}</p>
         </div>
       )}
+      {kind === 'social' && (cycle.social_monthly ?? 0) > 0 && <p className="text-xs text-zinc-600">{w.socialAsk(fmt(cycle.social_monthly ?? 0))}</p>}
       {kind === 'loan_repay' && (
         noLoan ? <p className="text-sm text-zinc-500">{w.noLoan}</p> : (
           <div><label className="label" htmlFor="pf-loan">{w.loanQ}</label>
@@ -654,6 +650,55 @@ function PayForm({ groupId, cycle, loans, owed, fmt, onSent }: { groupId: string
           {total > 0 && <span className="text-sm font-semibold">{w.youPay(fmt(total))}</span>}
         </div>
       )}
+    </form>
+  );
+}
+
+/** One pending contribution; the treasurer may change the amount before approving. */
+function ApproveRow({ x, name, kind, busy, fmt, onDecide }: { x: Contrib; name: string; kind: string; busy: boolean; fmt: (n: number) => string; onDecide: (approve: boolean, amount?: number) => void }) {
+  const { lang } = useI18n();
+  const w = VSLA[lang];
+  const [amt, setAmt] = useState(String(x.amount));
+  return (
+    <li className="space-y-2 rounded-xl border border-zinc-200 p-3 text-sm">
+      <p>
+        <span className="font-medium">{name}</span> · <span className="text-zinc-500">{kind}{x.kind === 'shares' ? ` ×${x.shares}` : ''}</span> · <span className="font-semibold">{fmt(x.amount)}</span>
+        <span className="block text-xs text-zinc-500">{x.meeting_date}{x.note ? ` · ${x.note}` : ''}</span>
+      </p>
+      <div className="flex flex-wrap items-end gap-2">
+        <div><label className="label" htmlFor={`ap-${x.id}`}>{w.approvedAmtL}</label><input id={`ap-${x.id}`} className="input w-32" type="number" min="0.01" step="any" inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value)} /></div>
+        <button type="button" className="btn btn-accent btn-sm" disabled={busy || !(Number(amt) > 0)} onClick={() => onDecide(true, Number(amt))}><Check className="h-3.5 w-3.5" aria-hidden="true" />{w.approveBtn}</button>
+        <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => onDecide(false)}><X className="h-3.5 w-3.5" aria-hidden="true" />{w.declineBtn}</button>
+      </div>
+    </li>
+  );
+}
+
+/** The treasurer sets the monthly social fund each member pays (kept apart from savings). */
+function SocialSetting({ cycle, fmt, onSaved }: { cycle: Cycle; fmt: (n: number) => string; onSaved: () => void }) {
+  const { t, lang } = useI18n();
+  const { toast } = useToast();
+  const w = VSLA[lang];
+  const [val, setVal] = useState(String(cycle.social_monthly ?? 0));
+  const [busy, setBusy] = useState(false);
+  const save = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.rpc('vsla_set_social', { p_cycle: cycle.id, p_amount: Number(val) || 0 });
+    setBusy(false);
+    if (error) return toast(t('vs_error', { why: error.message }), 'error');
+    toast(w.socialSaved);
+    onSaved();
+  };
+  return (
+    <form className="space-y-2 rounded-xl bg-zinc-50 p-3" onSubmit={save}>
+      <h3 className="text-sm font-semibold">{w.socialTitle}</h3>
+      <p className="text-xs text-zinc-500">{w.socialHelp}</p>
+      <div className="flex flex-wrap items-end gap-2">
+        <div><label className="label" htmlFor="vs-social">{w.socialMonthlyL}</label><input id="vs-social" className="input w-40" type="number" min="0" step="any" inputMode="decimal" value={val} onChange={(e) => setVal(e.target.value)} /></div>
+        <button className="btn btn-accent btn-sm" disabled={busy}>{busy && <Spinner />}{w.socialSave}</button>
+        {(cycle.social_monthly ?? 0) > 0 && <span className="text-xs text-zinc-500">{w.socialAsk(fmt(cycle.social_monthly ?? 0))}</span>}
+      </div>
     </form>
   );
 }

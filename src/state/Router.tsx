@@ -11,7 +11,7 @@ const RouterContext = createContext<RouterValue | null>(null);
 function parse(): Route {
   const [tab, id] = window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
   if (tab === 'legal' || tab === 'admin' || tab === 'join' || tab === 'post' || tab === 'contest' || tab === 'site' || tab === 'theme' || (TABS as readonly string[]).includes(tab)) return { tab: tab as Tab, id };
-  return { tab: 'search' }; // default landing page: Search & Feeds
+  return { tab: 'home' }; // default page after sign-in: Home
 }
 
 export function RouterProvider({ children }: { children: ReactNode }) {

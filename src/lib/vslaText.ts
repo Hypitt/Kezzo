@@ -13,6 +13,7 @@ export interface VslaWords {
   kindHelp: { shares: string; social: string; fine: string; loan: string; loan_repay: string };
   cycleHelp: { freq: string; currency: string; price: string; interest: string; multiple: string }; startHelp: string;
   joinHelp: string; createHelp: string; required: string;
+  approvedAmtL: string; requestedWas: (a: string) => string; approvedOf: (a: string) => string; socialTitle: string; socialHelp: string; socialMonthlyL: string; socialSave: string; socialSaved: string; socialAsk: (a: string) => string;
 }
 
 export const VSLA: Record<Lang, VslaWords> = {
@@ -50,6 +51,7 @@ export const VSLA: Record<Lang, VslaWords> = {
     },
     startHelp: 'A cycle is one savings period, often a year. Fill in the rules your group agreed on.',
     joinHelp: 'Have a code from your group? Enter it to join.', createHelp: 'Start a new savings group. You become its treasurer.', required: 'required',
+    approvedAmtL: 'Amount to approve', requestedWas: (a) => 'asked {a}'.replace('{a}', a), approvedOf: (a) => 'approved {a}'.replace('{a}', a), socialTitle: 'Monthly social fund', socialHelp: 'Money for group events and help (a funeral, a wedding, an emergency). It is kept apart from savings. Set the amount each member pays every month.', socialMonthlyL: 'Amount per member per month', socialSave: 'Save', socialSaved: 'Saved.', socialAsk: (a) => 'Monthly social fund: {a} per member'.replace('{a}', a),
   },
   fr: {
     guideTitle: 'Comment fonctionne un groupe d’épargne', guideShow: 'Comment ça marche ?', guideHide: 'Masquer l’aide',
@@ -85,6 +87,7 @@ export const VSLA: Record<Lang, VslaWords> = {
     },
     startHelp: 'Un cycle est une période d’épargne, souvent d’un an. Indiquez les règles convenues par votre groupe.',
     joinHelp: 'Vous avez un code de votre groupe ? Saisissez-le pour rejoindre.', createHelp: 'Créez un nouveau groupe d’épargne. Vous en devenez le trésorier.', required: 'obligatoire',
+    approvedAmtL: 'Montant à approuver', requestedWas: (a) => 'demandé {a}'.replace('{a}', a), approvedOf: (a) => 'approuvé {a}'.replace('{a}', a), socialTitle: 'Fonds social mensuel', socialHelp: 'Argent pour les événements et l’entraide du groupe (deuil, mariage, urgence). Il est séparé de l’épargne. Fixez le montant que chaque membre verse chaque mois.', socialMonthlyL: 'Montant par membre et par mois', socialSave: 'Enregistrer', socialSaved: 'Enregistré.', socialAsk: (a) => 'Fonds social mensuel : {a} par membre'.replace('{a}', a),
   },
   es: {
     guideTitle: 'Cómo funciona un grupo de ahorro', guideShow: '¿Cómo funciona?', guideHide: 'Ocultar ayuda',
@@ -120,6 +123,7 @@ export const VSLA: Record<Lang, VslaWords> = {
     },
     startHelp: 'Un ciclo es un periodo de ahorro, a menudo un año. Escribe las reglas que acordó tu grupo.',
     joinHelp: '¿Tienes un código de tu grupo? Escríbelo para unirte.', createHelp: 'Crea un nuevo grupo de ahorro. Serás su tesorero.', required: 'obligatorio',
+    approvedAmtL: 'Monto a aprobar', requestedWas: (a) => 'pidió {a}'.replace('{a}', a), approvedOf: (a) => 'aprobado {a}'.replace('{a}', a), socialTitle: 'Fondo social mensual', socialHelp: 'Dinero para eventos y ayuda del grupo (un funeral, una boda, una emergencia). Va aparte del ahorro. Fija el monto que cada miembro paga cada mes.', socialMonthlyL: 'Monto por miembro al mes', socialSave: 'Guardar', socialSaved: 'Guardado.', socialAsk: (a) => 'Fondo social mensual: {a} por miembro'.replace('{a}', a),
   },
   pt: {
     guideTitle: 'Como funciona um grupo de poupança', guideShow: 'Como funciona?', guideHide: 'Ocultar ajuda',
@@ -155,6 +159,7 @@ export const VSLA: Record<Lang, VslaWords> = {
     },
     startHelp: 'Um ciclo é um período de poupança, geralmente um ano. Preencha as regras que o grupo combinou.',
     joinHelp: 'Tem um código do seu grupo? Digite para entrar.', createHelp: 'Crie um novo grupo de poupança. Você será o tesoureiro.', required: 'obrigatório',
+    approvedAmtL: 'Valor a aprovar', requestedWas: (a) => 'pediu {a}'.replace('{a}', a), approvedOf: (a) => 'aprovado {a}'.replace('{a}', a), socialTitle: 'Fundo social mensal', socialHelp: 'Dinheiro para eventos e ajuda do grupo (funeral, casamento, emergência). Fica separado da poupança. Defina o valor que cada membro paga por mês.', socialMonthlyL: 'Valor por membro por mês', socialSave: 'Salvar', socialSaved: 'Salvo.', socialAsk: (a) => 'Fundo social mensal: {a} por membro'.replace('{a}', a),
   },
   hi: {
     guideTitle: 'बचत समूह कैसे काम करता है', guideShow: 'यह कैसे काम करता है?', guideHide: 'मदद छिपाएँ',
@@ -190,5 +195,6 @@ export const VSLA: Record<Lang, VslaWords> = {
     },
     startHelp: 'चक्र बचत की एक अवधि है, अक्सर एक साल। अपने समूह के तय नियम भरें।',
     joinHelp: 'क्या आपके पास समूह का कोड है? जुड़ने के लिए डालें।', createHelp: 'नया बचत समूह शुरू करें। आप उसके कोषाध्यक्ष होंगे।', required: 'ज़रूरी',
+    approvedAmtL: 'स्वीकृत करने की राशि', requestedWas: (a) => 'माँगा {a}'.replace('{a}', a), approvedOf: (a) => 'स्वीकृत {a}'.replace('{a}', a), socialTitle: 'मासिक सामाजिक कोष', socialHelp: 'समूह के आयोजनों और मदद (अंतिम संस्कार, शादी, आपात स्थिति) के लिए पैसा। यह बचत से अलग रहता है। हर सदस्य हर महीने कितना देगा, तय करें।', socialMonthlyL: 'प्रति सदस्य प्रति माह राशि', socialSave: 'सहेजें', socialSaved: 'सहेजा गया।', socialAsk: (a) => 'मासिक सामाजिक कोष: प्रति सदस्य {a}'.replace('{a}', a),
   },
 };
