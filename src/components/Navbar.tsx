@@ -11,7 +11,7 @@ import { LanguageSwitch } from './LanguageSwitch';
 import type { Lang } from '../lib/types';
 import { NotificationBell } from './NotificationBell';
 
-const BOTTOM = ['explore', 'arena', 'create', 'connect'];
+const BOTTOM = ['explore', 'community', 'create', 'connect'];
 
 export function Navbar() {
   const { user, profile, openAuth, updateProfile } = useAuth();

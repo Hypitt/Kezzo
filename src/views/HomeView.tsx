@@ -96,6 +96,11 @@ export function HomeView() {
             ))}
           </div>
         )}
+        {posts.length > 0 && (
+          <div className="mt-4 text-center">
+            <button type="button" className="btn btn-ghost" onClick={() => go('search')}>{t('see_all')}</button>
+          </div>
+        )}
       </section>}
       {viewing && <StatusViewer person={viewing} onClose={() => setViewing(null)} />}
     </div>
