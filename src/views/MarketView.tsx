@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, Heart, ImagePlus, MapPin, MessageCircle, Pencil, Plus, Share2, Store, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Heart, ImagePlus, MapPin, MessageCircle, Pencil, Plus, Share2, SlidersHorizontal, Store, Trash2, X } from 'lucide-react';
+import type { Lang } from '../lib/types';
 import { supabase } from '../lib/supabase';
 import { PUBLIC_PROFILE } from '../lib/data';
 import { fileExt } from '../lib/format';
@@ -267,6 +268,8 @@ function Form({ editing, onDone, onCancel }: { editing: Listing | null; onDone: 
 }
 
 /** Members sell products and services. No payments yet: buyers message sellers and arrange the deal themselves. */
+const FILTERS_WORD: Record<Lang, string> = { en: 'Filters', fr: 'Filtres', es: 'Filtros', pt: 'Filtros', hi: 'फ़िल्टर' };
+
 /** The seller's own shop look: name, about text, profile picture and cover. Saved in market_shops. */
 function ShopEditor({ ownerId, shop, onCancel, onSaved }: { ownerId: string; shop: Shop | null; onCancel: () => void; onSaved: (s: Shop) => void }) {
   const { lang } = useI18n();
@@ -360,6 +363,7 @@ export function MarketView({ shop }: { shop?: string }) {
   const [place, setPlace] = useState(readPlace);
   const [saved, setSaved] = useState(readPlace);
   const [placeEdit, setPlaceEdit] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [sort, setSort] = useState<'smart' | 'new' | 'low' | 'high'>('smart');
   const [avail, setAvail] = useState(false);
   const m2 = MARKET2[lang];
@@ -507,36 +511,45 @@ export function MarketView({ shop }: { shop?: string }) {
 
       {form.open && <Form editing={form.editing} onCancel={() => setForm({ open: false, editing: null })} onDone={() => { setForm({ open: false, editing: null }); load(); }} />}
 
-      <p className="text-xs text-zinc-500">{w.safety}</p>
-
-      {!shop && (
-        <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-600">
-          <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
-          {placeEdit || (!place.country && !place.city) ? (
-            <>
-              <input className="input !w-32 !py-1 text-sm" aria-label={m2.placeCountry} placeholder={m2.placeCountry} value={place.country} maxLength={60} onChange={(e) => setPlace({ ...place, country: e.target.value })} />
-              <input className="input !w-32 !py-1 text-sm" aria-label={m2.placeCity} placeholder={m2.placeCity} value={place.city} maxLength={60} onChange={(e) => setPlace({ ...place, city: e.target.value })} />
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => { const next = { country: place.country.trim(), city: place.city.trim() }; savePlace(next); setSaved(next); setPlaceEdit(false); }}>{m2.placeSave}</button>
-            </>
-          ) : (
-            <button type="button" className="hover:underline" onClick={() => setPlaceEdit(true)}><span className="font-semibold">{[place.city, place.country].filter(Boolean).join(', ')}</span></button>
-          )}
-        </div>
-      )}
 
       <div className="space-y-3">
-        <input className="input" placeholder={m2.searchHint} aria-label={w.search} value={input} onChange={(e) => setInput(e.target.value)} />
-        {!shop && <div className="flex gap-2 overflow-x-auto pb-1">{tabs.map(([k, label]) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{label}</Chip>)}</div>}
-        <div className="flex flex-wrap items-center gap-2">
-          <select className="input !w-auto min-w-0 flex-1 sm:flex-none" aria-label={w.fCat} value={cat} onChange={(e) => setCat(e.target.value as 'all' | MarketCat)}>
-            <option value="all">{w.anyCategory}</option>
-            {MARKET_CATS.map((c) => <option key={c} value={c}>{w.cats[c]}</option>)}
-          </select>
-          <select className="input !w-auto min-w-0 flex-1 sm:flex-none" aria-label={m2.sortNew} value={sort} onChange={(e) => setSort(e.target.value as 'smart' | 'new' | 'low' | 'high')}>
-            <option value="smart">{m2.sortSmart}</option><option value="new">{m2.sortNew}</option><option value="low">{m2.sortLow}</option><option value="high">{m2.sortHigh}</option>
-          </select>
-          <label className="flex items-center gap-2 whitespace-nowrap text-sm"><input type="checkbox" checked={avail} onChange={(e) => setAvail(e.target.checked)} />{m2.onlyAvail}</label>
+        <div className="flex gap-2">
+          <input className="input min-w-0 flex-1" placeholder={m2.searchHint} aria-label={w.search} value={input} onChange={(e) => setInput(e.target.value)} />
+          <button type="button" className="btn btn-ghost shrink-0" aria-expanded={showFilters} onClick={() => setShowFilters((v) => !v)}>
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+            <span className="hidden sm:inline">{FILTERS_WORD[lang]}</span>
+            {(cat !== 'all' || avail || sort !== 'smart') && <span className="h-2 w-2 rounded-full bg-accent" aria-hidden="true" />}
+          </button>
         </div>
+        {!shop && <div className="flex gap-2 overflow-x-auto pb-1">{tabs.map(([k, label]) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{label}</Chip>)}</div>}
+        {showFilters && (
+          <div className="space-y-3 rounded-xl bg-zinc-50 p-3">
+            {!shop && (
+              <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-600">
+                <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
+                {placeEdit || (!place.country && !place.city) ? (
+                  <>
+                    <input className="input !w-32 !py-1 text-sm" aria-label={m2.placeCountry} placeholder={m2.placeCountry} value={place.country} maxLength={60} onChange={(e) => setPlace({ ...place, country: e.target.value })} />
+                    <input className="input !w-32 !py-1 text-sm" aria-label={m2.placeCity} placeholder={m2.placeCity} value={place.city} maxLength={60} onChange={(e) => setPlace({ ...place, city: e.target.value })} />
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => { const next = { country: place.country.trim(), city: place.city.trim() }; savePlace(next); setSaved(next); setPlaceEdit(false); }}>{m2.placeSave}</button>
+                  </>
+                ) : (
+                  <button type="button" className="hover:underline" onClick={() => setPlaceEdit(true)}><span className="font-semibold">{[place.city, place.country].filter(Boolean).join(', ')}</span></button>
+                )}
+              </div>
+            )}
+            <div className="grid gap-2 sm:grid-cols-2">
+              <select className="input" aria-label={w.fCat} value={cat} onChange={(e) => setCat(e.target.value as 'all' | MarketCat)}>
+                <option value="all">{w.anyCategory}</option>
+                {MARKET_CATS.map((c) => <option key={c} value={c}>{w.cats[c]}</option>)}
+              </select>
+              <select className="input" aria-label={m2.sortNew} value={sort} onChange={(e) => setSort(e.target.value as 'smart' | 'new' | 'low' | 'high')}>
+                <option value="smart">{m2.sortSmart}</option><option value="new">{m2.sortNew}</option><option value="low">{m2.sortLow}</option><option value="high">{m2.sortHigh}</option>
+              </select>
+            </div>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={avail} onChange={(e) => setAvail(e.target.checked)} />{m2.onlyAvail}</label>
+          </div>
+        )}
       </div>
 
       {loading ? <Loading /> : rows.length === 0 ? <Empty text={shop ? w.emptyShop : kind === 'mine' ? w.emptyMine : kind === 'fav' ? m2.emptyFav : w.empty}><Store className="mx-auto mt-3 h-6 w-6 text-zinc-400" aria-hidden="true" /></Empty> : (
@@ -550,6 +563,7 @@ export function MarketView({ shop }: { shop?: string }) {
           <div className="grid gap-3 sm:grid-cols-2">{hiddenRows.map(card)}</div>
         </section>
       )}
+      <p className="pt-2 text-center text-[11px] text-zinc-400">{w.safety}</p>
     </div>
   );
 }
