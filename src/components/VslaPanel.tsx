@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { PiggyBank, WifiOff, ChevronLeft, ChevronRight, Check, X, Minus, Plus, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useI18n } from '../state/I18n';
@@ -210,7 +210,6 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
         {active && (admin && pendingContribs.length > 0
           ? <NextStep text={w.hintReview(pendingContribs.length)} button={w.hintReviewBtn} onClick={() => onOpenTab?.('contrib')} />
           : meId ? <NextStep text={w.hintPay} button={w.hintPayBtn} onClick={() => onOpenTab?.('contrib')} /> : null)}
-        <h3 className="text-sm font-semibold">{w.sectSummary}</h3>
         <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
           {[[t('vs_cash'), stats.cash], [t('vs_savings'), stats.saved], [t('vs_loans_out'), stats.outstanding], [t('vs_social'), stats.social]].map(([label, value]) => (
             <div key={label as string} className="rounded-xl bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{label}</dt><dd className="font-semibold">{fmt(value as number)}</dd></div>
@@ -226,7 +225,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
           {t('vs_rules2', { freq: t(`vs_freq_${cycle.frequency ?? 'weekly'}` as 'vs_freq_weekly'), price: fmt(cycle.share_price), max: cycle.max_shares, pct: cycle.loan_interest_pct })}
           {cycle.loan_multiple ? ` ${t('vs_limit_note', { mult: cycle.loan_multiple })}` : ''}
         </p>
-        <h3 className="text-sm font-semibold">{w.sectMembers}</h3>
+        <Fold title={w.sectMembers}>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[420px] text-left text-sm">
             <thead><tr className="text-[11px] text-zinc-500"><th className="py-1 font-medium">{t('vs_member')}</th><th className="font-medium">{t('vs_col_shares')}</th><th className="font-medium">{t('vs_col_saved')}</th><th className="font-medium">{t('vs_col_owes')}</th><th className="font-medium">{t('vs_col_payout')}</th></tr></thead>
@@ -240,15 +239,15 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
           </table>
         </div>
         <p className="text-[11px] text-zinc-500">{t('vs_estimate_note')}</p>
+        </Fold>
         {admin && active && (
-          <div className="space-y-3 border-t border-zinc-100 pt-4">
-            <h3 className="text-sm font-semibold">{w.sectRecord}</h3>
+          <Fold title={w.sectRecord}>
             <p className="text-xs text-zinc-500">{w.recordHelp}</p>
             <RecordForm cycle={cycle} members={live} perMember={stats.perMember} cash={stats.cash} fmt={fmt} loans={openLoans} nameOf={nameOf} busy={busy} onSubmit={submit} />
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => window.confirm(t('vs_close_confirm')) && supabase.rpc('vsla_close', { p_cycle: cycle.id }).then(({ error }) => (error ? toast(t('vs_error', { why: error.message }), 'error') : load()))}>{t('vs_close')}</button>
-          </div>
+          </Fold>
         )}
-        <EntryList entries={book.entries.slice(0, 15)} title={w.sectRecent} nameOf={nameOf} fmt={fmt} />
+        <EntryList fold entries={book.entries.slice(0, 15)} title={w.sectRecent} nameOf={nameOf} fmt={fmt} />
       </section>
     );
   }
@@ -271,7 +270,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
     return (
       <section className="card space-y-4" aria-label={t('vs_tab_contrib')}>
         {header}
-        {admin && active && <SocialSetting cycle={cycle} fmt={fmt} onSaved={load} />}
+        {admin && active && <Fold title={w.socialTitle}><SocialSetting cycle={cycle} fmt={fmt} onSaved={load} /></Fold>}
         {admin && (
           <div className="space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -293,8 +292,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
             <h3 className="text-sm font-semibold">{w.payTitle}</h3>
             <p className="text-xs text-zinc-500">{w.payHelp}</p>
             <PayForm groupId={groupId} cycle={cycle} loans={openLoans.filter((l) => l.member_id === meId)} owed={stats.owedByLoan} fmt={fmt} onSent={load} />
-            <div className="space-y-1">
-              <h4 className="text-sm font-semibold">{w.mineTitle}</h4>
+            <Fold title={w.mineTitle} defaultOpen={myContribs.some((x) => x.status === 'pending')}>
               {myContribs.length === 0 ? <p className="text-sm text-zinc-500">{w.mineEmpty}</p> : (
                 <ul className="divide-y divide-zinc-100 text-sm">
                   {myContribs.slice(0, 8).map((x) => (
@@ -307,10 +305,9 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
                   ))}
                 </ul>
               )}
-            </div>
+            </Fold>
           </div>
         )}
-        <h3 className="border-t border-zinc-100 pt-4 text-sm font-semibold">{t('vs_tab_contrib')}</h3>
         <div className="flex items-center justify-between gap-2">
           <button type="button" className="btn btn-ghost btn-sm" aria-label={t('vs_prev_month')} disabled={month <= first} onClick={() => shift(-1)}><ChevronLeft className="h-4 w-4" aria-hidden="true" /></button>
           <div className="text-center"><p className="font-semibold capitalize">{label}</p><p className="text-xs text-zinc-500">{t(`vs_freq_${cycle.frequency ?? 'weekly'}` as 'vs_freq_weekly')}</p></div>
@@ -332,7 +329,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
             );
           })}
         </ul>
-        <EntryList entries={inMonth} title={t('vs_month_entries')} nameOf={nameOf} fmt={fmt} empty={t('vs_month_empty')} />
+        <EntryList fold entries={inMonth} title={t('vs_month_entries')} nameOf={nameOf} fmt={fmt} empty={t('vs_month_empty')} />
       </section>
     );
   }
@@ -351,8 +348,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
         </div>
       )}
       {meId && active && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold">{t('vs_request_loan')}</h3>
+        <Fold title={t('vs_request_loan')} defaultOpen={myRequests.some((q) => q.status === 'pending')}>
           <RequestForm groupId={groupId} onSent={load} />
           {myRequests.length > 0 && (
             <ul className="divide-y divide-zinc-100 text-sm">
@@ -362,7 +358,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
               ))}
             </ul>
           )}
-        </div>
+        </Fold>
       )}
       <div className="space-y-1">
         <h3 className="text-sm font-semibold">{t('vs_open_loans')}</h3>
@@ -382,12 +378,10 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
   );
 }
 
-function EntryList({ entries, title, nameOf, fmt, empty }: { entries: Entry[]; title: string; nameOf: (id: string) => string; fmt: (n: number) => string; empty?: string }) {
+function EntryList({ entries, title, nameOf, fmt, empty, fold }: { fold?: boolean; entries: Entry[]; title: string; nameOf: (id: string) => string; fmt: (n: number) => string; empty?: string }) {
   const { t } = useI18n();
   if (entries.length === 0) return empty ? <p className="text-sm text-zinc-500">{empty}</p> : null;
-  return (
-    <div className="space-y-1">
-      <h3 className="text-sm font-semibold">{title}</h3>
+  const list = (
       <ul className="divide-y divide-zinc-100 text-sm">
         {entries.map((e) => (
           <li key={e.id} className="flex flex-wrap items-center gap-x-2 py-1.5">
@@ -397,8 +391,8 @@ function EntryList({ entries, title, nameOf, fmt, empty }: { entries: Entry[]; t
           </li>
         ))}
       </ul>
-    </div>
   );
+  return fold ? <Fold title={title} badge={String(entries.length)}>{list}</Fold> : <div className="space-y-1"><h3 className="text-sm font-semibold">{title}</h3>{list}</div>;
 }
 
 function RequestRow({ q, name, fmt, busy, onDecide }: { q: Request; name: string; fmt: (n: number) => string; busy: boolean; onDecide: (id: string, approve: boolean, due: string, amount?: number) => void }) {
@@ -691,8 +685,7 @@ function SocialSetting({ cycle, fmt, onSaved }: { cycle: Cycle; fmt: (n: number)
     onSaved();
   };
   return (
-    <form className="space-y-2 rounded-xl bg-zinc-50 p-3" onSubmit={save}>
-      <h3 className="text-sm font-semibold">{w.socialTitle}</h3>
+    <form className="space-y-2" onSubmit={save}>
       <p className="text-xs text-zinc-500">{w.socialHelp}</p>
       <div className="flex flex-wrap items-end gap-2">
         <div><label className="label" htmlFor="vs-social">{w.socialMonthlyL}</label><input id="vs-social" className="input w-40" type="number" min="0" step="any" inputMode="decimal" value={val} onChange={(e) => setVal(e.target.value)} /></div>
@@ -700,5 +693,19 @@ function SocialSetting({ cycle, fmt, onSaved }: { cycle: Cycle; fmt: (n: number)
         {(cycle.social_monthly ?? 0) > 0 && <span className="text-xs text-zinc-500">{w.socialAsk(fmt(cycle.social_monthly ?? 0))}</span>}
       </div>
     </form>
+  );
+}
+
+/** A closed-by-default section: keeps the page short, opens with one tap. */
+function Fold({ title, badge, defaultOpen, children }: { title: string; badge?: string; defaultOpen?: boolean; children: ReactNode }) {
+  return (
+    <details className="group rounded-xl border border-zinc-200" open={defaultOpen}>
+      <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-sm font-semibold">
+        <span className="mr-auto">{title}</span>
+        {badge && <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-600">{badge}</span>}
+        <ChevronRight className="h-4 w-4 shrink-0 text-zinc-400 transition group-open:rotate-90" aria-hidden="true" />
+      </summary>
+      <div className="space-y-3 border-t border-zinc-100 p-3">{children}</div>
+    </details>
   );
 }
