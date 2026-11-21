@@ -1,7 +1,7 @@
 import { ShareButton } from '../components/ShareButton';
 import { Tx } from '../components/Tx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Coins, Crown, Flame, Heart, Scale, Sparkles, Timer, UserMinus, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Crown, Flame, Heart, Scale, Sparkles, Timer, UserMinus, Volume2, VolumeX } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { api } from '../lib/api';
 import { BATTLE_SELECT, PUBLIC_PROFILE, loadPeople, normalizeBattle, type PersonRow } from '../lib/data';
@@ -172,7 +172,6 @@ export function BattleRoom({ id }: { id: string }) {
             {t(`status_${battle.status}` as Key)}
           </span>
           <span className="text-zinc-500">{t('round_of', { n: battle.current_round, total: battle.total_rounds })}</span>
-          <span className="inline-flex items-center gap-1 text-zinc-500"><Coins className="h-3.5 w-3.5" aria-hidden="true" />{t('prize_pool', { n: battle.prize_pool })}</span>
           {battle.entry_fee > 0 && <span className="text-zinc-500">{t('entry_fee_n', { n: battle.entry_fee })}</span>}
           <span className="inline-flex items-center gap-1 text-zinc-500"><Scale className="h-3.5 w-3.5" aria-hidden="true" />{t('weights_badge', { pub: battle.public_weight, jud: 100 - battle.public_weight })}</span>
           {!battle.host_competes && <span className="rounded-full bg-zinc-100 px-2 py-0.5 font-medium text-zinc-700">{t('host_only_badge')}</span>}
@@ -348,12 +347,6 @@ function CompetitorCard({ c, index, battle, standing, leader, hasJudges, viewerI
             <button type="button" className="btn btn-ghost btn-sm bg-white" disabled={!votesOpen || alreadyLiked || voting} onClick={onLike} aria-label={t('like_aria', { name })}>
               <Heart className={`h-3.5 w-3.5 ${alreadyLiked ? 'fill-red-500 text-red-500' : ''}`} aria-hidden="true" />
               {alreadyLiked ? t('liked') : t('like_free')}
-            </button>
-            <button type="button" className={`btn btn-sm text-white ${color.bg}`} disabled={!votesOpen || voting} onClick={() => onVote(2)} aria-label={t('vote_aria', { n: 2, name })}>
-              <Coins className="h-3.5 w-3.5" aria-hidden="true" />{t('vote_coins', { n: 2 })}
-            </button>
-            <button type="button" className={`btn btn-sm text-white ${color.bg}`} disabled={!votesOpen || voting} onClick={() => onVote(5)} aria-label={t('vote_aria', { n: 5, name })}>
-              <Coins className="h-3.5 w-3.5" aria-hidden="true" />{t('vote_coins', { n: 5 })}
             </button>
             {!votesOpen && <span className="text-xs text-zinc-500">{t('vote_after_start')}</span>}
           </>

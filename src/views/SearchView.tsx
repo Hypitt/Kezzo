@@ -10,7 +10,7 @@ import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { BattleCard } from '../components/BattleCard';
 import { PostCard } from '../components/PostCard';
-import { Avatar, Chip, Empty, Loading, LoadMore, FilterButton, PageHeader } from '../components/ui';
+import { Avatar, Chip, Empty, Loading, LoadMore, FilterButton } from '../components/ui';
 
 type Tab = 'feed' | 'battles' | 'people';
 const PAGE = 12;
@@ -109,7 +109,6 @@ export function SearchView() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title={t('nav_search')} sub={t('search_sub')} />
       <div className="mb-5 space-y-3">
         <div className="flex gap-2">
           <div className="relative min-w-0 flex-1">

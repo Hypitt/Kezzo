@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Coins, Users, XCircle } from 'lucide-react';
+import { Users, XCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { explain } from '../lib/errors';
 import type { Battle } from '../lib/types';
@@ -54,7 +54,6 @@ export function BattleCard({ battle }: { battle: Battle }) {
         </div>
         <div className="flex items-center gap-3 text-xs text-zinc-500">
           <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" aria-hidden="true" />{battle.contenders.length}/{battle.max_contenders}</span>
-          <span className="inline-flex items-center gap-1"><Coins className="h-3.5 w-3.5" aria-hidden="true" />{battle.prize_pool}</span>
         </div>
       </div>
     </button>

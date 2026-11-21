@@ -158,11 +158,6 @@ export function PostCard({ post, onChange, onDelete }: Props) {
           </span>
         </button>
         {contestInfo && <ContestBadge info={contestInfo} link={route.tab !== 'contest'} />}
-        {post.download_price > 0 && (
-          <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
-            {t('price_coins', { n: post.download_price })}
-          </span>
-        )}
       </header>
 
       {editing ? (

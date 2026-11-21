@@ -6,20 +6,17 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { PostCard } from '../components/PostCard';
-import { Chip, Empty, Loading, LoadMore, FilterButton, PageHeader } from '../components/ui';
+import { Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
 
 const PAGE = 8;
 type KindFilter = 'all' | 'photo' | 'audio' | 'video';
-type PriceFilter = 'all' | 'free' | 'paid';
 
 export function MediaView() {
   const { user, blocked } = useAuth();
-  const { t, lang } = useI18n();
-  const [showFilters, setShowFilters] = useState(false);
+  const { t } = useI18n();
   const { toast } = useToast();
   const { go } = useRouter();
   const [kind, setKind] = useState<KindFilter>('all');
-  const [price, setPrice] = useState<PriceFilter>('all');
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -35,9 +32,8 @@ export function MediaView() {
         shuffleSeed: seed.current,
         excludeAuthors: blocked,
         kinds: kind === 'all' ? (['photo', 'audio', 'video'] as PostKind[]) : [kind],
-        paid: price === 'all' ? null : price === 'paid',
       }),
-    [user, blocked, kind, price],
+    [user, blocked, kind],
   );
 
   useEffect(() => {
@@ -76,15 +72,7 @@ export function MediaView() {
               <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{t(`kind_${k}` as const)}</Chip>
             ))}
           </div>
-          <FilterButton open={showFilters} active={price !== 'all'} lang={lang} onClick={() => setShowFilters((v) => !v)} />
         </div>
-        {showFilters && (
-          <div className="flex flex-wrap gap-2 rounded-xl bg-zinc-50 p-3">
-            {(['all', 'free', 'paid'] as PriceFilter[]).map((p) => (
-              <Chip key={p} active={price === p} onClick={() => setPrice(p)}>{t(`price_${p}` as const)}</Chip>
-            ))}
-          </div>
-        )}
       </div>
       {loading ? (
         <Loading />

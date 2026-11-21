@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { Coins, Pencil } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { explain } from '../lib/errors';
 import { loadPosts } from '../lib/data';
 import { compressImage, resizeCover } from '../lib/media';
 import { CACHE_SECONDS, startUpload } from '../lib/upload';
@@ -159,7 +158,6 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
         </div>
       </header>
 
-      {own && <OwnWallet />}
 
       <section className="space-y-4">
         <h2 className="text-base font-semibold">{t('posts')}</h2>
@@ -180,33 +178,6 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
       {own && <OwnSettings profile={profile} />}
       {own && <div className="border-t border-zinc-200 pt-2"><AccountFooter /></div>}
     </div>
-  );
-}
-
-function OwnWallet() {
-  const { wallet, refreshWallet } = useAuth();
-  const { t } = useI18n();
-  const { toast } = useToast();
-  const thisMonth = new Date().toISOString().slice(0, 7);
-  const canClaim = Boolean(wallet && wallet.last_claim_month.slice(0, 7) < thisMonth);
-
-  const claim = async () => {
-    const { error } = await supabase.rpc('claim_monthly_coins');
-    if (error) return toast(explain(error, t), 'error');
-    await refreshWallet();
-    toast(t('claimed_toast'));
-  };
-
-  return (
-    <>
-      <section className="card flex flex-wrap items-center gap-x-3 gap-y-1 !p-2" aria-label={t('wallet')}>
-        <Coins className="h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
-        <span className="text-sm font-bold tabular-nums" title={`${t('voting_coins')} / ${t('reward_coins')}`}>{wallet?.voting_coins ?? 0} · {wallet?.reward_coins ?? 0}</span>
-        {canClaim && <button type="button" className="btn btn-accent btn-sm" onClick={claim}>{t('claim_monthly')}</button>}
-        <p className="min-w-0 flex-1 basis-48 text-[10px] leading-tight text-zinc-400">{t('coins_note')}</p>
-      </section>
-
-    </>
   );
 }
 

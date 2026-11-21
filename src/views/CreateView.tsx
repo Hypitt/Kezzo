@@ -272,11 +272,6 @@ function PostForm({ contest = false, contestId }: { contest?: boolean; contestId
             )}
             {kind === 'photo' && files.length > 0 && <p className="mt-1 text-xs text-zinc-500">{t('photos_count', { n: files.length, max: MAX_PHOTOS })}</p>}
           </div>
-          {!contest && <div>
-            <label className="label" htmlFor="pf-price">{t('price_label')}</label>
-            <input id="pf-price" type="number" min={0} max={100} className="input" value={price} disabled={busy} onChange={(e) => setPrice(Math.max(0, Math.min(100, Number(e.target.value) || 0)))} />
-            <p className="mt-1 text-xs text-zinc-500">{t('price_hint')}</p>
-          </div>}
         </>
       )}
       {upload && <UploadBar state={upload} onCancel={cancelUpload} onRetry={() => void run()} />}

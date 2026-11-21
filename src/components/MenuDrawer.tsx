@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Coins, LogOut, Settings, X, type LucideIcon } from 'lucide-react';
+import { LogOut, Settings, X, type LucideIcon } from 'lucide-react';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
-import { useToast } from '../state/Toast';
-import { explain } from '../lib/errors';
 import { supabase } from '../lib/supabase';
 import { GROUPS, TAB_ICON, groupName, groupOf, tabName } from '../lib/nav';
 import { InstallButton } from './InstallButton';
@@ -12,8 +10,7 @@ import { Avatar } from './ui';
 
 /** The full menu: every page grouped by purpose, plus account actions. Opens from the Menu button on every screen size. */
 export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { user, profile, wallet, signOut, openAuth, refreshWallet } = useAuth();
-  const { toast } = useToast();
+  const { user, profile, signOut, openAuth } = useAuth();
   const { t, lang } = useI18n();
   const { route, go } = useRouter();
   const [admin, setAdmin] = useState(false);
@@ -37,13 +34,6 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   useEffect(() => { onClose(); }, [route.tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!open) return null;
-  const canClaim = Boolean(wallet && wallet.last_claim_month.slice(0, 7) < new Date().toISOString().slice(0, 7));
-  const claim = async () => {
-    const { error } = await supabase.rpc('claim_monthly_coins');
-    if (error) return toast(explain(error, t), 'error');
-    await refreshWallet();
-    toast(t('claimed_toast'));
-  };
   const active = groupOf(route.tab)?.id;
   const open_ = (tab: Parameters<typeof go>[0]) => { go(tab); onClose(); };
 
@@ -81,13 +71,6 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             </button>
           ) : (
             <button type="button" className="btn btn-primary mb-3 w-full" onClick={() => { onClose(); openAuth(); }}>{t('sign_in')}</button>
-          )}
-
-          {wallet && (
-            <div className="mb-3 flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2 text-sm" title={t('coins_title')}>
-              <span className="flex items-center gap-2 text-zinc-800"><Coins className="h-4 w-4" aria-hidden="true" /><span className="tabular-nums font-semibold">{wallet.voting_coins}</span></span>
-              {canClaim && <button type="button" className="btn btn-primary btn-sm" onClick={claim}>{t('claim_coins')}</button>}
-            </div>
           )}
 
           {GROUPS.filter((g) => g.id !== 'profile').map((g) => (
