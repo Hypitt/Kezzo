@@ -69,9 +69,9 @@ export function VslaView() {
           </div>
         </form>
       )}
-      <form className="card flex flex-wrap items-end gap-2" onSubmit={join}>
-        <div className="min-w-0 flex-1"><label className="label" htmlFor="vg-code">{t('vsla_join_code')}</label><input id="vg-code" className="input" value={code} onChange={(e) => setCode(e.target.value)} required /></div>
-        <button className="btn btn-primary" disabled={busy || !code.trim()}>{t('vsla_join')}</button>
+      <form className="flex gap-2" onSubmit={join}>
+        <input id="vg-code" className="input min-w-0 flex-1" value={code} placeholder={t('vsla_join_code')} aria-label={t('vsla_join_code')} onChange={(e) => setCode(e.target.value)} required />
+        <button className="btn btn-primary shrink-0" disabled={busy || !code.trim()}>{t('vsla_join')}</button>
       </form>
 
       {groups === null ? <Loading /> : groups.length === 0 ? <Empty text={t('vsla_none_groups')} /> : (

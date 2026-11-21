@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, SlidersHorizontal } from 'lucide-react';
 import { initials } from '../lib/format';
 
 export function Avatar({ p, size = 36 }: { p: { display_name: string; avatar_url: string | null }; size?: number }) {
@@ -80,5 +80,18 @@ export function LoadMore({ show, busy, onClick, label }: { show: boolean; busy: 
         {label}
       </button>
     </div>
+  );
+}
+
+const FILTERS_WORD: Record<string, string> = { en: 'Filters', fr: 'Filtres', es: 'Filtros', pt: 'Filtros', hi: 'फ़िल्टर' };
+
+/** The small "Filters" button that opens a panel, so pages stay uncrowded. A dot shows when a filter is on. */
+export function FilterButton({ open, active, lang, onClick }: { open: boolean; active: boolean; lang: string; onClick: () => void }) {
+  return (
+    <button type="button" className="btn btn-ghost shrink-0" aria-expanded={open} onClick={onClick}>
+      <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+      <span className="hidden sm:inline">{FILTERS_WORD[lang] ?? FILTERS_WORD.en}</span>
+      {active && <span className="h-2 w-2 rounded-full bg-accent" aria-hidden="true" />}
+    </button>
   );
 }

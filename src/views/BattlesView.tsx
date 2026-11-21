@@ -7,14 +7,15 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { BattleCard } from '../components/BattleCard';
-import { Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
+import { Chip, Empty, Loading, LoadMore, FilterButton, PageHeader } from '../components/ui';
 
 const PAGE = 12;
 type Filter = 'active' | 'live' | 'open' | 'ended';
 const STATUSES: Record<Filter, BattleStatus[]> = { active: ['live', 'open'], live: ['live'], open: ['open'], ended: ['ended'] };
 
 export function BattlesView() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
   const { go } = useRouter();
   const [filter, setFilter] = useState<Filter>('active');
@@ -66,14 +67,23 @@ export function BattlesView() {
         sub={t('battles_sub')}
         action={<button type="button" className="btn btn-accent" onClick={() => go('create', 'battle')}>{t('create_battle')}</button>}
       />
-      <div className="mb-5 flex flex-wrap items-center gap-2">
-        {(Object.keys(STATUSES) as Filter[]).map((f) => (
-          <Chip key={f} active={filter === f} onClick={() => setFilter(f)}>{t(`filter_${f}` as Key)}</Chip>
-        ))}
-        <select className="input ml-auto w-auto" value={category} onChange={(e) => setCategory(e.target.value)} aria-label={t('category')}>
-          <option value="">{t('all_categories')}</option>
-          {BATTLE_CATEGORIES.map((c) => <option key={c} value={c}>{t(`cat_${c}` as Key)}</option>)}
-        </select>
+      <div className="mb-5 space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1">
+            {(Object.keys(STATUSES) as Filter[]).map((f) => (
+              <Chip key={f} active={filter === f} onClick={() => setFilter(f)}>{t(`filter_${f}` as Key)}</Chip>
+            ))}
+          </div>
+          <FilterButton open={showFilters} active={Boolean(category)} lang={lang} onClick={() => setShowFilters((v) => !v)} />
+        </div>
+        {showFilters && (
+          <div className="rounded-xl bg-zinc-50 p-3">
+            <select className="input sm:max-w-xs" value={category} onChange={(e) => setCategory(e.target.value)} aria-label={t('category')}>
+              <option value="">{t('all_categories')}</option>
+              {BATTLE_CATEGORIES.map((c) => <option key={c} value={c}>{t(`cat_${c}` as Key)}</option>)}
+            </select>
+          </div>
+        )}
       </div>
       {loading ? <Loading /> : battles.length === 0 ? (
         <Empty text={t('battles_empty')}>

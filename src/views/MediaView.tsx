@@ -6,7 +6,7 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { PostCard } from '../components/PostCard';
-import { Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
+import { Chip, Empty, Loading, LoadMore, FilterButton, PageHeader } from '../components/ui';
 
 const PAGE = 8;
 type KindFilter = 'all' | 'photo' | 'audio' | 'video';
@@ -14,7 +14,8 @@ type PriceFilter = 'all' | 'free' | 'paid';
 
 export function MediaView() {
   const { user, blocked } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
   const { go } = useRouter();
   const [kind, setKind] = useState<KindFilter>('all');
@@ -68,14 +69,22 @@ export function MediaView() {
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader title={t('nav_media')} sub={t('media_sub')} />
-      <div className="mb-5 flex flex-wrap items-center gap-2">
-        {(['all', 'photo', 'audio', 'video'] as KindFilter[]).map((k) => (
-          <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{t(`kind_${k}` as const)}</Chip>
-        ))}
-        <span className="mx-1 h-4 w-px bg-zinc-300" aria-hidden="true" />
-        {(['all', 'free', 'paid'] as PriceFilter[]).map((p) => (
-          <Chip key={p} active={price === p} onClick={() => setPrice(p)}>{t(`price_${p}` as const)}</Chip>
-        ))}
+      <div className="mb-5 space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1">
+            {(['all', 'photo', 'audio', 'video'] as KindFilter[]).map((k) => (
+              <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{t(`kind_${k}` as const)}</Chip>
+            ))}
+          </div>
+          <FilterButton open={showFilters} active={price !== 'all'} lang={lang} onClick={() => setShowFilters((v) => !v)} />
+        </div>
+        {showFilters && (
+          <div className="flex flex-wrap gap-2 rounded-xl bg-zinc-50 p-3">
+            {(['all', 'free', 'paid'] as PriceFilter[]).map((p) => (
+              <Chip key={p} active={price === p} onClick={() => setPrice(p)}>{t(`price_${p}` as const)}</Chip>
+            ))}
+          </div>
+        )}
       </div>
       {loading ? (
         <Loading />

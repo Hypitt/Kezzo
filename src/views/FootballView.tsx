@@ -313,10 +313,10 @@ export function FootballView({ code: linkCode }: { code?: string }) {
         )}
       </section>
 
-      <section className="card space-y-1 text-xs text-zinc-700">
-        <h2 className="text-sm font-semibold text-zinc-900">{w.helpTitle}</h2>
-        <p>{w.helpP1}</p><p>{w.helpP2}</p><p>{w.helpOnline}</p><p>{w.helpTouch}</p><p>{w.keysLegend}</p><p>{w.helpGk}</p>
-      </section>
+      <details className="card space-y-1 text-xs text-zinc-700">
+        <summary className="cursor-pointer text-sm font-semibold text-zinc-900">{w.helpTitle}</summary>
+        <p className="pt-1">{w.helpP1}</p><p>{w.helpP2}</p><p>{w.helpOnline}</p><p>{w.helpTouch}</p><p>{w.keysLegend}</p><p>{w.helpGk}</p>
+      </details>
     </div>
   );
 }

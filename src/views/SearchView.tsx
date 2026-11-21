@@ -10,7 +10,7 @@ import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { BattleCard } from '../components/BattleCard';
 import { PostCard } from '../components/PostCard';
-import { Avatar, Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
+import { Avatar, Chip, Empty, Loading, LoadMore, FilterButton, PageHeader } from '../components/ui';
 
 type Tab = 'feed' | 'battles' | 'people';
 const PAGE = 12;
@@ -18,7 +18,8 @@ const PAGE = 12;
 /** Default landing page: a searchable feed of everyone's posts, battles and people. */
 export function SearchView() {
   const { user, blocked } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
   const { go } = useRouter();
   const [input, setInput] = useState(() => { try { const q = sessionStorage.getItem('kezzo-q') ?? ''; sessionStorage.removeItem('kezzo-q'); return q; } catch { return ''; } });
@@ -120,19 +121,22 @@ export function SearchView() {
           aria-label={t('search_placeholder')}
         />
       </div>
-      <div className="mb-5 flex flex-wrap items-center gap-2">
-        <Chip active={tab === 'feed'} onClick={() => setTab('feed')}>{t('tab_feed')}</Chip>
-        <Chip active={tab === 'battles'} onClick={() => setTab('battles')}>{t('tab_battles')}</Chip>
-        <Chip active={tab === 'people'} onClick={() => setTab('people')}>{t('tab_people')}</Chip>
-        {tab === 'feed' && user && (
-          <>
-            <span className="mx-1 h-4 w-px bg-zinc-300" aria-hidden="true" />
+      <div className="mb-5 space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1">
+            <Chip active={tab === 'feed'} onClick={() => setTab('feed')}>{t('tab_feed')}</Chip>
+            <Chip active={tab === 'battles'} onClick={() => setTab('battles')}>{t('tab_battles')}</Chip>
+            <Chip active={tab === 'people'} onClick={() => setTab('people')}>{t('tab_people')}</Chip>
+          </div>
+          {tab === 'feed' && user && <FilterButton open={showFilters} active={scope !== 'all'} lang={lang} onClick={() => setShowFilters((v) => !v)} />}
+        </div>
+        {showFilters && tab === 'feed' && user && (
+          <div className="flex flex-wrap gap-2 rounded-xl bg-zinc-50 p-3">
             <Chip active={scope === 'all'} onClick={() => setScope('all')}>{t('scope_all')}</Chip>
             <Chip active={scope === 'following'} onClick={() => setScope('following')}>{t('scope_following')}</Chip>
-          </>
+          </div>
         )}
       </div>
-
 
       {loading ? (
         <Loading />
