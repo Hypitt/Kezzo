@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { Briefcase, Calendar, ExternalLink, Mail, MapPin, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Briefcase, Calendar, ExternalLink, Mail, MapPin, Pencil, Plus, SlidersHorizontal, Trash2 } from 'lucide-react';
+import type { Lang } from '../lib/types';
 import { supabase } from '../lib/supabase';
 import { PUBLIC_PROFILE } from '../lib/data';
 import { isSafe } from '../lib/moderation';
@@ -15,6 +16,8 @@ import { Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
 
 const PAGE = 15;
 const SELECT = `id,author_id,kind,title,org,body,country,city,online,deadline,link,contact,hidden,created_at,author:profiles!author_id(${PUBLIC_PROFILE})`;
+const FILTERS_WORD: Record<Lang, string> = { en: 'Filters', fr: 'Filtres', es: 'Filtros', pt: 'Filtros', hi: 'फ़िल्टर' };
+
 const clean = (s: string) => s.replace(/[%_,()*\\"]/g, ' ').trim();
 const today = () => new Date().toISOString().slice(0, 10);
 const field = 'input';
@@ -151,6 +154,7 @@ export function OpportunitiesView({ focus }: { focus?: string }) {
   const [rows, setRows] = useState<Opportunity[]>([]);
   const [first, setFirst] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [busy, setBusy] = useState(false);
   const [more, setMore] = useState(false);
   const [form, setForm] = useState<{ open: boolean; editing: Opportunity | null }>({ open: false, editing: null });
@@ -229,28 +233,36 @@ export function OpportunitiesView({ focus }: { focus?: string }) {
       {form.open && <Form editing={form.editing} place={place} onCancel={() => setForm({ open: false, editing: null })}
         onDone={() => { setForm({ open: false, editing: null }); load(); }} />}
 
-      <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] text-zinc-600">{w.warn}</p>
-
-      <details className="card space-y-2 !p-2 text-zinc-900" aria-label={w.yourPlace}>
-        <summary className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold"><MapPin className="h-3.5 w-3.5" aria-hidden="true" />{w.yourPlace}{place.country ? `: ${[place.city, place.country].filter(Boolean).join(', ')}` : ''}</summary>
-        {!place.country && <p className="text-xs text-zinc-500">{w.placeHint}</p>}
-        <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); savePlace(placeDraft); setPlace(placeDraft); }}>
-          <input className="input w-40" placeholder={w.country} aria-label={w.country} value={placeDraft.country} maxLength={60} onChange={(e) => setPlaceDraft({ ...placeDraft, country: e.target.value })} />
-          <input className="input w-40" placeholder={w.city} aria-label={w.city} value={placeDraft.city} maxLength={80} onChange={(e) => setPlaceDraft({ ...placeDraft, city: e.target.value })} />
-          <button className="btn btn-ghost">{w.savePlace}</button>
-        </form>
-      </details>
-
-      <div className="space-y-2">
-        <input className="input" placeholder={w.search} aria-label={w.search} value={input} onChange={(e) => setInput(e.target.value)} />
-        <div className="flex flex-wrap gap-2">
+      <div className="space-y-3">
+        <div className="flex gap-2">
+          <input className="input min-w-0 flex-1" placeholder={w.search} aria-label={w.search} value={input} onChange={(e) => setInput(e.target.value)} />
+          <button type="button" className="btn btn-ghost shrink-0" aria-expanded={showFilters} onClick={() => setShowFilters((v) => !v)}>
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+            <span className="hidden sm:inline">{FILTERS_WORD[lang]}</span>
+            {scope !== 'near' && <span className="h-2 w-2 rounded-full bg-accent" aria-hidden="true" />}
+          </button>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
           {(['all', ...OPP_KINDS] as const).map((k) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{w.kinds[k]}</Chip>)}
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Chip active={scope === 'near'} onClick={() => setScope('near')}>{w.near}</Chip>
-          <Chip active={scope === 'online'} onClick={() => setScope('online')}>{w.onlineOnly}</Chip>
-          <Chip active={scope === 'all'} onClick={() => setScope('all')}>{w.everywhere}</Chip>
-        </div>
+        {showFilters && (
+          <div className="space-y-3 rounded-xl bg-zinc-50 p-3">
+            <div className="flex flex-wrap gap-2">
+              <Chip active={scope === 'near'} onClick={() => setScope('near')}>{w.near}</Chip>
+              <Chip active={scope === 'online'} onClick={() => setScope('online')}>{w.onlineOnly}</Chip>
+              <Chip active={scope === 'all'} onClick={() => setScope('all')}>{w.everywhere}</Chip>
+            </div>
+            <div className="space-y-2">
+              <p className="flex items-center gap-1.5 text-sm font-medium"><MapPin className="h-4 w-4" aria-hidden="true" />{w.yourPlace}{place.country ? `: ${[place.city, place.country].filter(Boolean).join(', ')}` : ''}</p>
+              {!place.country && <p className="text-xs text-zinc-500">{w.placeHint}</p>}
+              <form className="flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); savePlace(placeDraft); setPlace(placeDraft); }}>
+                <input className="input !w-36" placeholder={w.country} aria-label={w.country} value={placeDraft.country} maxLength={60} onChange={(e) => setPlaceDraft({ ...placeDraft, country: e.target.value })} />
+                <input className="input !w-36" placeholder={w.city} aria-label={w.city} value={placeDraft.city} maxLength={80} onChange={(e) => setPlaceDraft({ ...placeDraft, city: e.target.value })} />
+                <button className="btn btn-ghost">{w.savePlace}</button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
 
       {first && !rows.some((r) => r.id === first.id) && card(first)}
@@ -265,6 +277,7 @@ export function OpportunitiesView({ focus }: { focus?: string }) {
           {hiddenRows.map(card)}
         </section>
       )}
+      <p className="pt-2 text-center text-[11px] text-zinc-400">{w.warn}</p>
     </div>
   );
 }
