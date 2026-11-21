@@ -507,36 +507,35 @@ export function MarketView({ shop }: { shop?: string }) {
 
       {form.open && <Form editing={form.editing} onCancel={() => setForm({ open: false, editing: null })} onDone={() => { setForm({ open: false, editing: null }); load(); }} />}
 
-      <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] text-zinc-600">{w.safety}</p>
+      <p className="text-xs text-zinc-500">{w.safety}</p>
 
       {!shop && (
-        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-600">
-          <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+        <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-600">
+          <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
           {placeEdit || (!place.country && !place.city) ? (
             <>
-              <input className="input !w-36 !py-1 text-sm" aria-label={m2.placeCountry} placeholder={m2.placeCountry} value={place.country} maxLength={60} onChange={(e) => setPlace({ ...place, country: e.target.value })} />
-              <input className="input !w-36 !py-1 text-sm" aria-label={m2.placeCity} placeholder={m2.placeCity} value={place.city} maxLength={60} onChange={(e) => setPlace({ ...place, city: e.target.value })} />
+              <input className="input !w-32 !py-1 text-sm" aria-label={m2.placeCountry} placeholder={m2.placeCountry} value={place.country} maxLength={60} onChange={(e) => setPlace({ ...place, country: e.target.value })} />
+              <input className="input !w-32 !py-1 text-sm" aria-label={m2.placeCity} placeholder={m2.placeCity} value={place.city} maxLength={60} onChange={(e) => setPlace({ ...place, city: e.target.value })} />
               <button type="button" className="btn btn-ghost btn-sm" onClick={() => { const next = { country: place.country.trim(), city: place.city.trim() }; savePlace(next); setSaved(next); setPlaceEdit(false); }}>{m2.placeSave}</button>
-              {!place.country && !place.city && <span>{m2.placeHint}</span>}
             </>
           ) : (
-            <button type="button" className="hover:underline" onClick={() => setPlaceEdit(true)}>{m2.placeTitle}: <span className="font-semibold">{[place.city, place.country].filter(Boolean).join(', ')}</span></button>
+            <button type="button" className="hover:underline" onClick={() => setPlaceEdit(true)}><span className="font-semibold">{[place.city, place.country].filter(Boolean).join(', ')}</span></button>
           )}
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <input className="input" placeholder={m2.searchHint} aria-label={w.search} value={input} onChange={(e) => setInput(e.target.value)} />
-        {!shop && <div className="flex flex-wrap gap-2">{tabs.map(([k, label]) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{label}</Chip>)}</div>}
-        <select className="input" aria-label={w.fCat} value={cat} onChange={(e) => setCat(e.target.value as 'all' | MarketCat)}>
-          <option value="all">{w.anyCategory}</option>
-          {MARKET_CATS.map((c) => <option key={c} value={c}>{w.cats[c]}</option>)}
-        </select>
-        <div className="flex flex-wrap items-center gap-3">
-          <select className="input !w-auto" aria-label={m2.sortNew} value={sort} onChange={(e) => setSort(e.target.value as 'smart' | 'new' | 'low' | 'high')}>
+        {!shop && <div className="flex gap-2 overflow-x-auto pb-1">{tabs.map(([k, label]) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{label}</Chip>)}</div>}
+        <div className="flex flex-wrap items-center gap-2">
+          <select className="input !w-auto min-w-0 flex-1 sm:flex-none" aria-label={w.fCat} value={cat} onChange={(e) => setCat(e.target.value as 'all' | MarketCat)}>
+            <option value="all">{w.anyCategory}</option>
+            {MARKET_CATS.map((c) => <option key={c} value={c}>{w.cats[c]}</option>)}
+          </select>
+          <select className="input !w-auto min-w-0 flex-1 sm:flex-none" aria-label={m2.sortNew} value={sort} onChange={(e) => setSort(e.target.value as 'smart' | 'new' | 'low' | 'high')}>
             <option value="smart">{m2.sortSmart}</option><option value="new">{m2.sortNew}</option><option value="low">{m2.sortLow}</option><option value="high">{m2.sortHigh}</option>
           </select>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={avail} onChange={(e) => setAvail(e.target.checked)} />{m2.onlyAvail}</label>
+          <label className="flex items-center gap-2 whitespace-nowrap text-sm"><input type="checkbox" checked={avail} onChange={(e) => setAvail(e.target.checked)} />{m2.onlyAvail}</label>
         </div>
       </div>
 

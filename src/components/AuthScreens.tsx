@@ -6,7 +6,6 @@ import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { HANDLE_RE } from '../lib/format';
 import { Spinner } from './ui';
-import type { Profile } from '../lib/types';
 import { LegalNotice } from '../state/Legal';
 
 function GoogleLogo() {
@@ -256,7 +255,6 @@ export function Onboarding() {
   const meta = (user?.user_metadata ?? {}) as { full_name?: string; name?: string };
   const [displayName, setDisplayName] = useState((meta.full_name || meta.name || '').slice(0, 40));
   const [handle, setHandle] = useState('');
-  const [generation, setGeneration] = useState<Profile['generation']>(null);
   const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -270,7 +268,7 @@ export function Onboarding() {
     setBusy(true);
     setError(null);
     try {
-      await createProfile({ handle: h, display_name: displayName.trim(), generation });
+      await createProfile({ handle: h, display_name: displayName.trim(), generation: null });
       toast(t('welcome_toast'));
       go('home');
     } catch (err) {
@@ -306,15 +304,6 @@ export function Onboarding() {
             />
           </div>
           <p className="mt-1 text-xs text-zinc-500">{t('handle_hint')}</p>
-        </div>
-        <div>
-          <label className="label" htmlFor="ob-gen">{t('generation')}</label>
-          <select id="ob-gen" className="input" value={generation ?? ''} onChange={(e) => setGeneration((e.target.value || null) as Profile['generation'])}>
-            <option value="">{t('prefer_not_say')}</option>
-            <option value="Gen Z">Gen Z</option>
-            <option value="Millennial">Millennial</option>
-            <option value="Other">{t('other')}</option>
-          </select>
         </div>
         <label className="flex items-start gap-2 text-sm text-zinc-700">
           <input type="checkbox" className="mt-1" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
