@@ -110,30 +110,34 @@ export function SearchView() {
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader title={t('nav_search')} sub={t('search_sub')} />
-      <div className="relative mb-3">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" aria-hidden="true" />
-        <input
-          type="search"
-          className="input pl-9"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={t('search_placeholder')}
-          aria-label={t('search_placeholder')}
-        />
-      </div>
       <div className="mb-5 space-y-3">
-        <div className="flex items-center gap-2">
-          <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1">
-            <Chip active={tab === 'feed'} onClick={() => setTab('feed')}>{t('tab_feed')}</Chip>
-            <Chip active={tab === 'battles'} onClick={() => setTab('battles')}>{t('tab_battles')}</Chip>
-            <Chip active={tab === 'people'} onClick={() => setTab('people')}>{t('tab_people')}</Chip>
+        <div className="flex gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" aria-hidden="true" />
+            <input
+              type="search"
+              className="input pl-9"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={t('search_placeholder')}
+              aria-label={t('search_placeholder')}
+            />
           </div>
-          {tab === 'feed' && user && <FilterButton open={showFilters} active={scope !== 'all'} lang={lang} onClick={() => setShowFilters((v) => !v)} />}
+          <FilterButton open={showFilters} active={tab !== 'feed' || scope !== 'all'} lang={lang} onClick={() => setShowFilters((v) => !v)} />
         </div>
-        {showFilters && tab === 'feed' && user && (
-          <div className="flex flex-wrap gap-2 rounded-xl bg-zinc-50 p-3">
-            <Chip active={scope === 'all'} onClick={() => setScope('all')}>{t('scope_all')}</Chip>
-            <Chip active={scope === 'following'} onClick={() => setScope('following')}>{t('scope_following')}</Chip>
+        {showFilters && (
+          <div className="space-y-3 rounded-xl bg-zinc-50 p-3">
+            <div className="flex flex-wrap gap-2">
+              <Chip active={tab === 'feed'} onClick={() => setTab('feed')}>{t('tab_feed')}</Chip>
+              <Chip active={tab === 'battles'} onClick={() => setTab('battles')}>{t('tab_battles')}</Chip>
+              <Chip active={tab === 'people'} onClick={() => setTab('people')}>{t('tab_people')}</Chip>
+            </div>
+            {tab === 'feed' && user && (
+              <div className="flex flex-wrap gap-2">
+                <Chip active={scope === 'all'} onClick={() => setScope('all')}>{t('scope_all')}</Chip>
+                <Chip active={scope === 'following'} onClick={() => setScope('following')}>{t('scope_following')}</Chip>
+              </div>
+            )}
           </div>
         )}
       </div>
