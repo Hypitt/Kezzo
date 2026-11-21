@@ -37,7 +37,7 @@ export interface MarketWords {
 
 export const MARKET: Record<Lang, MarketWords> = {
   en: {
-    title: 'Market', sub: 'Buy and sell products and services with other members.', sell: 'Sell something', all: 'All', products: 'Products', services: 'Services', mine: 'My listings', search: 'Search the market',
+    title: 'Market', sub: 'Buy or sell products or services.', sell: 'Sell something', all: 'All', products: 'Products', services: 'Services', mine: 'My listings', search: 'Search the market',
     anyCategory: 'All categories', empty: 'Nothing for sale here yet. Be the first to list something!', emptyMine: 'You have no listings yet.', more: 'Show more',
     safety: 'Kezzo doesn’t handle payments yet. Meet, check your item and enjoy your purchase.',
     byLabel: 'By', online: 'Online / delivery', free: 'Free', ask: 'Ask for the price', sold: 'Sold', paused: 'Paused',
@@ -51,7 +51,7 @@ export const MARKET: Record<Lang, MarketWords> = {
     errPlace: 'Enter a country, or tick “Available online or by delivery”.', errRate: 'You have posted a lot today. Please try again tomorrow.', errSafe: 'Please remove words that are not allowed.', errGeneric: 'Something went wrong. Try again.', errPhoto: 'A photo could not be added. Try another one.', location: 'Location', uploading: 'Uploading…',
   },
   fr: {
-    title: 'Marché', sub: 'Achetez et vendez des produits et des services entre membres.', sell: 'Vendre', all: 'Tout', products: 'Produits', services: 'Services', mine: 'Mes annonces', search: 'Rechercher dans le marché',
+    title: 'Marché', sub: 'Achetez ou vendez des produits ou des services.', sell: 'Vendre', all: 'Tout', products: 'Produits', services: 'Services', mine: 'Mes annonces', search: 'Rechercher dans le marché',
     anyCategory: 'Toutes les catégories', empty: 'Rien à vendre pour l’instant. Soyez le premier à publier !', emptyMine: 'Vous n’avez pas encore d’annonce.', more: 'Voir plus',
     safety: 'Kezzo ne gère pas encore les paiements. Rencontrez-vous, vérifiez votre article et profitez de votre achat.',
     byLabel: 'Par', online: 'En ligne / livraison', free: 'Gratuit', ask: 'Prix sur demande', sold: 'Vendu', paused: 'En pause',
@@ -65,7 +65,7 @@ export const MARKET: Record<Lang, MarketWords> = {
     errPlace: 'Indiquez un pays ou cochez « Disponible en ligne ou par livraison ».', errRate: 'Vous avez beaucoup publié aujourd’hui. Réessayez demain.', errSafe: 'Retirez les mots non permis.', errGeneric: 'Une erreur est survenue. Réessayez.', errPhoto: 'Une photo n’a pas pu être ajoutée. Essayez-en une autre.', location: 'Lieu', uploading: 'Envoi…',
   },
   es: {
-    title: 'Mercado', sub: 'Compra y vende productos y servicios con otros miembros.', sell: 'Vender', all: 'Todo', products: 'Productos', services: 'Servicios', mine: 'Mis anuncios', search: 'Buscar en el mercado',
+    title: 'Mercado', sub: 'Compra o vende productos o servicios.', sell: 'Vender', all: 'Todo', products: 'Productos', services: 'Servicios', mine: 'Mis anuncios', search: 'Buscar en el mercado',
     anyCategory: 'Todas las categorías', empty: 'Aún no hay nada en venta. ¡Sé el primero en publicar!', emptyMine: 'Aún no tienes anuncios.', more: 'Ver más',
     safety: 'Kezzo aún no gestiona pagos. Queda con el vendedor, revisa el artículo y disfruta tu compra.',
     byLabel: 'Por', online: 'En línea / envío', free: 'Gratis', ask: 'Consultar precio', sold: 'Vendido', paused: 'En pausa',
@@ -79,7 +79,7 @@ export const MARKET: Record<Lang, MarketWords> = {
     errPlace: 'Escribe un país o marca «Disponible en línea o con envío».', errRate: 'Has publicado mucho hoy. Inténtalo mañana.', errSafe: 'Quita las palabras no permitidas.', errGeneric: 'Algo salió mal. Inténtalo de nuevo.', errPhoto: 'No se pudo añadir una foto. Prueba con otra.', location: 'Lugar', uploading: 'Subiendo…',
   },
   pt: {
-    title: 'Mercado', sub: 'Compre e venda produtos e serviços com outros membros.', sell: 'Vender', all: 'Tudo', products: 'Produtos', services: 'Serviços', mine: 'Meus anúncios', search: 'Pesquisar no mercado',
+    title: 'Mercado', sub: 'Compre ou venda produtos ou serviços.', sell: 'Vender', all: 'Tudo', products: 'Produtos', services: 'Serviços', mine: 'Meus anúncios', search: 'Pesquisar no mercado',
     anyCategory: 'Todas as categorias', empty: 'Ainda não há nada à venda. Seja o primeiro a anunciar!', emptyMine: 'Você ainda não tem anúncios.', more: 'Ver mais',
     safety: 'O Kezzo ainda não processa pagamentos. Encontrem-se, confira o item e aproveite a compra.',
     byLabel: 'Por', online: 'Online / entrega', free: 'Grátis', ask: 'Preço sob consulta', sold: 'Vendido', paused: 'Pausado',
@@ -93,7 +93,7 @@ export const MARKET: Record<Lang, MarketWords> = {
     errPlace: 'Informe um país ou marque “Disponível online ou com entrega”.', errRate: 'Você publicou muito hoje. Tente amanhã.', errSafe: 'Remova as palavras não permitidas.', errGeneric: 'Algo deu errado. Tente de novo.', errPhoto: 'Não foi possível adicionar uma foto. Tente outra.', location: 'Local', uploading: 'Enviando…',
   },
   hi: {
-    title: 'बाज़ार', sub: 'दूसरे सदस्यों के साथ उत्पाद और सेवाएँ खरीदें और बेचें।', sell: 'कुछ बेचें', all: 'सभी', products: 'उत्पाद', services: 'सेवाएँ', mine: 'मेरे विज्ञापन', search: 'बाज़ार में खोजें',
+    title: 'बाज़ार', sub: 'उत्पाद या सेवाएँ खरीदें या बेचें।', sell: 'कुछ बेचें', all: 'सभी', products: 'उत्पाद', services: 'सेवाएँ', mine: 'मेरे विज्ञापन', search: 'बाज़ार में खोजें',
     anyCategory: 'सभी श्रेणियाँ', empty: 'अभी यहाँ कुछ बिक्री के लिए नहीं है। पहले आप सूचीबद्ध करें!', emptyMine: 'आपका अभी कोई विज्ञापन नहीं है।', more: 'और दिखाएँ',
     safety: 'Kezzo अभी भुगतान नहीं संभालता। मिलें, अपना सामान जाँचें और खरीद का आनंद लें।',
     byLabel: 'द्वारा', online: 'ऑनलाइन / डिलीवरी', free: 'मुफ़्त', ask: 'कीमत पूछें', sold: 'बिक गया', paused: 'रुका हुआ',
