@@ -272,11 +272,8 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
         {header}
         {admin && active && <Fold title={w.socialTitle}><SocialSetting cycle={cycle} fmt={fmt} onSaved={load} /></Fold>}
         {admin && (
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold">{w.toApprove} {pendingContribs.length > 0 && <span className="ml-1 rounded-full bg-accent px-2 py-0.5 text-[11px] text-white">{pendingContribs.length}</span>}</h3>
-              {pendingContribs.length > 1 && <button type="button" className="btn btn-accent btn-sm" disabled={busy} onClick={() => void approveAll()}><Check className="h-3.5 w-3.5" aria-hidden="true" />{w.approveAll}</button>}
-            </div>
+          <Fold title={w.toApprove} badge={pendingContribs.length > 0 ? String(pendingContribs.length) : undefined} defaultOpen={pendingContribs.length > 0}>
+            {pendingContribs.length > 1 && <button type="button" className="btn btn-accent btn-sm" disabled={busy} onClick={() => void approveAll()}><Check className="h-3.5 w-3.5" aria-hidden="true" />{w.approveAll}</button>}
             {pendingContribs.length === 0 ? <p className="text-sm text-zinc-500">{w.nothingToApprove}</p> : (
               <ul className="space-y-2">
                 {pendingContribs.map((x) => (
@@ -285,13 +282,14 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
               </ul>
             )}
             <p className="flex gap-1.5 text-xs text-zinc-500"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />{w.adminHint}</p>
-          </div>
+          </Fold>
         )}
         {meId && active && (
-          <div className="space-y-3 border-t border-zinc-100 pt-4">
-            <h3 className="text-sm font-semibold">{w.payTitle}</h3>
-            <p className="text-xs text-zinc-500">{w.payHelp}</p>
-            <PayForm groupId={groupId} cycle={cycle} loans={openLoans.filter((l) => l.member_id === meId)} owed={stats.owedByLoan} fmt={fmt} onSent={load} />
+          <div className="space-y-3">
+            <Fold title={w.payTitle} defaultOpen={!admin || pendingContribs.length === 0}>
+              <p className="text-xs text-zinc-500">{w.payHelp}</p>
+              <PayForm groupId={groupId} cycle={cycle} loans={openLoans.filter((l) => l.member_id === meId)} owed={stats.owedByLoan} fmt={fmt} onSent={load} />
+            </Fold>
             <Fold title={w.mineTitle} defaultOpen={myContribs.some((x) => x.status === 'pending')}>
               {myContribs.length === 0 ? <p className="text-sm text-zinc-500">{w.mineEmpty}</p> : (
                 <ul className="divide-y divide-zinc-100 text-sm">
@@ -317,6 +315,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
           <div className="rounded-xl bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{t('vs_month_total')}</dt><dd className="font-semibold">{fmt(total)}</dd></div>
           <div className="rounded-xl bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{t('vs_month_paid')}</dt><dd className="font-semibold">{paid} / {live.length}</dd></div>
         </dl>
+        <Fold title={t('vs_month_paid')} badge={`${paid} / ${live.length}`}>
         <ul className="divide-y divide-zinc-100 text-sm">
           {live.map((m) => {
             const r = shareRows.get(m.id);
@@ -329,6 +328,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
             );
           })}
         </ul>
+        </Fold>
         <EntryList fold entries={inMonth} title={t('vs_month_entries')} nameOf={nameOf} fmt={fmt} empty={t('vs_month_empty')} />
       </section>
     );
