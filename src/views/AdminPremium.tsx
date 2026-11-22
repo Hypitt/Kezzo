@@ -4,6 +4,7 @@ import { PREMIUM } from '../lib/premiumText';
 import { ORDERS } from '../lib/ordersText';
 import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
+import { SAFE, isSensitiveError } from '../lib/safeText';
 import { qrFromFile } from '../lib/qr';
 import { Chip, Loading } from '../components/ui';
 
@@ -71,7 +72,7 @@ export function AdminPremium() {
 
   const run = async (q: PromiseLike<{ error: { message: string } | null }>) => {
     const { error } = await q;
-    toast(error ? a.err : a.done, error ? 'error' : 'info');
+    toast(error ? (isSensitiveError(error.message) ? SAFE[lang].sensitive : a.err) : a.done, error ? 'error' : 'info');
     void load();
   };
   const date = (s: string) => new Date(s).toLocaleDateString(lang);
@@ -241,6 +242,7 @@ export function AdminPremium() {
       {part === 'setup' && (
         <div className="space-y-2">
           <h3 className="text-sm font-semibold">{a.step2}</h3>
+          <p className="rounded-lg bg-amber-50 p-2 text-xs text-amber-900">{SAFE[lang].warn}</p>
           <form className={`${card} grid gap-2 sm:grid-cols-2`} onSubmit={addAccount}>
             <input className="input" placeholder={a.country} aria-label={a.country} value={na.country} maxLength={60} onChange={(e) => setNa({ ...na, country: e.target.value })} />
             <input className="input" placeholder={a.method} aria-label={a.method} value={na.method} maxLength={40} onChange={(e) => setNa({ ...na, method: e.target.value })} />

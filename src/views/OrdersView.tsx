@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Crown } from 'lucide-react';
 import { GUIDE } from '../lib/premiumGuideText';
+import { SAFE } from '../lib/safeText';
 import { qrFromFile } from '../lib/qr';
 import { PayMethodCard } from '../components/PayMethodCard';
 import { supabase } from '../lib/supabase';
@@ -154,6 +155,7 @@ export function OrdersView() {
           {premium && (
             <form className="card space-y-2" onSubmit={addMethod}>
               <h2 className="text-sm font-semibold">{g.previewT}</h2>
+              <p className="rounded-lg bg-amber-50 p-2 text-xs text-amber-900">{SAFE[lang].warn}</p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <div><label className="label" htmlFor="pm-c">{w.country}</label>
                   <input id="pm-c" className="input" list="pm-countries" value={form.country} maxLength={60} onChange={(e) => setForm({ ...form, country: e.target.value, provider: '' })} placeholder={w.pickCountry} />

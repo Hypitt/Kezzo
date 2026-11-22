@@ -3,6 +3,7 @@ import { Check, ChevronDown, Crown, HandCoins, Receipt } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { PREMIUM } from '../lib/premiumText';
 import { GUIDE } from '../lib/premiumGuideText';
+import { SAFE, isSensitiveError } from '../lib/safeText';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
@@ -49,25 +50,27 @@ export function PremiumView() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const [m, p, a, l, h] = await Promise.all([
+    const [m, p, l, h] = await Promise.all([
       supabase.rpc('my_plan'),
       supabase.from('plan_prices').select('id, country, currency, duration, amount').eq('active', true).order('country'),
-      supabase.from('collection_accounts').select('id, country, method, account_name, account_number, instructions, pay_link, qr_data').eq('active', true),
       supabase.from('plan_limits').select('plan, key, value'),
       supabase.from('subscription_payments').select('id, country, duration, currency, amount, reference, status, reason, created_at').order('created_at', { ascending: false }).limit(20),
     ]);
     setMe((m.data as MyPlan | null) ?? { plan: 'free', status: 'free', expires_at: null, grace_until: null, limits: {} });
     setPrices((p.data as Price[] | null) ?? []);
-    setAccounts((a.data as Account[] | null) ?? []);
     setLimits((l.data as Limit[] | null) ?? []);
     setPays((h.data as Pay[] | null) ?? []);
   }, []);
   useEffect(() => { void load(); }, [load]);
 
   const countries = useMemo(() => Array.from(new Set(prices.map((p) => p.country))), [prices]);
+  useEffect(() => {
+    if (!country) { setAccounts([]); return; }
+    void supabase.rpc('kezzo_pay_methods', { p_country: country }).then(({ data }) => setAccounts(Array.isArray(data) ? (data as Account[]) : []));
+  }, [country]);
   const forCountry = prices.filter((p) => p.country === country);
   const price = prices.find((p) => p.country === country && p.duration === duration);
-  const accts = accounts.filter((a) => a.country.toLowerCase() === country.toLowerCase());
+  const accts = accounts;
   const waiting = pays.find((p) => p.status === 'pending');
   const date = (s: string | null) => (s ? new Date(s).toLocaleDateString(lang) : '');
 
@@ -85,7 +88,7 @@ export function PremiumView() {
     setBusy(true);
     const { data, error } = await supabase.rpc('submit_premium', { p_country: country, p_duration: duration, p_reference: ref.trim(), p_note: note.trim() });
     setBusy(false);
-    if (error) return toast(w.err, 'error');
+    if (error) return toast(isSensitiveError(error.message) ? SAFE[lang].sensitive : w.err, 'error');
     toast(w.results[String(data)] ?? w.err, data === 'ok' ? 'info' : 'error');
     if (data === 'ok') { setRef(''); setNote(''); void load(); }
   };
@@ -158,6 +161,7 @@ export function PremiumView() {
             </Step>
 
             <Step n={3} title={g.step3T} hint={g.step3H}>
+              <p className="text-xs text-amber-800">{SAFE[lang].warn}</p>
               <input className="input" value={ref} maxLength={80} placeholder={w.refPh} aria-label={w.refL} disabled={!price} onChange={(e) => setRef(e.target.value)} />
               <input className="input" value={note} maxLength={300} placeholder={w.noteL} aria-label={w.noteL} disabled={!price} onChange={(e) => setNote(e.target.value)} />
               <button className="btn btn-primary w-full" disabled={busy || !price || ref.trim().length < 3}>{busy ? w.sending : w.send}</button>

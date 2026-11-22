@@ -1,4 +1,5 @@
 import type { Lang } from './types';
+import { SAFE, isSensitiveError } from './safeText';
 
 /** Words for payment methods, the Pay button and orders, in the five Kezzo languages. */
 export interface OrderWords {
@@ -78,6 +79,7 @@ export const ORDERS: Record<Lang, OrderWords> = { en: EN, fr: FR, es: ES, pt: PT
 /** Turns a database error from the order or payment functions into a friendly sentence. */
 export function orderError(lang: Lang, message: string): string {
   const w = ORDERS[lang];
+  if (isSensitiveError(message)) return SAFE[lang].sensitive;
   const k = Object.keys(w.errors).find((e) => message.includes(e));
   return k ? w.errors[k] : w.err;
 }

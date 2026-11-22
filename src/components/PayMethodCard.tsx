@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Copy, ExternalLink } from 'lucide-react';
+import { SAFE } from '../lib/safeText';
 import { copyText } from '../lib/share';
 import { GUIDE } from '../lib/premiumGuideText';
 import { ORDERS } from '../lib/ordersText';
@@ -13,13 +15,18 @@ export function PayMethodCard({ m }: { m: PayDetails }) {
   const { toast } = useToast();
   const o = ORDERS[lang];
   const g = GUIDE[lang];
+  const [shown, setShown] = useState(false);
+  const safe = SAFE[lang];
+  const num = m.account_number ?? '';
+  const masked = num.length > 4 ? `${'•'.repeat(Math.min(num.length - 3, 8))}${num.slice(-3)}` : num;
   const copy = async (s: string) => { await copyText(s); toast(o.copied); };
   return (
     <div className="rounded-lg border border-zinc-300 bg-white p-2.5 text-sm">
       <p className="font-medium">{m.method}{m.type && o.types[m.type] ? <span className="text-xs font-normal text-zinc-500"> · {o.types[m.type]}</span> : null}</p>
       {m.account_name && <p className="text-xs text-zinc-600">{o.accName}: {m.account_name}</p>}
       {m.account_number && (
-        <p className="flex items-center gap-2 text-xs text-zinc-600">{g.numberL}: <b className="break-all text-sm text-zinc-900">{m.account_number}</b>
+        <p className="flex items-center gap-2 text-xs text-zinc-600">{g.numberL}: <b className="break-all text-sm text-zinc-900">{shown ? num : masked}</b>
+          {num.length > 4 && <button type="button" className="btn btn-ghost !px-2 !py-1 text-xs" onClick={() => setShown(!shown)}>{shown ? safe.hide : safe.show}</button>}
           <button type="button" className="btn btn-ghost !px-2 !py-1" aria-label={o.copy} onClick={() => void copy(m.account_number ?? '')}><Copy className="h-3.5 w-3.5" aria-hidden="true" /></button></p>
       )}
       {m.pay_link && <a href={m.pay_link} target="_blank" rel="noopener noreferrer nofollow" className="btn btn-primary btn-sm mt-2 inline-flex"><ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />{g.openLink}</a>}
