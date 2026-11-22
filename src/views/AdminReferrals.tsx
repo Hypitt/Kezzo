@@ -7,9 +7,10 @@ import { useToast } from '../state/Toast';
 import { Chip, Loading } from '../components/ui';
 
 const card = 'rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900';
-interface Summary { settings: { enabled: boolean; reward_cents: number; min_actions: number; min_days: number; claim_window_days: number; monthly_cap: number; min_payout_cents: number; require_install: boolean; require_email: boolean; rules_text: string; pause_from: string | null; pause_until: string | null; pause_note: string }; active: boolean; installs: number; pending: number; qualified: number; paid: number; rejected: number; owed_cents: number; paid_cents: number }
+interface Summary { settings: { enabled: boolean; reward_cents: number; min_actions: number; min_days: number; claim_window_days: number; monthly_cap: number; min_payout_cents: number; require_install: boolean; require_email: boolean; rules_text: string; auto_approve: boolean; pause_from: string | null; pause_until: string | null; pause_note: string }; active: boolean; ready: number; installs: number; pending: number; qualified: number; paid: number; rejected: number; owed_cents: number; paid_cents: number }
 interface Payout { referrer_id: string; name: string; handle: string; payout_info: string; blocked: boolean; n: number; owed_cents: number }
-interface Row { id: string; status: 'pending' | 'qualified' | 'paid' | 'rejected'; reward_cents: number; reject_reason: string; created_at: string; referrer_id: string; referrer_name: string; referrer_handle: string; referred_name: string; referred_handle: string }
+interface Checks { days: number; days_need: number; ok_days: boolean; email: boolean; email_required: boolean; ok_email: boolean; install: boolean; install_required: boolean; ok_install: boolean; posts: number; comments: number; likes: number; actions: number; actions_need: number; ok_actions: boolean; month_count: number; cap: number; ok_cap: boolean; burst: number; flags: string[]; ready: boolean }
+interface Row { checks: Checks | null; id: string; status: 'pending' | 'qualified' | 'paid' | 'rejected'; reward_cents: number; reject_reason: string; created_at: string; referrer_id: string; referrer_name: string; referrer_handle: string; referred_name: string; referred_handle: string }
 
 /** Admin → Referrals: settings, the monthly payout list, and every referral with reject / restore. */
 export function AdminReferrals() {
@@ -28,7 +29,7 @@ export function AdminReferrals() {
     const [s, p, l] = await Promise.all([
       supabase.rpc('admin_referral_summary'),
       supabase.rpc('admin_referral_payouts'),
-      supabase.rpc('admin_referral_list', { p_status: filter, p_limit: 100 }),
+      supabase.rpc('admin_referral_review', { p_status: filter, p_limit: 100 }),
     ]);
     if (s.data) { setSum(s.data as Summary); setF((cur) => cur ?? (s.data as Summary).settings); }
     setPays(Array.isArray(p.data) ? (p.data as Payout[]) : []);
@@ -44,7 +45,7 @@ export function AdminReferrals() {
   const saveSettings = async (e: FormEvent) => {
     e.preventDefault();
     if (!f) return;
-    await run(supabase.rpc('admin_referral_settings', { p_enabled: f.enabled, p_reward: f.reward_cents, p_actions: f.min_actions, p_days: f.min_days, p_window: f.claim_window_days, p_cap: f.monthly_cap, p_min_payout: f.min_payout_cents, p_install: f.require_install, p_email: f.require_email, p_rules: f.rules_text }));
+    await run(supabase.rpc('admin_referral_settings', { p_enabled: f.enabled, p_reward: f.reward_cents, p_actions: f.min_actions, p_days: f.min_days, p_window: f.claim_window_days, p_cap: f.monthly_cap, p_min_payout: f.min_payout_cents, p_install: f.require_install, p_email: f.require_email, p_rules: f.rules_text, p_auto: f.auto_approve }));
   };
 
   if (!sum || !f) return <Loading />;
@@ -52,7 +53,7 @@ export function AdminReferrals() {
     <div key={k}><label className="label" htmlFor={`rs-${k}`}>{{ reward_cents: a.reward, min_actions: a.actions, min_days: a.days, claim_window_days: a.window, monthly_cap: a.cap, min_payout_cents: a.minPayout }[k]}</label>
       <input id={`rs-${k}`} className="input" type="number" min={0} value={Number(f[k])} onChange={(e) => setF({ ...f, [k]: Math.max(0, Number(e.target.value) || 0) })} /></div>
   );
-  const statuses: Array<[string, string]> = [['', a.all], ['pending', a.pending], ['qualified', a.qualified], ['paid', a.paid], ['rejected', a.rejected]];
+  const statuses: Array<[string, string]> = [['', a.all], ['ready', a.readyF], ['pending', a.pending], ['qualified', a.qualified], ['paid', a.paid], ['rejected', a.rejected]];
 
   return (
     <div className="space-y-4">
@@ -105,7 +106,10 @@ export function AdminReferrals() {
       </section>
 
       <section className={`${card} space-y-2`}>
-        <h3 className="text-sm font-semibold">{a.list}</h3>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="mr-auto text-sm font-semibold">{a.list}</h3>
+          {sum.ready > 0 && sum.active && <button type="button" className="btn btn-accent btn-sm" onClick={() => { void run(supabase.rpc('admin_referral_approve_ready')); }}>{a.approveReady(sum.ready)}</button>}
+        </div>
         <div className="flex gap-2 overflow-x-auto pb-1">{statuses.map(([k, label]) => <Chip key={k || 'all'} active={filter === k} onClick={() => setFilter(k)}>{label}</Chip>)}</div>
         {rows.length === 0 ? <p className="text-sm text-zinc-500">{a.empty}</p> : (
           <ul className="divide-y divide-zinc-200">
@@ -115,6 +119,19 @@ export function AdminReferrals() {
                   <span className="font-medium">{r.referred_name}</span> <span className="text-xs text-zinc-500">@{r.referred_handle}</span>
                   <span className="block text-xs text-zinc-500">{a.invitedBy} {r.referrer_name} @{r.referrer_handle} · {r.created_at.slice(0, 10)}{r.reject_reason ? ` · ${r.reject_reason}` : ''}</span>
                 </span>
+                {r.checks && (
+                  <div className="flex w-full flex-wrap gap-1.5 text-[11px]">
+                    {([
+                      [r.checks.ok_days, `${a.cDays}: ${r.checks.days}/${r.checks.days_need}`],
+                      [r.checks.ok_email, `${a.cMail}: ${r.checks.email ? '✓' : '✗'}${r.checks.email_required ? '' : ' (off)'}`],
+                      [r.checks.ok_install, `${a.cInstall}: ${r.checks.install ? '✓' : '✗'}${r.checks.install_required ? '' : ' (off)'}`],
+                      [r.checks.ok_actions, `${a.cActions}: ${r.checks.actions}/${r.checks.actions_need} (${r.checks.posts}/${r.checks.comments}/${r.checks.likes})`],
+                      [r.checks.ok_cap, `${a.cCap}: ${r.checks.month_count}/${r.checks.cap}`],
+                    ] as Array<[boolean, string]>).map(([ok, label]) => <span key={label} className={`rounded-full px-2 py-0.5 font-medium ${ok ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>{ok ? '✓' : '✗'} {label}</span>)}
+                    {r.checks.flags.map((fl) => <span key={fl} className="rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-900">⚠ {fl === 'burst' ? a.fBurst : fl === 'only_likes' ? a.fLikes : a.fBlocked}</span>)}
+                    <span className={`rounded-full px-2 py-0.5 font-semibold ${r.checks.ready ? 'bg-emerald-600 text-white' : 'bg-zinc-200 text-zinc-700'}`}>{r.checks.ready ? a.ready : a.notReady}</span>
+                  </div>
+                )}
                 <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium">{({ pending: a.pending, qualified: a.qualified, paid: a.paid, rejected: a.rejected })[r.status]}</span>
                 {(r.status === 'pending' || r.status === 'qualified') && <button type="button" className="btn btn-ghost btn-sm text-red-700" onClick={() => { const why = window.prompt(a.reason) ?? null; if (why !== null) void run(supabase.rpc('admin_referral_reject', { p_id: r.id, p_reason: why })); }}>{a.reject}</button>}
                 {r.status === 'pending' && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void run(supabase.rpc('admin_referral_approve', { p_id: r.id }))}>{a.approve}</button>}
@@ -128,6 +145,7 @@ export function AdminReferrals() {
       <form className={`${card} space-y-3`} onSubmit={saveSettings}>
         <h3 className="text-sm font-semibold">{a.settings}</h3>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.enabled} onChange={(e) => setF({ ...f, enabled: e.target.checked })} />{a.enabled}</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.auto_approve} onChange={(e) => setF({ ...f, auto_approve: e.target.checked })} />{a.autoApprove}</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.require_install} onChange={(e) => setF({ ...f, require_install: e.target.checked })} />{a.requireInstall}</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.require_email} onChange={(e) => setF({ ...f, require_email: e.target.checked })} />{a.requireEmail}</label>
         <div className="grid gap-3 sm:grid-cols-2">{(['reward_cents', 'min_actions', 'min_days', 'claim_window_days', 'monthly_cap', 'min_payout_cents'] as const).map(num)}</div>
