@@ -3,7 +3,7 @@ import type { Lang } from './types';
 interface Words {
   nav: string; heroTitle: (a: string) => string; heroText: string; yourCode: string; copyLink: string; copied: string; share: string; shareText: string;
   balance: string; paid: string; friends: string; waiting: string;
-  installStep: [string, string]; rulesInstall: string; paused: (until: string) => string;
+  installStep: [string, string]; rulesInstall: string;
   howTitle: string; steps: (days: number, actions: number) => Array<[string, string]>;
   rulesTitle: string; rules: (monthly: number, minPayout: string) => string[];
   listTitle: string; listEmpty: string; stPending: string; stQualified: string; stPaid: string; stRejected: string;
@@ -12,7 +12,7 @@ interface Words {
 
 export const REFERRAL: Record<Lang, Words> = {
   en: {
-    paused: (u) => u ? `The program is paused until ${u}. Friends can still join, but no new rewards are earned until then.` : 'The program is paused for now. Friends can still join, but no new rewards are earned until it resumes.', installStep: ['They install the app','They add Kezzo to their phone (Add to Home screen or the app). Only the first install of a phone counts.'], rulesInstall: 'Only the first install of a phone counts: deleting and installing again does not earn twice.', nav: 'Invite & Earn', heroTitle: (a) => `Invite friends, earn ${a} each`, heroText: 'Share your personal link. When your friend joins Kezzo and becomes an active member, you earn a reward.',
+    installStep: ['They install the app','They add Kezzo to their phone (Add to Home screen or the app). Only the first install of a phone counts.'], rulesInstall: 'Only the first install of a phone counts: deleting and installing again does not earn twice.', nav: 'Invite & Earn', heroTitle: (a) => `Invite friends, earn ${a} each`, heroText: 'Share your personal link. When your friend joins Kezzo and becomes an active member, you earn a reward.',
     yourCode: 'Your invite code', copyLink: 'Copy link', copied: 'Link copied.', share: 'Share', shareText: 'Join me on Kezzo!',
     balance: 'Your balance', paid: 'Already paid', friends: 'Friends who qualified', waiting: 'Waiting to qualify',
     howTitle: 'How it works',
@@ -22,7 +22,7 @@ export const REFERRAL: Record<Lang, Words> = {
     payoutTitle: 'How should we pay you?', payoutHelp: 'Your mobile money number, PayPal e-mail or bank details. Only the Kezzo team can see it.', payoutPh: 'e.g. Mobile money +257…', save: 'Save', saved: 'Saved.', off: 'The invite program is paused for now.', err: 'Something went wrong. Please try again.', typed: 'Link is copied. Paste it anywhere.', claimOk: 'Welcome! You joined through a friend.',
   },
   fr: {
-    paused: (u) => u ? `Le programme est en pause jusqu’au ${u}. Vos amis peuvent encore s’inscrire, mais aucune nouvelle récompense n’est gagnée d’ici là.` : 'Le programme est en pause pour le moment. Vos amis peuvent encore s’inscrire, mais aucune nouvelle récompense n’est gagnée tant qu’il n’a pas repris.', installStep: ['Il installe l’application','Il ajoute Kezzo à son téléphone (écran d’accueil ou application). Seule la première installation d’un téléphone compte.'], rulesInstall: 'Seule la première installation d’un téléphone compte : supprimer puis réinstaller ne rapporte pas deux fois.', nav: 'Inviter et gagner', heroTitle: (a) => `Invitez vos amis, gagnez ${a} chacun`, heroText: 'Partagez votre lien personnel. Quand votre ami rejoint Kezzo et devient actif, vous gagnez une récompense.',
+    installStep: ['Il installe l’application','Il ajoute Kezzo à son téléphone (écran d’accueil ou application). Seule la première installation d’un téléphone compte.'], rulesInstall: 'Seule la première installation d’un téléphone compte : supprimer puis réinstaller ne rapporte pas deux fois.', nav: 'Inviter et gagner', heroTitle: (a) => `Invitez vos amis, gagnez ${a} chacun`, heroText: 'Partagez votre lien personnel. Quand votre ami rejoint Kezzo et devient actif, vous gagnez une récompense.',
     yourCode: 'Votre code d’invitation', copyLink: 'Copier le lien', copied: 'Lien copié.', share: 'Partager', shareText: 'Rejoins-moi sur Kezzo !',
     balance: 'Votre solde', paid: 'Déjà payé', friends: 'Amis qualifiés', waiting: 'En attente',
     howTitle: 'Comment ça marche',
@@ -32,7 +32,7 @@ export const REFERRAL: Record<Lang, Words> = {
     payoutTitle: 'Comment vous payer ?', payoutHelp: 'Votre numéro mobile money, e-mail PayPal ou coordonnées bancaires. Seule l’équipe Kezzo les voit.', payoutPh: 'ex. Mobile money +257…', save: 'Enregistrer', saved: 'Enregistré.', off: 'Le programme d’invitation est en pause.', err: 'Une erreur est survenue. Réessayez.', typed: 'Lien copié. Collez-le où vous voulez.', claimOk: 'Bienvenue ! Vous avez rejoint via un ami.',
   },
   es: {
-    paused: (u) => u ? `El programa está en pausa hasta el ${u}. Tus amigos aún pueden unirse, pero no se ganan nuevas recompensas hasta entonces.` : 'El programa está en pausa por ahora. Tus amigos aún pueden unirse, pero no se ganan nuevas recompensas hasta que se reanude.', installStep: ['Instala la app','Añade Kezzo a su teléfono (pantalla de inicio o la app). Solo cuenta la primera instalación de un teléfono.'], rulesInstall: 'Solo cuenta la primera instalación de un teléfono: borrar e instalar otra vez no paga dos veces.', nav: 'Invita y gana', heroTitle: (a) => `Invita amigos, gana ${a} por cada uno`, heroText: 'Comparte tu enlace personal. Cuando tu amigo se une a Kezzo y se vuelve activo, ganas una recompensa.',
+    installStep: ['Instala la app','Añade Kezzo a su teléfono (pantalla de inicio o la app). Solo cuenta la primera instalación de un teléfono.'], rulesInstall: 'Solo cuenta la primera instalación de un teléfono: borrar e instalar otra vez no paga dos veces.', nav: 'Invita y gana', heroTitle: (a) => `Invita amigos, gana ${a} por cada uno`, heroText: 'Comparte tu enlace personal. Cuando tu amigo se une a Kezzo y se vuelve activo, ganas una recompensa.',
     yourCode: 'Tu código de invitación', copyLink: 'Copiar enlace', copied: 'Enlace copiado.', share: 'Compartir', shareText: '¡Únete a mí en Kezzo!',
     balance: 'Tu saldo', paid: 'Ya pagado', friends: 'Amigos calificados', waiting: 'En espera',
     howTitle: 'Cómo funciona',
@@ -42,7 +42,7 @@ export const REFERRAL: Record<Lang, Words> = {
     payoutTitle: '¿Cómo te pagamos?', payoutHelp: 'Tu número de dinero móvil, correo de PayPal o datos bancarios. Solo el equipo de Kezzo lo ve.', payoutPh: 'p. ej. Dinero móvil +257…', save: 'Guardar', saved: 'Guardado.', off: 'El programa de invitación está en pausa.', err: 'Algo salió mal. Inténtalo de nuevo.', typed: 'Enlace copiado. Pégalo donde quieras.', claimOk: '¡Bienvenido! Te uniste por un amigo.',
   },
   pt: {
-    paused: (u) => u ? `O programa está em pausa até ${u}. Seus amigos ainda podem entrar, mas nenhuma nova recompensa é ganha até lá.` : 'O programa está em pausa por enquanto. Seus amigos ainda podem entrar, mas nenhuma nova recompensa é ganha até ele voltar.', installStep: ['Ele instala o app','Ele adiciona o Kezzo ao celular (tela inicial ou o app). Só conta a primeira instalação de um celular.'], rulesInstall: 'Só conta a primeira instalação de um celular: apagar e instalar de novo não paga duas vezes.', nav: 'Convide e ganhe', heroTitle: (a) => `Convide amigos, ganhe ${a} por cada um`, heroText: 'Compartilhe seu link pessoal. Quando seu amigo entra no Kezzo e fica ativo, você ganha uma recompensa.',
+    installStep: ['Ele instala o app','Ele adiciona o Kezzo ao celular (tela inicial ou o app). Só conta a primeira instalação de um celular.'], rulesInstall: 'Só conta a primeira instalação de um celular: apagar e instalar de novo não paga duas vezes.', nav: 'Convide e ganhe', heroTitle: (a) => `Convide amigos, ganhe ${a} por cada um`, heroText: 'Compartilhe seu link pessoal. Quando seu amigo entra no Kezzo e fica ativo, você ganha uma recompensa.',
     yourCode: 'Seu código de convite', copyLink: 'Copiar link', copied: 'Link copiado.', share: 'Compartilhar', shareText: 'Venha para o Kezzo comigo!',
     balance: 'Seu saldo', paid: 'Já pago', friends: 'Amigos qualificados', waiting: 'Aguardando',
     howTitle: 'Como funciona',
@@ -52,7 +52,7 @@ export const REFERRAL: Record<Lang, Words> = {
     payoutTitle: 'Como pagamos você?', payoutHelp: 'Seu número de dinheiro móvel, e-mail do PayPal ou dados bancários. Só a equipe Kezzo vê.', payoutPh: 'ex. Dinheiro móvel +257…', save: 'Salvar', saved: 'Salvo.', off: 'O programa de convites está pausado.', err: 'Algo deu errado. Tente de novo.', typed: 'Link copiado. Cole onde quiser.', claimOk: 'Bem-vindo! Você entrou por um amigo.',
   },
   hi: {
-    paused: (u) => u ? `कार्यक्रम ${u} तक रुका है। दोस्त अब भी जुड़ सकते हैं, लेकिन तब तक नया इनाम नहीं मिलेगा।` : 'कार्यक्रम अभी रुका है। दोस्त अब भी जुड़ सकते हैं, लेकिन दोबारा शुरू होने तक नया इनाम नहीं मिलेगा।', installStep: ['वह ऐप इंस्टॉल करे','वह Kezzo को अपने फ़ोन में जोड़े (होम स्क्रीन या ऐप)। किसी फ़ोन का केवल पहला इंस्टॉल गिना जाता है।'], rulesInstall: 'किसी फ़ोन का केवल पहला इंस्टॉल गिना जाता है: हटाकर दोबारा इंस्टॉल करने पर दो बार इनाम नहीं मिलता।', nav: 'आमंत्रित करें और कमाएँ', heroTitle: (a) => `दोस्तों को बुलाएँ, हर एक पर ${a} कमाएँ`, heroText: 'अपना निजी लिंक साझा करें। जब आपका दोस्त Kezzo से जुड़कर सक्रिय हो जाता है, आपको इनाम मिलता है।',
+    installStep: ['वह ऐप इंस्टॉल करे','वह Kezzo को अपने फ़ोन में जोड़े (होम स्क्रीन या ऐप)। किसी फ़ोन का केवल पहला इंस्टॉल गिना जाता है।'], rulesInstall: 'किसी फ़ोन का केवल पहला इंस्टॉल गिना जाता है: हटाकर दोबारा इंस्टॉल करने पर दो बार इनाम नहीं मिलता।', nav: 'आमंत्रित करें और कमाएँ', heroTitle: (a) => `दोस्तों को बुलाएँ, हर एक पर ${a} कमाएँ`, heroText: 'अपना निजी लिंक साझा करें। जब आपका दोस्त Kezzo से जुड़कर सक्रिय हो जाता है, आपको इनाम मिलता है।',
     yourCode: 'आपका आमंत्रण कोड', copyLink: 'लिंक कॉपी करें', copied: 'लिंक कॉपी हो गया।', share: 'साझा करें', shareText: 'Kezzo पर मेरे साथ जुड़ें!',
     balance: 'आपका बैलेंस', paid: 'भुगतान हो चुका', friends: 'योग्य दोस्त', waiting: 'प्रतीक्षा में',
     howTitle: 'यह कैसे काम करता है',
@@ -65,7 +65,6 @@ export const REFERRAL: Record<Lang, Words> = {
 
 interface AdminWords {
   tab: string; title: string; help: string; owed: string; paidT: string; pendingN: string; qualifiedN: string; rejectedN: string;
-  pauseTitle: string; pauseHelp: string; pauseFrom: string; pauseUntil: string; pauseNote: string; pauseBtn: string; resumeBtn: string; statusOn: string; statusPaused: string; statusOff: string;
   requireInstall: string; requireEmail: string; rulesText: string; rulesHelp: string; approve: string; installsN: string;
   settings: string; enabled: string; reward: string; actions: string; days: string; window: string; cap: string; minPayout: string; saveSettings: string; saved: string;
   payouts: string; payoutsHelp: string; noPayouts: string; markPaid: string; paidNote: string; belowMin: string; noInfo: string; block: string; unblock: string; blocked: string;
@@ -75,7 +74,6 @@ export const REFERRAL_ADMIN: Record<'en' | 'fr', AdminWords> = {
   en: {
     tab: 'Referrals', title: 'Invite & Earn', help: 'Members invite friends with a personal link. A referral only counts once the new member is real: confirmed e-mail, old enough and active. You pay balances once a month and mark them paid here.',
     owed: 'To pay', paidT: 'Paid so far', pendingN: 'Pending', qualifiedN: 'Qualified', rejectedN: 'Rejected',
-    pauseTitle: 'Pause the program', pauseHelp: 'While paused, friends can still join with a code, but nobody earns new rewards. Balances already earned stay and can be paid. Leave the dates empty to pause right now until you resume.', pauseFrom: 'Pause from (optional)', pauseUntil: 'Resume on (optional)', pauseNote: 'Message for members (optional)', pauseBtn: 'Pause', resumeBtn: 'Resume now', statusOn: 'Running', statusPaused: 'Paused', statusOff: 'Turned off',
     requireInstall: 'Friend must install the app (first install of a phone only)', requireEmail: 'Friend must confirm their e-mail', rulesText: 'Rules shown to members', rulesHelp: 'Optional. One rule per line. Leave empty to show the standard rules.', approve: 'Approve', installsN: 'Phones counted',
     settings: 'Settings', enabled: 'Program is on', reward: 'Reward per friend (US cents)', actions: 'Minimum actions (posts, comments, likes)', days: 'Minimum days since sign-up', window: 'Days to enter a code after sign-up', cap: 'Max rewards per member per month', minPayout: 'Minimum balance to pay (US cents)', saveSettings: 'Save settings', saved: 'Saved.',
     payouts: 'Monthly payouts', payoutsHelp: 'Pay each person outside Kezzo (mobile money, PayPal, bank), then press “Mark as paid”.', noPayouts: 'Nobody is waiting to be paid.', markPaid: 'Mark as paid', paidNote: 'Note (e.g. “Nov 2026, mobile money”)', belowMin: 'Below the minimum', noInfo: 'No payment details yet', block: 'Block', unblock: 'Unblock', blocked: 'Blocked',
@@ -84,7 +82,6 @@ export const REFERRAL_ADMIN: Record<'en' | 'fr', AdminWords> = {
   fr: {
     tab: 'Parrainage', title: 'Inviter et gagner', help: 'Les membres invitent leurs amis avec un lien personnel. Un parrainage ne compte que si le nouveau membre est réel : e-mail confirmé, assez ancien et actif. Vous payez les soldes une fois par mois et les marquez payés ici.',
     owed: 'À payer', paidT: 'Déjà payé', pendingN: 'En attente', qualifiedN: 'Qualifiés', rejectedN: 'Refusés',
-    pauseTitle: 'Mettre le programme en pause', pauseHelp: 'En pause, les amis peuvent encore s’inscrire avec un code, mais personne ne gagne de nouvelle récompense. Les soldes déjà gagnés restent et peuvent être payés. Laissez les dates vides pour mettre en pause tout de suite jusqu’à la reprise.', pauseFrom: 'Pause à partir du (facultatif)', pauseUntil: 'Reprise le (facultatif)', pauseNote: 'Message pour les membres (facultatif)', pauseBtn: 'Mettre en pause', resumeBtn: 'Reprendre maintenant', statusOn: 'En cours', statusPaused: 'En pause', statusOff: 'Désactivé',
     requireInstall: 'L’ami doit installer l’application (première installation d’un téléphone seulement)', requireEmail: 'L’ami doit confirmer son e-mail', rulesText: 'Règles affichées aux membres', rulesHelp: 'Facultatif. Une règle par ligne. Laissez vide pour afficher les règles standard.', approve: 'Approuver', installsN: 'Téléphones comptés',
     settings: 'Réglages', enabled: 'Programme activé', reward: 'Récompense par ami (cents US)', actions: 'Actions minimum (publications, commentaires, j’aime)', days: 'Jours minimum depuis l’inscription', window: 'Jours pour saisir un code après l’inscription', cap: 'Récompenses max par membre et par mois', minPayout: 'Solde minimum pour payer (cents US)', saveSettings: 'Enregistrer', saved: 'Enregistré.',
     payouts: 'Paiements du mois', payoutsHelp: 'Payez chaque personne hors de Kezzo (mobile money, PayPal, banque), puis appuyez sur « Marquer payé ».', noPayouts: 'Personne n’attend de paiement.', markPaid: 'Marquer payé', paidNote: 'Note (ex. « Nov 2026, mobile money »)', belowMin: 'Sous le minimum', noInfo: 'Pas encore de coordonnées', block: 'Bloquer', unblock: 'Débloquer', blocked: 'Bloqué',

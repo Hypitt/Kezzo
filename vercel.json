@@ -7,13 +7,6 @@
       "maxDuration": 30
     }
   },
-  "redirects": [
-    {
-      "source": "/r/:code",
-      "destination": "/?ref=:code",
-      "permanent": false
-    }
-  ],
   "rewrites": [
     {
       "source": "/s/:type/:id/:slug",
