@@ -1,68 +1,42 @@
-import { useEffect, useState } from 'react';
+import { supabase } from './supabase';
 
-/**
- * "Install the app" support (a web app, no app store). Chrome, Edge and Android browsers send a `beforeinstallprompt`
- * event that we keep until the person presses our Install button. Safari on iPhone/iPad has no such event, so we show
- * short instructions instead (Share, then Add to Home Screen).
- */
-interface InstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
+const SENT = 'kezzo.installSent';
+const EVENT = 'kezzo.installEvent';
 
-let deferred: InstallPromptEvent | null = null;
-let installed = false;
-const listeners = new Set<() => void>();
-const notify = () => listeners.forEach((fn) => fn());
-
-/** Called once at startup (main.tsx), before the page finishes loading, so the browser event is not missed. */
-export function initInstall(): void {
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferred = e as InstallPromptEvent;
-    notify();
-  });
-  window.addEventListener('appinstalled', () => {
-    deferred = null;
-    installed = true;
-    notify();
-  });
-}
-
-/** True when Kezzo is already running as an installed app (home screen icon or app window). */
-export function isStandalone(): boolean {
+/** True when Kezzo runs as an installed app (home-screen icon or native app), not as a normal browser tab. */
+export function isInstalledApp(): boolean {
   try {
-    return window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
-  } catch {
-    return false;
-  }
+    if (window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches) return true;
+    if ((navigator as Navigator & { standalone?: boolean }).standalone) return true;
+    return localStorage.getItem(EVENT) === '1';
+  } catch { return false; }
 }
 
-export function isIos(): boolean {
-  const ua = navigator.userAgent;
-  return /iphone|ipad|ipod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+/** The browser tells us when the person installs the app from the browser. */
+export function watchInstallEvent(): void {
+  window.addEventListener('appinstalled', () => { try { localStorage.setItem(EVENT, '1'); } catch { /* ignore */ } });
 }
 
-export function useInstall() {
-  const [, setTick] = useState(0);
-  useEffect(() => {
-    const fn = () => setTick((n) => n + 1);
-    listeners.add(fn);
-    return () => { listeners.delete(fn); };
-  }, []);
+/** A one-way code for this phone, made of settings that stay the same after the app is deleted and installed again. Only the hash leaves the phone. */
+async function deviceCode(): Promise<string> {
+  let gpu = '';
+  try {
+    const gl = document.createElement('canvas').getContext('webgl');
+    const ext = gl?.getExtension('WEBGL_debug_renderer_info');
+    if (gl && ext) gpu = String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL));
+  } catch { /* no WebGL */ }
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  const dims = [Math.min(screen.width, screen.height), Math.max(screen.width, screen.height)].join('x');
+  const raw = [nav.platform, dims, window.devicePixelRatio, nav.hardwareConcurrency, nav.deviceMemory ?? '', nav.maxTouchPoints, Intl.DateTimeFormat().resolvedOptions().timeZone, gpu, screen.colorDepth].join('|');
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`kezzo-device-v1|${raw}`));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 
-  const alreadyInstalled = installed || isStandalone();
-  /** Opens the browser's own install window when it is available; returns false when instructions must be shown instead. */
-  const install = async (): Promise<boolean> => {
-    if (!deferred) return false;
-    const ev = deferred;
-    deferred = null;
-    notify();
-    try {
-      await ev.prompt();
-      await ev.userChoice;
-    } catch { /* closed without choosing */ }
-    return true;
-  };
-  return { installed: alreadyInstalled, canPrompt: deferred !== null, ios: isIos(), install };
+/** Called once the person is signed in: if this is the installed app, tell the server (it counts only a device's first install). */
+export async function recordInstall(): Promise<void> {
+  try {
+    if (!isInstalledApp() || localStorage.getItem(SENT) === '1') return;
+    const { error } = await supabase.rpc('record_install', { p_device: await deviceCode(), p_source: 'web' });
+    if (!error) localStorage.setItem(SENT, '1');
+  } catch { /* try again next time */ }
 }

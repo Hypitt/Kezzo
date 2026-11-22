@@ -10,7 +10,7 @@ import { Chevron, Loading, PageHeader } from '../components/ui';
 
 interface Stats {
   code: string; payout_info: string;
-  settings: { enabled: boolean; reward_cents: number; min_actions: number; min_days: number; monthly_cap: number; min_payout_cents: number };
+  settings: { enabled: boolean; reward_cents: number; min_actions: number; min_days: number; monthly_cap: number; min_payout_cents: number; require_install: boolean; require_email: boolean; rules_text: string };
   pending: number; qualified: number; balance_cents: number; paid_cents: number;
   referrals: Array<{ name: string; status: 'pending' | 'qualified' | 'paid' | 'rejected'; created_at: string; reward_cents: number }>;
 }
@@ -54,6 +54,10 @@ export function InviteView() {
     return <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${m[0]}`}>{m[1]}</span>;
   };
   const steps = w.steps(s.settings.min_days, s.settings.min_actions);
+  if (s.settings.require_install) steps.splice(2, 0, w.installStep);
+  const ruleLines = s.settings.rules_text.trim()
+    ? s.settings.rules_text.split('\n').map((x) => x.trim()).filter(Boolean)
+    : [...w.rules(s.settings.monthly_cap, usd(s.settings.min_payout_cents)), ...(s.settings.require_install ? [w.rulesInstall] : [])];
 
   return (
     <div className="mx-auto max-w-xl space-y-4">
@@ -100,7 +104,7 @@ export function InviteView() {
         <button type="button" className="flex w-full items-center gap-2 rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-2.5 text-left text-sm font-semibold" aria-expanded={rules} onClick={() => setRules((v) => !v)}>
           <span className="flex-1">{w.rulesTitle}</span><Chevron open={rules} />
         </button>
-        {rules && <ul className="list-disc space-y-1 pl-5 text-xs text-zinc-600">{w.rules(s.settings.monthly_cap, usd(s.settings.min_payout_cents)).map((r) => <li key={r}>{r}</li>)}</ul>}
+        {rules && <ul className="list-disc space-y-1 pl-5 text-xs text-zinc-600">{ruleLines.map((r) => <li key={r}>{r}</li>)}</ul>}
       </section>
 
       <section className="card space-y-2">

@@ -15,6 +15,7 @@ import { Loading } from './components/ui';
 import { PENDING_GROUP, pendingGroup, pendingInvite } from './lib/invite';
 import { InviteView } from './views/InviteView';
 import { captureRef, clearRef, pendingRef } from './lib/referral';
+import { recordInstall, watchInstallEvent } from './lib/install';
 import { REFERRAL } from './lib/referralText';
 import { supabase } from './lib/supabase';
 import { startMonitoring, trackPage } from './lib/analytics';
@@ -124,7 +125,8 @@ function Shell() {
   }, [route.tab, route.id]);
 
   // Invite & Earn: a friend's code (from ?ref=) is claimed once, right after the new account exists.
-  useEffect(() => { captureRef(); }, []);
+  useEffect(() => { captureRef(); watchInstallEvent(); }, []);
+  useEffect(() => { if (profile) void recordInstall(); }, [profile?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!profile) return;
     const code = pendingRef();

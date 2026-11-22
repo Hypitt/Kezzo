@@ -7,7 +7,7 @@ import { useToast } from '../state/Toast';
 import { Chip, Loading } from '../components/ui';
 
 const card = 'rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900';
-interface Summary { settings: { enabled: boolean; reward_cents: number; min_actions: number; min_days: number; claim_window_days: number; monthly_cap: number; min_payout_cents: number }; pending: number; qualified: number; paid: number; rejected: number; owed_cents: number; paid_cents: number }
+interface Summary { settings: { enabled: boolean; reward_cents: number; min_actions: number; min_days: number; claim_window_days: number; monthly_cap: number; min_payout_cents: number; require_install: boolean; require_email: boolean; rules_text: string }; installs: number; pending: number; qualified: number; paid: number; rejected: number; owed_cents: number; paid_cents: number }
 interface Payout { referrer_id: string; name: string; handle: string; payout_info: string; blocked: boolean; n: number; owed_cents: number }
 interface Row { id: string; status: 'pending' | 'qualified' | 'paid' | 'rejected'; reward_cents: number; reject_reason: string; created_at: string; referrer_id: string; referrer_name: string; referrer_handle: string; referred_name: string; referred_handle: string }
 
@@ -43,12 +43,12 @@ export function AdminReferrals() {
   const saveSettings = async (e: FormEvent) => {
     e.preventDefault();
     if (!f) return;
-    await run(supabase.rpc('admin_referral_settings', { p_enabled: f.enabled, p_reward: f.reward_cents, p_actions: f.min_actions, p_days: f.min_days, p_window: f.claim_window_days, p_cap: f.monthly_cap, p_min_payout: f.min_payout_cents }));
+    await run(supabase.rpc('admin_referral_settings', { p_enabled: f.enabled, p_reward: f.reward_cents, p_actions: f.min_actions, p_days: f.min_days, p_window: f.claim_window_days, p_cap: f.monthly_cap, p_min_payout: f.min_payout_cents, p_install: f.require_install, p_email: f.require_email, p_rules: f.rules_text }));
   };
 
   if (!sum || !f) return <Loading />;
-  const num = (k: keyof Summary['settings']) => (
-    <div key={k}><label className="label" htmlFor={`rs-${k}`}>{{ reward_cents: a.reward, min_actions: a.actions, min_days: a.days, claim_window_days: a.window, monthly_cap: a.cap, min_payout_cents: a.minPayout, enabled: '' }[k]}</label>
+  const num = (k: 'reward_cents' | 'min_actions' | 'min_days' | 'claim_window_days' | 'monthly_cap' | 'min_payout_cents') => (
+    <div key={k}><label className="label" htmlFor={`rs-${k}`}>{{ reward_cents: a.reward, min_actions: a.actions, min_days: a.days, claim_window_days: a.window, monthly_cap: a.cap, min_payout_cents: a.minPayout }[k]}</label>
       <input id={`rs-${k}`} className="input" type="number" min={0} value={Number(f[k])} onChange={(e) => setF({ ...f, [k]: Math.max(0, Number(e.target.value) || 0) })} /></div>
   );
   const statuses: Array<[string, string]> = [['', a.all], ['pending', a.pending], ['qualified', a.qualified], ['paid', a.paid], ['rejected', a.rejected]];
@@ -57,8 +57,8 @@ export function AdminReferrals() {
     <div className="space-y-4">
       <div className={card}><h2 className="text-base font-semibold">{a.title}</h2><p className="mt-1 text-xs text-zinc-600">{a.help}</p></div>
 
-      <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-5">
-        {[[a.owed, usd(sum.owed_cents)], [a.paidT, usd(sum.paid_cents)], [a.pendingN, sum.pending], [a.qualifiedN, sum.qualified], [a.rejectedN, sum.rejected]].map(([l, v]) => (
+      <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3 lg:grid-cols-6">
+        {[[a.owed, usd(sum.owed_cents)], [a.paidT, usd(sum.paid_cents)], [a.pendingN, sum.pending], [a.qualifiedN, sum.qualified], [a.rejectedN, sum.rejected], [a.installsN, sum.installs]].map(([l, v]) => (
           <div key={String(l)} className={`${card} text-center`}><dd className="text-lg font-bold tabular-nums">{v}</dd><dt className="text-[11px] text-zinc-500">{l}</dt></div>
         ))}
       </dl>
@@ -98,6 +98,7 @@ export function AdminReferrals() {
                 </span>
                 <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium">{({ pending: a.pending, qualified: a.qualified, paid: a.paid, rejected: a.rejected })[r.status]}</span>
                 {(r.status === 'pending' || r.status === 'qualified') && <button type="button" className="btn btn-ghost btn-sm text-red-700" onClick={() => { const why = window.prompt(a.reason) ?? null; if (why !== null) void run(supabase.rpc('admin_referral_reject', { p_id: r.id, p_reason: why })); }}>{a.reject}</button>}
+                {r.status === 'pending' && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void run(supabase.rpc('admin_referral_approve', { p_id: r.id }))}>{a.approve}</button>}
                 {r.status === 'rejected' && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void run(supabase.rpc('admin_referral_restore', { p_id: r.id }))}>{a.restore}</button>}
               </li>
             ))}
@@ -108,7 +109,10 @@ export function AdminReferrals() {
       <form className={`${card} space-y-3`} onSubmit={saveSettings}>
         <h3 className="text-sm font-semibold">{a.settings}</h3>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.enabled} onChange={(e) => setF({ ...f, enabled: e.target.checked })} />{a.enabled}</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.require_install} onChange={(e) => setF({ ...f, require_install: e.target.checked })} />{a.requireInstall}</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.require_email} onChange={(e) => setF({ ...f, require_email: e.target.checked })} />{a.requireEmail}</label>
         <div className="grid gap-3 sm:grid-cols-2">{(['reward_cents', 'min_actions', 'min_days', 'claim_window_days', 'monthly_cap', 'min_payout_cents'] as const).map(num)}</div>
+        <div><label className="label" htmlFor="rs-rules">{a.rulesText}</label><textarea id="rs-rules" className="input" rows={4} maxLength={1200} value={f.rules_text} onChange={(e) => setF({ ...f, rules_text: e.target.value })} /><p className="mt-1 text-xs text-zinc-500">{a.rulesHelp}</p></div>
         <button className="btn btn-primary">{a.saveSettings}</button>
       </form>
     </div>
