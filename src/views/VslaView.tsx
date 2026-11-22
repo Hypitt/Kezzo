@@ -6,6 +6,8 @@ import { useI18n } from '../state/I18n';
 import { limitMessage } from '../lib/premiumText';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
+import { ExportButton, ReportCard } from '../components/VslaPremium';
+import { VSLA_PREMIUM, vslaPremiumError } from '../lib/vslaPremiumText';
 import { VslaPanel, type VslaMember, type VslaView as PanelView } from '../components/VslaPanel';
 import { Empty, Loading, PageHeader, Spinner } from '../components/ui';
 
@@ -75,6 +77,7 @@ export function VslaView() {
         <button className="btn btn-primary shrink-0" disabled={busy || !code.trim()}>{t('vsla_join')}</button>
       </form>
 
+      <ReportCard />
       {groups === null ? <Loading /> : groups.length === 0 ? <Empty text={t('vsla_none_groups')} /> : (
         <ul className="grid gap-3 sm:grid-cols-2">
           {groups.map((g) => (
@@ -152,6 +155,7 @@ export function VslaRoom({ id }: { id: string }) {
       <header className="space-y-0.5">
         <h1 className="text-xl font-bold">{group.name}</h1>
         {group.description && <p className="text-sm text-zinc-600">{group.description}</p>}
+        {admin && <div className="pt-1"><ExportButton groupId={group.id} name={group.name} /></div>}
       </header>
 
       <nav className="sticky top-0 z-10 -mx-1 flex gap-1 overflow-x-auto rounded-lg bg-zinc-100 p-0.5" aria-label={group.name}>
@@ -168,7 +172,7 @@ export function VslaRoom({ id }: { id: string }) {
 
       {/* The books stay mounted while another tab is open, so nothing reloads and the offline queue keeps running. */}
       <div hidden={tab === 'members' || tab === 'messages'}>
-        <VslaPanel groupId={id} members={members} admin={Boolean(admin)} meId={me?.id ?? null} view={tab === 'contrib' || tab === 'loans' ? tab : 'overview'} onPending={setPending} onOpenTab={setTab} />
+        <VslaPanel groupId={id} members={members} admin={Boolean(admin)} agent={me?.role === 'agent'} meId={me?.id ?? null} view={tab === 'contrib' || tab === 'loans' ? tab : 'overview'} onPending={setPending} onOpenTab={setTab} />
       </div>
       {tab === 'members' && <MembersTab group={group} members={members} details={details} me={me} admin={Boolean(admin)} owner={group.owner_id === user?.id} onChanged={load} />}
       {tab === 'messages' && <MessagesTab groupId={id} members={members} admin={Boolean(admin)} meUser={user?.id ?? ''} />}
@@ -181,7 +185,7 @@ export function VslaRoom({ id }: { id: string }) {
 function MembersTab({ group, members, details, me, admin, owner, onChanged }: {
   group: VslaGroup; members: VslaMember[]; details: Map<string, Details>; me?: VslaMember; admin: boolean; owner: boolean; onChanged: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { go } = useRouter();
   const { toast } = useToast();
   const why = useWhy();
@@ -195,7 +199,7 @@ function MembersTab({ group, members, details, me, admin, owner, onChanged }: {
     setBusy(true);
     const { error } = await fn();
     setBusy(false);
-    if (error) return toast(t('vs_error', { why: why(error.message) }), 'error');
+    if (error) return toast(/premium_required|guest_no_role|not_admin|last_admin/.test(error.message) && !error.message.includes('has_shares') ? vslaPremiumError(lang, error.message) : t('vs_error', { why: why(error.message) }), 'error');
     after?.();
     onChanged();
   };
@@ -207,13 +211,14 @@ function MembersTab({ group, members, details, me, admin, owner, onChanged }: {
         {live.map((m) => {
           const d = details.get(m.id);
           const mine = m.id === me?.id;
-          const canSee = admin || mine;
+          const canSee = admin || mine || me?.role === 'secretary';
           const expanded = open === m.id;
           return (
             <li key={m.id} className="py-2 text-sm">
               <div className="flex items-center gap-2">
                 <button type="button" className="flex min-w-0 flex-1 items-center gap-1.5 text-left" aria-expanded={expanded} onClick={() => { setOpen(expanded ? null : m.id); setEdit(null); }}>
                   {m.role === 'admin' && <Crown className="h-3.5 w-3.5 shrink-0 text-amber-600" aria-label={t('vsla_treasurer')} />}
+                  {(m.role === 'secretary' || m.role === 'agent') && <span className="shrink-0 rounded bg-sky-100 px-1.5 text-[10px] font-semibold text-sky-800">{VSLA_PREMIUM[lang].roles[m.role]}</span>}
                   <span className="truncate font-medium">{m.display_name}{mine && <span className="font-normal text-zinc-500"> ({t('vsla_you')})</span>}</span>
                   {!m.user_id && <span className="shrink-0 rounded bg-zinc-100 px-1.5 text-[10px] text-zinc-600">{t('vsla_guest_tag')}</span>}
                   {canSee && <ChevronDown className={`ml-auto h-4 w-4 shrink-0 text-zinc-400 transition ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />}
@@ -233,9 +238,10 @@ function MembersTab({ group, members, details, me, admin, owner, onChanged }: {
                       <div className="flex flex-wrap gap-2">
                         <button type="button" className="btn btn-primary btn-sm" onClick={() => setEdit(m.id)}><Pencil className="h-3.5 w-3.5" aria-hidden="true" />{t('vsla_edit_details')}</button>
                         {admin && m.user_id && !mine && (
-                          <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => act(() => supabase.rpc('vsla_set_role', { p_group: group.id, p_member: m.id, p_role: m.role === 'admin' ? 'member' : 'admin' }))}>
-                            {t(m.role === 'admin' ? 'vsla_make_member' : 'vsla_make_admin')}
-                          </button>
+                          <select className="input !w-auto !py-1 text-sm" aria-label={VSLA_PREMIUM[lang].roleLabel} title={VSLA_PREMIUM[lang].roleHelp} disabled={busy} value={m.role}
+                            onChange={(e) => void act(() => supabase.rpc('vsla_set_role', { p_group: group.id, p_member: m.id, p_role: e.target.value }))}>
+                            {(['admin', 'secretary', 'agent', 'member'] as const).map((r) => <option key={r} value={r}>{VSLA_PREMIUM[lang].roles[r]}</option>)}
+                          </select>
                         )}
                         {admin && !mine && (
                           <button type="button" className="btn btn-ghost btn-sm text-red-700" disabled={busy} onClick={() => window.confirm(t('vsla_remove_confirm')) && act(() => supabase.rpc('vsla_remove_member', { p_group: group.id, p_member: m.id }))}>

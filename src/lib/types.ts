@@ -180,6 +180,7 @@ export interface LiveStream {
   max_guests: number;
   status: 'live' | 'ended';
   created_at: string;
+  ends_at?: string | null;
   host: PublicProfile;
 }
 

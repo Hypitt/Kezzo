@@ -33,9 +33,9 @@ export default route(async (req, res) => {
       canPublishSources = allowed.canPublishSources;
     }
   } else if (parts[0] === 'live' && parts.length === 2 && UUID_RE.test(parts[1])) {
-    const { data: stream } = await db.from('live_streams').select('id,host_id,status,mode,kind').eq('id', parts[1]).maybeSingle();
+    const { data: stream } = await db.from('live_streams').select('id,host_id,status,mode,kind,ends_at').eq('id', parts[1]).maybeSingle();
     if (!stream) throw new HttpError(404, 'Live stream not found');
-    if (stream.status === 'ended') throw new HttpError(403, 'This live stream has ended');
+    if (stream.status === 'ended' || (stream.ends_at && new Date(stream.ends_at as string).getTime() < Date.now())) throw new HttpError(403, 'This live stream has ended');
     let onStage = stream.host_id === user.id;
     if (!onStage && stream.kind === 'group') {
       const { data: guest } = await db

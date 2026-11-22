@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { PiggyBank, WifiOff, ChevronLeft, ChevronRight, Check, X, Minus, Plus, Info } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { GroupPayCard, AgentForm } from './VslaPremium';
+import { VSLA_PREMIUM } from '../lib/vslaPremiumText';
 import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
 import { Chevron, Spinner } from './ui';
 import { VslaGuide } from './VslaGuide';
 import { VSLA } from '../lib/vslaText';
-export interface VslaMember { id: string; user_id: string | null; display_name: string; role: 'admin' | 'member'; active?: boolean }
+export interface VslaMember { id: string; user_id: string | null; display_name: string; role: 'admin' | 'member' | 'secretary' | 'agent'; active?: boolean }
 interface Request { id: string; member_id: string; amount: number; approved_amount?: number | null; note: string; status: 'pending' | 'approved' | 'declined'; created_at: string }
 export type VslaView = 'overview' | 'contrib' | 'loans';
 interface Contrib { id: string; member_id: string; kind: 'shares' | 'social' | 'loan_repay'; shares: number; amount: number; approved_amount?: number | null; loan_id: string | null; note: string; meeting_date: string; status: 'pending' | 'approved' | 'declined' | 'cancelled'; created_at: string }
@@ -28,7 +30,7 @@ const isNetwork = (e: { message?: string } | null) => !navigator.onLine || /fetc
  * Village savings and loans (VSLA) books for a group. Everyone in the group can read them; admins record each meeting.
  * Entries are sent with a unique id, so when the phone is offline they wait on the device and are sent later without ever being counted twice.
  */
-export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOpenTab }: { groupId: string; members: VslaMember[]; admin: boolean; meId: string | null; view: VslaView; onPending?: (n: number) => void; onOpenTab?: (tab: VslaView) => void }) {
+export function VslaPanel({ groupId, members, admin, agent, meId, view, onPending, onOpenTab }: { groupId: string; members: VslaMember[]; admin: boolean; agent?: boolean; meId: string | null; view: VslaView; onPending?: (n: number) => void; onOpenTab?: (tab: VslaView) => void }) {
   const { t, lang } = useI18n();
   const w = VSLA[lang];
   const { toast } = useToast();
@@ -292,8 +294,10 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
           <div className="space-y-3">
             <Fold title={w.payTitle} defaultOpen={!admin || pendingContribs.length === 0}>
               <p className="text-xs text-zinc-500">{w.payHelp}</p>
+              <GroupPayCard groupId={groupId} admin={admin} />
               <PayForm groupId={groupId} cycle={cycle} loans={openLoans.filter((l) => l.member_id === meId)} owed={stats.owedByLoan} fmt={fmt} onSent={load} />
             </Fold>
+            {agent && <Fold title={VSLA_PREMIUM[lang].agentT}><AgentForm groupId={groupId} members={members} onSent={load} /></Fold>}
             <Fold title={w.mineTitle} defaultOpen={myContribs.some((x) => x.status === 'pending')}>
               {myContribs.length === 0 ? <p className="text-sm text-zinc-500">{w.mineEmpty}</p> : (
                 <ul className="divide-y divide-zinc-200 text-sm">

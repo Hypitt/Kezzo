@@ -31,7 +31,7 @@ const EN: PremiumWords = {
   refL: 'Transaction reference', refPh: 'The code from your payment message', noteL: 'Note (optional)', send: 'I have paid, send for approval', sending: 'Sending…',
   results: { ok: 'Sent. An admin will check your payment.', no_price: 'This price is not available.', duplicate: 'This reference was already used.', pending: 'You already have a payment waiting for approval.' },
   historyT: 'Your payments', statuses: { pending: 'Waiting', approved: 'Approved', rejected: 'Rejected' }, reason: 'Reason', cancel: 'Cancel',
-  limitHit: { listings: 'You reached your listing limit. Premium raises it.', vsla_groups: 'You reached your savings-group limit. Premium raises it.', vsla_members: 'This group reached its member limit.' },
+  limitHit: { live_rooms: 'You reached your live-room limit for this month. Premium raises it.', listings: 'You reached your listing limit. Premium raises it.', vsla_groups: 'You reached your savings-group limit. Premium raises it.', vsla_members: 'This group reached its member limit.' },
 };
 const FR: PremiumWords = {
   nav: 'Premium', title: 'Kezzo Premium', sub: 'Le social, la marketplace et les groupes d’épargne restent gratuits. Premium ajoute les outils de paiement direct et des limites plus hautes pour vendeurs et créateurs.', err: 'Une erreur est survenue. Réessayez.', done: 'Fait.',
@@ -50,7 +50,7 @@ const FR: PremiumWords = {
   refL: 'Référence de la transaction', refPh: 'Le code du message de paiement', noteL: 'Note (facultatif)', send: 'J’ai payé, envoyer pour approbation', sending: 'Envoi…',
   results: { ok: 'Envoyé. Un admin va vérifier votre paiement.', no_price: 'Ce prix n’est pas disponible.', duplicate: 'Cette référence a déjà été utilisée.', pending: 'Vous avez déjà un paiement en attente d’approbation.' },
   historyT: 'Vos paiements', statuses: { pending: 'En attente', approved: 'Approuvé', rejected: 'Rejeté' }, reason: 'Motif', cancel: 'Annuler',
-  limitHit: { listings: 'Vous avez atteint votre limite d’annonces. Premium l’augmente.', vsla_groups: 'Vous avez atteint votre limite de groupes d’épargne. Premium l’augmente.', vsla_members: 'Ce groupe a atteint sa limite de membres.' },
+  limitHit: { live_rooms: 'Vous avez atteint votre limite de salons live ce mois-ci. Premium l’augmente.', listings: 'Vous avez atteint votre limite d’annonces. Premium l’augmente.', vsla_groups: 'Vous avez atteint votre limite de groupes d’épargne. Premium l’augmente.', vsla_members: 'Ce groupe a atteint sa limite de membres.' },
 };
 const ES: PremiumWords = {
   nav: 'Premium', title: 'Kezzo Premium', sub: 'Lo social, el mercado y los grupos de ahorro siguen siendo gratis. Premium añade pagos directos y límites más altos para vendedores y creadores.', err: 'Algo salió mal. Inténtalo de nuevo.', done: 'Listo.',
@@ -69,7 +69,7 @@ const ES: PremiumWords = {
   refL: 'Referencia de la transacción', refPh: 'El código del mensaje de pago', noteL: 'Nota (opcional)', send: 'Ya pagué, enviar para aprobación', sending: 'Enviando…',
   results: { ok: 'Enviado. Un admin revisará tu pago.', no_price: 'Este precio no está disponible.', duplicate: 'Esta referencia ya fue usada.', pending: 'Ya tienes un pago esperando aprobación.' },
   historyT: 'Tus pagos', statuses: { pending: 'En espera', approved: 'Aprobado', rejected: 'Rechazado' }, reason: 'Motivo', cancel: 'Cancelar',
-  limitHit: { listings: 'Llegaste a tu límite de anuncios. Premium lo aumenta.', vsla_groups: 'Llegaste a tu límite de grupos de ahorro. Premium lo aumenta.', vsla_members: 'Este grupo llegó a su límite de miembros.' },
+  limitHit: { live_rooms: 'Llegaste al límite de salas en vivo de este mes. Premium lo aumenta.', listings: 'Llegaste a tu límite de anuncios. Premium lo aumenta.', vsla_groups: 'Llegaste a tu límite de grupos de ahorro. Premium lo aumenta.', vsla_members: 'Este grupo llegó a su límite de miembros.' },
 };
 const PT: PremiumWords = {
   nav: 'Premium', title: 'Kezzo Premium', sub: 'O social, o mercado e os grupos de poupança continuam grátis. O Premium adiciona pagamentos diretos e limites maiores para vendedores e criadores.', err: 'Algo deu errado. Tente de novo.', done: 'Pronto.',
@@ -88,7 +88,7 @@ const PT: PremiumWords = {
   refL: 'Referência da transação', refPh: 'O código da mensagem de pagamento', noteL: 'Nota (opcional)', send: 'Já paguei, enviar para aprovação', sending: 'Enviando…',
   results: { ok: 'Enviado. Um admin vai conferir seu pagamento.', no_price: 'Este preço não está disponível.', duplicate: 'Esta referência já foi usada.', pending: 'Você já tem um pagamento aguardando aprovação.' },
   historyT: 'Seus pagamentos', statuses: { pending: 'Aguardando', approved: 'Aprovado', rejected: 'Rejeitado' }, reason: 'Motivo', cancel: 'Cancelar',
-  limitHit: { listings: 'Você atingiu o limite de anúncios. O Premium aumenta.', vsla_groups: 'Você atingiu o limite de grupos de poupança. O Premium aumenta.', vsla_members: 'Este grupo atingiu o limite de membros.' },
+  limitHit: { live_rooms: 'Você atingiu o limite de salas ao vivo deste mês. O Premium aumenta.', listings: 'Você atingiu o limite de anúncios. O Premium aumenta.', vsla_groups: 'Você atingiu o limite de grupos de poupança. O Premium aumenta.', vsla_members: 'Este grupo atingiu o limite de membros.' },
 };
 const HI: PremiumWords = {
   nav: 'प्रीमियम', title: 'Kezzo प्रीमियम', sub: 'सोशल, मार्केटप्लेस और बचत समूह मुफ़्त रहते हैं। प्रीमियम विक्रेताओं और क्रिएटर्स के लिए सीधा भुगतान और ऊँची सीमाएँ जोड़ता है।', err: 'कुछ गलत हो गया। फिर कोशिश करें।', done: 'हो गया।',
@@ -107,12 +107,12 @@ const HI: PremiumWords = {
   refL: 'लेनदेन संदर्भ', refPh: 'भुगतान संदेश का कोड', noteL: 'नोट (वैकल्पिक)', send: 'मैंने भुगतान किया, मंज़ूरी के लिए भेजें', sending: 'भेज रहे हैं…',
   results: { ok: 'भेज दिया। एडमिन आपका भुगतान जाँचेगा।', no_price: 'यह कीमत उपलब्ध नहीं है।', duplicate: 'यह संदर्भ पहले इस्तेमाल हो चुका है।', pending: 'आपका एक भुगतान पहले से मंज़ूरी की प्रतीक्षा में है।' },
   historyT: 'आपके भुगतान', statuses: { pending: 'प्रतीक्षा में', approved: 'मंज़ूर', rejected: 'अस्वीकृत' }, reason: 'कारण', cancel: 'रद्द करें',
-  limitHit: { listings: 'आप लिस्टिंग की सीमा तक पहुँच गए। प्रीमियम इसे बढ़ाता है।', vsla_groups: 'आप बचत समूहों की सीमा तक पहुँच गए। प्रीमियम इसे बढ़ाता है।', vsla_members: 'इस समूह में सदस्यों की सीमा पूरी हो गई।' },
+  limitHit: { live_rooms: 'आप इस महीने की लाइव रूम सीमा तक पहुँच गए। प्रीमियम इसे बढ़ाता है।', listings: 'आप लिस्टिंग की सीमा तक पहुँच गए। प्रीमियम इसे बढ़ाता है।', vsla_groups: 'आप बचत समूहों की सीमा तक पहुँच गए। प्रीमियम इसे बढ़ाता है।', vsla_members: 'इस समूह में सदस्यों की सीमा पूरी हो गई।' },
 };
 export const PREMIUM: Record<Lang, PremiumWords> = { en: EN, fr: FR, es: ES, pt: PT, hi: HI };
 
 /** If a database error is a plan-limit error, returns a friendly message; otherwise null. */
 export function limitMessage(lang: Lang, message: string): string | null {
-  const m = /plan_limit_(listings|vsla_groups|vsla_members)/.exec(message);
+  const m = /plan_limit_(listings|vsla_groups|vsla_members|live_rooms)/.exec(message);
   return m ? PREMIUM[lang].limitHit[m[1]] : null;
 }

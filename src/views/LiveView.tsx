@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { api } from '../lib/api';
 import { PUBLIC_PROFILE } from '../lib/data';
 import { explain } from '../lib/errors';
+import { limitMessage } from '../lib/premiumText';
 import { useLiveRoom } from '../lib/useLiveRoom';
 import type { LiveGuest, LiveStream, PublicProfile } from '../lib/types';
 import { useAuth } from '../state/Auth';
@@ -21,7 +22,7 @@ import { BattleRecorder, activeRecorder, onRecordingsChanged, recordingSupported
 import { formatClock } from '../lib/battle';
 
 const asProfile = (v: unknown): PublicProfile => (Array.isArray(v) ? v[0] : v) as PublicProfile;
-const STREAM_SELECT = `id,host_id,title,kind,mode,max_guests,status,created_at,host:profiles!host_id(${PUBLIC_PROFILE})`;
+const STREAM_SELECT = `id,host_id,title,kind,mode,max_guests,status,created_at,ends_at,host:profiles!host_id(${PUBLIC_PROFILE})`;
 const normalize = (row: unknown): LiveStream => {
   const r = row as Record<string, unknown>;
   return { ...(r as unknown as LiveStream), host: asProfile(r.host) };
@@ -33,7 +34,7 @@ const STALE_HOURS = 12;
 // ---------------------------------------------------------------------------------------------- list + Go Live
 
 export function LiveView() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { go } = useRouter();
   const { user, profile, ensureAuth } = useAuth();
   const { toast } = useToast();
@@ -48,7 +49,8 @@ export function LiveView() {
   const load = useCallback(async () => {
     const since = new Date(Date.now() - STALE_HOURS * 3600_000).toISOString();
     const { data } = await supabase.from('live_streams').select(STREAM_SELECT).eq('status', 'live').gt('created_at', since).order('created_at', { ascending: false }).limit(24);
-    setStreams((data ?? []).map(normalize));
+    const now = Date.now();
+    setStreams((data ?? []).map(normalize).filter((s) => !s.ends_at || new Date(s.ends_at).getTime() > now));
   }, []);
 
   // Streams the host forgot to end stay listed otherwise: tidy up very old ones when the list opens.
@@ -81,7 +83,7 @@ export function LiveView() {
     setBusy(true);
     const { data, error } = await supabase.rpc('start_live', { p_title: title.trim() || t('live_default_title', { name: profile?.display_name ?? '' }).trim(), p_kind: kind, p_mode: mode, p_max_guests: guests });
     setBusy(false);
-    if (error) return toast(explain(error, t), 'error');
+    if (error) return toast(limitMessage(lang, error.message) ?? explain(error, t), 'error');
     go('live', data as string);
   };
 
@@ -212,6 +214,19 @@ export function LiveStreamRoom({ id }: { id: string }) {
   const frame = useRef<HTMLDivElement>(null);
   const liveRef = useRef(live);
   liveRef.current = live;
+  // Plan limit: when the room's time is up, the host's page ends it (the server also refuses new joins after that time).
+  const endsAt = stream?.ends_at ? new Date(stream.ends_at).getTime() : null;
+  useEffect(() => {
+    if (!isHost || ended || !endsAt) return;
+    const end = async () => {
+      await supabase.rpc('end_live', { p_stream: id });
+      await api('livekit-live', { streamId: id, action: 'close' }).catch(() => undefined);
+    };
+    const wait = endsAt - Date.now();
+    if (wait <= 0) { void end(); return; }
+    const timer = window.setTimeout(() => void end(), wait);
+    return () => window.clearTimeout(timer);
+  }, [isHost, ended, endsAt, id]);
   const recording = wantRecord && Boolean(isHost) && live.phase === 'connected' && !ended;
 
   // Optional recording of the whole stage, only on the host's device. It reads what is already on screen, so viewers are not affected.
