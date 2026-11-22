@@ -3,6 +3,7 @@ import { ArrowLeft, Banknote, CalendarDays, ChevronDown, Copy, Crown, LogOut, Me
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
+import { limitMessage } from '../lib/premiumText';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { VslaPanel, type VslaMember, type VslaView as PanelView } from '../components/VslaPanel';
@@ -17,7 +18,7 @@ interface VslaGroup { id: string; name: string; description: string; owner_id: s
 /** Savings groups (VSLA): the person's own groups, a form to start one and a box to join with a code. */
 export function VslaView() {
   const { user } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { go } = useRouter();
   const { toast } = useToast();
   const [groups, setGroups] = useState<Array<VslaGroup & { role: string }> | null>(null);
@@ -40,7 +41,7 @@ export function VslaView() {
     setBusy(true);
     const { data, error } = await supabase.rpc('vsla_create_group', { p_name: name, p_description: desc });
     setBusy(false);
-    if (error) return toast(t('vs_error', { why: error.message }), 'error');
+    if (error) return toast(limitMessage(lang, error.message) ?? t('vs_error', { why: error.message }), 'error');
     go('vsla', data as string);
   };
   const join = async (e: FormEvent) => {
@@ -48,7 +49,7 @@ export function VslaView() {
     setBusy(true);
     const { data, error } = await supabase.rpc('vsla_join', { p_code: code });
     setBusy(false);
-    if (error) return toast(t('vs_error', { why: error.message }), 'error');
+    if (error) return toast(limitMessage(lang, error.message) ?? t('vs_error', { why: error.message }), 'error');
     go('vsla', data as string);
   };
 

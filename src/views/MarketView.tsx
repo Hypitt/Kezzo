@@ -14,6 +14,7 @@ import { copyText, shareUrl } from '../lib/share';
 import { ShareButton } from '../components/ShareButton';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
+import { limitMessage } from '../lib/premiumText';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { ReportButton } from '../components/ReportButton';
@@ -198,7 +199,7 @@ function Form({ editing, onDone, onCancel }: { editing: Listing | null; onDone: 
       ? await supabase.from('market_listings').update({ ...row, updated_at: new Date().toISOString() }).eq('id', editing.id)
       : await supabase.from('market_listings').insert({ ...row, seller_id: user.id });
     setBusy(false);
-    if (error) return setErr(error.message.includes('rate_limited') ? w.errRate : `${w.errGeneric} (${error.message})`);
+    if (error) return setErr(limitMessage(lang, error.message) ?? (error.message.includes('rate_limited') ? w.errRate : `${w.errGeneric} (${error.message})`));
     if (editing) await removePublic('media-public', editing.photos.filter((p) => !photos.includes(p)));
     toast(editing ? w.saved : w.posted);
     onDone();
