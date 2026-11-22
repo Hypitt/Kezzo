@@ -1,3 +1,5 @@
+import { AdminReferrals } from './AdminReferrals';
+import { REFERRAL_ADMIN } from '../lib/referralText';
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import { ArrowDown, ArrowUp, Minus, RefreshCw, ShieldAlert, Table2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -567,7 +569,7 @@ export function AdminView({ tab }: { tab?: string }) {
 
   const TABS: Array<[string, string]> = [
     ['overview', a.tabOverview], ['reports', a.tabReports], ['users', a.tabUsers], ['content', a.tabContent],
-    ['contests', a.tabContests], ['analytics', a.tabAnalytics], ['site', a.tabSite], ['team', a.tabTeam], ['log', a.tabLog],
+    ['contests', a.tabContests], ['analytics', a.tabAnalytics], ['site', a.tabSite], ['team', a.tabTeam], ['referrals', REFERRAL_ADMIN[lang === 'fr' ? 'fr' : 'en'].tab], ['log', a.tabLog],
   ];
   const current = TABS.some(([k]) => k === tab) ? (tab as string) : 'overview';
   const open = (t: string) => go('admin', t);
@@ -591,6 +593,7 @@ export function AdminView({ tab }: { tab?: string }) {
       {current === 'analytics' && <Analytics />}
       {current === 'site' && <SiteTab />}
       {current === 'team' && <AdminTeam />}
+      {current === 'referrals' && <AdminReferrals />}
       {current === 'log' && <AdminLog />}
     </div>
   );

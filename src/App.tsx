@@ -13,6 +13,10 @@ import { Navbar } from './components/Navbar';
 import { SectionTabs } from './components/SectionTabs';
 import { Loading } from './components/ui';
 import { PENDING_GROUP, pendingGroup, pendingInvite } from './lib/invite';
+import { InviteView } from './views/InviteView';
+import { captureRef, clearRef, pendingRef } from './lib/referral';
+import { REFERRAL } from './lib/referralText';
+import { supabase } from './lib/supabase';
 import { startMonitoring, trackPage } from './lib/analytics';
 import { isStaleChunkError, reloadOnce } from './lib/reload';
 import type { Lang } from './lib/types';
@@ -67,6 +71,7 @@ function View() {
     case 'create': return <Gate><CreateView initial={route.id} /></Gate>;
     case 'media': return <MediaView />;
     case 'groups': return route.id ? <GroupRoom key={route.id} id={route.id} /> : <GroupsView />;
+    case 'invite': return <Gate><InviteView /></Gate>;
     case 'vsla': return <Gate>{route.id ? <VslaRoom key={route.id} id={route.id} /> : <VslaView />}</Gate>;
     case 'messages': return <Gate><MessagesView otherId={route.id} /></Gate>;
     case 'profile': return <ProfileView id={route.id} />;
@@ -117,6 +122,17 @@ function Shell() {
   useEffect(() => {
     trackPage(window.location.hash);
   }, [route.tab, route.id]);
+
+  // Invite & Earn: a friend's code (from ?ref=) is claimed once, right after the new account exists.
+  useEffect(() => { captureRef(); }, []);
+  useEffect(() => {
+    if (!profile) return;
+    const code = pendingRef();
+    if (!code) return;
+    clearRef();
+    void supabase.rpc('claim_referral', { p_code: code }).then(({ data }) => { if (data === 'ok') toast(REFERRAL[lang].claimOk); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id]);
 
   // Finish joining a group if an invite link was opened before signing in.
   useEffect(() => {
