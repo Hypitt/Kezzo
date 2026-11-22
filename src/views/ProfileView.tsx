@@ -14,6 +14,8 @@ import { useToast } from '../state/Toast';
 import { ShareButton } from '../components/ShareButton';
 import { PostGrid } from '../components/PostGrid';
 import { ReportButton } from '../components/ReportButton';
+import { PayDialog } from '../components/PayDialog';
+import { ORDERS } from '../lib/ordersText';
 import { SignInCard } from '../components/AuthScreens';
 import { StatusViewer } from '../components/StatusViewer';
 import { useLegal } from '../state/Legal';
@@ -34,9 +36,11 @@ export function ProfileView({ id }: { id?: string }) {
 
 function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; mine: Profile | null }) {
   const { user, ensureAuth, blocked, refreshBlocked } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { toast } = useToast();
   const { go } = useRouter();
+  const [canPay, setCanPay] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(own ? mine : null);
   const [missing, setMissing] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -70,6 +74,10 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
   useEffect(() => {
     loadCounts();
   }, [loadCounts]);
+  useEffect(() => {
+    if (own || !user) { setCanPay(false); return; }
+    void supabase.rpc('seller_flags', { p_ids: [targetId] }).then(({ data }) => setCanPay(Array.isArray(data) && Boolean((data as Array<{ payable: boolean }>)[0]?.payable)));
+  }, [own, user, targetId]);
 
   useEffect(() => {
     let off = false;
@@ -151,10 +159,12 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
           <div className="flex flex-wrap gap-2 pt-2">
             <button type="button" className={`btn btn-sm ${isFollowing ? 'btn-ghost' : 'btn-primary'}`} onClick={toggleFollow}>{isFollowing ? t('unfollow') : t('follow')}</button>
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => (ensureAuth() ? go('messages', targetId) : undefined)}>{t('message')}</button>
+            {canPay && <button type="button" className="btn btn-primary btn-sm" onClick={() => setPayOpen(true)}>{ORDERS[lang].support}</button>}
             <button type="button" className="btn btn-ghost btn-sm" onClick={toggleBlock}>{isBlocked ? t('unblock') : t('block')}</button>
             <ReportButton targetType="profile" targetId={targetId} />
           </div>
         )}
+        {payOpen && profile && <PayDialog target={{ sellerId: targetId, sellerName: profile.display_name }} onClose={() => setPayOpen(false)} />}
         </div>
       </header>
 

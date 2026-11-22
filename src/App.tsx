@@ -15,6 +15,7 @@ import { Loading } from './components/ui';
 import { PENDING_GROUP, pendingGroup, pendingInvite } from './lib/invite';
 import { InviteView } from './views/InviteView';
 import { PremiumView } from './views/PremiumView';
+import { OrdersView } from './views/OrdersView';
 import { captureRef, clearRef, pendingRef } from './lib/referral';
 import { recordInstall, watchInstallEvent } from './lib/deviceInstall';
 import { REFERRAL } from './lib/referralText';
@@ -74,6 +75,7 @@ function View() {
     case 'media': return <MediaView />;
     case 'groups': return route.id ? <GroupRoom key={route.id} id={route.id} /> : <GroupsView />;
     case 'invite': return <Gate><InviteView /></Gate>;
+    case 'orders': return <Gate><OrdersView /></Gate>;
     case 'premium': return <Gate><PremiumView /></Gate>;
     case 'vsla': return <Gate>{route.id ? <VslaRoom key={route.id} id={route.id} /> : <VslaView />}</Gate>;
     case 'messages': return <Gate><MessagesView otherId={route.id} /></Gate>;

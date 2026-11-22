@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, Heart, ImagePlus, MapPin, MessageCircle, Pencil, Plus, Share2, ChevronDown, SlidersHorizontal, Store, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Crown, Heart, ImagePlus, MapPin, MessageCircle, Pencil, Plus, Share2, ChevronDown, SlidersHorizontal, Store, Trash2, X } from 'lucide-react';
 import type { Lang } from '../lib/types';
 import { supabase } from '../lib/supabase';
 import { PUBLIC_PROFILE } from '../lib/data';
@@ -18,6 +18,8 @@ import { limitMessage } from '../lib/premiumText';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { ReportButton } from '../components/ReportButton';
+import { PayDialog } from '../components/PayDialog';
+import { ORDERS } from '../lib/ordersText';
 import { Avatar, Chip, Empty, Loading, LoadMore, PageHeader } from '../components/ui';
 
 const PAGE = 18;
@@ -25,7 +27,7 @@ const SELECT = `id,seller_id,kind,category,title,body,price,currency,condition,c
 const clean = (s: string) => s.replace(/[%_,()*\\"]/g, ' ').trim();
 const sellerOf = (l: Listing) => (Array.isArray(l.seller) ? l.seller[0] : l.seller) ?? null;
 
-function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Listing; mine: boolean; admin: boolean; fav: boolean; onFav: () => void; onEdit: () => void; onChanged: () => void; onShop?: () => void }) {
+function Card({ l, mine, admin, fav, flag, onFav, onEdit, onChanged, onShop }: { l: Listing; mine: boolean; flag?: { premium: boolean; payable: boolean }; admin: boolean; fav: boolean; onFav: () => void; onEdit: () => void; onChanged: () => void; onShop?: () => void }) {
   const { lang } = useI18n();
   const { user, openAuth } = useAuth();
   const { go } = useRouter();
@@ -33,6 +35,7 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
   const w = MARKET[lang];
   const m2 = MARKET2[lang];
   const [open, setOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
   const [qtyText, setQtyText] = useState(l.quantity === null ? '' : String(l.quantity));
   useEffect(() => { setQtyText(l.quantity === null ? '' : String(l.quantity)); }, [l.quantity]);
   const seller = sellerOf(l);
@@ -114,6 +117,7 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
           {seller && (onShop
             ? <button type="button" className="text-xs text-zinc-500 hover:underline" onClick={onShop}>{w.byLabel} <span className="font-semibold">{seller.display_name}</span> · {w.visitShop}</button>
             : <span className="text-xs text-zinc-500">{w.byLabel} {seller.display_name}</span>)}
+          {flag?.premium && <Crown className="h-3.5 w-3.5 text-accent" aria-label="Premium" />}
           <span className="flex-1" />
           {mine ? (
             <>
@@ -127,6 +131,7 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
               <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" onClick={() => { if (!user) { openAuth('signup'); return; } rememberAbout(l.seller_id, l.id); go('messages', l.seller_id); }}>
                 <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />{user ? w.message : w.signIn}
               </button>
+              {flag?.payable && !gone && l.price !== null && l.price > 0 && user && <button type="button" className="btn btn-primary btn-sm" onClick={() => setPayOpen(true)}>{ORDERS[lang].pay}</button>}
               <ShareButton type="listing" id={l.id} title={l.title} />
               <ReportButton targetType="listing" targetId={l.id} />
             </>
@@ -134,6 +139,7 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
           {admin && <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void hide()}>{l.hidden ? w.unhide : w.hide}</button>}
         </div>
       </div>
+      {payOpen && seller && <PayDialog target={{ sellerId: l.seller_id, sellerName: seller.display_name, listing: { id: l.id, title: l.title, price: l.price, currency: l.currency, quantity: l.quantity } }} onClose={() => setPayOpen(false)} />}
     </article>
   );
 }
@@ -352,6 +358,7 @@ export function MarketView({ shop }: { shop?: string }) {
   const [input, setInput] = useState('');
   const [term, setTerm] = useState('');
   const [rows, setRows] = useState<Listing[]>([]);
+  const [flags, setFlags] = useState<Record<string, { premium: boolean; payable: boolean }>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [more, setMore] = useState(false);
@@ -456,6 +463,14 @@ export function MarketView({ shop }: { shop?: string }) {
     void fetchPage(0).then((r) => { if (mine !== request.current) return; setRows(r); setMore(r.length === PAGE); setLoading(false); });
   }, [fetchPage]);
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const ids = Array.from(new Set(rows.map((r) => r.seller_id).filter((id) => !(id in flags))));
+    if (!user || ids.length === 0) return;
+    void supabase.rpc('seller_flags', { p_ids: ids }).then(({ data }) => {
+      if (!Array.isArray(data)) return;
+      setFlags((f) => { const n = { ...f }; for (const id of ids) n[id] = { premium: false, payable: false }; for (const x of data as Array<{ user_id: string; premium: boolean; payable: boolean }>) n[x.user_id] = { premium: x.premium, payable: x.payable }; return n; });
+    });
+  }, [rows, user, flags]);
 
   const loadHidden = useCallback(() => {
     if (!admin) return;
@@ -472,7 +487,7 @@ export function MarketView({ shop }: { shop?: string }) {
   };
 
   const card = (l: Listing) => (
-    <Card key={l.id} l={l} mine={l.seller_id === user?.id} admin={admin} fav={favs.has(l.id)} onFav={() => void toggleFav(l.id)}
+    <Card key={l.id} l={l} mine={l.seller_id === user?.id} flag={flags[l.seller_id]} admin={admin} fav={favs.has(l.id)} onFav={() => void toggleFav(l.id)}
       onEdit={() => { setForm({ open: true, editing: l }); window.scrollTo(0, 0); }}
       onChanged={() => { load(); loadHidden(); }} onShop={shop ? undefined : () => go('market', l.seller_id)} />
   );

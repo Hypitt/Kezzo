@@ -1,4 +1,4 @@
-import { Gamepad2, Store, Briefcase, CalendarDays, Home, MessageCircle, PlusCircle, Radio, Search, Swords, Image as ImageIcon, User, Users, Trophy, CalendarCheck, PiggyBank, Gift, Crown, type LucideIcon } from 'lucide-react';
+import { Gamepad2, Store, Briefcase, CalendarDays, Home, MessageCircle, PlusCircle, Radio, Search, Swords, Image as ImageIcon, User, Users, Trophy, CalendarCheck, PiggyBank, Gift, Crown, Receipt, type LucideIcon } from 'lucide-react';
 import type { Key } from './i18n';
 import type { Lang } from './types';
 import type { Tab } from '../state/Router';
@@ -7,6 +7,7 @@ import { MARKET } from './market';
 import { FOOTBALL } from './footballText';
 import { REFERRAL } from './referralText';
 import { PREMIUM } from './premiumText';
+import { ORDERS } from './ordersText';
 
 /** The app menu groups related pages. Every page is still its own address (#/search, #/battles ...); nothing was removed. */
 export interface NavGroup { id: string; icon: LucideIcon; tabs: Tab[]; name: Key | Record<Lang, string> }
@@ -22,7 +23,7 @@ export const GROUPS: NavGroup[] = [
 
 export const TAB_ICON: Partial<Record<Tab, LucideIcon>> = {
   home: Home, search: Search, media: ImageIcon, battles: Swords, live: Radio, contest: Trophy,
-  community: CalendarCheck, opportunities: Briefcase, market: Store, football: Gamepad2, groups: Users, vsla: PiggyBank, messages: MessageCircle, invite: Gift, premium: Crown,
+  community: CalendarCheck, opportunities: Briefcase, market: Store, football: Gamepad2, groups: Users, vsla: PiggyBank, messages: MessageCircle, invite: Gift, premium: Crown, orders: Receipt,
 };
 
 const TAB_KEY: Partial<Record<Tab, Key>> = {
@@ -45,6 +46,7 @@ export function tabName(tab: Tab, lang: Lang, t: (k: Key) => string): string {
   if (tab === 'football') return FOOTBALL[lang].title;
   if (tab === 'invite') return REFERRAL[lang].nav;
   if (tab === 'premium') return PREMIUM[lang].nav;
+  if (tab === 'orders') return ORDERS[lang].nav;
   if (tab === 'battles') return BATTLES_LIVE[lang];
   const k = TAB_KEY[tab];
   return k ? t(k) : tab;

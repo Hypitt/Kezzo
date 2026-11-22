@@ -1,7 +1,8 @@
 import { REFERRAL } from '../lib/referralText';
 import { PREMIUM } from '../lib/premiumText';
+import { ORDERS } from '../lib/ordersText';
 import { useEffect, useState } from 'react';
-import { Crown, Gift, LogOut, Settings, X, type LucideIcon } from 'lucide-react';
+import { Crown, Gift, Receipt, LogOut, Settings, X, type LucideIcon } from 'lucide-react';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
@@ -83,6 +84,11 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
           {user && (
             <button type="button" onClick={() => open_('premium')} className="mb-3 flex w-full items-center gap-3 rounded-lg border border-accent/40 bg-accent/5 p-3 text-left text-sm font-semibold text-zinc-900 hover:bg-accent/10">
               <Crown className="h-5 w-5 text-accent" aria-hidden="true" />{PREMIUM[lang].nav}
+            </button>
+          )}
+          {user && (
+            <button type="button" onClick={() => open_('orders')} className="mb-3 flex w-full items-center gap-3 rounded-lg border border-zinc-300 bg-white p-3 text-left text-sm font-semibold text-zinc-900 hover:bg-zinc-50">
+              <Receipt className="h-5 w-5 text-accent" aria-hidden="true" />{ORDERS[lang].nav}
             </button>
           )}
 
