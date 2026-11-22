@@ -267,6 +267,10 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
     for (const e of inMonth) if (e.kind === 'shares') { const r = shareRows.get(e.member_id) ?? { shares: 0, amount: 0 }; r.shares += e.shares; r.amount += e.amount; shareRows.set(e.member_id, r); }
     const total = [...shareRows.values()].reduce((s, r) => s + r.amount, 0);
     const paid = live.filter((m) => shareRows.has(m.id)).length;
+    const sumKind = (k: Entry['kind']) => inMonth.filter((e) => e.kind === k).reduce((n, e) => n + e.amount, 0);
+    const socialTotal = sumKind('social');
+    const finesTotal = sumKind('fine');
+    const repaidTotal = sumKind('loan_repay');
     return (
       <section className="card space-y-4" aria-label={t('vs_tab_contrib')}>
         {header}
@@ -311,24 +315,37 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
           <div className="text-center"><p className="font-semibold capitalize">{label}</p><p className="text-xs text-zinc-500">{t(`vs_freq_${cycle.frequency ?? 'weekly'}` as 'vs_freq_weekly')}</p></div>
           <button type="button" className="btn btn-ghost btn-sm" aria-label={t('vs_next_month')} disabled={month >= nowMonth} onClick={() => shift(1)}><ChevronRight className="h-4 w-4" aria-hidden="true" /></button>
         </div>
-        <dl className="grid grid-cols-2 gap-2 text-sm">
-          <div className="rounded-xl bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{t('vs_month_total')}</dt><dd className="font-semibold">{fmt(total)}</dd></div>
-          <div className="rounded-xl bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{t('vs_month_paid')}</dt><dd className="font-semibold">{paid} / {live.length}</dd></div>
-        </dl>
-        <Fold title={t('vs_month_paid')} badge={`${paid} / ${live.length}`}>
-        <ul className="divide-y divide-zinc-100 text-sm">
-          {live.map((m) => {
-            const r = shareRows.get(m.id);
-            return (
-              <li key={m.id} className="flex items-center gap-2 py-2">
-                {r ? <Check className="h-4 w-4 shrink-0 text-emerald-600" aria-label={t('vs_paid')} /> : <X className="h-4 w-4 shrink-0 text-zinc-300" aria-label={t('vs_not_yet')} />}
-                <span className={`mr-auto ${m.id === meId ? 'font-medium' : ''}`}>{m.display_name}</span>
-                {r ? <span className="font-medium">{fmt(r.amount)} <span className="text-xs font-normal text-zinc-500">×{r.shares}</span></span> : <span className="text-xs text-zinc-400">{t('vs_not_yet')}</span>}
-              </li>
-            );
-          })}
-        </ul>
-        </Fold>
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold">{w.sheetTitle} · <span className="capitalize">{label}</span></h3>
+          <div className="overflow-x-auto rounded-xl border border-zinc-200">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-zinc-50 text-[11px] text-zinc-500">
+                <tr><th className="px-3 py-2 font-medium">{t('vs_member')}</th><th className="px-2 font-medium">{w.colContrib}</th><th className="px-2 font-medium">{w.colSocial}</th></tr>
+              </thead>
+              <tbody>
+                {live.map((m) => {
+                  const r = shareRows.get(m.id);
+                  const soc = inMonth.filter((e) => e.member_id === m.id && e.kind === 'social').reduce((n, e) => n + e.amount, 0);
+                  return (
+                    <tr key={m.id} className={`border-t border-zinc-100 ${m.id === meId ? 'font-medium' : ''}`}>
+                      <td className="px-3 py-1.5">{m.display_name}</td>
+                      <td className="px-2">{r ? fmt(r.amount) : <span className="text-zinc-300">—</span>}</td>
+                      <td className="px-2">{soc > 0 ? fmt(soc) : <span className="text-zinc-300">—</span>}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-zinc-200 bg-zinc-50 font-semibold"><td className="px-3 py-2">{w.rowTotal}</td><td className="px-2">{fmt(total)}</td><td className="px-2">{fmt(socialTotal)}</td></tr>
+              </tfoot>
+            </table>
+          </div>
+          <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+            {[[t('vs_month_paid'), `${paid} / ${live.length}`], [w.fines, fmt(finesTotal)], [w.repaid, fmt(repaidTotal)], [t('vs_month_total'), fmt(total + socialTotal + finesTotal + repaidTotal)]].map(([l, v]) => (
+              <div key={l} className="rounded-xl bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{l}</dt><dd className="font-semibold">{v}</dd></div>
+            ))}
+          </dl>
+        </div>
         <EntryList fold entries={inMonth} title={t('vs_month_entries')} nameOf={nameOf} fmt={fmt} empty={t('vs_month_empty')} />
       </section>
     );
