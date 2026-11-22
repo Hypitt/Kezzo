@@ -7,6 +7,8 @@ import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { PayInstructions } from '../components/PayDialog';
+import { ReviewForm, Stars } from '../components/Reviews';
+import { REVIEWS } from '../lib/reviewText';
 import { Chip, Loading, PageHeader } from '../components/ui';
 
 interface Order { id: string; reference: string; role: 'buyer' | 'seller'; other_name: string; other_handle: string; seller_id: string; title: string; quantity: number; amount: number; currency: string; status: string; buyer_note: string; cancel_reason: string; created_at: string }
@@ -27,6 +29,8 @@ export function OrdersView() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [premium, setPremium] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
+  const [rated, setRated] = useState<Record<string, number>>({});
+  const [reviewing, setReviewing] = useState<string | null>(null);
   const [form, setForm] = useState({ country: '', provider: '', type: 'mobile_money', account_name: '', account_number: '', instructions: '' });
 
   const load = useCallback(async () => {
@@ -36,7 +40,13 @@ export function OrdersView() {
       supabase.from('payment_providers').select('id, country, name, type').eq('enabled', true).order('sort'),
       supabase.rpc('my_plan'),
     ]);
-    setOrders(Array.isArray(o.data) ? (o.data as Order[]) : []);
+    const list = Array.isArray(o.data) ? (o.data as Order[]) : [];
+    setOrders(list);
+    const done = list.filter((x) => x.status === 'completed' && x.role === 'buyer').map((x) => x.id);
+    if (done.length > 0) {
+      const r = await supabase.from('order_reviews').select('order_id, rating').in('order_id', done);
+      setRated(Object.fromEntries(((r.data ?? []) as Array<{ order_id: string; rating: number }>).map((x) => [x.order_id, x.rating])));
+    }
     setMethods((m.data as Method[] | null) ?? []);
     setProviders((p.data as Provider[] | null) ?? []);
     setPremium((me.data as { plan?: string } | null)?.plan === 'premium');
@@ -98,6 +108,11 @@ export function OrdersView() {
                 {o.role === 'seller' && o.status === 'preparing' && <button className="btn btn-primary btn-sm" onClick={() => void run(supabase.rpc('order_seller_step', { p_id: o.id, p_to: 'completed' }))}>{w.actions.complete}</button>}
                 {!['completed', 'cancelled'].includes(o.status) && (o.role === 'seller' || o.status === 'awaiting_payment') && <button className="btn btn-ghost btn-sm" onClick={() => askCancel(o)}>{w.actions.cancel}</button>}
               </div>
+              {o.role === 'buyer' && o.status === 'completed' && (rated[o.id]
+                ? <p className="flex items-center gap-2 text-xs text-zinc-600">{REVIEWS[lang].yours}: <Stars value={rated[o.id]} /></p>
+                : reviewing === o.id
+                  ? <ReviewForm orderId={o.id} onDone={() => { setReviewing(null); toast(REVIEWS[lang].thanks); void load(); }} />
+                  : <button className="btn btn-ghost btn-sm w-fit" onClick={() => setReviewing(o.id)}>{REVIEWS[lang].leave}</button>)}
               {open === o.id && <PayInstructions order={o} onPaid={() => { setOpen(null); void load(); }} />}
             </div>
           ))}

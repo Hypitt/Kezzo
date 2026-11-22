@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, Crown, Heart, ImagePlus, MapPin, MessageCircle, Pencil, Plus, Share2, ChevronDown, SlidersHorizontal, Store, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Crown, Heart, Star, ImagePlus, MapPin, MessageCircle, Pencil, Plus, Share2, ChevronDown, SlidersHorizontal, Store, Trash2, X } from 'lucide-react';
 import type { Lang } from '../lib/types';
 import { supabase } from '../lib/supabase';
 import { PUBLIC_PROFILE } from '../lib/data';
@@ -27,7 +27,7 @@ const SELECT = `id,seller_id,kind,category,title,body,price,currency,condition,c
 const clean = (s: string) => s.replace(/[%_,()*\\"]/g, ' ').trim();
 const sellerOf = (l: Listing) => (Array.isArray(l.seller) ? l.seller[0] : l.seller) ?? null;
 
-function Card({ l, mine, admin, fav, flag, onFav, onEdit, onChanged, onShop }: { l: Listing; mine: boolean; flag?: { premium: boolean; payable: boolean }; admin: boolean; fav: boolean; onFav: () => void; onEdit: () => void; onChanged: () => void; onShop?: () => void }) {
+function Card({ l, mine, admin, fav, flag, onFav, onEdit, onChanged, onShop }: { l: Listing; mine: boolean; flag?: { premium: boolean; payable: boolean; avg?: number; n?: number }; admin: boolean; fav: boolean; onFav: () => void; onEdit: () => void; onChanged: () => void; onShop?: () => void }) {
   const { lang } = useI18n();
   const { user, openAuth } = useAuth();
   const { go } = useRouter();
@@ -118,6 +118,7 @@ function Card({ l, mine, admin, fav, flag, onFav, onEdit, onChanged, onShop }: {
             ? <button type="button" className="text-xs text-zinc-500 hover:underline" onClick={onShop}>{w.byLabel} <span className="font-semibold">{seller.display_name}</span> · {w.visitShop}</button>
             : <span className="text-xs text-zinc-500">{w.byLabel} {seller.display_name}</span>)}
           {flag?.premium && <Crown className="h-3.5 w-3.5 text-accent" aria-label="Premium" />}
+          {flag?.n ? <span className="inline-flex items-center gap-0.5 text-xs text-zinc-600"><Star className="h-3 w-3 fill-amber-400 text-amber-400" aria-hidden="true" />{flag.avg} ({flag.n})</span> : null}
           <span className="flex-1" />
           {mine ? (
             <>
@@ -358,7 +359,7 @@ export function MarketView({ shop }: { shop?: string }) {
   const [input, setInput] = useState('');
   const [term, setTerm] = useState('');
   const [rows, setRows] = useState<Listing[]>([]);
-  const [flags, setFlags] = useState<Record<string, { premium: boolean; payable: boolean }>>({});
+  const [flags, setFlags] = useState<Record<string, { premium: boolean; payable: boolean; avg?: number; n?: number }>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [more, setMore] = useState(false);
@@ -466,9 +467,10 @@ export function MarketView({ shop }: { shop?: string }) {
   useEffect(() => {
     const ids = Array.from(new Set(rows.map((r) => r.seller_id).filter((id) => !(id in flags))));
     if (!user || ids.length === 0) return;
-    void supabase.rpc('seller_flags', { p_ids: ids }).then(({ data }) => {
-      if (!Array.isArray(data)) return;
-      setFlags((f) => { const n = { ...f }; for (const id of ids) n[id] = { premium: false, payable: false }; for (const x of data as Array<{ user_id: string; premium: boolean; payable: boolean }>) n[x.user_id] = { premium: x.premium, payable: x.payable }; return n; });
+    void Promise.all([supabase.rpc('seller_flags', { p_ids: ids }), supabase.rpc('seller_ratings', { p_ids: ids })]).then(([fl, rt]) => {
+      if (!Array.isArray(fl.data)) return;
+      const ratings = new Map(((Array.isArray(rt.data) ? rt.data : []) as Array<{ seller_id: string; avg_rating: number; n: number }>).map((x) => [x.seller_id, x]));
+      setFlags((f) => { const n = { ...f }; for (const id of ids) n[id] = { premium: false, payable: false }; for (const x of fl.data as Array<{ user_id: string; premium: boolean; payable: boolean }>) n[x.user_id] = { premium: x.premium, payable: x.payable, avg: Number(ratings.get(x.user_id)?.avg_rating ?? 0), n: Number(ratings.get(x.user_id)?.n ?? 0) }; return n; });
     });
   }, [rows, user, flags]);
 

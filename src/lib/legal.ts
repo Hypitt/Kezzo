@@ -8,10 +8,10 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
   en: {
     terms: {
       title: 'Terms of Service',
-      updated: 'Effective October 19, 2026',
+      updated: 'Effective November 22, 2026',
       sections: [
         { h: '1. Introduction', body: [
-          'Welcome to Kezzo. These Terms of Service (“Terms”) govern your access to and use of the Kezzo website, platform and related services (the “Platform”). Kezzo is a social and creator platform where you can discover and share videos, photos and audio, take part in live battles, host solo or group livestreams, join groups, chat and call other users, and publish video highlights.',
+          'Welcome to Kezzo. These Terms of Service (“Terms”) govern your access to and use of the Kezzo website, platform and related services (the “Platform”). Kezzo is a social and creator platform where you can discover and share videos, photos and audio, take part in live battles, host solo or group livestreams, join groups, chat and call other users, publish video highlights, buy and sell products and services, and keep records for savings groups.',
           'Kezzo is operated by WeDIL Inc., based in Canada (“Kezzo”, “we”, “us”). Contact us at kezzo.app@gmail.com. By creating an account or using Kezzo, you agree to these Terms and to our Privacy Policy. If you do not agree, do not use the Platform.',
         ] },
         { h: '2. Eligibility and accounts', body: [
@@ -63,31 +63,66 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
         { h: '8. Moderation and enforcement', body: [
           'Use Report and Block when something is wrong. We may review reports, investigate, remove or restrict content, end livestreams, take back coins, and suspend or close accounts that break these Terms, with or without notice where the law allows. We do not review all content and cannot promise every violation will be caught. To ask us to review a moderation decision, write to kezzo.app@gmail.com.',
         ] },
-        { h: '9. Copyright complaints', body: [
+        { h: '9. Marketplace and payments between users', body: [
+          'The Market lets members list products and services and contact each other. Kezzo is only the place where they meet. The seller is responsible for the listing, its accuracy, its legality, delivery, taxes and after-sales service. The buyer is responsible for checking an item or service before paying.',
+          'Kezzo does not collect, hold, transfer, guarantee, escrow or refund payments between users. When a Premium seller or creator shows a payment method, the buyer pays that person directly, outside Kezzo, with their own mobile money, bank or other provider. Kezzo only records what each person says: “Marked paid by buyer” and “Confirmed by seller” are statements by the users, not a check by Kezzo that money arrived. Every order has a reference (for example KZ-4821) to help both sides match a payment.',
+          [
+            'Only pay sellers you trust. Kezzo is not a party to the sale and is not liable for scams, non-delivery, defective goods or payment disputes between users, to the extent the law allows. Disputes are settled between the buyer and the seller.',
+            'Payment methods are shown only for active Premium accounts that pass the checks we have turned on (for example a verified phone number or a matching account name). We may hide, suspend or remove payment methods, orders, listings or accounts that look unsafe or break these Terms.',
+            'Do not use Kezzo to sell anything illegal, to take payments for others, or to ask for money under false pretences.',
+            'Use Report on a listing or profile (scam, fake product, no delivery, other). We may review reports but cannot promise to recover money or settle a dispute.',
+          ],
+        ] },
+        { h: '10. Premium subscription', body: [
+          'Free accounts keep the social, marketplace, creator and savings-group features described in the app, within the limits shown on the Premium page (for example the number of listings, live rooms or savings groups). Premium raises those limits and unlocks direct-payment tools for sellers and creators and extra savings-group tools. We may change the plans, limits and prices; a change to the price applies only to periods you have not yet paid for.',
+          [
+            'Premium is paid to Kezzo’s own collection account for your country, outside the app, for the duration you choose (weekly where offered, monthly or quarterly). You then send the transaction reference, and an administrator checks the payment by hand. Premium starts when it is approved. We may reject a payment (for example the amount is wrong or the reference cannot be found) and you may submit again. A reference can be used only once.',
+            'If you renew while Premium is active, the new period starts when the current one ends. After Premium ends there are 3 days of grace; then the account returns to the Free plan. Your listings, content, followers, messages, reviews and saved payment methods are not deleted and come back when you renew. Existing orders keep their details until they are completed or cancelled.',
+            'Premium fees are not refundable, except where the law requires it or where we decide otherwise in a specific case.',
+            'We may suspend Premium or payment tools for accounts that break these Terms or put others at risk.',
+          ],
+          'Premium fees are separate from payments between users. Kezzo never takes a share of what buyers pay sellers.',
+        ] },
+        { h: '11. Savings groups (VSLA)', body: [
+          'The savings-group tools help a group keep its own records: members, contributions, loans, repayments, fines and meetings. Kezzo is not a bank, lender, insurer, cooperative or financial institution. It does not hold the group’s money, lend money or guarantee any loan, savings or return. The group and its administrators (treasurers) decide the rules and are responsible for the accuracy of the records and for how the money is handled.',
+          [
+            'Treasurers can see members’ contact details and records for the group. Members see their own records and the group totals. Treasurers can give other roles (such as secretary or field agent) to members of their group; those roles are Premium features.',
+            'When a group shows its own payment account, members pay it directly. The treasurer confirms each payment in the books. Kezzo does not verify it.',
+            'Check your records regularly. Records in Kezzo are a tool, not a legal contract between members, unless your group and local law say otherwise.',
+          ],
+        ] },
+        { h: '12. Reviews', body: [
+          'A buyer can leave one review (1 to 5 stars and a short comment) for a completed order. Reviews are shown on the seller’s profile and listings with the reviewer’s first name. Write honestly and only about your own experience. Do not offer or ask for rewards in exchange for reviews, write reviews for yourself or people you know, or post abusive, false or private content. We may remove reviews that break these Terms.',
+        ] },
+        { h: '13. Invite & Earn', body: [
+          'Kezzo may run a referral program in which members invite friends with a personal link or code. A reward is earned only when the invited person is a real new member who meets the conditions shown in the app (for example a confirmed e-mail, installing the app, a minimum number of days and activity). The conditions, reward amount, monthly limits and pauses are set by Kezzo and can change. To help detect fake accounts and repeated installs, the app may keep a one-way code made from basic device details; it is not used to identify you.',
+          'Rewards are not cash held in your account. When a referral is approved, Kezzo records the amount and administrators pay approved balances manually, about once a month, using the payout details you give us. We may refuse, cancel or take back rewards linked to fake or duplicate accounts, abuse or breaking these Terms, and we may pause or end the program at any time.',
+        ] },
+        { h: '14. Copyright complaints', body: [
           'If you believe content on Kezzo infringes your copyright, email kezzo.app@gmail.com with the content’s link, the work you own and your contact details. We will forward notices to the poster as Canada’s notice-and-notice rules require and remove infringing content where appropriate. Repeat infringers lose their accounts.',
         ] },
-        { h: '10. Kezzo’s intellectual property', body: [
+        { h: '15. Kezzo’s intellectual property', body: [
           'The Kezzo name, branding, design, software and other Platform materials belong to WeDIL Inc. or its licensors, except User Content and third-party material. Do not copy, modify, distribute, reverse-engineer or commercially use them without our permission, except as the law allows.',
         ] },
-        { h: '11. Third-party services', body: [
+        { h: '16. Third-party services', body: [
           'Kezzo relies on our third-party providers for sign-in, hosting, storage, livestreaming, email delivery and AI features. Their own terms and privacy policies may also apply. We are not responsible for their outages or changes beyond what the law requires.',
         ] },
-        { h: '12. Availability and changes', body: [
+        { h: '17. Availability and changes', body: [
           'We may update, change, suspend or discontinue features. We do not guarantee uninterrupted or error-free service, or that content, streams or recordings will always be available; keep your own copies of anything important. If we make significant changes to these Terms, we will notify you in the app at least 15 days before they take effect. If you keep using Kezzo after that, the new Terms apply.',
         ] },
-        { h: '13. Disclaimers and liability', body: [
-          'Kezzo is provided “as is” and “as available”. To the extent the law allows, WeDIL Inc. is not liable for indirect or consequential losses, lost data, or content posted by other users, and because Kezzo is free, our total liability to you is limited to CAD $100. Nothing in these Terms removes rights you have under Québec’s Consumer Protection Act or other law that cannot be waived.',
+        { h: '18. Disclaimers and liability', body: [
+          'Kezzo is provided “as is” and “as available”. To the extent the law allows, WeDIL Inc. is not liable for indirect or consequential losses, lost data, or content posted by other users, and our total liability to you is limited to the greater of CAD $100 and the Premium fees you paid us in the 12 months before the claim. Nothing in these Terms removes rights you have under Québec’s Consumer Protection Act or other law that cannot be waived.',
         ] },
-        { h: '14. Suspension and account deletion', body: [
+        { h: '19. Suspension and account deletion', body: [
           'You can stop using Kezzo and delete your account at any time with the Delete account button at the bottom of your profile page, or by emailing kezzo.app@gmail.com. Deleting your account removes your profile, content, messages and coins and cannot be undone. We may suspend or end your access for breaking these Terms or for other legitimate reasons, subject to the law. Some information may be kept after deletion where the law requires it or for security, fraud prevention or disputes.',
         ] },
-        { h: '15. Governing law', body: [
+        { h: '20. Governing law', body: [
           'These Terms are governed by the laws of Québec and the federal laws of Canada that apply there. Disputes go to the courts of the district of Montréal, unless your local consumer law lets you sue where you live.',
         ] },
-        { h: '16. Language', body: [
+        { h: '21. Language', body: [
           'These Terms are available in English and French. The parties have required that these Terms be drawn up in English and French. Les parties ont exigé que les présentes conditions soient rédigées en anglais et en français.',
         ] },
-        { h: '17. Contact', body: ['WeDIL Inc., Canada — kezzo.app@gmail.com'] },
+        { h: '22. Contact', body: ['WeDIL Inc., Canada — kezzo.app@gmail.com'] },
       ],
     },
     privacy: {
@@ -165,10 +200,10 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
   fr: {
     terms: {
       title: 'Conditions d’utilisation',
-      updated: 'En vigueur le 19 octobre 2026',
+      updated: 'En vigueur le 22 novembre 2026',
       sections: [
         { h: '1. Introduction', body: [
-          'Bienvenue sur Kezzo. Les présentes conditions d’utilisation (les « Conditions ») régissent votre accès au site Web, à la plateforme et aux services connexes de Kezzo (la « Plateforme ») et leur utilisation. Kezzo est une plateforme sociale pour créateurs où vous pouvez découvrir et partager des vidéos, des photos et des fichiers audio, participer à des battles en direct, animer des diffusions en direct en solo ou en groupe, rejoindre des groupes, clavarder et appeler d’autres utilisateurs, et publier des faits saillants vidéo.',
+          'Bienvenue sur Kezzo. Les présentes conditions d’utilisation (les « Conditions ») régissent votre accès au site Web, à la plateforme et aux services connexes de Kezzo (la « Plateforme ») et leur utilisation. Kezzo est une plateforme sociale pour créateurs où vous pouvez découvrir et partager des vidéos, des photos et des fichiers audio, participer à des battles en direct, animer des diffusions en direct en solo ou en groupe, rejoindre des groupes, clavarder et appeler d’autres utilisateurs, publier des faits saillants vidéo, acheter et vendre des produits et des services, et tenir les registres de groupes d’épargne.',
           'Kezzo est exploitée par WeDIL Inc., établie au Canada (« Kezzo », « nous »). Écrivez-nous à kezzo.app@gmail.com. En créant un compte ou en utilisant Kezzo, vous acceptez ces Conditions et notre Politique de confidentialité. Si vous n’êtes pas d’accord, n’utilisez pas la Plateforme.',
         ] },
         { h: '2. Admissibilité et comptes', body: [
@@ -220,31 +255,66 @@ export const LEGAL: Record<'en' | 'fr', { privacy: LegalDoc; terms: LegalDoc }> 
         { h: '8. Modération et application', body: [
           'Utilisez Signaler et Bloquer en cas de problème. Nous pouvons examiner les signalements, enquêter, retirer ou restreindre du contenu, interrompre des diffusions, reprendre des pièces, et suspendre ou fermer les comptes qui enfreignent ces Conditions, avec ou sans préavis lorsque la loi le permet. Nous n’examinons pas tout le contenu et ne pouvons promettre que chaque infraction sera détectée. Pour demander la révision d’une décision de modération, écrivez à kezzo.app@gmail.com.',
         ] },
-        { h: '9. Plaintes relatives au droit d’auteur', body: [
+        { h: '9. Marché et paiements entre utilisateurs', body: [
+          'Le Marché permet aux membres de publier des produits et des services et de se contacter. Kezzo n’est que le lieu de rencontre. Le vendeur est responsable de son annonce, de son exactitude, de sa légalité, de la livraison, des taxes et du service après-vente. L’acheteur doit vérifier l’article ou le service avant de payer.',
+          'Kezzo ne perçoit, ne détient, ne transfère, ne garantit, ne place en main tierce ni ne rembourse les paiements entre utilisateurs. Lorsqu’un vendeur ou créateur Premium affiche un moyen de paiement, l’acheteur le paie directement, en dehors de Kezzo, avec son propre mobile money, sa banque ou un autre fournisseur. Kezzo enregistre seulement ce que chaque personne déclare : « Marqué payé par l’acheteur » et « Confirmé par le vendeur » sont des déclarations des utilisateurs, et non une vérification par Kezzo que l’argent est arrivé. Chaque commande a une référence (par exemple KZ-4821) pour aider les deux parties à reconnaître un paiement.',
+          [
+            'Ne payez que des vendeurs de confiance. Kezzo n’est pas partie à la vente et n’est pas responsable des fraudes, des non-livraisons, des produits défectueux ni des différends de paiement entre utilisateurs, dans la mesure permise par la loi. Les différends se règlent entre l’acheteur et le vendeur.',
+            'Les moyens de paiement ne sont affichés que pour les comptes Premium actifs qui passent les vérifications que nous avons activées (par exemple un numéro de téléphone vérifié ou un nom de compte concordant). Nous pouvons masquer, suspendre ou retirer des moyens de paiement, des commandes, des annonces ou des comptes qui semblent dangereux ou qui enfreignent ces Conditions.',
+            'N’utilisez pas Kezzo pour vendre quoi que ce soit d’illégal, encaisser des paiements pour autrui ou demander de l’argent sous de faux prétextes.',
+            'Utilisez Signaler sur une annonce ou un profil (arnaque, faux produit, pas de livraison, autre). Nous pouvons examiner les signalements, mais nous ne pouvons pas promettre de récupérer de l’argent ni de régler un différend.',
+          ],
+        ] },
+        { h: '10. Abonnement Premium', body: [
+          'Les comptes gratuits conservent les fonctions sociales, de marché, de création et de groupes d’épargne décrites dans l’application, dans les limites indiquées sur la page Premium (par exemple le nombre d’annonces, de salons live ou de groupes d’épargne). Premium relève ces limites et ajoute des outils de paiement direct pour les vendeurs et créateurs ainsi que des outils d’épargne supplémentaires. Nous pouvons modifier les forfaits, les limites et les prix ; un changement de prix ne s’applique qu’aux périodes que vous n’avez pas encore payées.',
+          [
+            'Premium se paie à Kezzo, sur le compte de collecte de votre pays, en dehors de l’application, pour la durée choisie (hebdomadaire lorsqu’offert, mensuelle ou trimestrielle). Vous envoyez ensuite la référence de la transaction, et un administrateur vérifie le paiement à la main. Premium commence à l’approbation. Nous pouvons rejeter un paiement (par exemple montant erroné ou référence introuvable) et vous pouvez soumettre de nouveau. Une référence ne peut servir qu’une fois.',
+            'Si vous renouvelez pendant que Premium est actif, la nouvelle période commence à la fin de la période en cours. Après la fin de Premium, une période de grâce de 3 jours s’applique ; ensuite le compte revient au forfait gratuit. Vos annonces, contenus, abonnés, messages, avis et moyens de paiement enregistrés ne sont pas supprimés et reviennent au renouvellement. Les commandes en cours gardent leurs détails jusqu’à leur fin ou leur annulation.',
+            'Les frais Premium ne sont pas remboursables, sauf si la loi l’exige ou si nous en décidons autrement dans un cas précis.',
+            'Nous pouvons suspendre Premium ou les outils de paiement des comptes qui enfreignent ces Conditions ou qui mettent d’autres personnes en danger.',
+          ],
+          'Les frais Premium sont distincts des paiements entre utilisateurs. Kezzo ne prélève jamais une part de ce que les acheteurs paient aux vendeurs.',
+        ] },
+        { h: '11. Groupes d’épargne (VSLA)', body: [
+          'Les outils de groupes d’épargne aident un groupe à tenir ses propres registres : membres, cotisations, prêts, remboursements, amendes et réunions. Kezzo n’est pas une banque, un prêteur, un assureur, une coopérative ni une institution financière. Elle ne détient pas l’argent du groupe, ne prête pas d’argent et ne garantit aucun prêt, aucune épargne ni aucun rendement. Le groupe et ses administrateurs (trésoriers) fixent les règles et sont responsables de l’exactitude des registres et de la gestion de l’argent.',
+          [
+            'Les trésoriers peuvent voir les coordonnées des membres et les registres du groupe. Les membres voient leurs propres registres et les totaux du groupe. Les trésoriers peuvent attribuer d’autres rôles (comme secrétaire ou agent de terrain) aux membres de leur groupe ; ces rôles sont des fonctions Premium.',
+            'Lorsqu’un groupe affiche son propre compte de paiement, les membres le paient directement. Le trésorier confirme chaque paiement dans les livres. Kezzo ne le vérifie pas.',
+            'Vérifiez vos registres régulièrement. Les registres dans Kezzo sont un outil, et non un contrat juridique entre les membres, sauf si votre groupe et la loi locale en disposent autrement.',
+          ],
+        ] },
+        { h: '12. Avis', body: [
+          'Un acheteur peut laisser un avis (de 1 à 5 étoiles et un court commentaire) pour une commande terminée. Les avis sont affichés sur le profil et les annonces du vendeur avec le prénom de l’auteur. Écrivez honnêtement et seulement sur votre propre expérience. N’offrez ni ne demandez de récompense en échange d’avis, n’écrivez pas d’avis pour vous-même ou vos proches, et ne publiez pas de contenu abusif, faux ou privé. Nous pouvons retirer les avis qui enfreignent ces Conditions.',
+        ] },
+        { h: '13. Inviter et gagner', body: [
+          'Kezzo peut offrir un programme de parrainage dans lequel les membres invitent des amis avec un lien ou un code personnel. Une récompense n’est gagnée que si la personne invitée est un vrai nouveau membre qui remplit les conditions indiquées dans l’application (par exemple courriel confirmé, installation de l’application, nombre minimal de jours et d’activité). Les conditions, le montant de la récompense, les limites mensuelles et les pauses sont fixés par Kezzo et peuvent changer. Pour aider à repérer les faux comptes et les installations répétées, l’application peut conserver un code à sens unique créé à partir de renseignements de base sur l’appareil ; il ne sert pas à vous identifier.',
+          'Les récompenses ne sont pas de l’argent détenu dans votre compte. Lorsqu’un parrainage est approuvé, Kezzo enregistre le montant et des administrateurs paient manuellement les soldes approuvés, environ une fois par mois, selon les renseignements de paiement que vous nous donnez. Nous pouvons refuser, annuler ou reprendre des récompenses liées à de faux comptes ou à des comptes en double, à des abus ou au non-respect de ces Conditions, et nous pouvons suspendre ou mettre fin au programme en tout temps.',
+        ] },
+        { h: '14. Plaintes relatives au droit d’auteur', body: [
           'Si vous croyez qu’un contenu de Kezzo porte atteinte à votre droit d’auteur, écrivez à kezzo.app@gmail.com en indiquant le lien du contenu, l’œuvre dont vous êtes titulaire et vos coordonnées. Nous transmettrons les avis à la personne qui a publié, comme l’exige le régime canadien d’avis et avis, et retirerons le contenu contrefait s’il y a lieu. Les récidivistes perdent leur compte.',
         ] },
-        { h: '10. Propriété intellectuelle de Kezzo', body: [
+        { h: '15. Propriété intellectuelle de Kezzo', body: [
           'Le nom Kezzo, l’image de marque, le design, les logiciels et les autres éléments de la Plateforme appartiennent à WeDIL Inc. ou à ses concédants, à l’exception du Contenu utilisateur et du matériel de tiers. Ne les copiez pas, ne les modifiez pas, ne les distribuez pas, ne les désassemblez pas et ne les utilisez pas à des fins commerciales sans notre permission, sauf dans la mesure permise par la loi.',
         ] },
-        { h: '11. Services de tiers', body: [
+        { h: '16. Services de tiers', body: [
           'Kezzo s’appuie sur des fournisseurs tiers pour la connexion, l’hébergement, le stockage, la diffusion en direct, l’envoi de courriels et les fonctions d’IA. Leurs propres conditions et politiques de confidentialité peuvent aussi s’appliquer. Nous ne sommes pas responsables de leurs pannes ou de leurs changements au-delà de ce que la loi exige.',
         ] },
-        { h: '12. Disponibilité et modifications', body: [
+        { h: '17. Disponibilité et modifications', body: [
           'Nous pouvons mettre à jour, modifier, suspendre ou abandonner des fonctions. Nous ne garantissons pas un service ininterrompu ou sans erreur, ni que le contenu, les diffusions ou les enregistrements seront toujours disponibles; conservez vos propres copies de tout ce qui est important. Si nous apportons des modifications importantes à ces Conditions, nous vous en aviserons dans l’application au moins 15 jours avant leur entrée en vigueur. Si vous continuez à utiliser Kezzo par la suite, les nouvelles Conditions s’appliquent.',
         ] },
-        { h: '13. Exclusions de garantie et responsabilité', body: [
-          'Kezzo est fournie « telle quelle » et « selon la disponibilité ». Dans la mesure permise par la loi, WeDIL Inc. n’est pas responsable des pertes indirectes ou consécutives, des pertes de données ni du contenu publié par d’autres utilisateurs et, comme Kezzo est gratuite, notre responsabilité totale envers vous est limitée à 100 $ CA. Rien dans ces Conditions ne supprime les droits que vous confère la Loi sur la protection du consommateur du Québec ou toute autre loi à laquelle on ne peut renoncer.',
+        { h: '18. Exclusions de garantie et responsabilité', body: [
+          'Kezzo est fournie « telle quelle » et « selon la disponibilité ». Dans la mesure permise par la loi, WeDIL Inc. n’est pas responsable des pertes indirectes ou consécutives, des pertes de données ni du contenu publié par d’autres utilisateurs et, notre responsabilité totale envers vous est limitée au plus élevé de 100 $ CA et des frais Premium que vous nous avez payés au cours des 12 mois précédant la réclamation. Rien dans ces Conditions ne supprime les droits que vous confère la Loi sur la protection du consommateur du Québec ou toute autre loi à laquelle on ne peut renoncer.',
         ] },
-        { h: '14. Suspension et suppression du compte', body: [
+        { h: '19. Suspension et suppression du compte', body: [
           'Vous pouvez cesser d’utiliser Kezzo et supprimer votre compte en tout temps avec le bouton Supprimer le compte au bas de votre page de profil, ou en écrivant à kezzo.app@gmail.com. La suppression de votre compte retire votre profil, votre contenu, vos messages et vos pièces, et est irréversible. Nous pouvons suspendre ou mettre fin à votre accès si vous enfreignez ces Conditions ou pour d’autres motifs légitimes, sous réserve de la loi. Certains renseignements peuvent être conservés après la suppression lorsque la loi l’exige ou pour la sécurité, la prévention de la fraude ou le règlement de différends.',
         ] },
-        { h: '15. Droit applicable', body: [
+        { h: '20. Droit applicable', body: [
           'Ces Conditions sont régies par les lois du Québec et les lois fédérales du Canada qui s’y appliquent. Les différends relèvent des tribunaux du district de Montréal, sauf si votre loi locale sur la protection du consommateur vous permet de poursuivre là où vous habitez.',
         ] },
-        { h: '16. Langue', body: [
+        { h: '21. Langue', body: [
           'Ces Conditions sont offertes en anglais et en français. Les parties ont exigé que les présentes conditions soient rédigées en anglais et en français. The parties have required that these Terms be drawn up in English and French.',
         ] },
-        { h: '17. Contact', body: ['WeDIL Inc., Canada — kezzo.app@gmail.com'] },
+        { h: '22. Contact', body: ['WeDIL Inc., Canada — kezzo.app@gmail.com'] },
       ],
     },
     privacy: {

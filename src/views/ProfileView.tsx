@@ -15,6 +15,7 @@ import { ShareButton } from '../components/ShareButton';
 import { PostGrid } from '../components/PostGrid';
 import { ReportButton } from '../components/ReportButton';
 import { PayDialog } from '../components/PayDialog';
+import { SellerReviews } from '../components/Reviews';
 import { ORDERS } from '../lib/ordersText';
 import { SignInCard } from '../components/AuthScreens';
 import { StatusViewer } from '../components/StatusViewer';
@@ -155,6 +156,7 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
             <ShareButton type="profile" id={targetId} title={profile.display_name} />
           </div>
         </div>
+        <SellerReviews sellerId={targetId} />
         {!own && (
           <div className="flex flex-wrap gap-2 pt-2">
             <button type="button" className={`btn btn-sm ${isFollowing ? 'btn-ghost' : 'btn-primary'}`} onClick={toggleFollow}>{isFollowing ? t('unfollow') : t('follow')}</button>
