@@ -320,28 +320,30 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
           <div className="overflow-x-auto rounded-xl border border-zinc-200">
             <table className="w-full text-left text-sm">
               <thead className="bg-zinc-50 text-[11px] text-zinc-500">
-                <tr><th className="px-3 py-2 font-medium">{t('vs_member')}</th><th className="px-2 font-medium">{w.colContrib}</th><th className="px-2 font-medium">{w.colSocial}</th></tr>
+                <tr><th className="px-3 py-2 font-medium">{t('vs_member')}</th><th className="px-2 font-medium">{w.colContrib}</th><th className="px-2 font-medium">{w.colSocial}</th><th className="px-2 font-medium">{w.repaid}</th></tr>
               </thead>
               <tbody>
                 {live.map((m) => {
                   const r = shareRows.get(m.id);
                   const soc = inMonth.filter((e) => e.member_id === m.id && e.kind === 'social').reduce((n, e) => n + e.amount, 0);
+                  const rep = inMonth.filter((e) => e.member_id === m.id && e.kind === 'loan_repay').reduce((n, e) => n + e.amount, 0);
                   return (
                     <tr key={m.id} className={`border-t border-zinc-100 ${m.id === meId ? 'font-medium' : ''}`}>
                       <td className="px-3 py-1.5">{m.display_name}</td>
                       <td className="px-2">{r ? fmt(r.amount) : <span className="text-zinc-300">—</span>}</td>
                       <td className="px-2">{soc > 0 ? fmt(soc) : <span className="text-zinc-300">—</span>}</td>
+                      <td className="px-2">{rep > 0 ? fmt(rep) : <span className="text-zinc-300">—</span>}</td>
                     </tr>
                   );
                 })}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-zinc-200 bg-zinc-50 font-semibold"><td className="px-3 py-2">{w.rowTotal}</td><td className="px-2">{fmt(total)}</td><td className="px-2">{fmt(socialTotal)}</td></tr>
+                <tr className="border-t-2 border-zinc-200 bg-zinc-50 font-semibold"><td className="px-3 py-2">{w.rowTotal}</td><td className="px-2">{fmt(total)}</td><td className="px-2">{fmt(socialTotal)}</td><td className="px-2">{fmt(repaidTotal)}</td></tr>
               </tfoot>
             </table>
           </div>
-          <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-            {[[t('vs_month_paid'), `${paid} / ${live.length}`], [w.fines, fmt(finesTotal)], [w.repaid, fmt(repaidTotal)], [t('vs_month_total'), fmt(total + socialTotal + finesTotal + repaidTotal)]].map(([l, v]) => (
+          <dl className="grid grid-cols-3 gap-2 text-sm">
+            {[[t('vs_month_paid'), `${paid} / ${live.length}`], [w.fines, fmt(finesTotal)], [t('vs_month_total'), fmt(total + socialTotal + finesTotal + repaidTotal)]].map(([l, v]) => (
               <div key={l} className="rounded-xl bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{l}</dt><dd className="font-semibold">{v}</dd></div>
             ))}
           </dl>
