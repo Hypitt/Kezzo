@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Copy, X } from 'lucide-react';
+import { PayMethodCard } from './PayMethodCard';
 import { supabase } from '../lib/supabase';
 import { copyText } from '../lib/share';
 import { ORDERS, orderError } from '../lib/ordersText';
@@ -10,7 +11,7 @@ import { Spinner } from './ui';
 
 export interface PayTarget { sellerId: string; sellerName: string; listing?: { id: string; title: string; price: number | null; currency: string; quantity: number | null } }
 interface Created { id: string; reference: string; amount: number; currency: string; title: string }
-export interface PayMethod { id: string; method: string; type: string; account_name: string; account_number: string; instructions: string; is_default: boolean }
+export interface PayMethod { id: string; method: string; type: string; account_name: string; account_number: string; instructions: string; is_default: boolean; pay_link: string; qr_data: string }
 
 /** Shows the seller's payment methods for one order, the reference, the safety notice and the "I've paid" button. */
 export function PayInstructions({ order, onPaid, onLater }: { order: { id: string; reference: string; amount: number; currency: string; title: string }; onPaid?: () => void; onLater?: () => void }) {
@@ -40,15 +41,7 @@ export function PayInstructions({ order, onPaid, onLater }: { order: { id: strin
           <button type="button" className="btn btn-ghost !px-2 !py-1" aria-label={w.copy} onClick={() => void copy(order.reference)}><Copy className="h-3.5 w-3.5" aria-hidden="true" /></button></p>
       </div>
       <p className="font-medium">{w.payTo}</p>
-      {methods === null ? <Spinner /> : methods.length === 0 ? <p className="text-zinc-500">{w.noMethods}</p> : methods.map((m) => (
-        <div key={m.id} className="rounded-lg border border-zinc-300 bg-white p-2.5">
-          <p className="font-medium">{m.method} <span className="text-xs font-normal text-zinc-500">{w.types[m.type]}</span></p>
-          {m.account_name && <p className="text-xs text-zinc-600">{w.accName}: {m.account_name}</p>}
-          {m.account_number && <p className="flex items-center gap-2 text-xs text-zinc-600">{w.accNumber}: <b className="text-sm text-zinc-900">{m.account_number}</b>
-            <button type="button" className="btn btn-ghost !px-2 !py-1" aria-label={w.copy} onClick={() => void copy(m.account_number)}><Copy className="h-3.5 w-3.5" aria-hidden="true" /></button></p>}
-          {m.instructions && <p className="mt-1 whitespace-pre-line text-xs text-zinc-600">{m.instructions}</p>}
-        </div>
-      ))}
+      {methods === null ? <Spinner /> : methods.length === 0 ? <p className="text-zinc-500">{w.noMethods}</p> : methods.map((m) => <PayMethodCard key={m.id} m={m} />)}
       <p className="rounded-lg bg-amber-50 p-2 text-xs text-amber-900">{w.notice}</p>
       {onPaid && (
         <>

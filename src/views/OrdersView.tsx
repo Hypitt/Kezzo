@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Crown } from 'lucide-react';
+import { GUIDE } from '../lib/premiumGuideText';
+import { qrFromFile } from '../lib/qr';
+import { PayMethodCard } from '../components/PayMethodCard';
 import { supabase } from '../lib/supabase';
 import { ORDERS, orderError } from '../lib/ordersText';
-import { PREMIUM } from '../lib/premiumText';
 import { useI18n } from '../state/I18n';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
@@ -12,7 +14,7 @@ import { REVIEWS } from '../lib/reviewText';
 import { Chip, Loading, PageHeader } from '../components/ui';
 
 interface Order { id: string; reference: string; role: 'buyer' | 'seller'; other_name: string; other_handle: string; seller_id: string; title: string; quantity: number; amount: number; currency: string; status: string; buyer_note: string; cancel_reason: string; created_at: string }
-interface Method { id: string; country: string; method: string; type: string; account_name: string; account_number: string; instructions: string; enabled: boolean; is_default: boolean }
+interface Method { id: string; country: string; method: string; type: string; account_name: string; account_number: string; instructions: string; enabled: boolean; is_default: boolean; pay_link: string; qr_data: string }
 interface Provider { id: string; country: string; name: string; type: string }
 
 const CHIP: Record<string, string> = { awaiting_payment: 'bg-amber-100 text-amber-800', marked_paid: 'bg-sky-100 text-sky-800', confirmed: 'bg-emerald-100 text-emerald-800', disputed: 'bg-red-100 text-red-800', preparing: 'bg-indigo-100 text-indigo-800', completed: 'bg-emerald-100 text-emerald-800', cancelled: 'bg-zinc-200 text-zinc-700' };
@@ -21,9 +23,10 @@ const CHIP: Record<string, string> = { awaiting_payment: 'bg-amber-100 text-ambe
 export function OrdersView() {
   const { lang } = useI18n();
   const { toast } = useToast();
-  const { go } = useRouter();
+  const { go, route } = useRouter();
   const w = ORDERS[lang];
-  const [tab, setTab] = useState<'buy' | 'sell' | 'methods'>('buy');
+  const g = GUIDE[lang];
+  const [tab, setTab] = useState<'buy' | 'sell' | 'methods'>(route.id === 'methods' ? 'methods' : 'buy');
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [methods, setMethods] = useState<Method[]>([]);
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -31,12 +34,12 @@ export function OrdersView() {
   const [open, setOpen] = useState<string | null>(null);
   const [rated, setRated] = useState<Record<string, number>>({});
   const [reviewing, setReviewing] = useState<string | null>(null);
-  const [form, setForm] = useState({ country: '', provider: '', type: 'mobile_money', account_name: '', account_number: '', instructions: '' });
+  const [form, setForm] = useState({ country: '', provider: '', type: 'mobile_money', account_name: '', account_number: '', instructions: '', pay_link: '', qr_data: '' });
 
   const load = useCallback(async () => {
     const [o, m, p, me] = await Promise.all([
       supabase.rpc('orders_mine'),
-      supabase.from('user_payment_methods').select('id, country, method, type, account_name, account_number, instructions, enabled, is_default').order('created_at'),
+      supabase.from('user_payment_methods').select('id, country, method, type, account_name, account_number, instructions, enabled, is_default, pay_link, qr_data').order('created_at'),
       supabase.from('payment_providers').select('id, country, name, type').eq('enabled', true).order('sort'),
       supabase.rpc('my_plan'),
     ]);
@@ -64,8 +67,12 @@ export function OrdersView() {
     const prov = providers.find((x) => x.country === form.country && x.name === form.provider);
     const name = prov ? prov.name : form.provider.trim();
     if (!form.country.trim() || !name) return;
-    await run(supabase.from('user_payment_methods').insert({ country: form.country.trim(), method: name, type: prov ? prov.type : form.type, account_name: form.account_name.trim(), account_number: form.account_number.trim(), instructions: form.instructions.trim() }));
-    setForm({ ...form, account_number: '', instructions: '' });
+    await run(supabase.from('user_payment_methods').insert({ country: form.country.trim(), method: name, type: prov ? prov.type : form.type, account_name: form.account_name.trim(), account_number: form.account_number.trim(), instructions: form.instructions.trim(), pay_link: form.pay_link.trim(), qr_data: form.qr_data }));
+    setForm({ ...form, account_number: '', instructions: '', pay_link: '', qr_data: '' });
+  };
+  const pickQr = async (f: File | undefined) => {
+    if (!f) return;
+    try { setForm((x) => ({ ...x, qr_data: '' })); const d = await qrFromFile(f); setForm((x) => ({ ...x, qr_data: d })); } catch { toast(g.qrBad, 'error'); }
   };
   const askCancel = (o: Order) => {
     const reason = o.role === 'seller' ? (window.prompt(w.actions.cancelAsk) ?? '') : '';
@@ -121,22 +128,23 @@ export function OrdersView() {
 
       {tab === 'methods' && (
         <div className="space-y-3">
-          <p className="text-xs text-zinc-600">{w.methodsHelp}</p>
+          <div className="card space-y-2">
+            <h2 className="text-sm font-semibold">{g.howPaidT}</h2>
+            <ol className="list-decimal space-y-1 pl-5 text-sm text-zinc-700">{g.howPaidSteps.map((t) => <li key={t}>{t}</li>)}</ol>
+          </div>
           {!premium && (
             <div className="card flex flex-wrap items-center justify-between gap-2 border-accent/40 bg-accent/5 text-sm">
-              <span className="flex items-center gap-2"><Crown className="h-4 w-4 text-accent" aria-hidden="true" />{w.premiumNeeded}</span>
-              <button className="btn btn-primary btn-sm" onClick={() => go('premium')}>{PREMIUM[lang].nav} · {w.goPremium}</button>
+              <span className="flex items-center gap-2"><Crown className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />{g.subscribeFirstH}</span>
+              <button className="btn btn-primary btn-sm" onClick={() => go('premium')}>{g.subscribe}</button>
             </div>
           )}
           {methods.length === 0 && <p className="text-sm text-zinc-500">{w.none}</p>}
+          {methods.length > 0 && <h2 className="text-sm font-semibold">{g.yourMethodsT}</h2>}
           {methods.map((m) => (
-            <div key={m.id} className="card space-y-1 text-sm text-zinc-900">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="font-semibold">{m.method} <span className="text-xs font-normal text-zinc-500">{m.country} · {w.types[m.type]}</span></p>
+            <div key={m.id} className="space-y-1">
+              <PayMethodCard m={m} />
+              <div className="flex flex-wrap items-center gap-2 px-1">
                 <span className="text-xs text-zinc-500">{m.enabled ? w.on : w.off}{m.is_default ? ` · ${w.isDefault}` : ''}</span>
-              </div>
-              <p className="break-all text-xs text-zinc-600">{m.account_name} {m.account_number}</p>
-              <div className="flex flex-wrap gap-2 pt-1">
                 <button className="btn btn-ghost btn-sm" onClick={() => void run(supabase.from('user_payment_methods').update({ enabled: !m.enabled }).eq('id', m.id))}>{m.enabled ? w.off : w.on}</button>
                 {!m.is_default && <button className="btn btn-ghost btn-sm" onClick={() => void run(supabase.rpc('set_default_method', { p_id: m.id }))}>{w.makeDefault}</button>}
                 <button className="btn btn-ghost btn-sm text-red-600" onClick={() => void run(supabase.from('user_payment_methods').delete().eq('id', m.id))}>{w.del}</button>
@@ -145,7 +153,7 @@ export function OrdersView() {
           ))}
           {premium && (
             <form className="card space-y-2" onSubmit={addMethod}>
-              <h2 className="text-sm font-semibold">{w.addT}</h2>
+              <h2 className="text-sm font-semibold">{g.previewT}</h2>
               <div className="grid gap-2 sm:grid-cols-2">
                 <div><label className="label" htmlFor="pm-c">{w.country}</label>
                   <input id="pm-c" className="input" list="pm-countries" value={form.country} maxLength={60} onChange={(e) => setForm({ ...form, country: e.target.value, provider: '' })} placeholder={w.pickCountry} />
@@ -160,9 +168,19 @@ export function OrdersView() {
                 </select>
               )}
               <input className="input" placeholder={w.accNameL} aria-label={w.accNameL} maxLength={80} value={form.account_name} onChange={(e) => setForm({ ...form, account_name: e.target.value })} />
-              <input className="input" placeholder={w.accNumberL} aria-label={w.accNumberL} maxLength={80} value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} />
+              <input className="input" placeholder={g.numberL} aria-label={g.numberL} maxLength={80} value={form.account_number} onChange={(e) => setForm({ ...form, account_number: e.target.value })} />
+              <input className="input" type="url" inputMode="url" placeholder={g.linkL} aria-label={g.linkL} maxLength={300} value={form.pay_link} onChange={(e) => setForm({ ...form, pay_link: e.target.value })} />
+              <p className="-mt-1 text-xs text-zinc-500">{g.linkHelp}</p>
+              <div className="space-y-2">
+                {form.qr_data && <img src={form.qr_data} alt="" className="h-32 w-32 rounded-lg border border-zinc-200 bg-white object-contain" />}
+                <div className="flex flex-wrap gap-2">
+                  <label className="btn btn-ghost btn-sm cursor-pointer">{form.qr_data ? g.qrChange : g.qrAdd}<input type="file" accept="image/*" className="sr-only" onChange={(e) => { void pickQr(e.target.files?.[0]); e.target.value = ''; }} /></label>
+                  {form.qr_data && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setForm({ ...form, qr_data: '' })}>{g.qrRemove}</button>}
+                </div>
+                <p className="text-xs text-zinc-500">{g.qrHelp}</p>
+              </div>
               <textarea className="input" rows={2} placeholder={w.instrL} aria-label={w.instrL} maxLength={500} value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} />
-              <button className="btn btn-primary w-full">{w.add}</button>
+              <button className="btn btn-primary w-full">{g.addBtn}</button>
             </form>
           )}
         </div>

@@ -17,6 +17,7 @@ import { ReportButton } from '../components/ReportButton';
 import { PayDialog } from '../components/PayDialog';
 import { SellerReviews } from '../components/Reviews';
 import { ORDERS } from '../lib/ordersText';
+import { GUIDE } from '../lib/premiumGuideText';
 import { SignInCard } from '../components/AuthScreens';
 import { StatusViewer } from '../components/StatusViewer';
 import { useLegal } from '../state/Legal';
@@ -187,6 +188,16 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
         <LoadMore show={hasMore} busy={moreBusy} onClick={more} label={t('load_more')} />
       </section>
       {viewStatus && <StatusViewer person={profile} onClose={() => setViewStatus(false)} />}
+      {own && (
+        <div className="card space-y-2">
+          <h2 className="text-sm font-semibold">{GUIDE[lang].cardT}</h2>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => go('premium')}>{GUIDE[lang].cardGoPremium}</button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('orders', 'methods')}>{GUIDE[lang].cardGetPaid}</button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => go('orders')}>{GUIDE[lang].cardOrders}</button>
+          </div>
+        </div>
+      )}
       {own && <OwnSettings profile={profile} />}
       {own && <div className="border-t border-zinc-300 pt-2"><AccountFooter /></div>}
     </div>

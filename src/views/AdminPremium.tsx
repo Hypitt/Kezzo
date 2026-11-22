@@ -1,17 +1,18 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import { PREMIUM } from '../lib/premiumText';
 import { ORDERS } from '../lib/ordersText';
 import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
+import { qrFromFile } from '../lib/qr';
 import { Chip, Loading } from '../components/ui';
 
 const card = 'rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900';
 const W = {
-  en: { tab: 'Premium', help: 'Premium fees are paid to Kezzo outside the app. Check your own account, then approve. A reference can only be used once.', review: 'Payments', members: 'Subscribers', limits: 'Limits', prices: 'Prices', accounts: 'Accounts', pending: 'Waiting', approved: 'Approved', rejected: 'Rejected', all: 'All',
+  en: { tab: 'Premium', help: 'Premium fees are paid to Kezzo outside the app. Check your own account, then approve. A reference can only be used once.', review: 'Payments', members: 'Subscribers', limits: 'Limits', step1: '1. Set the price for a country', step2: '2. Add where members pay Kezzo (your receiving accounts)', ck1: 'Prices set', ck2: 'Receiving account added', ck3: 'payments waiting for review', link: 'Payment link (optional, https://…)', qrAdd: 'Add QR code picture', qrChange: 'Change QR code', qrRemove: 'Remove QR code', qrBad: 'This picture could not be used.', accNumberHelp: 'Number or merchant code', noAcct: 'No receiving account for this country yet.', setup: 'Setup (prices & accounts)', pending: 'Waiting', approved: 'Approved', rejected: 'Rejected', all: 'All',
     approve: 'Approve', reject: 'Reject', reasonPh: 'Reason shown to the member', none: 'Nothing here.', err: 'Something went wrong.', done: 'Saved.', save: 'Save', add: 'Add', del: 'Delete', suspend: 'Suspend', restore: 'Restore',
     country: 'Country', currency: 'Currency', amount: 'Amount', method: 'Method', accName: 'Account name', accNumber: 'Number', instr: 'Instructions', until: 'until', trust: 'Trust', providers: 'Payment methods', reqPhone: 'Require a verified phone before payment methods go live', reqName: 'Require the account name to match the profile name', handleL: 'Member @handle', phoneOk: 'Phone verified', nameOk: 'Name matches', susp: 'Payment methods suspended', apply: 'Apply', notFound: 'Member not found.', type: 'Type', free: 'Free', premium: 'Premium', helpLimits: 'Changes apply right away for new listings, groups and members.' },
-  fr: { tab: 'Premium', help: 'Les frais Premium sont payés à Kezzo hors de l’application. Vérifiez votre propre compte, puis approuvez. Une référence ne peut servir qu’une fois.', review: 'Paiements', members: 'Abonnés', limits: 'Limites', prices: 'Prix', accounts: 'Comptes', pending: 'En attente', approved: 'Approuvés', rejected: 'Rejetés', all: 'Tous',
+  fr: { tab: 'Premium', help: 'Les frais Premium sont payés à Kezzo hors de l’application. Vérifiez votre propre compte, puis approuvez. Une référence ne peut servir qu’une fois.', review: 'Paiements', members: 'Abonnés', limits: 'Limites', step1: '1. Fixer le prix pour un pays', step2: '2. Ajouter où les membres paient Kezzo (vos comptes de réception)', ck1: 'Prix fixés', ck2: 'Compte de réception ajouté', ck3: 'paiements à vérifier', link: 'Lien de paiement (facultatif, https://…)', qrAdd: 'Ajouter l’image du code QR', qrChange: 'Changer le code QR', qrRemove: 'Retirer le code QR', qrBad: 'Cette image n’a pas pu être utilisée.', accNumberHelp: 'Numéro ou code marchand', noAcct: 'Aucun compte de réception pour ce pays.', setup: 'Réglage (prix et comptes)', pending: 'En attente', approved: 'Approuvés', rejected: 'Rejetés', all: 'Tous',
     approve: 'Approuver', reject: 'Rejeter', reasonPh: 'Motif montré au membre', none: 'Rien ici.', err: 'Une erreur est survenue.', done: 'Enregistré.', save: 'Enregistrer', add: 'Ajouter', del: 'Supprimer', suspend: 'Suspendre', restore: 'Rétablir',
     country: 'Pays', currency: 'Devise', amount: 'Montant', method: 'Méthode', accName: 'Nom du compte', accNumber: 'Numéro', instr: 'Instructions', until: 'jusqu’au', trust: 'Confiance', providers: 'Moyens de paiement', reqPhone: 'Exiger un téléphone vérifié avant d’activer les moyens de paiement', reqName: 'Exiger que le nom du compte corresponde au nom du profil', handleL: '@pseudo du membre', phoneOk: 'Téléphone vérifié', nameOk: 'Nom conforme', susp: 'Moyens de paiement suspendus', apply: 'Appliquer', notFound: 'Membre introuvable.', type: 'Type', free: 'Gratuit', premium: 'Premium', helpLimits: 'Les changements s’appliquent tout de suite aux nouvelles annonces, groupes et membres.' },
 };
@@ -19,7 +20,7 @@ interface Row { id: string; user_id: string; name: string; handle: string; count
 interface Member { user_id: string; name: string; handle: string; status: string; expires_at: string; suspended: boolean }
 interface Limit { plan: string; key: string; value: number }
 interface Price { id: string; country: string; currency: string; duration: string; amount: number; active: boolean }
-interface Account { id: string; country: string; method: string; account_name: string; account_number: string; instructions: string; active: boolean }
+interface Account { id: string; country: string; method: string; account_name: string; account_number: string; instructions: string; active: boolean; pay_link: string; qr_data: string }
 const KEYS = ['listings', 'payment_methods', 'live_rooms_month', 'live_minutes', 'vsla_groups', 'vsla_members', 'featured_month', 'export'];
 
 /** Admin → Premium: approve payments, see subscribers, edit limits, country prices and Kezzo's collection accounts. */
@@ -28,7 +29,8 @@ export function AdminPremium() {
   const a = W[lang === 'fr' ? 'fr' : 'en'];
   const p = PREMIUM[lang];
   const { toast } = useToast();
-  const [part, setPart] = useState<'review' | 'members' | 'limits' | 'prices' | 'accounts' | 'trust' | 'providers'>('review');
+  const [part, setPart] = useState<'review' | 'members' | 'limits' | 'setup' | 'trust' | 'providers'>('review');
+  const first = useRef(true);
   const [status, setStatus] = useState('pending');
   const [rows, setRows] = useState<Row[] | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
@@ -42,7 +44,7 @@ export function AdminPremium() {
   const [npv, setNpv] = useState({ country: '', name: '', type: 'mobile_money' });
   const [why, setWhy] = useState<Record<string, string>>({});
   const [np, setNp] = useState({ country: '', currency: '', duration: 'month', amount: '' });
-  const [na, setNa] = useState({ country: '', method: '', account_name: '', account_number: '', instructions: '' });
+  const [na, setNa] = useState({ country: '', method: '', account_name: '', account_number: '', instructions: '', pay_link: '', qr_data: '' });
 
   const load = useCallback(async () => {
     const [r, m, l, pr, ac, ts, vs, pv] = await Promise.all([
@@ -50,7 +52,7 @@ export function AdminPremium() {
       supabase.rpc('admin_premium_members'),
       supabase.from('plan_limits').select('plan, key, value'),
       supabase.from('plan_prices').select('id, country, currency, duration, amount, active').order('country'),
-      supabase.from('collection_accounts').select('id, country, method, account_name, account_number, instructions, active').order('country'),
+      supabase.from('collection_accounts').select('id, country, method, account_name, account_number, instructions, active, pay_link, qr_data').order('country'),
       supabase.from('trust_settings').select('require_phone, require_name_match').eq('id', 1).maybeSingle(),
       supabase.rpc('admin_verifications'),
       supabase.from('payment_providers').select('id, country, name, type, enabled').order('country').order('sort'),
@@ -63,6 +65,7 @@ export function AdminPremium() {
     setLimits((l.data as Limit[] | null) ?? []);
     setPrices((pr.data as Price[] | null) ?? []);
     setAccts((ac.data as Account[] | null) ?? []);
+    if (first.current) { first.current = false; if (!((pr.data as unknown[] | null) ?? []).length) setPart('setup'); }
   }, [status]);
   useEffect(() => { void load(); }, [load]);
 
@@ -83,9 +86,13 @@ export function AdminPremium() {
     e.preventDefault();
     if (!na.country.trim() || !na.method.trim()) return;
     await run(supabase.from('collection_accounts').insert({ ...na, country: na.country.trim(), method: na.method.trim() }));
-    setNa({ country: na.country, method: '', account_name: '', account_number: '', instructions: '' });
+    setNa({ country: na.country, method: '', account_name: '', account_number: '', instructions: '', pay_link: '', qr_data: '' });
   };
 
+  const pickQr = async (f: File | undefined) => {
+    if (!f) return;
+    try { const d = await qrFromFile(f); setNa((x) => ({ ...x, qr_data: d })); } catch { toast(a.qrBad, 'error'); }
+  };
   const verify = async (e: FormEvent) => {
     e.preventDefault();
     const { data, error } = await supabase.rpc('admin_verify_user', { p_handle: vf.handle, p_phone: vf.phone, p_name: vf.name, p_suspended: vf.susp });
@@ -100,7 +107,7 @@ export function AdminPremium() {
     setNpv({ ...npv, name: '' });
   };
   if (!rows) return <Loading />;
-  const parts: Array<[typeof part, string]> = [['review', a.review], ['members', a.members], ['limits', a.limits], ['prices', a.prices], ['accounts', a.accounts], ['trust', a.trust], ['providers', a.providers]];
+  const parts: Array<[typeof part, string]> = [['review', a.review], ['members', a.members], ['limits', a.limits], ['setup', a.setup], ['trust', a.trust], ['providers', a.providers]];
   const statuses: Array<[string, string]> = [['pending', a.pending], ['approved', a.approved], ['rejected', a.rejected], ['', a.all]];
 
   return (
@@ -159,8 +166,17 @@ export function AdminPremium() {
         </div>
       )}
 
-      {part === 'prices' && (
+      {part === 'setup' && (
+        <div className={`${card} space-y-1 text-sm`}>
+          <p>{prices.length > 0 ? '✅' : '⬜'} {a.ck1}</p>
+          <p>{accts.length > 0 ? '✅' : '⬜'} {a.ck2}</p>
+          <p>{rows.filter((x) => x.status === 'pending').length > 0 ? '🔔' : '✅'} {rows.filter((x) => x.status === 'pending').length} {a.ck3}</p>
+        </div>
+      )}
+
+      {part === 'setup' && (
         <div className="space-y-2">
+          <h3 className="text-sm font-semibold">{a.step1}</h3>
           <form className={`${card} grid gap-2 sm:grid-cols-5`} onSubmit={addPrice}>
             <input className="input" placeholder={a.country} aria-label={a.country} value={np.country} maxLength={60} onChange={(e) => setNp({ ...np, country: e.target.value })} />
             <input className="input" placeholder={a.currency} aria-label={a.currency} value={np.currency} maxLength={8} onChange={(e) => setNp({ ...np, currency: e.target.value })} />
@@ -222,19 +238,26 @@ export function AdminPremium() {
         </div>
       )}
 
-      {part === 'accounts' && (
+      {part === 'setup' && (
         <div className="space-y-2">
+          <h3 className="text-sm font-semibold">{a.step2}</h3>
           <form className={`${card} grid gap-2 sm:grid-cols-2`} onSubmit={addAccount}>
             <input className="input" placeholder={a.country} aria-label={a.country} value={na.country} maxLength={60} onChange={(e) => setNa({ ...na, country: e.target.value })} />
             <input className="input" placeholder={a.method} aria-label={a.method} value={na.method} maxLength={40} onChange={(e) => setNa({ ...na, method: e.target.value })} />
             <input className="input" placeholder={a.accName} aria-label={a.accName} value={na.account_name} maxLength={80} onChange={(e) => setNa({ ...na, account_name: e.target.value })} />
-            <input className="input" placeholder={a.accNumber} aria-label={a.accNumber} value={na.account_number} maxLength={80} onChange={(e) => setNa({ ...na, account_number: e.target.value })} />
+            <input className="input" placeholder={a.accNumberHelp} aria-label={a.accNumberHelp} value={na.account_number} maxLength={80} onChange={(e) => setNa({ ...na, account_number: e.target.value })} />
+            <input className="input sm:col-span-2" type="url" placeholder={a.link} aria-label={a.link} value={na.pay_link} maxLength={300} onChange={(e) => setNa({ ...na, pay_link: e.target.value })} />
+            <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
+              {na.qr_data && <img src={na.qr_data} alt="" className="h-24 w-24 rounded border border-zinc-200 object-contain" />}
+              <label className="btn btn-ghost btn-sm cursor-pointer">{na.qr_data ? a.qrChange : a.qrAdd}<input type="file" accept="image/*" className="sr-only" onChange={(e) => { void pickQr(e.target.files?.[0]); e.target.value = ''; }} /></label>
+              {na.qr_data && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setNa({ ...na, qr_data: '' })}>{a.qrRemove}</button>}
+            </div>
             <textarea className="input sm:col-span-2" rows={2} placeholder={a.instr} aria-label={a.instr} value={na.instructions} maxLength={500} onChange={(e) => setNa({ ...na, instructions: e.target.value })} />
             <button className="btn btn-primary sm:col-span-2">{a.add}</button>
           </form>
           {accts.map((x) => (
             <div key={x.id} className={`${card} flex items-center justify-between gap-2 text-sm`}>
-              <span className="min-w-0 truncate">{x.country} · {x.method} · {x.account_name} {x.account_number}</span>
+              <span className="min-w-0 truncate">{x.country} · {x.method} · {x.account_name} {x.account_number}{x.pay_link ? ' · 🔗' : ''}{x.qr_data ? ' · QR' : ''}</span>
               <button className="btn btn-ghost btn-sm shrink-0" onClick={() => void run(supabase.from('collection_accounts').delete().eq('id', x.id))}>{a.del}</button>
             </div>
           ))}
