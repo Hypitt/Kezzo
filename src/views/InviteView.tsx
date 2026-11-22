@@ -10,7 +10,7 @@ import { Chevron, Loading, PageHeader } from '../components/ui';
 
 interface Stats {
   code: string; payout_info: string;
-  settings: { enabled: boolean; reward_cents: number; min_actions: number; min_days: number; monthly_cap: number; min_payout_cents: number; require_install: boolean; require_email: boolean; rules_text: string };
+  settings: { enabled: boolean; paused: boolean; pause_until: string | null; pause_note: string; reward_cents: number; min_actions: number; min_days: number; monthly_cap: number; min_payout_cents: number; require_install: boolean; require_email: boolean; rules_text: string };
   pending: number; qualified: number; balance_cents: number; paid_cents: number;
   referrals: Array<{ name: string; status: 'pending' | 'qualified' | 'paid' | 'rejected'; created_at: string; reward_cents: number }>;
 }
@@ -62,6 +62,7 @@ export function InviteView() {
   return (
     <div className="mx-auto max-w-xl space-y-4">
       <PageHeader title={w.nav} sub="" />
+      {s.settings.paused && <p className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">{w.paused(s.settings.pause_until ? new Date(s.settings.pause_until).toLocaleDateString() : '')}{s.settings.pause_note ? ` ${s.settings.pause_note}` : ''}</p>}
       {!s.settings.enabled && <p className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">{w.off}</p>}
 
       <section className="card space-y-3 text-center">
@@ -71,7 +72,7 @@ export function InviteView() {
         <div className="rounded-xl border border-zinc-300 bg-zinc-50 p-3 text-left">
           <p className="text-[11px] font-medium text-zinc-500">{w.yourCode}</p>
           <div className="flex items-center gap-2">
-            <p className="min-w-0 flex-1 truncate font-mono text-lg font-semibold tracking-wider">{s.code.toUpperCase()}</p>
+            <p className="min-w-0 flex-1 truncate text-lg font-semibold">{s.code}</p>
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => void copy()}><Copy className="h-3.5 w-3.5" aria-hidden="true" />{w.copyLink}</button>
           </div>
           <p className="truncate text-xs text-zinc-500">{link}</p>
