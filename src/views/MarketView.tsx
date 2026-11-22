@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowLeft, Heart, ImagePlus, MapPin, MessageCircle, Pencil, Plus, Share2, SlidersHorizontal, Store, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Heart, ImagePlus, MapPin, MessageCircle, Pencil, Plus, Share2, ChevronDown, SlidersHorizontal, Store, Trash2, X } from 'lucide-react';
 import type { Lang } from '../lib/types';
 import { supabase } from '../lib/supabase';
 import { PUBLIC_PROFILE } from '../lib/data';
@@ -519,6 +519,7 @@ export function MarketView({ shop }: { shop?: string }) {
             <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
             <span className="hidden sm:inline">{FILTERS_WORD[lang]}</span>
             {(cat !== 'all' || avail || sort !== 'smart') && <span className="h-2 w-2 rounded-full bg-accent" aria-hidden="true" />}
+            <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} aria-hidden="true" />
           </button>
         </div>
         {!shop && <div className="flex gap-2 overflow-x-auto pb-1">{tabs.map(([k, label]) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{label}</Chip>)}</div>}

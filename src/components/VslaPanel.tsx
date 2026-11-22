@@ -3,7 +3,7 @@ import { PiggyBank, WifiOff, ChevronLeft, ChevronRight, Check, X, Minus, Plus, I
 import { supabase } from '../lib/supabase';
 import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
-import { Spinner } from './ui';
+import { Chevron, Spinner } from './ui';
 import { VslaGuide } from './VslaGuide';
 import { VSLA } from '../lib/vslaText';
 export interface VslaMember { id: string; user_id: string | null; display_name: string; role: 'admin' | 'member'; active?: boolean }
@@ -715,14 +715,15 @@ function SocialSetting({ cycle, fmt, onSaved }: { cycle: Cycle; fmt: (n: number)
   );
 }
 
-/** A closed-by-default section: keeps the page short, opens with one tap. */
-function Fold({ title, badge, defaultOpen, children }: { title: string; badge?: string; defaultOpen?: boolean; children: ReactNode }) {
+/** A section that is always closed when the page opens; one tap opens it. */
+function Fold({ title, badge, children }: { title: string; badge?: string; defaultOpen?: boolean; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
   return (
-    <details className="group rounded-xl border border-zinc-200" open={defaultOpen}>
-      <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-sm font-semibold">
+    <details className="rounded-xl border border-zinc-200" onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}>
+      <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-sm font-semibold hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
         <span className="mr-auto">{title}</span>
         {badge && <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-600">{badge}</span>}
-        <ChevronRight className="h-4 w-4 shrink-0 text-zinc-400 transition group-open:rotate-90" aria-hidden="true" />
+        <Chevron open={open} />
       </summary>
       <div className="space-y-3 border-t border-zinc-100 p-3">{children}</div>
     </details>

@@ -1,3 +1,4 @@
+import { Chevron } from './ui';
 import { useState } from 'react';
 import { HelpCircle } from 'lucide-react';
 import { useI18n } from '../state/I18n';
@@ -13,7 +14,7 @@ export function VslaGuide({ startOpen = false }: { startOpen?: boolean }) {
       <button type="button" className="flex w-full items-center gap-2 text-left text-sm font-semibold" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
         <HelpCircle className="h-4 w-4 text-accent" aria-hidden="true" />
         <span className="flex-1">{open ? w.guideTitle : w.guideShow}</span>
-        <span className="text-xs font-normal text-zinc-500">{open ? w.guideHide : ''}</span>
+        <Chevron open={open} />
       </button>
       {open && (
         <ol className="mt-3 grid gap-3 sm:grid-cols-2">

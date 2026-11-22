@@ -266,7 +266,7 @@ function ContestDetail({ id }: { id: string }) {
             )}
             {contest.rules && (
               <details className="mt-3 text-sm">
-                <summary className="cursor-pointer font-semibold">{w.rulesTitle}</summary>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-semibold [&::-webkit-details-marker]:hidden">{w.rulesTitle}<span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100" aria-hidden="true">▾</span></summary>
                 <p className="mt-2 whitespace-pre-line text-zinc-700">{contest.rules}</p>
               </details>
             )}

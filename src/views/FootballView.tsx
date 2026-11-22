@@ -314,7 +314,7 @@ export function FootballView({ code: linkCode }: { code?: string }) {
       </section>
 
       <details className="card space-y-1 text-xs text-zinc-700">
-        <summary className="cursor-pointer text-sm font-semibold text-zinc-900">{w.helpTitle}</summary>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-zinc-900 [&::-webkit-details-marker]:hidden">{w.helpTitle}<span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100" aria-hidden="true">▾</span></summary>
         <p className="pt-1">{w.helpP1}</p><p>{w.helpP2}</p><p>{w.helpOnline}</p><p>{w.helpTouch}</p><p>{w.keysLegend}</p><p>{w.helpGk}</p>
       </details>
     </div>

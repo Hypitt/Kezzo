@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Loader2, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, Loader2, SlidersHorizontal } from 'lucide-react';
 import { initials } from '../lib/format';
 
 export function Avatar({ p, size = 36 }: { p: { display_name: string; avatar_url: string | null }; size?: number }) {
@@ -92,6 +92,16 @@ export function FilterButton({ open, active, lang, onClick }: { open: boolean; a
       <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
       <span className="hidden sm:inline">{FILTERS_WORD[lang] ?? FILTERS_WORD.en}</span>
       {active && <span className="h-2 w-2 rounded-full bg-accent" aria-hidden="true" />}
+      <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
     </button>
+  );
+}
+
+/** A clear round arrow that shows something can be opened or closed. Turns upside-down when open. */
+export function Chevron({ open, className = '' }: { open: boolean; className?: string }) {
+  return (
+    <span className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-zinc-300 bg-zinc-100 text-zinc-800 transition-transform ${open ? 'rotate-180' : ''} ${className}`} aria-hidden="true">
+      <ChevronDown className="h-4 w-4" strokeWidth={2.5} />
+    </span>
   );
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
-import { Briefcase, Calendar, ExternalLink, Mail, MapPin, Pencil, Plus, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { Briefcase, Calendar, ExternalLink, Mail, MapPin, Pencil, Plus, ChevronDown, SlidersHorizontal, Trash2 } from 'lucide-react';
 import type { Lang } from '../lib/types';
 import { supabase } from '../lib/supabase';
 import { PUBLIC_PROFILE } from '../lib/data';
@@ -240,6 +240,7 @@ export function OpportunitiesView({ focus }: { focus?: string }) {
             <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
             <span className="hidden sm:inline">{FILTERS_WORD[lang]}</span>
             {scope !== 'near' && <span className="h-2 w-2 rounded-full bg-accent" aria-hidden="true" />}
+            <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} aria-hidden="true" />
           </button>
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1">
