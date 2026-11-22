@@ -8,6 +8,7 @@ import { timeAgo } from '../lib/format';
 import type { DirectMessage, PublicProfile } from '../lib/types';
 import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
+import { TRUST_WORDS } from '../lib/ordersText';
 import { useRouter } from '../state/Router';
 import { useToast } from '../state/Toast';
 import { useCalls } from '../state/Calls';
@@ -109,6 +110,8 @@ export function MessagesView({ otherId }: { otherId?: string }) {
   );
 }
 
+const PHONE_LIKE = /(\+?\d[\d\s().-]{7,}\d)/;
+
 function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: string; refreshKey: number; onSent: () => void }) {
   const { t } = useI18n();
   const { toast } = useToast();
@@ -116,6 +119,7 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
   const [other, setOther] = useState<PublicProfile | null>(null);
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [text, setText] = useState('');
+  const [freeSeller, setFreeSeller] = useState(false);
   const { lang } = useI18n();
   const aw = ABOUT_WORDS[lang];
   const mw = MARKET[lang];
@@ -128,6 +132,9 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
 
   useEffect(() => {
     supabase.from('profiles').select(PUBLIC_PROFILE).eq('id', otherId).maybeSingle().then(({ data }) => setOther((data as PublicProfile | null) ?? null));
+  }, [otherId]);
+  useEffect(() => {
+    void supabase.rpc('seller_flags', { p_ids: [otherId] }).then(({ data }) => setFreeSeller(Array.isArray(data) && (data as Array<{ premium: boolean }>)[0]?.premium === false));
   }, [otherId]);
 
   useEffect(() => {
@@ -228,6 +235,7 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
           )}
         </div>
       </header>
+      {freeSeller && messages.some((m) => m.sender_id !== me && PHONE_LIKE.test(m.body ?? '')) && <p className="border-b border-zinc-200 bg-amber-50 px-4 py-2 text-xs text-amber-900">{TRUST_WORDS[lang].chatWarn}</p>}
       {calling && <p className="border-b border-zinc-200 bg-emerald-50 px-4 py-2 text-xs text-emerald-800">{t('call_hint')}</p>}
       <div className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
         {messages.length === 0 && <p className="text-sm text-zinc-500">{t('say_hello')}</p>}

@@ -1,6 +1,6 @@
 import { REFERRAL } from '../lib/referralText';
 import { PREMIUM } from '../lib/premiumText';
-import { ORDERS } from '../lib/ordersText';
+import { ORDERS, TRUST_WORDS } from '../lib/ordersText';
 import { useEffect, useState } from 'react';
 import { Crown, Gift, Receipt, LogOut, Settings, X, type LucideIcon } from 'lucide-react';
 import { useAuth } from '../state/Auth';
@@ -18,11 +18,17 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const { route, go } = useRouter();
   const [admin, setAdmin] = useState(false);
   const uid = user?.id;
+  const [alerts, setAlerts] = useState<{ orders: number; premium_days: number | null }>({ orders: 0, premium_days: null });
 
   useEffect(() => {
     if (!uid) { setAdmin(false); return; }
     void supabase.rpc('is_admin').then(({ data }) => setAdmin(data === true));
   }, [uid]);
+
+  useEffect(() => {
+    if (!open || !uid) return;
+    void supabase.rpc('my_alerts').then(({ data }) => { if (data) setAlerts(data as { orders: number; premium_days: number | null }); });
+  }, [open, uid]);
 
   useEffect(() => {
     if (!open) return;
@@ -84,11 +90,13 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
           {user && (
             <button type="button" onClick={() => open_('premium')} className="mb-3 flex w-full items-center gap-3 rounded-lg border border-accent/40 bg-accent/5 p-3 text-left text-sm font-semibold text-zinc-900 hover:bg-accent/10">
               <Crown className="h-5 w-5 text-accent" aria-hidden="true" />{PREMIUM[lang].nav}
+              {alerts.premium_days !== null && alerts.premium_days <= 7 && <span className="ml-auto rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold text-white">{TRUST_WORDS[lang].soon}</span>}
             </button>
           )}
           {user && (
             <button type="button" onClick={() => open_('orders')} className="mb-3 flex w-full items-center gap-3 rounded-lg border border-zinc-300 bg-white p-3 text-left text-sm font-semibold text-zinc-900 hover:bg-zinc-50">
               <Receipt className="h-5 w-5 text-accent" aria-hidden="true" />{ORDERS[lang].nav}
+              {alerts.orders > 0 && <span className="ml-auto rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-semibold text-white">{alerts.orders}</span>}
             </button>
           )}
 

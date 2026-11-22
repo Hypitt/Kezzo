@@ -5,16 +5,19 @@ import { useAuth } from '../state/Auth';
 import { useI18n } from '../state/I18n';
 import { useToast } from '../state/Toast';
 import type { Key } from '../lib/i18n';
+import { TRUST_WORDS } from '../lib/ordersText';
 
 const REASONS = ['spam', 'harassment', 'sexual', 'violence', 'other'] as const;
+type Reason = (typeof REASONS)[number] | 'scam' | 'fake_product' | 'no_delivery';
+const MONEY = ['scam', 'fake_product', 'no_delivery'] as const;
 
 export function ReportButton({ targetType, targetId }: { targetType: 'post' | 'profile' | 'battle' | 'group' | 'opportunity' | 'listing'; targetId: string }) {
   const { user, ensureAuth } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
-  const send = async (reason: (typeof REASONS)[number]) => {
+  const send = async (reason: Reason) => {
     if (!ensureAuth() || !user) return;
     const { error } = await supabase.from('reports').insert({ reporter_id: user.id, target_type: targetType, target_id: targetId, reason });
     setOpen(false);
@@ -29,6 +32,9 @@ export function ReportButton({ targetType, targetId }: { targetType: 'post' | 'p
       </button>
       {open && (
         <div className="absolute right-0 z-20 mt-1 w-44 rounded-xl border border-zinc-300 bg-white p-1 shadow-lg">
+          {(targetType === 'listing' || targetType === 'profile') && MONEY.map((r) => (
+            <button key={r} type="button" className="block w-full rounded-lg px-3 py-1.5 text-left text-sm hover:bg-zinc-100" onClick={() => send(r)}>{TRUST_WORDS[lang][r]}</button>
+          ))}
           {REASONS.map((r) => (
             <button key={r} type="button" className="block w-full rounded-lg px-3 py-1.5 text-left text-sm hover:bg-zinc-100" onClick={() => send(r)}>
               {t(`report_${r}` as Key)}

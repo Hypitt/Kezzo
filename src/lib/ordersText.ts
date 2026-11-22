@@ -81,3 +81,12 @@ export function orderError(lang: Lang, message: string): string {
   const k = Object.keys(w.errors).find((e) => message.includes(e));
   return k ? w.errors[k] : w.err;
 }
+
+/** Extra report reasons for scams, and the one warning shown in chat. */
+export const TRUST_WORDS: Record<Lang, { scam: string; fake_product: string; no_delivery: string; chatWarn: string; soon: string }> = {
+  en: { scam: 'Scam', fake_product: 'Fake product', no_delivery: 'No delivery', chatWarn: 'This person has shared a phone number or payment details and is not a Premium seller. Be careful paying unverified sellers.', soon: 'Premium ends soon' },
+  fr: { scam: 'Arnaque', fake_product: 'Faux produit', no_delivery: 'Pas de livraison', chatWarn: 'Cette personne a partagé un numéro ou des détails de paiement et n’est pas un vendeur Premium. Soyez prudent avant de payer un vendeur non vérifié.', soon: 'Premium se termine bientôt' },
+  es: { scam: 'Estafa', fake_product: 'Producto falso', no_delivery: 'Sin entrega', chatWarn: 'Esta persona compartió un número o datos de pago y no es vendedor Premium. Ten cuidado al pagar a vendedores no verificados.', soon: 'Premium termina pronto' },
+  pt: { scam: 'Golpe', fake_product: 'Produto falso', no_delivery: 'Sem entrega', chatWarn: 'Esta pessoa compartilhou um número ou dados de pagamento e não é vendedor Premium. Tenha cuidado ao pagar vendedores não verificados.', soon: 'O Premium termina em breve' },
+  hi: { scam: 'धोखाधड़ी', fake_product: 'नकली उत्पाद', no_delivery: 'डिलीवरी नहीं', chatWarn: 'इस व्यक्ति ने फ़ोन नंबर या भुगतान विवरण साझा किया है और यह प्रीमियम विक्रेता नहीं है। अनजान विक्रेताओं को भुगतान करते समय सावधान रहें।', soon: 'प्रीमियम जल्द खत्म होगा' },
+};
