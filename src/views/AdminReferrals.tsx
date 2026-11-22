@@ -7,7 +7,7 @@ import { useToast } from '../state/Toast';
 import { Chip, Loading } from '../components/ui';
 
 const card = 'rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900';
-interface Summary { settings: { enabled: boolean; reward_cents: number; min_actions: number; min_days: number; claim_window_days: number; monthly_cap: number; min_payout_cents: number; require_install: boolean; require_email: boolean; rules_text: string }; installs: number; pending: number; qualified: number; paid: number; rejected: number; owed_cents: number; paid_cents: number }
+interface Summary { settings: { enabled: boolean; reward_cents: number; min_actions: number; min_days: number; claim_window_days: number; monthly_cap: number; min_payout_cents: number; require_install: boolean; require_email: boolean; rules_text: string; pause_from: string | null; pause_until: string | null; pause_note: string }; active: boolean; installs: number; pending: number; qualified: number; paid: number; rejected: number; owed_cents: number; paid_cents: number }
 interface Payout { referrer_id: string; name: string; handle: string; payout_info: string; blocked: boolean; n: number; owed_cents: number }
 interface Row { id: string; status: 'pending' | 'qualified' | 'paid' | 'rejected'; reward_cents: number; reject_reason: string; created_at: string; referrer_id: string; referrer_name: string; referrer_handle: string; referred_name: string; referred_handle: string }
 
@@ -21,6 +21,7 @@ export function AdminReferrals() {
   const [rows, setRows] = useState<Row[]>([]);
   const [filter, setFilter] = useState('');
   const [f, setF] = useState<Summary['settings'] | null>(null);
+  const [pz, setPz] = useState({ from: '', until: '', note: '' });
   const [notes, setNotes] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
@@ -56,6 +57,24 @@ export function AdminReferrals() {
   return (
     <div className="space-y-4">
       <div className={card}><h2 className="text-base font-semibold">{a.title}</h2><p className="mt-1 text-xs text-zinc-600">{a.help}</p></div>
+
+      <section className={`${card} space-y-2`}>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="mr-auto text-sm font-semibold">{a.pauseTitle}</h3>
+          <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${!sum.settings.enabled ? 'bg-zinc-200 text-zinc-700' : sum.active ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>{!sum.settings.enabled ? a.statusOff : sum.active ? a.statusOn : a.statusPaused}</span>
+        </div>
+        <p className="text-xs text-zinc-600">{a.pauseHelp}</p>
+        {sum.settings.pause_from && <p className="text-xs text-zinc-700">{sum.settings.pause_from.slice(0, 16).replace('T', ' ')} → {sum.settings.pause_until ? sum.settings.pause_until.slice(0, 16).replace('T', ' ') : '…'}{sum.settings.pause_note ? ` · ${sum.settings.pause_note}` : ''}</p>}
+        <div className="grid gap-2 sm:grid-cols-2">
+          <div><label className="label" htmlFor="pz-from">{a.pauseFrom}</label><input id="pz-from" className="input" type="datetime-local" value={pz.from} onChange={(e) => setPz({ ...pz, from: e.target.value })} /></div>
+          <div><label className="label" htmlFor="pz-until">{a.pauseUntil}</label><input id="pz-until" className="input" type="datetime-local" value={pz.until} onChange={(e) => setPz({ ...pz, until: e.target.value })} /></div>
+        </div>
+        <input className="input" placeholder={a.pauseNote} aria-label={a.pauseNote} maxLength={200} value={pz.note} onChange={(e) => setPz({ ...pz, note: e.target.value })} />
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className="btn btn-accent btn-sm" onClick={() => void run(supabase.rpc('admin_referral_pause', { p_from: pz.from ? new Date(pz.from).toISOString() : null, p_until: pz.until ? new Date(pz.until).toISOString() : null, p_note: pz.note, p_pause: true }))}>{a.pauseBtn}</button>
+          {sum.settings.pause_from && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void run(supabase.rpc('admin_referral_pause', { p_from: null, p_until: null, p_note: '', p_pause: false }))}>{a.resumeBtn}</button>}
+        </div>
+      </section>
 
       <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3 lg:grid-cols-6">
         {[[a.owed, usd(sum.owed_cents)], [a.paidT, usd(sum.paid_cents)], [a.pendingN, sum.pending], [a.qualifiedN, sum.qualified], [a.rejectedN, sum.rejected], [a.installsN, sum.installs]].map(([l, v]) => (

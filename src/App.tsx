@@ -15,7 +15,7 @@ import { Loading } from './components/ui';
 import { PENDING_GROUP, pendingGroup, pendingInvite } from './lib/invite';
 import { InviteView } from './views/InviteView';
 import { captureRef, clearRef, pendingRef } from './lib/referral';
-import { recordInstall, watchInstallEvent } from './lib/install';
+import { recordInstall, watchInstallEvent } from './lib/deviceInstall';
 import { REFERRAL } from './lib/referralText';
 import { supabase } from './lib/supabase';
 import { startMonitoring, trackPage } from './lib/analytics';
