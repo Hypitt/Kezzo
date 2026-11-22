@@ -23,6 +23,7 @@ export function InviteView() {
   const [s, setS] = useState<Stats | null>(null);
   const [info, setInfo] = useState('');
   const [busy, setBusy] = useState(false);
+  const [friend, setFriend] = useState('');
   const [rules, setRules] = useState(false);
 
   const load = useCallback(() => {
@@ -48,6 +49,17 @@ export function InviteView() {
     const { error } = await supabase.rpc('referral_set_payout', { p_info: info });
     setBusy(false);
     toast(error ? w.err : w.saved, error ? 'error' : 'info');
+  };
+  const applyCode = async (e: FormEvent) => {
+    e.preventDefault();
+    const code = friend.trim().replace(/^@/, '').toLowerCase();
+    if (!code) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc('claim_referral', { p_code: code });
+    setBusy(false);
+    if (error) return toast(w.err, 'error');
+    toast(w.codeResult[String(data)] ?? w.err, data === 'ok' ? 'info' : 'error');
+    if (data === 'ok') setFriend('');
   };
   const chip = (st: Stats['referrals'][number]['status']) => {
     const m = { pending: ['bg-amber-100 text-amber-800', w.stPending], qualified: ['bg-emerald-100 text-emerald-800', w.stQualified], paid: ['bg-sky-100 text-sky-800', w.stPaid], rejected: ['bg-zinc-200 text-zinc-700', w.stRejected] }[st];
@@ -122,6 +134,14 @@ export function InviteView() {
           </ul>
         )}
       </section>
+
+      <form className="card space-y-2" onSubmit={applyCode}>
+        <h2 className="text-sm font-semibold">{w.haveCode}</h2>
+        <div className="flex gap-2">
+          <input className="input min-w-0 flex-1" value={friend} maxLength={20} placeholder={w.codePh} aria-label={w.codePh} onChange={(e) => setFriend(e.target.value)} />
+          <button className="btn btn-ghost shrink-0" disabled={busy || !friend.trim()}>{w.codeBtn}</button>
+        </div>
+      </form>
 
       <form className="card space-y-2" onSubmit={savePayout}>
         <h2 className="text-sm font-semibold">{w.payoutTitle}</h2>
