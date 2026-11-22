@@ -498,7 +498,8 @@ export function MarketView({ shop }: { shop?: string }) {
             <div className="flex gap-2">
               {user?.id === shop && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditShop((v) => !v)}><Pencil className="h-4 w-4" aria-hidden="true" />{sw.edit}</button>}
               <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" onClick={async () => {
-                const url = shareUrl('shop', shop);
+                const named = user ? await supabase.rpc('share_slug', { p_type: 'shop', p_id: shop }) : null;
+                const url = shareUrl('shop', shop, typeof named?.data === 'string' ? named.data : undefined);
                 const title = shopRow?.name || (owner ? w.shopOf(owner.display_name) : 'Kezzo');
                 if (typeof navigator.share === 'function') { try { await navigator.share({ title, url }); return; } catch { /* cancelled: fall back to copy */ } }
                 toast((await copyText(url)) ? w.linkCopied : w.errGeneric);
