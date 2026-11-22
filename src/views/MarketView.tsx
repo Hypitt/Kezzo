@@ -62,7 +62,7 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
 
   return (
     <article className="card overflow-hidden !p-0 text-zinc-900">
-      <div className="relative aspect-[4/3] bg-zinc-100">
+      <div className="relative aspect-square bg-zinc-100">
         {photo
           ? <img src={photo} alt={l.title} loading="lazy" decoding="async" className={`h-full w-full object-cover ${gone ? 'opacity-50' : ''}`} />
           : <div className="flex h-full items-center justify-center text-zinc-400"><Store className="h-10 w-10" aria-hidden="true" /></div>}
@@ -76,15 +76,18 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
         {gone && <span className="absolute right-2 top-2 rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold">{l.status === 'sold' ? w.sold : w.paused}</span>}
         {l.hidden && <span className="absolute bottom-2 left-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700">{w.hide}</span>}
       </div>
-      <div className="space-y-1.5 p-3">
-        <p className="flex items-center gap-2 text-base font-bold">{price}
+      <div className="space-y-1 p-2.5">
+        <div className="flex items-baseline justify-between gap-2">
+        <h3 className="min-w-0 truncate text-sm font-semibold">{l.title}</h3>
+        <p className="flex shrink-0 items-center gap-2 text-base font-bold">{price}
           {l.quantity !== null && <span className={`text-xs font-semibold ${l.quantity === 0 ? 'text-red-600' : l.quantity <= 3 ? 'text-amber-600' : 'text-zinc-500'}`}>{l.quantity === 0 ? m2.soldOut : m2.left(l.quantity)}</span>}
         </p>
-        <h3 className="text-sm font-semibold">{l.title}</h3>
+        </div>
         <p className="flex flex-wrap items-center gap-x-3 text-xs text-zinc-600">
           <span>{w.cats[l.category]}</span>
           {l.condition && <span>{w.conds[l.condition]}</span>}
           {place && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" aria-hidden="true" />{place}</span>}
+          <button type="button" className="font-semibold text-accent hover:underline" aria-expanded={open} onClick={() => setOpen((v) => !v)}>{open ? w.showLess : w.readMore}</button>
         </p>
         {open && (
           <div className="space-y-2 pt-1">
@@ -98,7 +101,6 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
             {l.contact && <p className="text-xs text-zinc-700">{w.contact}: {l.contact}</p>}
           </div>
         )}
-        <button type="button" className="text-xs font-semibold text-accent hover:underline" aria-expanded={open} onClick={() => setOpen((v) => !v)}>{open ? w.showLess : w.readMore}</button>
         {mine && (
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <label className="text-xs font-semibold text-zinc-600" htmlFor={`q-${l.id}`}>{m2.qty}</label>
@@ -107,7 +109,7 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
             {l.quantity !== null && l.quantity > 0 && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void setQty(l.quantity! - 1)}>{m2.soldOne}</button>}
           </div>
         )}
-        <div className="flex flex-wrap items-center gap-2 border-t border-zinc-200 pt-2">
+        <div className="flex flex-wrap items-center gap-1.5 pt-1">
           {seller && (onShop
             ? <button type="button" className="text-xs text-zinc-500 hover:underline" onClick={onShop}>{w.byLabel} <span className="font-semibold">{seller.display_name}</span> · {w.visitShop}</button>
             : <span className="text-xs text-zinc-500">{w.byLabel} {seller.display_name}</span>)}
