@@ -268,7 +268,7 @@ export function BattleRoom({ id }: { id: string }) {
             <section className="card space-y-3" aria-label={t('ai_recap')}>
               <h2 className="flex items-center gap-2 font-semibold"><Sparkles className="h-4 w-4 text-accent" aria-hidden="true" />{t('ai_recap')}</h2>
               {verdicts.slice(0, 3).map((v) => (
-                <div key={v.id} className="space-y-1 border-t border-zinc-100 pt-3 first:border-0 first:pt-0">
+                <div key={v.id} className="space-y-1 border-t border-zinc-200 pt-3 first:border-0 first:pt-0">
                   <p className="text-sm">{v.verdict}</p>
                   {v.highlights.length > 0 && <ul className="list-disc pl-5 text-sm text-zinc-600">{v.highlights.map((h, i) => <li key={i}>{h}</li>)}</ul>}
                 </div>
@@ -415,7 +415,7 @@ function JudgesSection({ battle, judges, scores, isHost, isJudge, round, busy, r
       {isJudge && live && userId && <JudgeForm battle={battle} mine={scores.filter((s) => s.judge_id === userId && s.round === round)} rpc={rpc} busy={busy} />}
 
       {roundScores.length > 0 && (
-        <div className="space-y-2 border-t border-zinc-100 pt-3">
+        <div className="space-y-2 border-t border-zinc-200 pt-3">
           <h3 className="text-sm font-semibold">{t('judges_scores_round', { n: round })}</h3>
           <ul className="space-y-2">
             {roundScores.map((s) => (
@@ -451,7 +451,7 @@ function AddJudge({ battle, judges, rpc, busy }: { battle: Battle; judges: Judge
       <label className="label" htmlFor="judge-search">{t('add_judge')}</label>
       <input id="judge-search" className="input" value={term} onChange={(e) => setTerm(e.target.value)} placeholder={t('search_people_placeholder')} autoComplete="off" />
       {options.length > 0 && (
-        <ul className="divide-y divide-zinc-100 rounded-lg border border-zinc-200">
+        <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-300">
           {options.map((p) => (
             <li key={p.id} className="flex items-center gap-3 px-3 py-2">
               <Avatar p={p} size={28} />
@@ -491,7 +491,7 @@ function JudgeForm({ battle, mine, rpc, busy }: { battle: Battle; mine: JudgeSco
   };
 
   return (
-    <div className="space-y-3 border-t border-zinc-100 pt-3">
+    <div className="space-y-3 border-t border-zinc-200 pt-3">
       <h3 className="text-sm font-semibold">{t('your_scores', { n: battle.current_round })}</h3>
       {battle.contenders.map((c, i) => {
         const color = COMPETITOR_COLORS[i % COMPETITOR_COLORS.length];
@@ -553,7 +553,7 @@ function HostControls({ battle, busy, rpc, onRecap, hasJudges }: HostProps) {
       )}
 
       {battle.status === 'open' && (
-        <div className="space-y-2 border-t border-zinc-100 pt-3">
+        <div className="space-y-2 border-t border-zinc-200 pt-3">
           <label className="label" htmlFor="hw-weight">{t('voting_weights')}</label>
           <input id="hw-weight" type="range" min={0} max={100} step={5} value={weight} className="w-full" onChange={(e) => setWeight(Number(e.target.value))} />
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
@@ -568,7 +568,7 @@ function HostControls({ battle, busy, rpc, onRecap, hasJudges }: HostProps) {
       )}
 
       {live && (
-        <div className="space-y-2 border-t border-zinc-100 pt-3">
+        <div className="space-y-2 border-t border-zinc-200 pt-3">
           <span className="label flex items-center gap-1.5"><Timer className="h-3.5 w-3.5" aria-hidden="true" />{t('competition_timer')}</span>
           <div className="flex flex-wrap items-center gap-2">
             <select className="input w-auto" value={seconds} onChange={(e) => setSeconds(Number(e.target.value))} aria-label={t('competition_timer')}>
@@ -618,7 +618,7 @@ function HostBar({ battle, busy, rpc, record, onRecord }: { battle: Battle; busy
         {busy === 'end_battle' && <Spinner />}{t(open ? 'cancel_battle' : 'end_battle')}
       </button>
       {open && battle.contenders.length < 2 && <p className="basis-full text-xs text-zinc-500">{t('need_two')}</p>}
-      <div className="basis-full space-y-1 border-t border-zinc-100 pt-3">
+      <div className="basis-full space-y-1 border-t border-zinc-200 pt-3">
         {canRecord ? (
           <>
             <label className="flex items-center gap-2 text-sm">

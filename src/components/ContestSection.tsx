@@ -35,7 +35,7 @@ export function ContestSection({ onJoin, signedIn = false }: { onJoin: () => voi
   return (
     <section className={signedIn ? 'text-zinc-900' : 'bg-white px-3 py-2 text-zinc-900 sm:px-4'} aria-label={c.title}>
       <div className="mx-auto mb-2 max-w-2xl"><WinnersStrip max={1} /></div>
-      <div className="mx-auto max-w-2xl rounded-xl border border-zinc-200 bg-white p-3">
+      <div className="mx-auto max-w-2xl rounded-xl border border-zinc-300 bg-white p-3">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-900"><Trophy className="h-3.5 w-3.5 text-accent" aria-hidden="true" />{w.nav}</span>
           {phase === 'open' && <span className="rounded-full bg-zinc-900 px-2 py-0.5 text-[11px] font-semibold text-white">{d === 0 && h < 6 ? w.lastHours : w.left(d, h)}</span>}
@@ -46,7 +46,7 @@ export function ContestSection({ onJoin, signedIn = false }: { onJoin: () => voi
         </div>
 
         {open && (
-          <div className="mt-3 space-y-2 border-t border-zinc-200 pt-3">
+          <div className="mt-3 space-y-2 border-t border-zinc-300 pt-3">
             {c.theme && <p className="text-xs text-zinc-700"><span className="font-semibold">{w.theme}:</span> {c.theme}</p>}
             {c.prize && <p className="text-sm font-semibold">{w.prize}: <span className="text-accent">{c.prize}</span></p>}
             <p className="text-xs text-zinc-700"><span className="font-semibold">{w.dates}:</span> {fmt(c.starts_at)} – {fmt(c.ends_at)}{count > 0 ? ` · ${w.entriesN(count)}` : ''}</p>
@@ -56,11 +56,11 @@ export function ContestSection({ onJoin, signedIn = false }: { onJoin: () => voi
               <li>{w.step1}</li><li>{w.step2}</li><li>{w.step3}</li>
             </ol>
             <div className="grid gap-2 sm:grid-cols-2">
-              <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
+              <div className="rounded-lg border border-zinc-300 bg-zinc-50 p-2">
                 <h3 className="text-xs font-semibold">{w.forEnter}</h3>
                 <p className="mt-0.5 text-[11px] leading-snug text-zinc-700">{w.forEnterText}</p>
               </div>
-              <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
+              <div className="rounded-lg border border-zinc-300 bg-zinc-50 p-2">
                 <h3 className="text-xs font-semibold">{w.forVote}</h3>
                 <p className="mt-0.5 text-[11px] leading-snug text-zinc-700">{w.forVoteText}</p>
               </div>

@@ -245,7 +245,7 @@ function ContestDetail({ id }: { id: string }) {
 
       {contest && (
         <>
-          <section className="rounded-xl border border-zinc-200 bg-white p-3 text-zinc-900">
+          <section className="rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
               <span className="inline-flex items-center gap-2 font-semibold"><Trophy className="h-5 w-5 text-accent" aria-hidden="true" />{contest.prize || w.nav}</span>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold">{phase === 'soon' ? w.soon : phase === 'open' ? w.open : w.ended}</span>
@@ -294,7 +294,7 @@ function ContestDetail({ id }: { id: string }) {
           )}
 
           {phase === 'open' && (
-            <section className="rounded-2xl border border-zinc-200 bg-white p-4 text-zinc-900" aria-label={w.enter}>
+            <section className="rounded-2xl border border-zinc-300 bg-white p-4 text-zinc-900" aria-label={w.enter}>
               <h2 className="text-sm font-semibold">{w.enter}</h2>
               {!user ? (
                 <button type="button" className="btn bg-zinc-900 text-white hover:bg-zinc-700 mt-3" onClick={() => openAuth('signup')}>{w.signup}</button>
@@ -336,7 +336,7 @@ function ContestDetail({ id }: { id: string }) {
                   {mine === null || mine.length === 0 ? null : (
                     <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                       {mine.map((p) => (
-                        <li key={p.id} className="overflow-hidden rounded-xl border border-zinc-200">
+                        <li key={p.id} className="overflow-hidden rounded-xl border border-zinc-300">
                           <div className="aspect-[4/5] bg-zinc-200"><Thumb kind={p.kind} path={p.media_path} title={p.title} /></div>
                           <button type="button" disabled={busy} className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm w-full rounded-none" onClick={() => void enter(p.id)}>{busy ? w.entering : w.pick}</button>
                         </li>
@@ -385,7 +385,7 @@ function ContestDetail({ id }: { id: string }) {
             {board.length === 0 ? <Empty text={w.empty} /> : (
               <ol className="space-y-3">
                 {board.map((e) => (
-                  <li key={e.post_id} className={`flex items-center gap-3 rounded-2xl border bg-white p-2 text-zinc-900 ${e.author_id === user?.id ? 'border-zinc-900' : 'border-zinc-200'}`}>
+                  <li key={e.post_id} className={`flex items-center gap-3 rounded-2xl border bg-white p-2 text-zinc-900 ${e.author_id === user?.id ? 'border-zinc-900' : 'border-zinc-300'}`}>
                     <span className="w-8 shrink-0 text-center text-lg font-bold">{e.rank}</span>
                     <div className="h-16 w-14 shrink-0 overflow-hidden rounded-lg bg-zinc-200"><Thumb kind={e.kind} path={e.media_path} title={e.title} /></div>
                     <div className="min-w-0 flex-1">
@@ -411,7 +411,7 @@ function ContestDetail({ id }: { id: string }) {
       )}
 
       {contest && canManage && (
-        <section className="rounded-2xl border border-zinc-200 bg-white p-4 text-zinc-900" aria-label={h.manage}>
+        <section className="rounded-2xl border border-zinc-300 bg-white p-4 text-zinc-900" aria-label={h.manage}>
           <h2 className="text-sm font-semibold">{h.manage}</h2>
           <p className="mt-1 text-xs text-zinc-500">{h.mgmtHelp}</p>
           {editingContest ? (
@@ -426,7 +426,7 @@ function ContestDetail({ id }: { id: string }) {
               <button type="button" className="btn btn-ghost btn-sm text-red-600" onClick={() => void deleteContest()}>{A.del}</button>
             </div>
           )}
-          <div className="mt-5 border-t border-zinc-200 pt-4">
+          <div className="mt-5 border-t border-zinc-300 pt-4">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-sm font-semibold">{x.report}</h3>
               <button type="button" className="btn btn-ghost btn-sm" onClick={() => void openReport()}><Trophy className="h-4 w-4" aria-hidden="true" />{report ? w.refresh : x.report}</button>
@@ -435,7 +435,7 @@ function ContestDetail({ id }: { id: string }) {
             </div>
             <p className="mt-1 text-xs text-zinc-500">{x.reportHelp}</p>
             {report && (
-              <div className="mt-3 space-y-2 rounded-xl bg-zinc-50 p-3 text-sm">
+              <div className="mt-3 space-y-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm">
                 {report.phase !== 'ended' && <p className="text-xs text-zinc-600">{x.reportLive}</p>}
                 <p className="text-xs text-zinc-700">{x.totals}: {report.totals.entries} · {x.likes} {report.totals.likes} · {x.commenters} {report.totals.commenters} · {x.voters} {report.totals.voters}</p>
                 {report.winners.length === 0 ? <p className="text-xs">{x.noWinners}</p> : (
@@ -453,10 +453,10 @@ function ContestDetail({ id }: { id: string }) {
               </div>
             )}
           </div>
-          <div className="mt-5 border-t border-zinc-200 pt-4">
+          <div className="mt-5 border-t border-zinc-300 pt-4">
             <p className="text-xs text-zinc-600">{A.stats(allEntries.length, allEntries.reduce((n, e) => n + e.likes, 0), allEntries.reduce((n, e) => n + e.commenters, 0))}</p>
             <h3 className="mt-3 text-sm font-semibold">{A.entriesTitle}</h3>
-            <ul className="mt-2 divide-y divide-zinc-100 text-sm">
+            <ul className="mt-2 divide-y divide-zinc-200 text-sm">
               {allEntries.map((e) => (
                 <li key={e.post_id} className="flex flex-wrap items-center gap-2 py-2">
                   <span className="min-w-0 flex-1 truncate">{e.author_name} · {e.title} · {e.score}

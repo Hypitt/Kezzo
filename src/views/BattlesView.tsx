@@ -77,7 +77,7 @@ export function BattlesView() {
           <FilterButton open={showFilters} active={Boolean(category)} lang={lang} onClick={() => setShowFilters((v) => !v)} />
         </div>
         {showFilters && (
-          <div className="rounded-xl bg-zinc-50 p-3">
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
             <select className="input sm:max-w-xs" value={category} onChange={(e) => setCategory(e.target.value)} aria-label={t('category')}>
               <option value="">{t('all_categories')}</option>
               {BATTLE_CATEGORIES.map((c) => <option key={c} value={c}>{t(`cat_${c}` as Key)}</option>)}

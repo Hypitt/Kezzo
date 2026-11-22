@@ -125,7 +125,7 @@ export function SearchView() {
           <FilterButton open={showFilters} active={tab !== 'feed' || scope !== 'all'} lang={lang} onClick={() => setShowFilters((v) => !v)} />
         </div>
         {showFilters && (
-          <div className="space-y-3 rounded-xl bg-zinc-50 p-3">
+          <div className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
             <div className="flex flex-wrap gap-2">
               <Chip active={tab === 'feed'} onClick={() => setTab('feed')}>{t('tab_feed')}</Chip>
               <Chip active={tab === 'battles'} onClick={() => setTab('battles')}>{t('tab_battles')}</Chip>

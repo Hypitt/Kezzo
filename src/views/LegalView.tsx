@@ -11,12 +11,12 @@ function Block({ block }: { block: LegalBlock }) {
     return <ul className="list-disc space-y-1 pl-5 text-sm leading-relaxed text-zinc-700">{block.map((item) => <li key={item}>{item}</li>)}</ul>;
   }
   return (
-    <div className="overflow-x-auto rounded-lg border border-zinc-200">
+    <div className="overflow-x-auto rounded-lg border border-zinc-300">
       <table className="w-full text-left text-xs sm:text-sm">
         <thead className="bg-zinc-50 text-zinc-600">
           <tr>{block.head.map((h) => <th key={h} className="px-3 py-2 font-semibold">{h}</th>)}</tr>
         </thead>
-        <tbody className="divide-y divide-zinc-100 text-zinc-700">
+        <tbody className="divide-y divide-zinc-200 text-zinc-700">
           {block.rows.map((row) => (
             <tr key={row[0]} className="align-top">
               {row.map((cell, i) => <td key={i} className={`px-3 py-2 ${i === 0 ? 'font-medium text-zinc-900' : ''}`}>{cell}</td>)}

@@ -67,7 +67,7 @@ export function ContestHub() {
             const ms = Math.max(0, Date.parse(c.ends_at) - Date.now());
             return (
               <li key={c.id}>
-                <button type="button" onClick={() => go('contest', c.id)} className="block w-full rounded-2xl border border-zinc-200 bg-white p-4 text-left text-zinc-900 hover:border-zinc-400">
+                <button type="button" onClick={() => go('contest', c.id)} className="block w-full rounded-2xl border border-zinc-300 bg-white p-4 text-left text-zinc-900 hover:border-zinc-400">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className={`${pill} ${c.phase === 'open' ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-700'}`}>
                       {c.phase === 'open' ? h.open : c.phase === 'soon' ? h.soon : h.ended}

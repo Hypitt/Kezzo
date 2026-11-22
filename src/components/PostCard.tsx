@@ -294,7 +294,7 @@ function Comments({ post, onCount }: { post: Post; onCount: (n: number) => void 
   };
 
   return (
-    <div className="space-y-3 border-t border-zinc-100 pt-3">
+    <div className="space-y-3 border-t border-zinc-200 pt-3">
       {rows === null ? <Spinner /> : rows.length === 0 ? <p className="text-sm text-zinc-500">{t('no_comments')}</p> : (
         <ul className="space-y-2">
           {rows.map((c, i) => (

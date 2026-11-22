@@ -53,7 +53,7 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={t('nav_menu')}>
       <button type="button" className="absolute inset-0 bg-black/50" aria-label={t('close')} onClick={onClose} />
       <aside className="absolute inset-y-0 right-0 flex w-[88%] max-w-sm flex-col bg-white shadow-xl">
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 px-4">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-300 px-4">
           <span className="font-display text-base font-bold text-zinc-900">{t('nav_menu')}</span>
           <button type="button" className="rounded-full p-2 text-zinc-700 hover:bg-zinc-100" aria-label={t('close')} onClick={onClose}>
             <X className="h-5 w-5" aria-hidden="true" />
@@ -62,7 +62,7 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
 
         <div className="flex-1 overflow-y-auto px-3 py-3">
           {user && profile ? (
-            <button type="button" onClick={() => open_('profile')} className="mb-3 flex w-full items-center gap-3 rounded-lg border border-zinc-200 p-3 text-left hover:bg-zinc-50">
+            <button type="button" onClick={() => open_('profile')} className="mb-3 flex w-full items-center gap-3 rounded-lg border border-zinc-300 p-3 text-left hover:bg-zinc-50">
               <Avatar p={profile} size={40} />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-semibold text-zinc-900">{profile.display_name || profile.handle}</span>
@@ -87,7 +87,7 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
           ))}
         </div>
 
-        <div className="shrink-0 space-y-2 border-t border-zinc-200 px-4 py-3">
+        <div className="shrink-0 space-y-2 border-t border-zinc-300 px-4 py-3">
           <div className="flex items-center justify-start gap-2">
             {user && profile && <InstallButton compact className="btn btn-sm border border-zinc-300 bg-white text-zinc-800" />}
           </div>

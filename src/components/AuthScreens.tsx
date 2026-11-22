@@ -195,7 +195,7 @@ export function AuthPanel({ onDone, initialMode = 'signin' }: { onDone: () => vo
 
 export function SignInCard() {
   return (
-    <div className="mx-auto max-w-sm rounded-2xl border border-zinc-200 p-6">
+    <div className="mx-auto max-w-sm rounded-2xl border border-zinc-300 p-6">
       <AuthPanel onDone={() => undefined} />
     </div>
   );

@@ -298,7 +298,7 @@ export function FootballView({ code: linkCode }: { code?: string }) {
             {open.length === 0 ? <Empty text={w.noMatches} /> : (
               <ul className="space-y-2">
                 {open.map((r) => (
-                  <li key={r.code} className="flex items-center gap-3 rounded-xl border border-zinc-200 p-2.5">
+                  <li key={r.code} className="flex items-center gap-3 rounded-xl border border-zinc-300 p-2.5">
                     <Avatar p={{ display_name: r.host, avatar_url: r.avatar }} size={36} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold">{w.hostOf(r.host)}</p>

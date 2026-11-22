@@ -112,7 +112,7 @@ export function ShareButton({ type, id, title, media, className = 'btn btn-ghost
               <h2 className="text-base font-semibold">{t('share_title')}</h2>
               <button type="button" className="rounded-full p-1 hover:bg-zinc-100" onClick={close} aria-label={t('close')}><X className="h-4 w-4" aria-hidden="true" /></button>
             </div>
-            <div className="mb-3 flex items-center gap-2 rounded-lg bg-zinc-50 p-2.5">
+            <div className="mb-3 flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2.5">
               <div className="min-w-0"><p className="truncate text-sm font-semibold">{title}</p><p className="truncate text-xs text-zinc-500">{url.replace(/^https?:\/\//, '')}</p></div>
             </div>
             <div className="grid grid-cols-3 gap-1">
@@ -128,7 +128,7 @@ export function ShareButton({ type, id, title, media, className = 'btn btn-ghost
               </button>
             </div>
             {media && (
-              <div className="mt-3 rounded-xl border border-zinc-200 p-3">
+              <div className="mt-3 rounded-xl border border-zinc-300 p-3">
                 <p className="text-sm font-semibold">{t(media.kind === 'photo' ? 'share_media_photo' : 'share_media_video')}</p>
                 <p className="mt-0.5 text-xs text-zinc-500">{t('share_media_hint')}</p>
                 {prep.state === 'idle' && <button type="button" className="btn btn-primary btn-sm mt-2" onClick={() => void prepare()}>{t('share_media_prepare')}</button>}

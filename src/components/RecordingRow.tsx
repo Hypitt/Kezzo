@@ -74,7 +74,7 @@ export function RecordingRow({ r, title, onPosted }: { r: RecordingInfo; title: 
   };
 
   return (
-    <li className="space-y-2 rounded-xl border border-zinc-200 p-2.5 text-sm">
+    <li className="space-y-2 rounded-xl border border-zinc-300 p-2.5 text-sm">
       <div className="flex flex-wrap items-center gap-2">
         <span className="mr-auto">
           {t('rec_part', { n: r.part })} · {formatClock(r.durationMs / 1000)} · {formatBytes(r.size)}

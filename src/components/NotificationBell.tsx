@@ -73,8 +73,8 @@ export function NotificationBell() {
         )}
       </button>
       {open && (
-        <div className="fixed inset-x-2 top-14 z-50 max-h-[70vh] overflow-hidden rounded-2xl border border-zinc-200 bg-white text-zinc-900 shadow-xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-10 sm:w-96">
-          <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
+        <div className="fixed inset-x-2 top-14 z-50 max-h-[70vh] overflow-hidden rounded-2xl border border-zinc-300 bg-white text-zinc-900 shadow-xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-10 sm:w-96">
+          <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3">
             <h2 className="text-sm font-semibold">{t('notif_title')}</h2>
             {unread > 0 && (
               <button type="button" className="inline-flex items-center gap-1 text-xs font-medium text-zinc-600 hover:text-zinc-900" onClick={() => void markAllRead()}>
@@ -85,7 +85,7 @@ export function NotificationBell() {
           {items.length === 0 ? (
             <p className="px-4 py-8 text-center text-sm text-zinc-500">{t('notif_empty')}</p>
           ) : (
-            <ul className="max-h-[60vh] divide-y divide-zinc-100 overflow-y-auto">
+            <ul className="max-h-[60vh] divide-y divide-zinc-200 overflow-y-auto">
               {items.map((n) => {
                 const Icon = ICON[n.kind];
                 return (

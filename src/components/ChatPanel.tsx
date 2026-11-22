@@ -168,7 +168,7 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
 
   return (
     <section className="card flex h-[28rem] flex-col p-0 sm:p-0" aria-label={t('chat')}>
-      <h2 className="border-b border-zinc-100 px-4 py-3 text-sm font-semibold">{t('chat')}</h2>
+      <h2 className="border-b border-zinc-200 px-4 py-3 text-sm font-semibold">{t('chat')}</h2>
       <div ref={list} className="flex-1 space-y-3 overflow-y-auto px-4 py-3 text-sm">
         {visible.length === 0 && <p className="text-zinc-500">{t('chat_empty')}</p>}
         {visible.map((m) => (
@@ -190,7 +190,7 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
       </div>
       {upload && <div className="px-3 pb-2"><UploadBar state={upload} onCancel={cancelUpload} onRetry={() => void runUpload()} /></div>}
       {canWrite ? (
-        <form onSubmit={send} className="flex gap-2 border-t border-zinc-100 p-3">
+        <form onSubmit={send} className="flex gap-2 border-t border-zinc-200 p-3">
           {allowFiles && (
             <>
               <input ref={picker} type="file" className="sr-only" onChange={(e) => void pick(e.target.files?.[0])} aria-label={t('attach_file')} />
@@ -206,7 +206,7 @@ export function ChatPanel({ roomType, roomId, canWrite = true, allowFiles = fals
           </button>
         </form>
       ) : (
-        <p className="border-t border-zinc-100 p-3 text-center text-xs text-zinc-500">{t('chat_closed')}</p>
+        <p className="border-t border-zinc-200 p-3 text-center text-xs text-zinc-500">{t('chat_closed')}</p>
       )}
     </section>
   );
@@ -246,11 +246,11 @@ function ChatFile({ message }: { message: ChatMessage }) {
   return (
     <div className="mt-1.5 space-y-1.5">
       {type.startsWith('image/') && url && (
-        <a href={url} target="_blank" rel="noreferrer"><img src={url} alt={message.file_name ?? ''} className="max-h-48 rounded-lg border border-zinc-200 object-cover" loading="lazy" decoding="async" /></a>
+        <a href={url} target="_blank" rel="noreferrer"><img src={url} alt={message.file_name ?? ''} className="max-h-48 rounded-lg border border-zinc-300 object-cover" loading="lazy" decoding="async" /></a>
       )}
       {type.startsWith('video/') && url && <video src={url} controls preload="none" className="max-h-56 rounded-lg" />}
       {type.startsWith('audio/') && url && <audio src={url} controls preload="none" className="w-full max-w-xs" />}
-      {!isVoice && <button type="button" onClick={download} className="flex w-full max-w-xs items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-left text-xs hover:bg-zinc-100">
+      {!isVoice && <button type="button" onClick={download} className="flex w-full max-w-xs items-center gap-2 rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 text-left text-xs hover:bg-zinc-100">
         <FileText className="h-4 w-4 shrink-0 text-zinc-500" aria-hidden="true" />
         <span className="min-w-0 flex-1">
           <span className="block truncate font-medium">{message.file_name}</span>

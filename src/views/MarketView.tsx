@@ -107,7 +107,7 @@ function Card({ l, mine, admin, fav, onFav, onEdit, onChanged, onShop }: { l: Li
             {l.quantity !== null && l.quantity > 0 && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void setQty(l.quantity! - 1)}>{m2.soldOne}</button>}
           </div>
         )}
-        <div className="flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-2">
+        <div className="flex flex-wrap items-center gap-2 border-t border-zinc-200 pt-2">
           {seller && (onShop
             ? <button type="button" className="text-xs text-zinc-500 hover:underline" onClick={onShop}>{w.byLabel} <span className="font-semibold">{seller.display_name}</span> · {w.visitShop}</button>
             : <span className="text-xs text-zinc-500">{w.byLabel} {seller.display_name}</span>)}
@@ -524,7 +524,7 @@ export function MarketView({ shop }: { shop?: string }) {
         </div>
         {!shop && <div className="flex gap-2 overflow-x-auto pb-1">{tabs.map(([k, label]) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{label}</Chip>)}</div>}
         {showFilters && (
-          <div className="space-y-3 rounded-xl bg-zinc-50 p-3">
+          <div className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
             {!shop && (
               <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-600">
                 <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />

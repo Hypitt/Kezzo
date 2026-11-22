@@ -212,7 +212,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
           : meId ? <NextStep text={w.hintPay} button={w.hintPayBtn} onClick={() => onOpenTab?.('contrib')} /> : null)}
         <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
           {[[t('vs_cash'), stats.cash], [t('vs_savings'), stats.saved], [t('vs_loans_out'), stats.outstanding], [t('vs_social'), stats.social]].map(([label, value]) => (
-            <div key={label as string} className="rounded-xl bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{label}</dt><dd className="font-semibold">{fmt(value as number)}</dd></div>
+            <div key={label as string} className="rounded-xl border border-zinc-200 bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{label}</dt><dd className="font-semibold">{fmt(value as number)}</dd></div>
           ))}
         </dl>
         {mine && (
@@ -233,7 +233,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
               {live.map((m) => {
                 const r = stats.perMember.get(m.id) ?? { shares: 0, saved: 0, owes: 0 };
                 const payout = stats.saved > 0 ? (r.saved / stats.saved) * stats.pool : 0;
-                return <tr key={m.id} className={`border-t border-zinc-100 ${m.id === meId ? 'font-medium' : ''}`}><td className="py-1.5 pr-2">{m.display_name}</td><td>{r.shares}</td><td>{fmt(r.saved)}</td><td>{r.owes > 0 ? fmt(r.owes) : '—'}</td><td>{fmt(payout)}</td></tr>;
+                return <tr key={m.id} className={`border-t border-zinc-200 ${m.id === meId ? 'font-medium' : ''}`}><td className="py-1.5 pr-2">{m.display_name}</td><td>{r.shares}</td><td>{fmt(r.saved)}</td><td>{r.owes > 0 ? fmt(r.owes) : '—'}</td><td>{fmt(payout)}</td></tr>;
               })}
             </tbody>
           </table>
@@ -296,7 +296,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
             </Fold>
             <Fold title={w.mineTitle} defaultOpen={myContribs.some((x) => x.status === 'pending')}>
               {myContribs.length === 0 ? <p className="text-sm text-zinc-500">{w.mineEmpty}</p> : (
-                <ul className="divide-y divide-zinc-100 text-sm">
+                <ul className="divide-y divide-zinc-200 text-sm">
                   {myContribs.slice(0, 8).map((x) => (
                     <li key={x.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5">
                       <span className="mr-auto">{kindLabel(x.kind)}{x.kind === 'shares' ? ` ×${x.shares}` : ''} <span className="text-xs text-zinc-400">{x.meeting_date}</span></span>
@@ -317,7 +317,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
         </div>
         <div className="space-y-2">
           <h3 className="text-sm font-semibold">{w.sheetTitle} · <span className="capitalize">{label}</span></h3>
-          <div className="overflow-x-auto rounded-xl border border-zinc-200">
+          <div className="overflow-x-auto rounded-xl border border-zinc-300">
             <table className="w-full text-left text-sm">
               <thead className="bg-zinc-50 text-[11px] text-zinc-500">
                 <tr><th className="px-3 py-2 font-medium">{t('vs_member')}</th><th className="px-2 font-medium">{w.colContrib}</th><th className="px-2 font-medium">{w.colSocial}</th><th className="px-2 font-medium">{w.repaid}</th></tr>
@@ -328,7 +328,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
                   const soc = inMonth.filter((e) => e.member_id === m.id && e.kind === 'social').reduce((n, e) => n + e.amount, 0);
                   const rep = inMonth.filter((e) => e.member_id === m.id && e.kind === 'loan_repay').reduce((n, e) => n + e.amount, 0);
                   return (
-                    <tr key={m.id} className={`border-t border-zinc-100 ${m.id === meId ? 'font-medium' : ''}`}>
+                    <tr key={m.id} className={`border-t border-zinc-200 ${m.id === meId ? 'font-medium' : ''}`}>
                       <td className="px-3 py-1.5">{m.display_name}</td>
                       <td className="px-2">{r ? fmt(r.amount) : <span className="text-zinc-300">—</span>}</td>
                       <td className="px-2">{soc > 0 ? fmt(soc) : <span className="text-zinc-300">—</span>}</td>
@@ -338,13 +338,13 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
                 })}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-zinc-200 bg-zinc-50 font-semibold"><td className="px-3 py-2">{w.rowTotal}</td><td className="px-2">{fmt(total)}</td><td className="px-2">{fmt(socialTotal)}</td><td className="px-2">{fmt(repaidTotal)}</td></tr>
+                <tr className="border-t-2 border-zinc-300 bg-zinc-50 font-semibold"><td className="px-3 py-2">{w.rowTotal}</td><td className="px-2">{fmt(total)}</td><td className="px-2">{fmt(socialTotal)}</td><td className="px-2">{fmt(repaidTotal)}</td></tr>
               </tfoot>
             </table>
           </div>
           <dl className="grid grid-cols-3 gap-2 text-sm">
             {[[t('vs_month_paid'), `${paid} / ${live.length}`], [w.fines, fmt(finesTotal)], [t('vs_month_total'), fmt(total + socialTotal + finesTotal + repaidTotal)]].map(([l, v]) => (
-              <div key={l} className="rounded-xl bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{l}</dt><dd className="font-semibold">{v}</dd></div>
+              <div key={l} className="rounded-xl border border-zinc-200 bg-zinc-50 p-2.5"><dt className="text-[11px] text-zinc-500">{l}</dt><dd className="font-semibold">{v}</dd></div>
             ))}
           </dl>
         </div>
@@ -370,7 +370,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
         <Fold title={t('vs_request_loan')} defaultOpen={myRequests.some((q) => q.status === 'pending')}>
           <RequestForm groupId={groupId} onSent={load} />
           {myRequests.length > 0 && (
-            <ul className="divide-y divide-zinc-100 text-sm">
+            <ul className="divide-y divide-zinc-200 text-sm">
               {myRequests.slice(0, 5).map((q) => (
                 <li key={q.id} className="flex items-center gap-2 py-1.5"><span className="mr-auto">{q.status === 'approved' && q.approved_amount != null && q.approved_amount !== q.amount ? `${fmt(q.amount)} → ${fmt(q.approved_amount)}` : fmt(q.amount)}{q.note && <span className="text-xs text-zinc-500"> · {q.note}</span>}</span>
                   <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${q.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : q.status === 'declined' ? 'bg-zinc-200 text-zinc-700' : 'bg-amber-100 text-amber-800'}`}>{t(`vs_status_${q.status}` as 'vs_status_pending')}</span></li>
@@ -382,7 +382,7 @@ export function VslaPanel({ groupId, members, admin, meId, view, onPending, onOp
       <div className="space-y-1">
         <h3 className="text-sm font-semibold">{t('vs_open_loans')}</h3>
         {openLoans.length === 0 ? <p className="text-sm text-zinc-500">{t('vs_no_loans')}</p> : (
-          <ul className="divide-y divide-zinc-100 text-sm">
+          <ul className="divide-y divide-zinc-200 text-sm">
             {openLoans.map((l) => (
               <li key={l.id} className="flex flex-wrap items-center gap-x-2 py-1.5">
                 <span className="mr-auto">{nameOf(l.member_id)}{l.guarantor_id && <span className="text-xs text-zinc-500"> · {t('vs_guarantor_is', { name: nameOf(l.guarantor_id) })}</span>}</span>
@@ -401,7 +401,7 @@ function EntryList({ entries, title, nameOf, fmt, empty, fold }: { fold?: boolea
   const { t } = useI18n();
   if (entries.length === 0) return empty ? <p className="text-sm text-zinc-500">{empty}</p> : null;
   const list = (
-      <ul className="divide-y divide-zinc-100 text-sm">
+      <ul className="divide-y divide-zinc-200 text-sm">
         {entries.map((e) => (
           <li key={e.id} className="flex flex-wrap items-center gap-x-2 py-1.5">
             <span className="mr-auto">{nameOf(e.member_id)} · <span className="text-zinc-500">{t(`vs_kind_${e.kind}` as 'vs_kind_shares')}{e.kind === 'shares' ? ` ×${e.shares}` : ''}</span></span>
@@ -419,7 +419,7 @@ function RequestRow({ q, name, fmt, busy, onDecide }: { q: Request; name: string
   const [due, setDue] = useState('');
   const [amt, setAmt] = useState(String(q.amount));
   return (
-    <div className="space-y-2 rounded-xl border border-zinc-200 p-3 text-sm">
+    <div className="space-y-2 rounded-xl border border-zinc-300 p-3 text-sm">
       <p><span className="font-medium">{name}</span> · {fmt(q.amount)}{q.note && <span className="block text-xs text-zinc-500">{q.note}</span>}</p>
       <div className="flex flex-wrap items-end gap-2">
         <div><label className="label" htmlFor={`rqa-${q.id}`}>{VSLA[lang].approvedAmtL}</label><input id={`rqa-${q.id}`} className="input w-32" type="number" min="0.01" step="any" inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value)} /></div>
@@ -476,7 +476,7 @@ function StartCycle({ busy, onStart }: { busy: boolean; onStart: (a: Record<stri
     if (ok) setOpen(false);
   };
   return (
-    <form className="grid gap-3 rounded-xl bg-zinc-50 p-3 sm:grid-cols-2" onSubmit={go}>
+    <form className="grid gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3 sm:grid-cols-2" onSubmit={go}>
       <p className="flex gap-1.5 text-xs text-zinc-600 sm:col-span-2"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />{w.startHelp}</p>
       <div><label className="label" htmlFor="vs-name">{t('vs_cycle_name')}</label><input id="vs-name" className="input" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} required /></div>
       <div className="sm:col-span-2">
@@ -536,7 +536,7 @@ function RecordForm({ cycle, members, perMember, cash, fmt, loans, nameOf, busy,
   };
 
   return (
-    <form className="space-y-3 rounded-xl bg-zinc-50 p-3" onSubmit={save}>
+    <form className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3" onSubmit={save}>
       <div className="flex flex-wrap gap-1.5">
         {kinds.map((k) => (
           <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)}
@@ -620,7 +620,7 @@ function PayForm({ groupId, cycle, loans, owed, fmt, onSent }: { groupId: string
   };
 
   return (
-    <form className="space-y-3 rounded-xl bg-zinc-50 p-3" onSubmit={send}>
+    <form className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3" onSubmit={send}>
       <div>
         <span className="label">{w.whatPaid}</span>
         <div className="flex flex-wrap gap-1.5">
@@ -673,7 +673,7 @@ function ApproveRow({ x, name, kind, busy, fmt, onDecide }: { x: Contrib; name: 
   const w = VSLA[lang];
   const [amt, setAmt] = useState(String(x.amount));
   return (
-    <li className="space-y-2 rounded-xl border border-zinc-200 p-3 text-sm">
+    <li className="space-y-2 rounded-xl border border-zinc-300 p-3 text-sm">
       <p>
         <span className="font-medium">{name}</span> · <span className="text-zinc-500">{kind}{x.kind === 'shares' ? ` ×${x.shares}` : ''}</span> · <span className="font-semibold">{fmt(x.amount)}</span>
         <span className="block text-xs text-zinc-500">{x.meeting_date}{x.note ? ` · ${x.note}` : ''}</span>
@@ -719,13 +719,13 @@ function SocialSetting({ cycle, fmt, onSaved }: { cycle: Cycle; fmt: (n: number)
 function Fold({ title, badge, children }: { title: string; badge?: string; defaultOpen?: boolean; children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
-    <details className="rounded-xl border border-zinc-200" onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}>
+    <details className="rounded-xl border border-zinc-300" onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}>
       <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-sm font-semibold hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
         <span className="mr-auto">{title}</span>
         {badge && <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-600">{badge}</span>}
         <Chevron open={open} />
       </summary>
-      <div className="space-y-3 border-t border-zinc-100 p-3">{children}</div>
+      <div className="space-y-3 border-t border-zinc-200 p-3">{children}</div>
     </details>
   );
 }

@@ -176,7 +176,7 @@ function ProfileBody({ targetId, own, mine }: { targetId: string; own: boolean; 
       </section>
       {viewStatus && <StatusViewer person={profile} onClose={() => setViewStatus(false)} />}
       {own && <OwnSettings profile={profile} />}
-      {own && <div className="border-t border-zinc-200 pt-2"><AccountFooter /></div>}
+      {own && <div className="border-t border-zinc-300 pt-2"><AccountFooter /></div>}
     </div>
   );
 }
@@ -307,7 +307,7 @@ function OwnSettings({ profile }: { profile: Profile }) {
             </div>
           </form>
         )}
-        <div className="flex flex-wrap items-center gap-4 border-t border-zinc-100 pt-4 text-xs">
+        <div className="flex flex-wrap items-center gap-4 border-t border-zinc-200 pt-4 text-xs">
           <button type="button" className="text-zinc-500 underline" onClick={() => openLegal('terms')}>{t('terms')}</button>
           <button type="button" className="text-zinc-500 underline" onClick={() => openLegal('privacy')}>{t('privacy')}</button>
         </div>

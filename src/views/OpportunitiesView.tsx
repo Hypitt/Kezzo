@@ -55,7 +55,7 @@ function Card({ o, mine, admin, startOpen = false, onEdit, onDeleted, onHide }: 
         {o.link && <a className="btn bg-zinc-900 text-white hover:bg-zinc-700 btn-sm" href={o.link} target="_blank" rel="noopener noreferrer nofollow"><ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />{w.apply}</a>}
         {o.contact && <span className="inline-flex items-center gap-1 text-xs text-zinc-700"><Mail className="h-3.5 w-3.5" aria-hidden="true" />{w.contact}: {o.contact}</span>}
       </div>
-      <div className="flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-2">
+      <div className="flex flex-wrap items-center gap-2 border-t border-zinc-200 pt-2">
         {author && <span className="text-xs text-zinc-500">{w.by} {author.display_name}</span>}
         <span className="flex-1" />
         <ShareButton type="opportunity" id={o.id} title={o.title} />
@@ -247,7 +247,7 @@ export function OpportunitiesView({ focus }: { focus?: string }) {
           {(['all', ...OPP_KINDS] as const).map((k) => <Chip key={k} active={kind === k} onClick={() => setKind(k)}>{w.kinds[k]}</Chip>)}
         </div>
         {showFilters && (
-          <div className="space-y-3 rounded-xl bg-zinc-50 p-3">
+          <div className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
             <div className="flex flex-wrap gap-2">
               <Chip active={scope === 'near'} onClick={() => setScope('near')}>{w.near}</Chip>
               <Chip active={scope === 'online'} onClick={() => setScope('online')}>{w.onlineOnly}</Chip>

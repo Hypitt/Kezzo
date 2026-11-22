@@ -71,7 +71,7 @@ export function MessagesView({ otherId }: { otherId?: string }) {
   return (
     <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
       <aside className={`${otherId ? 'hidden md:block' : ''} card p-0 sm:p-0`} aria-label={t('nav_messages')}>
-        <h1 className="border-b border-zinc-100 px-4 py-3 text-base font-semibold">{t('nav_messages')}</h1>
+        <h1 className="border-b border-zinc-200 px-4 py-3 text-base font-semibold">{t('nav_messages')}</h1>
         {convs === null ? <Loading /> : visible.length === 0 ? (
           <p className="px-4 py-6 text-sm text-zinc-500">{t('no_conversations')}</p>
         ) : (
@@ -167,7 +167,7 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
 
   const chip = (it: Item | null, id: string, mine: boolean) => (
     <button type="button" disabled={!it} onClick={() => it && go('market', it.seller_id)}
-      className={`mb-1 flex w-full items-center gap-2 rounded-xl border px-2 py-1.5 text-left ${mine ? 'border-white/20 bg-white/10' : 'border-zinc-200 bg-white'}`}>
+      className={`mb-1 flex w-full items-center gap-2 rounded-xl border px-2 py-1.5 text-left ${mine ? 'border-white/20 bg-white/10' : 'border-zinc-300 bg-white'}`}>
       {it?.photo ? <img src={publicUrl('media-public', it.photo)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" /> : <span className="h-10 w-10 shrink-0 rounded-lg bg-zinc-200" />}
       <span className="min-w-0">
         <span className={`block text-[10px] font-semibold uppercase tracking-wide ${mine ? 'text-white/70' : 'text-zinc-500'}`}>{aw.about}</span>
@@ -214,7 +214,7 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
 
   return (
     <div className="card flex h-[32rem] flex-col p-0 sm:p-0">
-      <header className="flex items-center gap-3 border-b border-zinc-100 px-4 py-3">
+      <header className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3">
         <button type="button" className="md:hidden" onClick={() => go('messages')} aria-label={t('back')}><ArrowLeft className="h-4 w-4" /></button>
         {other && <button type="button" className="flex items-center gap-2" onClick={() => go('profile', other.id)}><Avatar p={other} size={30} /><span className="text-sm font-semibold">{other.display_name}</span></button>}
         <div className="ml-auto flex gap-2">
@@ -228,7 +228,7 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
           )}
         </div>
       </header>
-      {calling && <p className="border-b border-zinc-100 bg-emerald-50 px-4 py-2 text-xs text-emerald-800">{t('call_hint')}</p>}
+      {calling && <p className="border-b border-zinc-200 bg-emerald-50 px-4 py-2 text-xs text-emerald-800">{t('call_hint')}</p>}
       <div className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
         {messages.length === 0 && <p className="text-sm text-zinc-500">{t('say_hello')}</p>}
         {messages.map((m, i) => (
@@ -242,12 +242,12 @@ function Thread({ otherId, me, refreshKey, onSent }: { otherId: string; me: stri
         ))}
       </div>
       {aboutId && (
-        <div className="flex items-center gap-2 border-t border-zinc-100 bg-zinc-50 px-3 pt-2">
+        <div className="flex items-center gap-2 border-t border-zinc-200 bg-zinc-50 px-3 pt-2">
           <div className="min-w-0 flex-1">{chip(items[aboutId] ?? null, aboutId, false)}</div>
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setAboutId(null); clearAbout(); }}>{aw.drop}</button>
         </div>
       )}
-      <form onSubmit={send} className="flex gap-2 border-t border-zinc-100 p-3">
+      <form onSubmit={send} className="flex gap-2 border-t border-zinc-200 p-3">
         <VoiceRecorder onDone={(f, sec) => void sendVoice(f, sec)} />
         <input className="input" value={text} maxLength={1000} onChange={(e) => setText(e.target.value)} placeholder={t('message_placeholder')} aria-label={t('message_placeholder')} />
         <button className="btn btn-primary" disabled={!text.trim()} aria-label={t('send')}><Send className="h-4 w-4" aria-hidden="true" /></button>

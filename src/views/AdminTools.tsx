@@ -11,7 +11,7 @@ import { Avatar, Chip, Empty, Loading } from '../components/ui';
 
 /** Moderation tools for Kezzo admins. Every action is checked and logged in the database. */
 
-const card = 'rounded-xl border border-zinc-200 bg-white p-3 text-zinc-900';
+const card = 'rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900';
 const tag = 'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold';
 
 interface Overview { open_reports: number; restricted_users: number; contests_open: number; contests_hidden: number; actions_24h: number; members: number }
@@ -336,7 +336,7 @@ export function AdminLog() {
         <thead className="text-xs text-zinc-600"><tr><th className="py-1 pr-3">{a.logWhen}</th><th className="pr-3">{a.logWho}</th><th className="pr-3">{a.logWhat}</th><th>{a.logOn}</th></tr></thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.id} className="border-t border-zinc-100 align-top">
+            <tr key={r.id} className="border-t border-zinc-200 align-top">
               <td className="whitespace-nowrap py-1.5 pr-3 text-xs text-zinc-600">{when(r.created_at, lang)}</td>
               <td className="pr-3">{r.admin_name ?? '–'}</td>
               <td className="pr-3 font-medium">{r.action}</td>

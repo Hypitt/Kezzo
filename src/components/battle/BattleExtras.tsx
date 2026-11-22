@@ -269,7 +269,7 @@ function HighlightSection({ battle, recordings, onPosted }: { battle: Battle; re
           {clip && <video src={clip.url} controls playsInline className="max-h-80 w-full rounded-xl bg-black" />}
 
           {tooLong && !clip && (
-            <div className="space-y-3 rounded-xl bg-zinc-50 p-3">
+            <div className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
               <p className="text-sm text-zinc-700">{t('hl_too_long', { n: Math.round(source.seconds), max: HIGHLIGHT_SECONDS })}</p>
               {!clipSupported() ? (
                 <p className="text-xs text-amber-700">{t('hl_trim_unsupported')}</p>

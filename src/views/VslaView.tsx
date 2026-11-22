@@ -202,7 +202,7 @@ function MembersTab({ group, members, details, me, admin, owner, onChanged }: {
   return (
     <section className="card space-y-3" aria-label={t('members')}>
       <h2 className="font-semibold">{t('members')} ({live.length})</h2>
-      <ul className="divide-y divide-zinc-100">
+      <ul className="divide-y divide-zinc-200">
         {live.map((m) => {
           const d = details.get(m.id);
           const mine = m.id === me?.id;
@@ -219,7 +219,7 @@ function MembersTab({ group, members, details, me, admin, owner, onChanged }: {
                 </button>
               </div>
               {expanded && canSee && (
-                <div className="mt-2 space-y-3 rounded-xl bg-zinc-50 p-3">
+                <div className="mt-2 space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                   {edit === m.id ? (
                     <MemberDetails groupId={group.id} member={m} initial={d} onSaved={() => { setEdit(null); onChanged(); }} />
                   ) : (
@@ -256,13 +256,13 @@ function MembersTab({ group, members, details, me, admin, owner, onChanged }: {
         })}
       </ul>
       {admin && (
-        <div className="space-y-3 border-t border-zinc-100 pt-3">
+        <div className="space-y-3 border-t border-zinc-200 pt-3">
           <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); void act(() => supabase.rpc('vsla_add_guest', { p_group: group.id, p_name: guest }), () => setGuest('')); }}>
             <div className="min-w-0 flex-1"><label className="label" htmlFor="vg-guest">{t('vsla_add_guest')}</label><input id="vg-guest" className="input" value={guest} maxLength={60} onChange={(e) => setGuest(e.target.value)} placeholder={t('vsla_guest_name')} required /></div>
             <button className="btn btn-primary btn-sm" disabled={busy || !guest.trim()}><UserPlus className="h-3.5 w-3.5" aria-hidden="true" />{t('vsla_add')}</button>
           </form>
           <p className="text-xs text-zinc-500">{t('vsla_guest_hint')}</p>
-          <div className="flex flex-wrap items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm">
             <span className="text-xs text-zinc-500">{t('vsla_invite_code')}</span>
             <code className="font-mono font-semibold">{group.code}</code>
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => { void navigator.clipboard?.writeText(group.code); toast(t('link_copied')); }}><Copy className="h-3.5 w-3.5" aria-hidden="true" /></button>

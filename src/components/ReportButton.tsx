@@ -28,7 +28,7 @@ export function ReportButton({ targetType, targetId }: { targetType: 'post' | 'p
         {t('report')}
       </button>
       {open && (
-        <div className="absolute right-0 z-20 mt-1 w-44 rounded-xl border border-zinc-200 bg-white p-1 shadow-lg">
+        <div className="absolute right-0 z-20 mt-1 w-44 rounded-xl border border-zinc-300 bg-white p-1 shadow-lg">
           {REASONS.map((r) => (
             <button key={r} type="button" className="block w-full rounded-lg px-3 py-1.5 text-left text-sm hover:bg-zinc-100" onClick={() => send(r)}>
               {t(`report_${r}` as Key)}

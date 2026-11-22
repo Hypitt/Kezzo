@@ -89,7 +89,7 @@ function Delta({ now, before, w }: { now: number; before: number; w: Words }) {
 
 function Tile({ label, value, extra, note }: { label: string; value: string; extra?: ReactNode; note?: string }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-3" title={note}>
+    <div className="rounded-xl border border-zinc-300 bg-white p-3" title={note}>
       <div className="text-xs text-zinc-600">{label}</div>
       <div className="mt-1 text-2xl font-semibold tabular-nums text-zinc-900">{value}</div>
       <div className="mt-0.5 min-h-4">{extra}</div>
@@ -153,7 +153,7 @@ function LineChart({ labels, series, area = true }: { labels: string[]; series: 
       </svg>
       {hover !== null && (
         <div
-          className="pointer-events-none absolute top-1 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs shadow-md"
+          className="pointer-events-none absolute top-1 rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs shadow-md"
           style={{ left: `${(x(hover) / W) * 100}%`, transform: `translateX(${hover > n / 2 ? '-105%' : '5%'})` }}
         >
           <div className="mb-0.5 font-medium text-zinc-900">{labels[hover]}</div>
@@ -423,7 +423,7 @@ function Analytics() {
               </thead>
               <tbody className="tabular-nums">
                 {[...data.daily].reverse().map((d) => (
-                  <tr key={d.day} className="border-t border-zinc-100"><td className="py-1 pr-3">{d.day}</td><td>{nf(d.visitors)}</td><td>{nf(d.views)}</td><td>{nf(d.signins)}</td><td>{nf(d.new_users)}</td></tr>
+                  <tr key={d.day} className="border-t border-zinc-200"><td className="py-1 pr-3">{d.day}</td><td>{nf(d.visitors)}</td><td>{nf(d.views)}</td><td>{nf(d.signins)}</td><td>{nf(d.new_users)}</td></tr>
                 ))}
               </tbody>
             </table>
@@ -488,7 +488,7 @@ function Analytics() {
             <thead className="text-xs text-zinc-600"><tr><th className="py-1 pr-3">{w.error}</th><th className="pr-3">{w.times}</th><th>{w.last}</th></tr></thead>
             <tbody>
               {data.errors.map((e) => (
-                <tr key={e.name} className="border-t border-zinc-100 align-top">
+                <tr key={e.name} className="border-t border-zinc-200 align-top">
                   <td className="break-all py-1 pr-3 font-mono text-xs">{e.name}</td>
                   <td className="pr-3 tabular-nums">{nf(e.n)}</td>
                   <td className="whitespace-nowrap text-xs text-zinc-600">{e.last_seen ? new Date(e.last_seen).toLocaleString() : ''}</td>

@@ -10,7 +10,7 @@ export function VslaGuide({ startOpen = false }: { startOpen?: boolean }) {
   const w = VSLA[lang];
   const [open, setOpen] = useState(startOpen);
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-3 text-zinc-900">
+    <div className="rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900">
       <button type="button" className="flex w-full items-center gap-2 text-left text-sm font-semibold" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
         <HelpCircle className="h-4 w-4 text-accent" aria-hidden="true" />
         <span className="flex-1">{open ? w.guideTitle : w.guideShow}</span>

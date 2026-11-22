@@ -172,7 +172,7 @@ function Shell() {
           <View />
         </Suspense>
       </main>
-      <footer className="border-t border-zinc-100 py-6 text-center text-xs text-zinc-500">
+      <footer className="border-t border-zinc-200 py-6 text-center text-xs text-zinc-500">
         <button type="button" className="underline" onClick={() => go('legal', 'terms')}>{FOOT[lang].terms}</button>
         {' · '}
         <button type="button" className="underline" onClick={() => go('legal', 'privacy')}>{FOOT[lang].privacy}</button>

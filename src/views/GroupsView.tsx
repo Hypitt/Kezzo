@@ -294,7 +294,7 @@ export function GroupRoom({ id }: { id: string }) {
 
             <section className="card space-y-3">
               <h2 className="font-semibold">{t('members')} ({members.length})</h2>
-              <ul className="divide-y divide-zinc-100">
+              <ul className="divide-y divide-zinc-200">
                 {members.map((m) => (
                   <MemberRow key={m.user_id} m={m} groupId={id} myRole={myRole} me={user?.id ?? ''} onChanged={load} />
                 ))}
@@ -435,7 +435,7 @@ function AdminTools({ group, owner, members, onChanged, onPolicy, onFeatured }: 
         <input id="ga-search" className="input" value={term} onChange={(e) => setTerm(e.target.value)} placeholder={t('search_people_placeholder')} autoComplete="off" />
         {searching && <p className="text-xs text-zinc-500">{t('searching')}</p>}
         {results.length > 0 && (
-          <ul className="divide-y divide-zinc-100 rounded-lg border border-zinc-200">
+          <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-300">
             {results.map((p) => (
               <li key={p.id} className="flex items-center gap-3 px-3 py-2">
                 <Avatar p={p} size={28} />

@@ -39,7 +39,7 @@ export function ContestForm({ contest, onSaved, onCancel }: { contest?: ContestR
   };
 
   return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-4 text-zinc-900" aria-label={contest ? h.editTitle : h.newTitle}>
+    <section className="rounded-2xl border border-zinc-300 bg-white p-4 text-zinc-900" aria-label={contest ? h.editTitle : h.newTitle}>
       <h2 className="text-sm font-semibold">{contest ? h.editTitle : h.newTitle}</h2>
       <p className="mt-1 text-xs text-zinc-500">{h.fHint}</p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">

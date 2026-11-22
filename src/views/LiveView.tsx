@@ -386,7 +386,7 @@ export function LiveStreamRoom({ id }: { id: string }) {
                 <h2 className="font-semibold">{t('host_controls')}</h2>
                 <button type="button" className="btn btn-primary" disabled={busy === 'end'} onClick={endStream}>{busy === 'end' && <Spinner />}{t('live_end')}</button>
               </div>
-              <div className="space-y-1 border-t border-zinc-100 pt-3">
+              <div className="space-y-1 border-t border-zinc-200 pt-3">
                 {recordingSupported() ? (
                   <>
                     <label className="flex items-center gap-2 text-sm">
@@ -416,7 +416,7 @@ export function LiveStreamRoom({ id }: { id: string }) {
                     ))}
                   </div>
                   {approved.length > 0 && (
-                    <div className="space-y-2 border-t border-zinc-100 pt-3">
+                    <div className="space-y-2 border-t border-zinc-200 pt-3">
                       <h3 className="text-sm font-semibold">{t('live_on_stage_list')}</h3>
                       {approved.map((g) => (
                         <div key={g.user_id} className="flex items-center gap-2">

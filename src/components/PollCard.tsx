@@ -54,7 +54,7 @@ export function PollCard({ poll, onChange, showShare = true }: { poll: PollView;
             <li key={o.id}>
               <button
                 type="button" disabled={!poll.open || busy !== null} onClick={() => void vote(o.id)} aria-pressed={mineOpt}
-                className={`relative w-full overflow-hidden rounded-lg border px-3 py-2 text-left text-sm ${mineOpt ? 'border-accent' : 'border-zinc-200'} ${poll.open ? 'hover:bg-zinc-50' : 'cursor-default'}`}
+                className={`relative w-full overflow-hidden rounded-lg border px-3 py-2 text-left text-sm ${mineOpt ? 'border-accent' : 'border-zinc-300'} ${poll.open ? 'hover:bg-zinc-50' : 'cursor-default'}`}
               >
                 {showResults && <span className="absolute inset-y-0 left-0 bg-zinc-100" style={{ width: `${pct}%` }} aria-hidden="true" />}
                 <span className="relative flex items-center justify-between gap-3">
